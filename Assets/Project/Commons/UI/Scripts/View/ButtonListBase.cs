@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-namespace Project.Commons.Button.Scripts.View
+namespace Project.Commons.UI.Scripts.View
 {
     public abstract class ButtonListBase : MonoBehaviour
     {
-        [SerializeField] protected List<ButtonBase> buttons;
+        [SerializeField] protected List<ArchivedButtonBase> buttons;
 
         protected ButtonListType buttonListType;
         

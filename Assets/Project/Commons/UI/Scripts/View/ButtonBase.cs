@@ -3,7 +3,7 @@ using UniRx;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Project.Commons.Button.Scripts.View
+namespace Project.Commons.UI.Scripts.View
 {
     public class ButtonBase : Selectable, ISubmitHandler, IPointerClickHandler
     {

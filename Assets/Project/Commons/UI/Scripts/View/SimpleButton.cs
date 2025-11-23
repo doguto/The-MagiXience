@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Project.Commons.Button.Scripts.View
+namespace Project.Commons.UI.Scripts.View
 {
     public class SimpleButton : ButtonBase, IDisposable
     {

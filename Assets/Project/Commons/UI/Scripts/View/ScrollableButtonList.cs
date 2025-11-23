@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Project.Commons.Button.Scripts.View
+namespace Project.Commons.UI.Scripts.View
 {
     public class ScrollableButtonList : ButtonListBase
     {
