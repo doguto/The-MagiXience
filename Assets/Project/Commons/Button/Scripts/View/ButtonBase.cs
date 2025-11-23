@@ -1,52 +1,92 @@
-using System;
-using DG.Tweening;
+﻿using System;
 using UniRx;
-using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Project.Commons.Button.Scripts.View
 {
-    public class ButtonBase : MonoBehaviour
+    public class ButtonBase : Selectable, ISubmitHandler, IPointerClickHandler
     {
-        const float MoveTime = .5f;
-        const float ScaleRatio = 1.1f;
-        
-        Transform _transform;
-        Vector3 _initialScale;
-        
-        Vector2 initialPosition;
-        
         readonly Subject<Unit> onPressed = new();
         public IObservable<Unit> OnPressed => onPressed;
-        
-        public bool IsActive { get; private set; }
 
-
-        protected void Awake()
+        bool isFocused;
+        protected bool IsFocused
         {
-            _transform = transform;
-            _initialScale = _transform.localScale;
-            initialPosition = _transform.localPosition;
+            get => isFocused;
+            set
+            {
+                if (value == isFocused) return;
+                isFocused = value;
+
+                if (value) OnFocused();
+                else OnUnfocused();
+            }
         }
 
-        public void SetActive(bool active)
+        bool isOpened;
+        protected bool IsOpened
         {
-            var endPosition = _initialScale * (active? ScaleRatio : 1);
-            _transform.DOScale(endPosition, MoveTime).SetEase(Ease.InOutQuart);
-            IsActive = active;
+            get => isOpened;
+            set
+            {
+                if (value == isOpened) return;
+                isOpened = value;
+
+                if (value) OnOpened();
+                else OnClosed();
+            }
         }
-        
-        public void Press()
+
+
+        public void Init(bool isOpened = true, bool isFocused = false)
         {
-            if (!IsActive) return;
-            
+            IsOpened = isOpened;
+            IsFocused = isFocused;
+        }
+
+        protected virtual void PressButton()
+        {
+            if (IsOpened) return;
+            if (IsFocused) return;
+
             onPressed.OnNext(Unit.Default);
         }
 
-
-        public void Move(Vector2 moveDistance)
+        public override void OnSelect(BaseEventData eventData)
         {
-            var targetPosition = initialPosition + moveDistance;
-            _transform.DOLocalMove(targetPosition, MoveTime).SetEase(Ease.InOutQuart);
+            base.OnSelect(eventData);
+            IsFocused = true;
         }
+
+        public override void OnDeselect(BaseEventData eventData)
+        {
+            base.OnDeselect(eventData);
+            IsFocused = false;
+        }
+
+        public virtual void OnSubmit(BaseEventData eventData)
+        {
+            PressButton();
+        }
+
+        public virtual void OnPointerClick(PointerEventData eventData)
+        {
+            IsFocused = true;
+            PressButton();
+        }
+
+        public override void OnPointerEnter(PointerEventData eventData)
+        {
+            base.OnPointerEnter(eventData);
+            EventSystem.current.SetSelectedGameObject(gameObject);
+            IsFocused = true;
+        }
+
+        protected virtual void OnFocused() { }
+        protected virtual void OnUnfocused() { }
+        
+        protected virtual void OnOpened() { }
+        protected virtual void OnClosed() { }
     }
 }
