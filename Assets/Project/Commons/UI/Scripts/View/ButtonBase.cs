@@ -7,7 +7,7 @@ namespace Project.Commons.UI.Scripts.View
 {
     public class ButtonBase : Selectable, ISubmitHandler, IPointerClickHandler
     {
-        readonly Subject<Unit> onPressed = new();
+        protected readonly Subject<Unit> onPressed = new();
         public IObservable<Unit> OnPressed => onPressed;
 
         bool isFocused;
@@ -47,8 +47,8 @@ namespace Project.Commons.UI.Scripts.View
 
         protected virtual void PressButton()
         {
-            if (IsOpened) return;
-            if (IsFocused) return;
+            if (!IsOpened) return;
+            if (!IsFocused) return;
 
             onPressed.OnNext(Unit.Default);
         }

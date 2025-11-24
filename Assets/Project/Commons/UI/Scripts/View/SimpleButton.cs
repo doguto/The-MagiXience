@@ -9,11 +9,13 @@ namespace Project.Commons.UI.Scripts.View
     public class SimpleButton : ButtonBase, IDisposable
     {
         [SerializeField] SpriteRenderer spriteRenderer;
+
         [SerializeField] float brightnessRatioOnPressed = 0.85f;
         [SerializeField] float brightnessDurationOnPressed = 0.20f;
         [SerializeField] float scaleChangeRatio = 1.05f;
         [SerializeField] float brightnessRatioOnClose = 0.7f;
 
+        Transform myTransform;
         Color originalColor;
         Vector3 originalLocalScale;
 
@@ -21,13 +23,21 @@ namespace Project.Commons.UI.Scripts.View
 
         protected override void Awake()
         {
+            myTransform = transform;
             originalColor = spriteRenderer.color;
-            originalLocalScale = spriteRenderer.transform.localScale;
+            originalLocalScale = myTransform.localScale;
+        }
+
+        public void Dispose()
+        {
+            onPressed.Dispose();
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
         }
 
         protected override void OnFocused()
         {
-            gameObject.transform.localScale = originalLocalScale * scaleChangeRatio;
+            myTransform.localScale = originalLocalScale * scaleChangeRatio;
         }
 
         public override void OnSubmit(BaseEventData eventData)
@@ -38,7 +48,7 @@ namespace Project.Commons.UI.Scripts.View
 
         protected override void OnUnfocused()
         {
-            gameObject.transform.localScale = originalLocalScale;
+            myTransform.localScale = originalLocalScale;
         }
 
         public override void OnPointerDown(PointerEventData eventData)
@@ -63,11 +73,6 @@ namespace Project.Commons.UI.Scripts.View
         {
             base.OnClosed();
             spriteRenderer.color = originalColor * brightnessRatioOnClose;
-        }
-
-        public void Dispose()
-        {
-            cancellationTokenSource.Cancel();
         }
 
         async UniTask DarkenColor(CancellationToken token)
