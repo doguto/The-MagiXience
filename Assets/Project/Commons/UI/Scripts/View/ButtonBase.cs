@@ -10,7 +10,7 @@ namespace Project.Commons.UI.Scripts.View
         protected readonly Subject<Unit> onPressed = new();
         public IObservable<Unit> OnPressed => onPressed;
 
-        bool isFocused;
+        private bool isFocused;
         protected bool IsFocused
         {
             get => isFocused;
@@ -24,7 +24,7 @@ namespace Project.Commons.UI.Scripts.View
             }
         }
 
-        bool isOpened;
+        private bool isOpened;
         protected bool IsOpened
         {
             get => isOpened;

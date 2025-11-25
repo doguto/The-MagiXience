@@ -30,8 +30,8 @@ namespace Project.Commons.UI.Scripts.View
 
         public void SetActive(bool active)
         {
-            var endPosition = _initialScale * (active? ScaleRatio : 1);
-            _transform.DOScale(endPosition, MoveTime).SetEase(Ease.InOutQuart);
+            var endScale = _initialScale * (active? ScaleRatio : 1);
+            _transform.DOScale(endScale, MoveTime).SetEase(Ease.InOutQuart);
             IsActive = active;
         }
         

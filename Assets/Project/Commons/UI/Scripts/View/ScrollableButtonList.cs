@@ -23,8 +23,6 @@ namespace Project.Commons.UI.Scripts.View
         
         public override void MoveNext(bool isUp = true)
         {
-            Debug.Log($"ScrollableButtonList: MoveNext: {isUp}");
-            
             // 両端の場合はもう一端に行かずに移動不可にする
             if (ButtonIndex == buttons.Count - 1 && !isUp) return;
             if (ButtonIndex == 0 && isUp) return;

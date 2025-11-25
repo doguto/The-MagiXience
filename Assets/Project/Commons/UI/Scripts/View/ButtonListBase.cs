@@ -36,9 +36,11 @@ namespace Project.Commons.UI.Scripts.View
             if (!IsActive) return;
 
             if (MoveNextFlag) MoveNext();
-            if (MoveBackFlag) MoveNext(false);
+            if (MoveBackFlag) MoveBack();
             if (Input.GetKeyDown(KeyCode.Space)) PressButton();
         }
+        
+        void MoveBack() => MoveNext(false);
         
 
         public virtual void Init(ButtonListType buttonListType, int index = 0, bool isActive = false)
