@@ -3,9 +3,9 @@ using DG.Tweening;
 using UniRx;
 using UnityEngine;
 
-namespace Project.Commons.Button.Scripts.View
+namespace Project.Commons.UI.Scripts.View
 {
-    public class ButtonBase : MonoBehaviour
+    public class ArchivedButtonBase : MonoBehaviour
     {
         const float MoveTime = .5f;
         const float ScaleRatio = 1.1f;
@@ -30,8 +30,8 @@ namespace Project.Commons.Button.Scripts.View
 
         public void SetActive(bool active)
         {
-            var endPosition = _initialScale * (active? ScaleRatio : 1);
-            _transform.DOScale(endPosition, MoveTime).SetEase(Ease.InOutQuart);
+            var endScale = _initialScale * (active? ScaleRatio : 1);
+            _transform.DOScale(endScale, MoveTime).SetEase(Ease.InOutQuart);
             IsActive = active;
         }
         
