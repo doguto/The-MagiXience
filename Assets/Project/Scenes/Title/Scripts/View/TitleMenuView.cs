@@ -9,15 +9,17 @@ namespace Project.Scenes.Title.Scripts.View
     public class TitleMenuView : MonoBehaviour
     {
         [SerializeField] ButtonList buttonList;  // 0: Start, 1: Exit
-        [SerializeField] List<Sprite> backgroundSprites;
         [SerializeField] SpriteRenderer memberStillRenderer;
+        [SerializeField] SpriteRenderer backGroundRenderer;
 
         public IObservable<Unit> OnPressedStart => buttonList.GetButtonEvent(0);
         public IObservable<Unit> OnPressedExit => buttonList.GetButtonEvent(1);
 
-        public void Init(Sprite memberStillSprite)
+        public void Init((Sprite memberStill, Sprite backGround)sprites)
         {
-            memberStillRenderer.sprite = memberStillSprite;
+            memberStillRenderer.sprite = sprites.memberStill;
+            backGroundRenderer.sprite = sprites.backGround;
+            
             buttonList.Init(ButtonListType.Vertical, 0, true);
         }
 
@@ -26,9 +28,8 @@ namespace Project.Scenes.Title.Scripts.View
             gameObject.SetActive(active);
         }
 
-        public void SetBackGround(int clearedStageAmount)
+        public void SetBackGround(int clearedStageNumber)
         {
-            memberStillRenderer.sprite = backgroundSprites[clearedStageAmount];
         }
     }
 }

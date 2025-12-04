@@ -7,20 +7,23 @@ namespace Project.Scenes.Title.Scripts.Model
     public class TitleModel : ModelBase
     {
         readonly AllCharacterStillAssetRepository allCharacterStillAssetRepository = new();
+        readonly BackGroundAssetRepository backGroundAssetRepository = new();
 
-        readonly int clearedStageAmount;
+        readonly int clearedStageNumber;
         Sprite memberStillSprite;
+        Sprite backGroundSprite;
 
-        public TitleModel(int clearedStageAmount)
+        public TitleModel(int clearedStageNumber)
         {
-            this.clearedStageAmount = clearedStageAmount;
+            this.clearedStageNumber = clearedStageNumber;
         }
 
-        public Sprite GetMemberStillSprite()
+        public (Sprite memberStill, Sprite backGround)GetBackGroundSprites()
         {
-            var characterCount = clearedStageAmount + 1;
+            var characterCount = clearedStageNumber + 1;
             memberStillSprite ??= allCharacterStillAssetRepository.Load(characterCount);
-            return memberStillSprite;
+            backGroundSprite ??= backGroundAssetRepository.Load(characterCount);
+            return (memberStillSprite, backGroundSprite);
         }
     }
 }
