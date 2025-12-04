@@ -28,8 +28,5 @@ namespace Project.Scenes.Title.Scripts.View
             gameObject.SetActive(active);
         }
 
-        public void SetBackGround(int clearedStageNumber)
-        {
-        }
     }
 }
