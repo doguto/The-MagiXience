@@ -23,7 +23,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             titleModelRepository = TitleModelRepository.Instance;
             titleModel = titleModelRepository.Get();
             
-            titleMenuView.Init(titleModel.GetMemberStillSprite());
+            titleMenuView.Init(titleModel.GetBackGroundSprites());
         }
 
         void Start()

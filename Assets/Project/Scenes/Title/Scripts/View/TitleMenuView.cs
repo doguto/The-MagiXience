@@ -12,23 +12,20 @@ namespace Project.Scenes.Title.Scripts.View
         [SerializeField] SimpleButton exitButton;
         [SerializeField] List<Sprite> backgroundSprites;
         [SerializeField] SpriteRenderer memberStillRenderer;
+        [SerializeField] SpriteRenderer backGroundRenderer;
 
         public IObservable<Unit> OnPressedStart => startButton.OnPressed;
         public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
 
-        public void Init(Sprite memberStillSprite)
+        public void Init((Sprite memberStill, Sprite backGround)sprites)
         {
-            memberStillRenderer.sprite = memberStillSprite;
+            memberStillRenderer.sprite = sprites.memberStill;
+            backGroundRenderer.sprite = sprites.backGround;
         }
 
         public void SetActive(bool active)
         {
             gameObject.SetActive(active);
-        }
-
-        public void SetBackGround(int clearedStageAmount)
-        {
-            memberStillRenderer.sprite = backgroundSprites[clearedStageAmount];
         }
     }
 }
