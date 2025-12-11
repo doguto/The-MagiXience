@@ -11,6 +11,9 @@ namespace Project.Scripts.Model
 
         public int ClearedStageNumber => UserData.clearedStageNumber;
 
+        // 一旦 -1 を null 的に扱う
+        public int CurrentStageNumber { get; internal set; } = -1;
+
         readonly string saveDirectoryPath;
         readonly string saveFilePath;
 
@@ -25,13 +28,12 @@ namespace Project.Scripts.Model
             saveFilePath = Path.Combine(saveDirectoryPath, "UserData.json");
             UserData = Load();
         }
-        
-        public void StageClear(int  stageNumber)
+
+        public void StageClear(int stageNumber)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);
             Save();
         }
-
 
         public bool IsClearedStage(int stageNumber)
         {
@@ -43,7 +45,6 @@ namespace Project.Scripts.Model
             return UserData.clearedStageNumber >= stageNumber - 1;
         }
 
-        
         public UserData Load()
         {
             if (!File.Exists(saveFilePath))

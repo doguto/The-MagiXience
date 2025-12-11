@@ -12,6 +12,5 @@ namespace Project.Scripts.Repository.ModelRepository
         {
             return userModel ??= new();
         }
-
     }
 }

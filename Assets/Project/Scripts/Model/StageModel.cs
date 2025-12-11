@@ -13,16 +13,22 @@ namespace Project.Scripts.Model
         public bool IsOpened { get; private set; }
         public bool IsCleared { get; private set; }
 
-        
-        
-        public StageModel(StageData stageData, bool isOpened = false, bool isCleared = false)
+        readonly UserModel userModel;
+
+        public StageModel(UserModel userModel, StageData stageData, bool isOpened = false, bool isCleared = false)
         {
+            this.userModel = userModel;
             StageData = stageData;
             IsOpened = isOpened;
             IsCleared = isCleared && isOpened; // 念のため isOpened と AND する
 
             var stillAssetRepository = new StillAssetRepository();
             CharaImage = stillAssetRepository.Load(StageData.charaStillAddress, false);
+        }
+
+        public void Start()
+        {
+            userModel.CurrentStageNumber = StageData.stageNumber;
         }
 
         public void Open()
@@ -35,6 +41,8 @@ namespace Project.Scripts.Model
             if (!IsOpened) throw new Exception("ステージが開放されていません.");
 
             IsCleared = true;
+            userModel.StageClear(StageData.stageNumber);
+            userModel.CurrentStageNumber = -1;
         }
 
         public (string id, string title) GetIdAndTitle()
