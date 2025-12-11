@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Project.Scripts.Infra;
 using UnityEngine;
 
 namespace Project.Scripts.Model
@@ -89,25 +90,4 @@ namespace Project.Scripts.Model
             Debug.Log("Saved user data");
         }
     }
-
-    public class UserData
-    {
-        public int clearedStageNumber;
-        public Dictionary<string, string> keyConfigMaps;
-        
-        public UserData()
-        {
-            clearedStageNumber = 0;
-            keyConfigMaps = new ()
-            {
-                {"Attack","Enter"},
-                {"Charge", "Space"},
-                {"MoveLeft","AllowLeft"},
-                {"MoveRight","AllowRight"},
-                {"MoveUp","AllowUp"},
-                {"MoveDown","AllowDown"},
-            };
-        }
-    }
-    
 }
