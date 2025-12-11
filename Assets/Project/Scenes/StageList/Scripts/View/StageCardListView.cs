@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DG.Tweening;
-using Project.Commons.Button.Scripts.View;
+using Project.Commons.UI.Scripts.View;
 using UnityEngine;
 
 

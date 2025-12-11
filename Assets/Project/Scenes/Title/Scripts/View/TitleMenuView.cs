@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Project.Commons.Button.Scripts.View;
+using Project.Commons.UI.Scripts.View;
 using UniRx;
 using UnityEngine;
 
@@ -8,17 +8,17 @@ namespace Project.Scenes.Title.Scripts.View
 {
     public class TitleMenuView : MonoBehaviour
     {
-        [SerializeField] ButtonList buttonList;  // 0: Start, 1: Exit
+        [SerializeField] SimpleButton startButton;
+        [SerializeField] SimpleButton exitButton;
         [SerializeField] List<Sprite> backgroundSprites;
         [SerializeField] SpriteRenderer memberStillRenderer;
 
-        public IObservable<Unit> OnPressedStart => buttonList.GetButtonEvent(0);
-        public IObservable<Unit> OnPressedExit => buttonList.GetButtonEvent(1);
+        public IObservable<Unit> OnPressedStart => startButton.OnPressed;
+        public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
 
         public void Init(Sprite memberStillSprite)
         {
             memberStillRenderer.sprite = memberStillSprite;
-            buttonList.Init(ButtonListType.Vertical, 0, true);
         }
 
         public void SetActive(bool active)
