@@ -1,55 +1,30 @@
-using System.Linq;
+﻿using Project.Scripts.Model;
+using Project.Scripts.Repository.AssetRepository;
+using UnityEngine;
 
 namespace Project.Scenes.Scenario.Scripts.Model
 {
-    public class ScenarioModel
+    public class ScenarioModel : ModelBase
     {
-        private ScenarioLine[] _lines;
-        private int _index = -1;
+        readonly StillAssetRepository StillAssetRepository = new();
 
-        public ScenarioModel(ScenarioLine[] lines)
+        // TODO: 現在進行中のステージ番号の管理・取得方法を考える
+        readonly int clearedStageNumber;
+        Sprite playerStillSprite;
+        Sprite enemyStillSprite;
+        Sprite playerFaceSprite;
+        Sprite enemyFaceSprite;
+        public ScenarioModel(int clearedStageNumber)
         {
-            _lines = lines;
+            this.clearedStageNumber = clearedStageNumber;
         }
 
-        public bool HasNext => _index + 1 < _lines.Length;
-        public bool HasPrevious => _index > 0;
-
-        public ScenarioLine Next()
+        public (Sprite playerStill, Sprite enemyStill) GetStillSprites()
         {
-            _index++;
-            return _lines[_index];
-        }
-        public ScenarioLine UndoDev()
-        {
-            if (_index <= 0)
-            {
-                return _lines[0];
-            }
-            _index--;
-            return _lines[_index];
-        }
-        public ScenarioLine GetCurrentLine()
-        {
-            return _lines[_index];
-        }
-
-        public string GetSpeakingCharacterKey()
-        {
-            return ScenarioDataSO.CharacterJaNameToKey[_lines[_index].character];
-        }
-
-        public string GetEnemyCharacterKey()
-        {
-            // string enemyName = _lines.Select(line => line.character).Distinct().Where(character => character != MainCharacter.Me).ToArray()[0];
-            // return ScenarioDataSO.CharacterJaNameToKey[enemyName];
-            return "";
-        }
-
-        public string GetMainCharacterKey()
-        {
-            return "";
-            // return ScenarioDataSO.CharacterJaNameToKey[MainCharacter.Me];
+            // TODO: ステージ番号から画像をロード
+            // playerStillSprite ??= StillAssetRepository.Load();
+            // enemyStillSprite ??= StillAssetRepository.Load();
+            return (playerStillSprite, enemyStillSprite);
         }
     }
 }
