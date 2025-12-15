@@ -11,8 +11,11 @@ namespace Project.Commons.UI.Scripts.View
         protected readonly Subject<Unit> onPressed = new();
         public IObservable<Unit> OnPressed => onPressed;
 
+        protected readonly Subject<Unit> onFocused = new();
+        public IObservable<Unit> OnFocusedEvent => onFocused;
+
         bool isFocused;
-        protected bool IsFocused
+        public bool IsFocused
         {
             get => isFocused;
             set
@@ -84,7 +87,11 @@ namespace Project.Commons.UI.Scripts.View
             IsFocused = true;
         }
 
-        protected virtual void OnFocused() { }
+        protected virtual void OnFocused()
+        {
+            onFocused.OnNext(Unit.Default);
+        }
+
         protected virtual void OnUnfocused() { }
         
         protected virtual void OnOpened() { }
