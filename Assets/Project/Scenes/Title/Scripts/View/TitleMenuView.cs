@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Project.Commons.UI.Scripts.View;
 using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Project.Scenes.Title.Scripts.View
 {
@@ -21,6 +22,14 @@ namespace Project.Scenes.Title.Scripts.View
         {
             memberStillRenderer.sprite = sprites.memberStill;
             backGroundRenderer.sprite = sprites.backGround;
+        }
+
+        public void InitStart()
+        {
+            startButton.Init(isFocused: true);
+            exitButton.Init();
+
+            EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
 
         public void SetActive(bool active)

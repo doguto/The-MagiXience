@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 
 namespace Project.Commons.UI.Scripts.View
 {
+    [RequireComponent(typeof(Collider2D))]
     public class SimpleButton : ButtonBase, IDisposable
     {
         [SerializeField] SpriteRenderer spriteRenderer;
