@@ -12,9 +12,6 @@ namespace Project.Scripts.Model
 
         public int ClearedStageNumber => UserData.clearedStageNumber;
 
-        // 一旦 -1 を null 的に扱う
-        public int CurrentStageNumber { get; internal set; } = -1;
-
         readonly string saveDirectoryPath;
         readonly string saveFilePath;
 

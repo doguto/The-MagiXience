@@ -13,11 +13,8 @@ namespace Project.Scripts.Model
         public bool IsOpened { get; private set; }
         public bool IsCleared { get; private set; }
 
-        readonly UserModel userModel;
-
-        public StageModel(UserModel userModel, StageData stageData, bool isOpened = false, bool isCleared = false)
+        public StageModel(StageData stageData, bool isOpened = false, bool isCleared = false)
         {
-            this.userModel = userModel;
             StageData = stageData;
             IsOpened = isOpened;
             IsCleared = isCleared && isOpened; // 念のため isOpened と AND する
@@ -28,7 +25,7 @@ namespace Project.Scripts.Model
 
         public void Start()
         {
-            userModel.CurrentStageNumber = StageData.stageNumber;
+            RuntimeModel.CurrentStageNumber = StageData.stageNumber;
         }
 
         public void Open()
@@ -41,8 +38,8 @@ namespace Project.Scripts.Model
             if (!IsOpened) throw new Exception("ステージが開放されていません.");
 
             IsCleared = true;
-            userModel.StageClear(StageData.stageNumber);
-            userModel.CurrentStageNumber = -1;
+            UserModel.StageClear(StageData.stageNumber);
+            RuntimeModel.CurrentStageNumber = -1;
         }
 
         public (string id, string title) GetIdAndTitle()

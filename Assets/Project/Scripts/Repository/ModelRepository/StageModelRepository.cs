@@ -12,12 +12,14 @@ namespace Project.Scripts.Repository.ModelRepository
 
         readonly List<StageData> stageData;
         readonly List<StageModel> stageModels = new();
-        
-        readonly UserModel userModel;
+
+        readonly RuntimeModelRepository runtimeModelRepository;
+        readonly UserModelRepository userModelRepository;
 
         public StageModelRepository()
         {
-            userModel = UserModelRepository.Instance.Get();
+            runtimeModelRepository = RuntimeModelRepository.Instance;
+            userModelRepository = UserModelRepository.Instance;
 
             dataName = "StageData";
             stageData = LoadData();
@@ -26,7 +28,11 @@ namespace Project.Scripts.Repository.ModelRepository
             {
                 var stageNumber = data.stageNumber;
                 stageModels.Add(
-                    new StageModel(userModel, data, UserModel.IsOpenedStage(stageNumber), UserModel.IsClearedStage(stageNumber))
+                    new StageModel(data, UserModel.IsOpenedStage(stageNumber), UserModel.IsClearedStage(stageNumber))
+                    {
+                        UserModel = userModelRepository.Get(),
+                        RuntimeModel = runtimeModelRepository.Get(),
+                    }
                 );
             }
         }
@@ -39,7 +45,11 @@ namespace Project.Scripts.Repository.ModelRepository
             var data = stageData.Find(m => m.stageNumber == stageNumber);
             if (data == null) throw new Exception($"StageId {stageNumber} のデータが存在しません.");
 
-            var newModel = new StageModel(userModel, data, UserModel.IsOpenedStage(stageNumber), UserModel.IsClearedStage(stageNumber));
+            var newModel = new StageModel(data, UserModel.IsOpenedStage(stageNumber), UserModel.IsClearedStage(stageNumber))
+            {
+                UserModel = userModelRepository.Get(),
+                RuntimeModel = runtimeModelRepository.Get(),
+            };
             stageModels.Add(newModel);
             return newModel;
         }
