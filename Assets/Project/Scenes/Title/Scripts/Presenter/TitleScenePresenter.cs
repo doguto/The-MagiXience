@@ -28,6 +28,8 @@ namespace Project.Scenes.Title.Scripts.Presenter
 
         void Start()
         {
+            titleMenuView.InitStart();
+
             titleMenuView.OnPressedStart.Subscribe(x => StartGame(x).Forget());
             titleMenuView.OnPressedExit.Subscribe(ExitGame);
         }
