@@ -27,7 +27,7 @@ namespace Project.Scenes.StageList.Scripts.View
 
             for (int i = 0; i < simpleButtons.Count; i++)
             {
-                simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged);
+                simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
             }
         }
 
