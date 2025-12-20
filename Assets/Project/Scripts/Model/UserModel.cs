@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Project.Scripts.Infra;
 using UnityEngine;
 
 namespace Project.Scripts.Model
@@ -25,13 +26,12 @@ namespace Project.Scripts.Model
             saveFilePath = Path.Combine(saveDirectoryPath, "UserData.json");
             UserData = Load();
         }
-        
-        public void StageClear(int  stageNumber)
+
+        public void StageClear(int stageNumber)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);
             Save();
         }
-
 
         public bool IsClearedStage(int stageNumber)
         {
@@ -43,7 +43,6 @@ namespace Project.Scripts.Model
             return UserData.clearedStageNumber >= stageNumber - 1;
         }
 
-        
         public UserData Load()
         {
             if (!File.Exists(saveFilePath))
@@ -88,25 +87,4 @@ namespace Project.Scripts.Model
             Debug.Log("Saved user data");
         }
     }
-
-    public class UserData
-    {
-        public int clearedStageNumber;
-        public Dictionary<string, string> keyConfigMaps;
-        
-        public UserData()
-        {
-            clearedStageNumber = 0;
-            keyConfigMaps = new ()
-            {
-                {"Attack","Enter"},
-                {"Charge", "Space"},
-                {"MoveLeft","AllowLeft"},
-                {"MoveRight","AllowRight"},
-                {"MoveUp","AllowUp"},
-                {"MoveDown","AllowDown"},
-            };
-        }
-    }
-    
 }

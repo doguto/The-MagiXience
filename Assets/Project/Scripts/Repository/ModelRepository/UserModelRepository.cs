@@ -6,12 +6,18 @@ namespace Project.Scripts.Repository.ModelRepository
     {
         public static UserModelRepository Instance { get; } = new();
 
-        UserModel userModel = new();
+        readonly RuntimeModelRepository runtimeModelRepository;
+        UserModel userModel;
 
+        public UserModelRepository()
+        {
+            runtimeModelRepository = RuntimeModelRepository.Instance;
+            userModel = new(){ RuntimeModel = runtimeModelRepository.Get() };
+        }
+        
         public UserModel Get()
         {
-            return userModel ??= new();
+            return userModel ??= new(){ RuntimeModel = runtimeModelRepository.Get() };
         }
-
     }
 }
