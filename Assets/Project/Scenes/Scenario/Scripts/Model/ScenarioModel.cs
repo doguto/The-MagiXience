@@ -1,4 +1,5 @@
-﻿using Project.Scripts.Model;
+﻿using System.Collections.Generic;
+using Project.Scripts.Model;
 using Project.Scripts.Repository.AssetRepository;
 using UnityEngine;
 
@@ -19,12 +20,22 @@ namespace Project.Scenes.Scenario.Scripts.Model
             this.clearedStageNumber = clearedStageNumber;
         }
 
-        public (Sprite playerStill, Sprite enemyStill) GetStillSprites()
+        public ScenarioStep CurrentStep => steps[currentIndex];
+        public bool IsEnd => currentIndex >= steps.Count;
+
+        List<ScenarioStep> steps;
+        int currentIndex;
+
+
+        public void LoadData(List<ScenarioStep> steps)
         {
-            // TODO: ステージ番号から画像をロード
-            // playerStillSprite ??= StillAssetRepository.Load();
-            // enemyStillSprite ??= StillAssetRepository.Load();
-            return (playerStillSprite, enemyStillSprite);
+            this.steps = steps;
+            currentIndex = 0;
+        }
+
+        public void Next()
+        {
+            currentIndex++;
         }
     }
 }
