@@ -10,18 +10,18 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
         public static ScenarioModelRepository Instance { get; } = new();
 
         ScenarioModel scenarioModel;
+        RuntimeModel runtimeModel;
 
         public ScenarioModelRepository()
         {
+            runtimeModel = RuntimeModelRepository.Instance.Get();
         }
 
         public ScenarioModel Get()
         {
             if (scenarioModel == null)
             {
-                // Init model
-                // TODO: 実際のクリアステージ数を取得する
-                scenarioModel = new ScenarioModel(1);
+                scenarioModel = new ScenarioModel();
                 var data = LoadData();
                 scenarioModel.LoadData(data.steps);
             }
@@ -35,8 +35,23 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
 
         ScenarioData LoadData()
         {
-            var path = $"{GamePath.DataStorepath}/test_scenario.asset";
-            return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
+            var scenarioNumber = runtimeModel.GetScenarioNumber();
+            
+            var path = $"{GamePath.DataStorepath}/scenario_{scenarioNumber}.asset";
+            
+            // TODO: 本番用シナリオファイルが揃ったらフォールバックを削除
+            try
+            {
+                return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
+            }
+            catch
+            {
+                // フォールバック: test_scenarioを使用
+                UnityEngine.Debug.LogWarning($"[ScenarioModelRepository] scenario_{scenarioNumber} not found, using test_scenario instead.");
+                var fallbackPath = $"{GamePath.DataStorepath}/test_scenario.asset";
+                return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(fallbackPath).WaitForCompletion();
+            }
         }
     }
 }
+

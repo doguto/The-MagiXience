@@ -39,7 +39,7 @@ namespace Project.Scripts.Model
 
             IsCleared = true;
             UserModel.StageClear(StageData.stageNumber);
-            RuntimeModel.CurrentStageNumber = -1;
+            RuntimeModel.ExitStage();
         }
 
         public (string id, string title) GetIdAndTitle()
