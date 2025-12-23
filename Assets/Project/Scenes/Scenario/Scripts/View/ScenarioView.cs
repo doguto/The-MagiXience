@@ -25,6 +25,41 @@ namespace Project.Scenes.Scenario.Scripts.View
             faceSpriteRenderer.sprite = face;
         }
 
+        /// <summary>
+        /// ChangeCastLayerとStopGrayingCastの機能を内蔵してキャラ名とセリフを表示
+        /// </summary>
+        public void ShowCastMessage(string characterName, string message)
+        {
+            ChangeCastLayer(characterName, 1);
+            StopGrayingCast(characterName);
+            ShowMessage(characterName, message);
+        }
+
+        /// <summary>
+        /// キャラ名とセリフを表示
+        /// </summary>
+        public void ShowMessage(string characterName, string message)
+        {
+            characterNameText.text = characterName ?? "";
+            contentsText.text = message ?? "";
+        }
+
+        /// <summary>
+        /// 指定したキャラのレイヤーを変更
+        /// </summary>
+        public void ChangeCastLayer(string characterName, int layer)
+        {
+            // TODO
+        }
+
+        /// <summary>
+        /// キャラにかかっている灰色のフィルターを外す（=スポットライトを当てる）
+        /// </summary>
+        public void StopGrayingCast(string characterName)
+        {
+            // TODO
+        }
+
         public void LogCommand(string function, string[] args)
         {
             Debug.Log($"[ScenarioView] Execute: {function}, Args: {string.Join(", ", args)}");

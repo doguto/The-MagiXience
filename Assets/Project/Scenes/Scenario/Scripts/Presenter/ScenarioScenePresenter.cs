@@ -50,9 +50,20 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 scenarioView.LogCommand(step.function, step.args);
 
                 // メッセージ表示系コマンドの場合はループを抜けて待機
-                if (step.function == "ShowCastMessage" || step.function == "ShowMessage")
+                if (step.function == "ShowCastMessage")
                 {
-                    // View等への反映はここで行う (今回はログのみ)
+                    // args[0]: キャラ名 args[1]: 会話内容
+                    var characterName = step.args.Length > 0 ? step.args[0] : "";
+                    var message = step.args.Length > 1 ? step.args[1] : "";
+                    scenarioView.ShowCastMessage(characterName, message);
+                    break;
+                }
+                
+                if (step.function == "ShowMessage")
+                {
+                    var characterName = step.args.Length > 0 ? step.args[0] : "";
+                    var message = step.args.Length > 1 ? step.args[1] : "";
+                    scenarioView.ShowMessage(characterName, message);
                     break;
                 }
 
