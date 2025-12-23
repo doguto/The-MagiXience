@@ -22,8 +22,15 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
             if (scenarioModel == null)
             {
                 scenarioModel = new ScenarioModel();
+                
+                // シナリオデータをロード
                 var data = LoadData();
                 scenarioModel.LoadData(data.steps);
+                
+                // キャラクター画像をロード
+                var stageNumber = runtimeModel.CurrentStageNumber;
+                var enemyCharaName = GetEnemyCharaName(stageNumber);
+                scenarioModel.LoadCharacterSprites(enemyCharaName);
             }
             return scenarioModel;
         }
@@ -40,17 +47,23 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
             var path = $"{GamePath.DataStorepath}/scenario_{scenarioNumber}.asset";
             
             // TODO: 本番用シナリオファイルが揃ったらフォールバックを削除
-            try
-            {
-                return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
-            }
-            catch
-            {
+            // try
+            // {
+        //         return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
+            // }
+            // catch
+            // {
                 // フォールバック: test_scenarioを使用
                 UnityEngine.Debug.LogWarning($"[ScenarioModelRepository] scenario_{scenarioNumber} not found, using test_scenario instead.");
                 var fallbackPath = $"{GamePath.DataStorepath}/test_scenario.asset";
                 return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(fallbackPath).WaitForCompletion();
-            }
+            // }
+        }
+
+        string GetEnemyCharaName(int stageNumber)
+        {
+            var stageModel = StageModelRepository.Instance.GetByStageNumber(stageNumber);
+            return stageModel.StageData.charaStillAddress;
         }
     }
 }

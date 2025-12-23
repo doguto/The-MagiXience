@@ -67,6 +67,27 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     break;
                 }
 
+                if (step.function == "ShowCast")
+                {
+                    // args[0]: キャラ名, args[1]: unknown, args[2]: 表情差分, 
+                    // args[3]: 表示時間, args[4]: 位置(LL/RR), args[5]: unknown
+                    var characterName = step.args.Length > 0 ? step.args[0] : "";
+                    var unknownArg1 = step.args.Length > 1 ? step.args[1] : "";
+                    var faceExpression = step.args.Length > 2 ? step.args[2] : "";
+                    var displayTime = step.args.Length > 3 ? step.args[3] : "";
+                    var position = step.args.Length > 4 ? step.args[4] : "";
+                    var unknownArg2 = step.args.Length > 5 ? step.args[5] : "";
+                    
+                    scenarioView.ShowCast(characterName, unknownArg1, faceExpression, 
+                        displayTime, position, unknownArg2,
+                        scenarioModel.PlayerStillSprite, scenarioModel.EnemyStillSprite);
+                    
+                    // ShowCastは自動で次へ進む
+                    scenarioModel.Next();
+                    continue;
+                }
+
+
                 // それ以外は自動で次へ
                 scenarioModel.Next();
             }
