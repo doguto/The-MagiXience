@@ -2,16 +2,13 @@ using System.Linq;
 using Project.Scenes.Scenario.Scripts.Model;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scenes.Scenario.Scripts.View;
-using UniRx;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Project.Scenes.Scenario.Scripts.Presenter
 {
     public class ScenarioScenePresenter : MonoBehaviour
     {
         [SerializeField] ScenarioView scenarioView;
-        [SerializeField] Button nextButton;
 
         ScenarioModel scenarioModel;
 
@@ -20,13 +17,19 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
             // RepositoryからModelを取得
             scenarioModel = ScenarioModelRepository.Instance.Get();
 
-            nextButton.OnClickAsObservable().Subscribe(_ => OnClickNext()).AddTo(this);
-
             // 初回実行
             ExecuteSteps();
         }
 
-        void OnClickNext()
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Z))
+            {
+                OnPressNext();
+            }
+        }
+
+        void OnPressNext()
         {
             if (scenarioModel.IsEnd)
             {
@@ -34,7 +37,6 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 return;
             }
 
-            // 次へ進む (現在のメッセージを読み終わった扱い)
             scenarioModel.Next();
 
             ExecuteSteps();
@@ -82,13 +84,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                         displayTime, position, unknownArg2,
                         scenarioModel.PlayerStillSprite, scenarioModel.EnemyStillSprite);
                     
-                    // ShowCastは自動で次へ進む
                     scenarioModel.Next();
                     continue;
                 }
 
 
-                // それ以外は自動で次へ
                 scenarioModel.Next();
             }
         }

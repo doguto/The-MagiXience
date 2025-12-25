@@ -29,16 +29,9 @@ namespace Project.Scenes.Scenario.Scripts.Model
             currentIndex++;
         }
 
-        /// <summary>
-        /// キャラクター画像を読み込む
-        /// </summary>
-        /// <param name="enemyCharaName">敵キャラクター名</param>
         public void LoadCharacterSprites(string enemyCharaName)
         {
-            // プレイヤー（テン）のStillをロード
             PlayerStillSprite = stillAssetRepository.Load("Ten", false);
-            
-            // 敵キャラのStillをロード
             EnemyStillSprite = stillAssetRepository.Load(enemyCharaName, false);
         }
     }

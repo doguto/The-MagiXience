@@ -11,6 +11,7 @@ namespace Project.Scenes.Scenario.Scripts.View
         [SerializeField] Image playerSpriteRenderer;
         [SerializeField] Image enemySpriteRenderer;
         [SerializeField] Image faceSpriteRenderer;
+
         public void Init(string characterName, string contents, Sprite playerStill, Sprite enemyStill, Sprite face)
         {
             UpdateCanvas(characterName, contents, playerStill, enemyStill, face);
