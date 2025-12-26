@@ -13,32 +13,43 @@ namespace Project.Scripts.Repository.ModelRepository
         readonly List<StageData> stageData;
         readonly List<StageModel> stageModels = new();
 
-        readonly UserDataModel userModel;
+        readonly RuntimeModelRepository runtimeModelRepository;
+        readonly UserModelRepository userModelRepository;
 
         public StageModelRepository()
         {
+            runtimeModelRepository = RuntimeModelRepository.Instance;
+            userModelRepository = UserModelRepository.Instance;
+
             dataName = "StageData";
             stageData = LoadData();
-
-            userModel = UserModelRepository.Instance.Get();
 
             foreach (var data in stageData)
             {
                 var stageNumber = data.stageNumber;
-                stageModels.Add(new StageModel(data, userModel.IsOpenedStage(stageNumber), userModel.IsClearedStage(stageNumber)));
+                stageModels.Add(
+                    new StageModel(data, UserModel.IsOpenedStage(stageNumber), UserModel.IsClearedStage(stageNumber))
+                    {
+                        UserModel = userModelRepository.Get(),
+                        RuntimeModel = runtimeModelRepository.Get(),
+                    }
+                );
             }
         }
 
-        public StageModel GetById(string stageId)
+        public StageModel GetByStageNumber(int stageNumber)
         {
-            var model = stageModels.Find(m => m.StageData.id == stageId);
+            var model = stageModels.Find(m => m.StageData.stageNumber == stageNumber);
             if (model != null) return model;
 
-            var data = stageData.Find(m => m.id == stageId);
-            if (data == null) throw new Exception($"StageId {stageId} のデータが存在しません.");
+            var data = stageData.Find(m => m.stageNumber == stageNumber);
+            if (data == null) throw new Exception($"StageId {stageNumber} のデータが存在しません.");
 
-            var stageNumber = data.stageNumber;
-            var newModel = new StageModel(data, userModel.IsOpenedStage(stageNumber), userModel.IsClearedStage(stageNumber));
+            var newModel = new StageModel(data, UserModel.IsOpenedStage(stageNumber), UserModel.IsClearedStage(stageNumber))
+            {
+                UserModel = userModelRepository.Get(),
+                RuntimeModel = runtimeModelRepository.Get(),
+            };
             stageModels.Add(newModel);
             return newModel;
         }

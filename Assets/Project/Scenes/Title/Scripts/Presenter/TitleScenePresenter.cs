@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Model;
 using Project.Scenes.Title.Scripts.Model;
+using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scenes.Title.Scripts.View;
 using Project.Scripts.Presenter;
 using UniRx;
@@ -13,27 +13,32 @@ namespace Project.Scenes.Title.Scripts.Presenter
     public class TitleScenePresenter : MonoPresenter
     {
         [SerializeField] TitleMenuView titleMenuView;
-        [SerializeField] TitleSettingModalView titleSettingModalView;
-        
-        TitleBackgroundModel titleBackgroundModel;
-        TitleGameStartModel titleGameStartModel;
+
+        TitleModelRepository titleModelRepository;
+
+        TitleModel titleModel;
+
+        void Awake()
+        {
+            titleModelRepository = TitleModelRepository.Instance;
+            titleModel = titleModelRepository.Get();
+            
+            titleMenuView.Init(titleModel.GetBackGroundSprites());
+        }
 
         void Start()
         {
-            titleBackgroundModel = new TitleBackgroundModel();
-            titleGameStartModel = new TitleGameStartModel();
+            titleMenuView.InitStart();
 
             titleMenuView.OnPressedStart.Subscribe(x => StartGame(x).Forget());
             titleMenuView.OnPressedExit.Subscribe(ExitGame);
-
-            titleMenuView.Init();
-
-            SetTitleBackGround();
         }
 
         async UniTask StartGame(Unit _)
         {
-            titleGameStartModel.StartGame();
+            // TitleScene 以外で TitleModel は使用しないのでクリアする
+            titleModelRepository.Refresh(); 
+
             await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.StageList));
@@ -45,14 +50,8 @@ namespace Project.Scenes.Title.Scripts.Presenter
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();//ゲームプレイ終了
+            Application.Quit(); //ゲームプレイ終了
 #endif
-        }
-
-        void SetTitleBackGround()
-        {
-            var clearedStageAmount = titleBackgroundModel.ClearedStageAmount;
-            titleMenuView.SetBackGround(clearedStageAmount);
         }
     }
 }

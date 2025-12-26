@@ -6,6 +6,7 @@ namespace Project.Scripts.Model
 {
     public class ModelBase
     {
-        
+        public UserModel UserModel { get; set; }
+        public RuntimeModel RuntimeModel { get; set; }
     }
 }

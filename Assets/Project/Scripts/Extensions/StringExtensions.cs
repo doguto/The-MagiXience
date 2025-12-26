@@ -1,4 +1,4 @@
-namespace Project.Commons.Scripts.Extensions
+namespace Project.Scripts.Extensions
 {
     public static class StringExtensions
     {

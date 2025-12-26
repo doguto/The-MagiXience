@@ -1,7 +1,6 @@
 ﻿using System;
 using Project.Scripts.Infra;
 using Project.Scripts.Repository.AssetRepository;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Project.Scripts.Model
@@ -14,8 +13,6 @@ namespace Project.Scripts.Model
         public bool IsOpened { get; private set; }
         public bool IsCleared { get; private set; }
 
-        
-        
         public StageModel(StageData stageData, bool isOpened = false, bool isCleared = false)
         {
             StageData = stageData;
@@ -24,6 +21,11 @@ namespace Project.Scripts.Model
 
             var stillAssetRepository = new StillAssetRepository();
             CharaImage = stillAssetRepository.Load(StageData.charaStillAddress, false);
+        }
+
+        public void Start()
+        {
+            RuntimeModel.CurrentStageNumber = StageData.stageNumber;
         }
 
         public void Open()
@@ -36,6 +38,8 @@ namespace Project.Scripts.Model
             if (!IsOpened) throw new Exception("ステージが開放されていません.");
 
             IsCleared = true;
+            UserModel.StageClear(StageData.stageNumber);
+            RuntimeModel.CurrentStageNumber = -1;
         }
 
         public (string id, string title) GetIdAndTitle()

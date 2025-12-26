@@ -1,4 +1,4 @@
-using Project.Scripts.Infra;
+using Project.Scripts.Model;
 
 namespace Project.Scripts.Repository.ModelRepository
 {
@@ -6,18 +6,18 @@ namespace Project.Scripts.Repository.ModelRepository
     {
         public static UserModelRepository Instance { get; } = new();
 
-
-        UserDataModel userData;
+        readonly RuntimeModelRepository runtimeModelRepository;
+        UserModel userModel;
 
         public UserModelRepository()
         {
-            userData = new UserDataModel();
+            runtimeModelRepository = RuntimeModelRepository.Instance;
+            userModel = new(){ RuntimeModel = runtimeModelRepository.Get() };
         }
-
-        public UserDataModel Get()
+        
+        public UserModel Get()
         {
-            return userData ??= new();
+            return userModel ??= new(){ RuntimeModel = runtimeModelRepository.Get() };
         }
-
     }
 }
