@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Project.Scenes.Battle.Scripts.Model;
 using UnityEngine.AddressableAssets;
 
-namespace Project.Scenes.Battle.Scripts.Model
+namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 {
     public class BattlePhaseSequenceRepository
     {
@@ -22,7 +23,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             }
 
             var models = new List<BattlePhaseModelBase>(asset.Phases.Count);
-            foreach (var definition in asset.Phases)
+         foreach (var definition in asset.Phases)
             {
                 models.Add(BattlePhaseModelFactory.Create(definition));
             }

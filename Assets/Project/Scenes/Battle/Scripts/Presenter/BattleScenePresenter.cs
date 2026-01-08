@@ -1,9 +1,11 @@
 using System;
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
+using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -12,19 +14,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField, Min(1)] int fallbackStageNumber = 1;
         [SerializeField] bool playOnStart = true;
-        [SerializeField] bool autoCompleteScenarioRequests = true;
 
         readonly BattlePhaseSequenceRepository sequenceRepository = new();
-        readonly Subject<ScenarioTransitionRequest> scenarioRequests = new();
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
 
         StageModel stageModel;
         BattlePhaseSequenceModel waySequence;
         BattlePhaseSequenceModel bossSequence;
-        ScenarioTransitionTiming? pendingScenario;
 
-        public IObservable<ScenarioTransitionRequest> OnScenarioRequested => scenarioRequests;
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
         void Awake()
@@ -117,57 +115,25 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             if (sequenceType == BattleSequenceType.Way)
             {
-                if (!RequestScenario(stageModel.ScenarioIdWayToBoss, ScenarioTransitionTiming.WayToBoss))
-                {
-                    StartBossSequence();
-                }
+                TransitionToScenario(stageModel.ScenarioIdWayToBoss, StartBossSequence);
             }
             else
             {
-                if (!RequestScenario(stageModel.ScenarioIdBossToNext, ScenarioTransitionTiming.BossToNextStage))
-                {
-                    CompleteStage();
-                }
+                TransitionToScenario(stageModel.ScenarioIdBossToNext, CompleteStage);
             }
         }
 
-        bool RequestScenario(string scenarioId, ScenarioTransitionTiming timing)
+        void TransitionToScenario(string scenarioId, System.Action onCompleteOrSkip)
         {
-            Debug.Log($"Requesting scenario transition: {scenarioId} at {timing}", this);
             if (string.IsNullOrEmpty(scenarioId))
             {
-                return false;
-            }
-
-            pendingScenario = timing;
-            var request = new ScenarioTransitionRequest(stageModel.StageNumber, scenarioId, timing);
-            scenarioRequests.OnNext(request);
-
-            if (autoCompleteScenarioRequests)
-            {
-                CompleteScenarioTransition(timing);
-            }
-
-            return true;
-        }
-
-        public void CompleteScenarioTransition(ScenarioTransitionTiming timing)
-        {
-            if (pendingScenario != timing)
-            {
+                Debug.Log("No scenario configured. Proceeding to next phase.", this);
+                onCompleteOrSkip?.Invoke();
                 return;
             }
 
-            pendingScenario = null;
-
-            if (timing == ScenarioTransitionTiming.WayToBoss)
-            {
-                StartBossSequence();
-            }
-            else
-            {
-                CompleteStage();
-            }
+            Debug.Log($"Loading scenario: {scenarioId}", this);
+            SceneManager.LoadScene(scenarioId);
         }
 
         void StartBossSequence()
@@ -198,7 +164,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void OnDestroy()
         {
             disposables.Dispose();
-            scenarioRequests.Dispose();
             battleCompleted.Dispose();
             phaseStateMachine?.Stop();
         }
