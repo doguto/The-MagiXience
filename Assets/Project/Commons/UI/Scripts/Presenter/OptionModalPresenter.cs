@@ -23,16 +23,23 @@ namespace Project.Commons.UI.Scripts.Presenter
         {
             optionModalView.InitStart();
             
-            optionModalView.OnPressedCansel.Subscribe(_ =>
+            optionModalView.OnPressedCancel.Subscribe(_ =>
             {
                 gameObject.SetActive(false);
                 if (runtimeModel.IsInGame) onClosed.OnNext(Unit.Default);
-            });
-            optionModalView.OnPressedSave.Subscribe();
+            }).AddTo(this);
+            optionModalView.OnPressedSave.Subscribe(_ =>
+            {
+                //TODO saveする
+            }).AddTo(this);
         }
 
         public void Open()
         {
+            if (gameObject == null)
+            {
+                Debug.Log("null");
+            }
             gameObject.SetActive(true);
         }
         

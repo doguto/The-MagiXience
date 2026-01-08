@@ -5,23 +5,23 @@ using UnityEngine.EventSystems;
 
 namespace Project.Commons.UI.Scripts.View
 {
-    public class PauseModalView
+    public class PauseModalView: MonoBehaviour
     {
-        [SerializeField] SimpleButton canselButton;
+        [SerializeField] SimpleButton cancelButton;
         [SerializeField] SimpleButton optionButton;
         [SerializeField] SimpleButton exitButton;
         
-        public IObservable<Unit> OnPressedCansel => canselButton.OnPressed;
+        public IObservable<Unit> OnPressedCancel => cancelButton.OnPressed;
         public IObservable<Unit> OnPressedOption => optionButton.OnPressed;
         public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
 
         public void InitStart()
         {
-            canselButton.Init(isFocused:true);
+            cancelButton.Init(isFocused:true);
             optionButton.Init();
             exitButton.Init();
             
-            EventSystem.current.SetSelectedGameObject(canselButton.gameObject);
+            EventSystem.current.SetSelectedGameObject(cancelButton.gameObject);
         }
         
     }

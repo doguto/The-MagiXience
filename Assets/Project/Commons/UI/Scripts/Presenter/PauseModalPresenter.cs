@@ -33,10 +33,9 @@ namespace Project.Commons.UI.Scripts.Presenter
         {
             pauseModalView.InitStart();
             
-            pauseModalView.OnPressedCansel.Subscribe(_ =>
+            pauseModalView.OnPressedCancel.Subscribe(_ =>
             {
                 gameObject.SetActive(false);
-                // TODO 時間動かす
             });
             pauseModalView.OnPressedOption.Subscribe(_ =>
             {
@@ -50,7 +49,7 @@ namespace Project.Commons.UI.Scripts.Presenter
                     pauseEvent.Dispose();
                 });
             });
-            pauseModalView.OnPressedExit.Subscribe(x => LoadTitle(x).Forget());
+            pauseModalView.OnPressedExit.Subscribe(x => LoadTitle(x).Forget()).AddTo(this);
         }
 
         
