@@ -19,7 +19,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 var trackName = output.streamName;
                 if (string.IsNullOrEmpty(trackName)) continue;
 
-                if (!TryGetBinding(trackName, out var target) || !target)
+                var target = GetBinding(trackName);
+                if (!target)
                 {
                     continue;
                 }
@@ -28,19 +29,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        bool TryGetBinding(string trackName, out UnityEngine.Object target)
+        UnityEngine.Object GetBinding(string trackName)
         {
             foreach (var entry in bindings)
             {
                 if (entry != null && entry.Matches(trackName))
                 {
-                    target = entry.Target;
-                    return true;
+                    return entry.Target;
                 }
             }
 
-            target = null;
-            return false;
+            return null;
         }
 
         [Serializable]

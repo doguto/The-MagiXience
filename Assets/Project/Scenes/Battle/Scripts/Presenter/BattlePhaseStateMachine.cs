@@ -55,7 +55,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            if (!activeSequence.TryMoveNext(out var nextPhase))
+            var nextPhase = activeSequence.MoveNext();
+            if (nextPhase == null)
             {
                 playableDirector?.Stop();
                 sequenceCompleted.OnNext(activeSequence.SequenceType);

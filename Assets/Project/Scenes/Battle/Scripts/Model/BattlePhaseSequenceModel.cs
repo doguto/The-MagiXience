@@ -17,19 +17,17 @@ namespace Project.Scenes.Battle.Scripts.Model
         public bool HasPhases => phases.Count > 0;
         public IReadOnlyList<BattlePhaseModelBase> Phases => phases;
 
-        public bool TryMoveNext(out BattlePhaseModelBase phase)
+        public BattlePhaseModelBase MoveNext()
         {
             var nextIndex = currentIndex + 1;
             if (nextIndex >= phases.Count)
             {
-                phase = null;
                 currentIndex = phases.Count;
-                return false;
+                return null;
             }
 
             currentIndex = nextIndex;
-            phase = phases[currentIndex];
-            return true;
+            return phases[currentIndex];
         }
 
         public void Reset()
