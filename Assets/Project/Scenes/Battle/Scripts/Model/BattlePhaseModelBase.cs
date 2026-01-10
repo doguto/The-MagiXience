@@ -11,7 +11,6 @@ namespace Project.Scenes.Battle.Scripts.Model
         readonly Subject<Unit> exitSubject = new();
 
         TimelineAsset resolvedTimeline;
-        bool isRuntimeTimeline;
         bool isTimelineResolved;
 
         protected BattlePhaseModelBase(BattlePhaseDefinition definition)
@@ -36,15 +35,14 @@ namespace Project.Scenes.Battle.Scripts.Model
             }
 
             isTimelineResolved = true;
-            if (Definition.TryCreateTimeline(out var asset, out var runtime))
+            var asset = Definition.CreateTimeline();
+            if (asset)
             {
                 resolvedTimeline = asset;
-                isRuntimeTimeline = runtime;
             }
             else
             {
                 resolvedTimeline = null;
-                isRuntimeTimeline = false;
             }
 
             return resolvedTimeline;
@@ -74,7 +72,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             Disposables.Dispose();
             exitSubject.Dispose();
 
-            if (isRuntimeTimeline && resolvedTimeline)
+            if (resolvedTimeline)
             {
                 UnityEngine.Object.Destroy(resolvedTimeline);
             }
