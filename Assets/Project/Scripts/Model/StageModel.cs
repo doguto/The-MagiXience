@@ -9,6 +9,12 @@ namespace Project.Scripts.Model
     {
         public StageData StageData { get; }
 
+        public int StageNumber => StageData.stageNumber;
+        public string WaySequenceAddress => StageData.waySequenceAddress;
+        public string BossSequenceAddress => StageData.bossSequenceAddress;
+        public string ScenarioIdWayToBoss => StageData.scenarioIdWayToBoss;
+        public string ScenarioIdBossToNext => StageData.scenarioIdBossToNext;
+
         public Sprite CharaImage { get; }
         public bool IsOpened { get; private set; }
         public bool IsCleared { get; private set; }
@@ -39,7 +45,7 @@ namespace Project.Scripts.Model
 
             IsCleared = true;
             UserModel.StageClear(StageData.stageNumber);
-            RuntimeModel.CurrentStageNumber = -1;
+            RuntimeModel.ExitStage();
         }
 
         public (string id, string title) GetIdAndTitle()
