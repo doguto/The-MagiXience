@@ -1,68 +1,103 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 namespace Project.Scenes.Scenario.Scripts.View
 {
     public class ScenarioView : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI characterNameText;
-        [SerializeField] private TextMeshProUGUI contentText;
-        [SerializeField] private Image faceImage;
-        [SerializeField] private Image StillImageMe;
-        [SerializeField] private Image StillImageEnemy;
+        [SerializeField] TextMeshProUGUI characterNameText;
+        [SerializeField] TextMeshProUGUI contentsText;
+        [SerializeField] Image playerSpriteRenderer;
+        [SerializeField] Image enemySpriteRenderer;
+        [SerializeField] Image faceSpriteRenderer;
 
-        public void InitStillImage(string characterKeyMe, string characterKeyEnemy, string stillImageType)
+        public void Init(string characterName, string contents, Sprite playerStill, Sprite enemyStill, Sprite face)
         {
-            SetStillImage(StillImageMe, characterKeyMe, "Default");
-            SetStillImage(StillImageEnemy, characterKeyEnemy, stillImageType);
-        }
-        
-        public class DisplayData
-        {
-            public string character { get; set; }
-            public string content { get; set; }
-            public string faceType { get; set; }
-            public string characterKey { get; set; }
-        }
-        public void Display(DisplayData data)
-        {
-            characterNameText.text = data.character;
-            contentText.text = data.content;
-            UpdateFaceImage(data.characterKey, data.faceType);
+            UpdateCanvas(characterName, contents, playerStill, enemyStill, face);
         }
 
-        private void UpdateFaceImage(string characterKey, string faceType)
+        public void UpdateCanvas(string characterName, string contents, Sprite playerStill, Sprite enemyStill, Sprite face)
         {
-            string facePath = $"CharaImage/Face/{characterKey}/{faceType}";
-            Sprite faceSprite = Resources.Load<Sprite>(facePath);
-            if (faceSprite == null)
-            {
-                Debug.LogWarning($"faceSprite is null. Check the path: {facePath}");
-                facePath = $"CharaImage/Face/{characterKey}/Default";
-                faceSprite = Resources.Load<Sprite>(facePath);
-            }
-            faceImage.sprite = faceSprite;
+            characterNameText.text = characterName;
+            contentsText.text = contents;
+            playerSpriteRenderer.sprite = playerStill;
+            enemySpriteRenderer.sprite = enemyStill;
+            faceSpriteRenderer.sprite = face;
         }
 
-        private void SetStillImage(Image image, string characterKey, string stillImageType)
+        /// <summary>
+        /// ChangeCastLayerとStopGrayingCastの機能を内蔵してキャラ名とセリフを表示
+        /// </summary>
+        public void ShowCastMessage(string characterName, string message)
         {
-            string fileName;
-            if (stillImageType.Contains("Crazy"))
-            {
-                fileName = characterKey + "_Crazy";
-            }
-            else
-            {
-                fileName = characterKey;
-            }
-            string stillPath = $"CharaImage/Still/{fileName}";
-            Sprite stillSprite = Resources.Load<Sprite>(stillPath);
-            if (stillSprite == null)
-            {
-                Debug.LogWarning($"stillSprite is null. Check the path: {stillPath}");
-            }
-            image.sprite = stillSprite;
+            ChangeCastLayer(characterName, 1);
+            StopGrayingCast(characterName);
+            ShowMessage(characterName, message);
         }
+
+        /// <summary>
+        /// キャラ名とセリフを表示
+        /// </summary>
+        public void ShowMessage(string characterName, string message)
+        {
+            characterNameText.text = characterName ?? "";
+            contentsText.text = message ?? "";
+        }
+
+        /// <summary>
+        /// キャラクターを表示する
+        /// </summary>
+        /// <param name="characterName">キャラ名</param>
+        /// <param name="unknownArg1">不明な引数1</param>
+        /// <param name="faceExpression">表情差分</param>
+        /// <param name="displayTime">表示までの時間(s)</param>
+        /// <param name="position">表示位置（LL or RR）</param>
+        /// <param name="unknownArg2">不明な引数2</param>
+        /// <param name="playerSprite">プレイヤーのSprite</param>
+        /// <param name="enemySprite">敵のSprite</param>
+        public void ShowCast(string characterName, string unknownArg1, string faceExpression, 
+            string displayTime, string position, string unknownArg2, 
+            Sprite playerSprite, Sprite enemySprite)
+        {
+            // TODO: displayTime, faceExpression, unknownArgsの処理は後で実装
+            
+            // 位置に応じてSpriteを表示
+            if (position == "LL")
+            {
+                // 左側 = プレイヤー
+                playerSpriteRenderer.sprite = playerSprite;
+                playerSpriteRenderer.gameObject.SetActive(true);
+            }
+            else if (position == "RR")
+            {
+                // 右側 = 敵キャラ
+                enemySpriteRenderer.sprite = enemySprite;
+                enemySpriteRenderer.gameObject.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// 指定したキャラのレイヤーを変更
+        /// </summary>
+        public void ChangeCastLayer(string characterName, int layer)
+        {
+            // TODO
+        }
+
+        /// <summary>
+        /// キャラにかかっている灰色のフィルターを外す（=スポットライトを当てる）
+        /// </summary>
+        public void StopGrayingCast(string characterName)
+        {
+            // TODO
+        }
+
+        public void LogCommand(string function, string[] args)
+        {
+            Debug.Log($"[ScenarioView] Execute: {function}, Args: {string.Join(", ", args)}");
+        }
+        // TODO?: 喋ってないほうのStillを暗くする
+        // TODO?: アニメーションをつける
     }
 }
