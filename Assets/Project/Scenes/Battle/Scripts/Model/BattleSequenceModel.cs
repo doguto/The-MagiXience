@@ -2,12 +2,12 @@ using System.Collections.Generic;
 
 namespace Project.Scenes.Battle.Scripts.Model
 {
-    public class BattlePhaseSequenceModel
+    public class BattleSequenceModel
     {
         readonly IReadOnlyList<BattlePhaseModelBase> phases;
         int currentIndex = -1;
 
-        public BattlePhaseSequenceModel(BattleSequenceType sequenceType, IReadOnlyList<BattlePhaseModelBase> phases)
+        public BattleSequenceModel(BattleSequenceType sequenceType, IReadOnlyList<BattlePhaseModelBase> phases)
         {
             SequenceType = sequenceType;
             this.phases = phases;

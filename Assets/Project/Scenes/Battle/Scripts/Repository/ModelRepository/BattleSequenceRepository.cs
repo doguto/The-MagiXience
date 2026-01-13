@@ -5,11 +5,11 @@ using UnityEngine.AddressableAssets;
 
 namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 {
-    public class BattlePhaseSequenceRepository
+    public class BattleSequenceRepository
     {
-        readonly Dictionary<string, BattlePhaseSequenceAsset> cache = new();
+        readonly Dictionary<string, BattleSequenceAsset> cache = new();
 
-        public BattlePhaseSequenceModel Load(string address)
+        public BattleSequenceModel Load(string address)
         {
             if (string.IsNullOrEmpty(address))
             {
@@ -18,7 +18,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 
             if (!cache.TryGetValue(address, out var asset))
             {
-                asset = Addressables.LoadAssetAsync<BattlePhaseSequenceAsset>(address).WaitForCompletion();
+                asset = Addressables.LoadAssetAsync<BattleSequenceAsset>(address).WaitForCompletion();
                 cache[address] = asset;
             }
 
@@ -28,7 +28,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
                 models.Add(BattlePhaseModelFactory.Create(definition));
             }
 
-            return new BattlePhaseSequenceModel(asset.SequenceType, models);
+            return new BattleSequenceModel(asset.SequenceType, models);
         }
     }
 }

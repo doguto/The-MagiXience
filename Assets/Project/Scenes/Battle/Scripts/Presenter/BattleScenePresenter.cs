@@ -14,13 +14,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField, Min(1)] int initialStageNumber = 1;
 
-        readonly BattlePhaseSequenceRepository sequenceRepository = new();
+        readonly BattleSequenceRepository sequenceRepository = new();
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
 
         StageModel stageModel;
-        BattlePhaseSequenceModel waySequence;
-        BattlePhaseSequenceModel bossSequence;
+        BattleSequenceModel waySequence;
+        BattleSequenceModel bossSequence;
         System.Action pendingScenarioCallback;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
@@ -90,7 +90,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        BattlePhaseSequenceModel LoadSequence(string address)
+        BattleSequenceModel LoadSequence(string address)
         {
             if (string.IsNullOrEmpty(address))
             {

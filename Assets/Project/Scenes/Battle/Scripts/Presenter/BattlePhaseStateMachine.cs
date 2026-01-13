@@ -14,14 +14,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         readonly Subject<BattlePhaseModelBase> phaseStarted = new();
         readonly Subject<BattleSequenceType> sequenceCompleted = new();
 
-        BattlePhaseSequenceModel activeSequence;
+        BattleSequenceModel activeSequence;
         BattlePhaseModelBase activePhase;
         IDisposable exitSubscription;
 
         public IObservable<BattlePhaseModelBase> OnPhaseStarted => phaseStarted;
         public IObservable<BattleSequenceType> OnSequenceCompleted => sequenceCompleted;
 
-        public void PlaySequence(BattlePhaseSequenceModel sequence)
+        public void PlaySequence(BattleSequenceModel sequence)
         {
             if (sequence == null)
             {
@@ -124,7 +124,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void DisposeSequence(BattlePhaseSequenceModel sequence)
+        void DisposeSequence(BattleSequenceModel sequence)
         {
             if (sequence == null)
             {

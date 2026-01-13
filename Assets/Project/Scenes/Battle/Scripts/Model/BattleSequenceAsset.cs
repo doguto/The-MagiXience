@@ -5,8 +5,8 @@ using UnityEngine.Timeline;
 
 namespace Project.Scenes.Battle.Scripts.Model
 {
-    [CreateAssetMenu(fileName = "BattlePhaseSequence", menuName = "Battle/Phase Sequence")]
-    public class BattlePhaseSequenceAsset : ScriptableObject
+    [CreateAssetMenu(fileName = "BattleSequence", menuName = "Battle/Phase Sequence")]
+    public class BattleSequenceAsset : ScriptableObject
     {
         [SerializeField] BattleSequenceType sequenceType = BattleSequenceType.Way;
         [SerializeField] List<BattlePhaseDefinition> phases = new();
@@ -23,13 +23,13 @@ namespace Project.Scenes.Battle.Scripts.Model
             if (isBoss && sequenceType != BattleSequenceType.Boss)
             {
                 sequenceType = BattleSequenceType.Boss;
-                Debug.LogWarning($"BattlePhaseSequenceAsset: {name} is automatically set to Boss", this);
+                Debug.LogWarning($"BattleSequenceAsset: {name} is automatically set to Boss", this);
                 UnityEditor.EditorUtility.SetDirty(this);
             }
             else if (isWay && sequenceType != BattleSequenceType.Way)
             {
                 sequenceType = BattleSequenceType.Way;
-                Debug.LogWarning($"BattlePhaseSequenceAsset: {name} is automatically set to Way", this);
+                Debug.LogWarning($"BattleSequenceAsset: {name} is automatically set to Way", this);
                 UnityEditor.EditorUtility.SetDirty(this);
             }
         }
