@@ -20,7 +20,5 @@ namespace Project.Scripts.Infra
         [Header("Battle Flow")]
         public string waySequenceAddress;
         public string bossSequenceAddress;
-        public string scenarioIdWayToBoss;
-        public string scenarioIdBossToNext;
     }
 }

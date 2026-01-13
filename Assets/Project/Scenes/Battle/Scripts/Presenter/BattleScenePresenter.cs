@@ -13,7 +13,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField, Min(1)] int fallbackStageNumber = 1;
-        [SerializeField] bool playOnStart = true;
 
         readonly BattlePhaseSequenceRepository sequenceRepository = new();
         readonly Subject<Unit> battleCompleted = new();
@@ -22,6 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         StageModel stageModel;
         BattlePhaseSequenceModel waySequence;
         BattlePhaseSequenceModel bossSequence;
+        System.Action pendingScenarioCallback;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
@@ -42,10 +42,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 .Subscribe(HandleSequenceCompleted)
                 .AddTo(disposables);
 
-            if (playOnStart)
-            {
-                InitializeAndStart();
-            }
+            InitializeAndStart();
         }
 
         public void InitializeAndStart()
@@ -78,7 +75,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         StageModel ResolveStageModel()
         {
             var runtimeModel = RuntimeModelRepository.Instance.Get();
-            var stageNumber = runtimeModel.CurrentStageNumber >= 0 ? runtimeModel.CurrentStageNumber : fallbackStageNumber;
+            var stageNumber = runtimeModel.CurrentStageNumber > 0 ? runtimeModel.CurrentStageNumber : fallbackStageNumber;
 
             try
             {
@@ -115,25 +112,54 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             if (sequenceType == BattleSequenceType.Way)
             {
-                TransitionToScenario(stageModel.ScenarioIdWayToBoss, StartBossSequence);
+                TransitionToScenario(StartBossSequence);
             }
             else
             {
-                TransitionToScenario(stageModel.ScenarioIdBossToNext, CompleteStage);
+                TransitionToScenario(CompleteStage);
             }
         }
 
-        void TransitionToScenario(string scenarioId, System.Action onCompleteOrSkip)
+        void TransitionToScenario(System.Action onCompleteOrSkip)
         {
-            if (string.IsNullOrEmpty(scenarioId))
-            {
-                Debug.Log("No scenario configured. Proceeding to next phase.", this);
-                onCompleteOrSkip?.Invoke();
-                return;
-            }
+            // ScenarioIdは不要、ScenarioModelRepositoryがRuntimeModelから自動決定
+            Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);
 
-            Debug.Log($"Loading scenario: {scenarioId}", this);
-            SceneManager.LoadScene(scenarioId);
+            // シナリオ完了後のコールバックを保存
+            pendingScenarioCallback = onCompleteOrSkip;
+
+            // シーンロード完了を待ってからイベントを購読
+            SceneManager.sceneLoaded += OnScenarioSceneLoaded;
+            SceneManager.LoadScene(SceneRouterModel.Scenario, LoadSceneMode.Additive);
+        }
+
+        void OnScenarioSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name != SceneRouterModel.Scenario) return;
+
+            Debug.Log($"[BattleScenePresenter] Scenario scene loaded", this);
+            SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+
+            // ScenarioScenePresenterを見つけてイベントを購読
+            var scenarioPresenter = FindObjectOfType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
+            if (scenarioPresenter != null)
+            {
+                scenarioPresenter.OnScenarioCompleted
+                    .Take(1) // 1回だけ実行
+                    .Subscribe(_ => OnScenarioCompleted())
+                    .AddTo(disposables);
+            }
+            else
+            {
+                Debug.LogWarning("ScenarioScenePresenter not found in the loaded scene.", this);
+            }
+        }
+
+        void OnScenarioCompleted()
+        {
+            Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
+            pendingScenarioCallback?.Invoke();
+            pendingScenarioCallback = null;
         }
 
         void StartBossSequence()
@@ -156,9 +182,35 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             catch (Exception e)
             {
                 Debug.LogError($"Failed to mark stage as cleared: {e.Message}", this);
+                battleCompleted.OnNext(Unit.Default);
+                return;
             }
 
-            battleCompleted.OnNext(Unit.Default);
+            // 次のステージをロード
+            var nextStageModel = ResolveStageModel();
+            if (nextStageModel == null)
+            {
+                // 次のステージが存在しない（最終ステージクリア）
+                Debug.Log("[BattleScenePresenter] All stages cleared!", this);
+                battleCompleted.OnNext(Unit.Default);
+                return;
+            }
+
+            // 次のステージのシーケンスをロード
+            stageModel = nextStageModel;
+            waySequence = LoadSequence(stageModel.WaySequenceAddress);
+
+            // 道中シーケンスを開始
+            if (waySequence != null)
+            {
+                Debug.Log($"[BattleScenePresenter] Starting next stage {stageModel.StageNumber}", this);
+                phaseStateMachine.PlaySequence(waySequence);
+            }
+            else
+            {
+                Debug.LogError("[BattleScenePresenter] Next stage way sequence is missing.", this);
+                battleCompleted.OnNext(Unit.Default);
+            }
         }
 
         void OnDestroy()

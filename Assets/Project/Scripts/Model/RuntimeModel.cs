@@ -22,16 +22,18 @@
             CurrentSituation = situation;
         }
 
-        public void AdvanceToNextPhase()
+        public void AdvanceToNextSequence()
         {
             if (CurrentSituation == GameSituation.Way)
             {
                 CurrentSituation = GameSituation.Boss;
+                UnityEngine.Debug.Log($"[RuntimeModel] Stage {CurrentStageNumber}: Way → Boss");
             }
             else
             {
                 CurrentStageNumber++;
                 CurrentSituation = GameSituation.Way;
+                UnityEngine.Debug.Log($"[RuntimeModel] Stage advanced: {CurrentStageNumber - 1} → {CurrentStageNumber}");
             }
         }
 

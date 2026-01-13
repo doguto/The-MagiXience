@@ -1,8 +1,11 @@
-using System.Linq;
+using System;
+using UniRx;
 using Project.Scenes.Scenario.Scripts.Model;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scenes.Scenario.Scripts.View;
+using Project.Scripts.Model;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Project.Scenes.Scenario.Scripts.Presenter
 {
@@ -11,9 +14,13 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         [SerializeField] ScenarioView scenarioView;
 
         ScenarioModel scenarioModel;
+        readonly Subject<Unit> scenarioCompleted = new();
+
+        public IObservable<Unit> OnScenarioCompleted => scenarioCompleted;
 
         void Start()
         {
+            Debug.Log("[ScenarioScenePresenter] Start called");
             // RepositoryからModelを取得
             scenarioModel = ScenarioModelRepository.Instance.Get();
 
@@ -33,7 +40,17 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         {
             if (scenarioModel.IsEnd)
             {
-                Debug.Log("Scenario End");
+                Debug.Log("[ScenarioScenePresenter] Scenario End. Advance to Next Sequence");
+
+                // シナリオ完了時にSituationを変更
+                var runtimeModel = Project.Scripts.Repository.ModelRepository.RuntimeModelRepository.Instance.Get();
+
+                runtimeModel.AdvanceToNextSequence();
+
+                scenarioCompleted.OnNext(Unit.Default);
+                // シナリオシーンをアンロード
+                SceneManager.UnloadSceneAsync(SceneRouterModel.Scenario);
+                ScenarioModelRepository.Instance.Refresh();
                 return;
             }
 
@@ -47,9 +64,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
             while (!scenarioModel.IsEnd)
             {
                 var step = scenarioModel.CurrentStep;
-                
+
                 // コマンド実行ログ
                 scenarioView.LogCommand(step.function, step.args);
+
+                // memo: 将来ルビ表示コマンド作るかも
 
                 // メッセージ表示系コマンドの場合はループを抜けて待機
                 if (step.function == "ShowCastMessage")
@@ -60,7 +79,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     scenarioView.ShowCastMessage(characterName, message);
                     break;
                 }
-                
+
                 if (step.function == "ShowMessage")
                 {
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
@@ -79,11 +98,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     var displayTime = step.args.Length > 3 ? step.args[3] : "";
                     var position = step.args.Length > 4 ? step.args[4] : "";
                     var unknownArg2 = step.args.Length > 5 ? step.args[5] : "";
-                    
-                    scenarioView.ShowCast(characterName, unknownArg1, faceExpression, 
+
+                    scenarioView.ShowCast(characterName, unknownArg1, faceExpression,
                         displayTime, position, unknownArg2,
                         scenarioModel.PlayerStillSprite, scenarioModel.EnemyStillSprite);
-                    
+
                     scenarioModel.Next();
                     continue;
                 }
@@ -91,6 +110,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
                 scenarioModel.Next();
             }
+        }
+
+        void OnDestroy()
+        {
+            scenarioCompleted.Dispose();
         }
     }
 }

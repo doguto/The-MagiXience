@@ -1,4 +1,5 @@
-﻿using Project.Scenes.Scenario.Scripts.Model;
+﻿using UnityEngine;
+using Project.Scenes.Scenario.Scripts.Model;
 using Project.Scripts.Extensions;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
@@ -22,11 +23,11 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
             if (scenarioModel == null)
             {
                 scenarioModel = new ScenarioModel();
-                
+
                 // シナリオデータをロード
                 var data = LoadData();
                 scenarioModel.LoadData(data.steps);
-                
+
                 // キャラクター画像をロード
                 var stageNumber = runtimeModel.CurrentStageNumber;
                 var enemyCharaName = GetEnemyCharaName(stageNumber);
@@ -42,22 +43,37 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
 
         ScenarioData LoadData()
         {
-            var scenarioNumber = runtimeModel.GetScenarioNumber();
-            
-            var path = $"{GamePath.DataStorepath}/scenario_{scenarioNumber}.asset";
-            
-            // TODO: 本番用シナリオファイルが揃ったらフォールバックを削除
-            // try
-            // {
-        //         return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
-            // }
-            // catch
-            // {
-                // フォールバック: test_scenarioを使用
-                UnityEngine.Debug.LogWarning($"[ScenarioModelRepository] scenario_{scenarioNumber} not found, using test_scenario instead.");
-                var fallbackPath = $"{GamePath.DataStorepath}/test_scenario.asset";
-                return UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<ScenarioData>(fallbackPath).WaitForCompletion();
-            // }
+            var stageNumber = runtimeModel.CurrentStageNumber;
+            var situation = runtimeModel.CurrentSituation;
+
+            string scenarioId = GenerateScenarioId(stageNumber, situation);
+            var path = $"{GamePath.DataStorepath}/{scenarioId}.asset";
+            Debug.Log($"[ScenarioModelRepository] Loading scenario: {scenarioId}");
+            try
+            {
+                var data = UnityEngine.AddressableAssets.Addressables
+                    .LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
+                if (data != null)
+                {
+                    Debug.Log($"[ScenarioModelRepository] Loaded scenario: {scenarioId}");
+                    return data;
+                }
+            }
+            catch
+            {
+                Debug.LogWarning($"[ScenarioModelRepository] Failed to load {scenarioId}, using test_scenario.");
+            }
+
+            // フォールバック: test_scenarioを使用
+            var fallbackPath = $"{GamePath.DataStorepath}/test_scenario.asset";
+            return UnityEngine.AddressableAssets.Addressables
+                .LoadAssetAsync<ScenarioData>(fallbackPath).WaitForCompletion();
+        }
+
+        string GenerateScenarioId(int stageNumber, GameSituation situation)
+        {
+            string situationSuffix = situation == GameSituation.Way ? "Way" : "Boss";
+            return $"Stage{stageNumber}{situationSuffix}Scenario";
         }
 
         string GetEnemyCharaName(int stageNumber)

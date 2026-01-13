@@ -29,6 +29,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            Debug.Log($"[BattlePhaseStateMachine] PlaySequence called for {sequence.SequenceType}", this);
             Stop();
             activeSequence = sequence;
             activeSequence.Reset();
@@ -104,6 +105,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public void Stop()
         {
+            Debug.Log($"[BattlePhaseStateMachine] Stop called, activeSequence: {activeSequence?.SequenceType}", this);
             exitSubscription?.Dispose();
             exitSubscription = null;
 
@@ -129,8 +131,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.SequenceType} with {sequence.Phases.Count} phases", this);
             foreach (var phase in sequence.Phases)
             {
+                Debug.Log($"[BattlePhaseStateMachine] Disposing phase {phase.PhaseId}", this);
                 phase.Dispose();
             }
         }
