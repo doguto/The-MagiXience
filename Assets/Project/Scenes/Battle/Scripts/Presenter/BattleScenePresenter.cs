@@ -12,7 +12,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     public class BattleScenePresenter : MonoBehaviour
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
-        [SerializeField, Min(1)] int fallbackStageNumber = 1;
+        [SerializeField, Min(1)] int initialStageNumber = 1;
 
         readonly BattlePhaseSequenceRepository sequenceRepository = new();
         readonly Subject<Unit> battleCompleted = new();
@@ -75,7 +75,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         StageModel ResolveStageModel()
         {
             var runtimeModel = RuntimeModelRepository.Instance.Get();
-            var stageNumber = runtimeModel.CurrentStageNumber > 0 ? runtimeModel.CurrentStageNumber : fallbackStageNumber;
+            var stageNumber = runtimeModel.CurrentStageNumber < initialStageNumber ? initialStageNumber : runtimeModel.CurrentStageNumber;
 
             try
             {
