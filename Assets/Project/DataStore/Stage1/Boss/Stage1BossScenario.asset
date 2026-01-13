@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f92af5f91ed75704092ce4223786056e, type: 3}
+  m_Name: Stage1BossScenario
+  m_EditorClassIdentifier: 
+  steps:
+  - function: ShowCastMessage
+    args:
+    - 
+    - "\u2026\u2026\u2026\u2026\u3002"
+  - function: ShowCast
+    args:
+    - "\u30C6\u30F3"
+    - 1
+    - Default
+    - 0.1
+    - LL
+    - 1
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u2026\u2026\u2026\u2026\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Additional
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u30ED\u30B3\u3001\u5C45\u308B\u304B\uFF1F"
+  - function: ShowCast
+    args:
+    - "\u30ED\u30B3"
+    - 1
+    - Default
+    - 0.1
+    - RR
+    - 1
+  - function: ShakeCastV
+    args:
+    - "\u30ED\u30B3"
+    - -25
+    - 5
+    - 1
+  - function: ShowCastMessage
+    args:
+    - "\u30ED\u30B3"
+    - "\u2026\u2026\u306A\u3041\u306B\u3002\u3069\u3046\u304B\u3057\u305F\u306E\uFF1F"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Default
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u30DC\u30B9\u304C\u6765\u308B\u3002"
+  - function: ShowCastMessage
+    args:
+    - "\u30ED\u30B3"
+    - "\u2026\u2026\u306A\u3093\u3066\uFF1F"
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u3053\u308C\u306F\u30DC\u30B9\u6226\u306E\u30B7\u30CA\u30EA\u30AA\u3089\u3057\u3044\u306A\u2026\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Additional
+  - function: ShowCastMessage
+    args:
+    - "\u30ED\u30B3"
+    - "\u30C6\u30F3\u3001\u4F55\u8A00\u3063\u3066\u308B\u306E\uFF1F\u5927\u4E08\u592B\uFF1F"

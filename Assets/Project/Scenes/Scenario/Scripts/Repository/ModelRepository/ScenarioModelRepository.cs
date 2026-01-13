@@ -47,8 +47,9 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
             var situation = runtimeModel.CurrentSituation;
 
             string scenarioId = GenerateScenarioId(stageNumber, situation);
-            var path = $"{GamePath.DataStorepath}/{scenarioId}.asset";
-            Debug.Log($"[ScenarioModelRepository] Loading scenario: {scenarioId}");
+            string situationFolder = situation == GameSituation.Way ? "Way" : "Boss";
+            var path = $"{GamePath.DataStorepath}/Stage{stageNumber}/{situationFolder}/{scenarioId}.asset";
+            Debug.Log($"[ScenarioModelRepository] Loading scenario: {scenarioId} from {path}");
             try
             {
                 var data = UnityEngine.AddressableAssets.Addressables
