@@ -13,6 +13,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] List<ActivationTrackDefinition> activationTracks = new();
         [SerializeField] List<AudioTrackDefinition> audioTracks = new();
         [SerializeField] List<ControlTrackDefinition> controlTracks = new();
+        [SerializeField] List<EnemySpawnTrackDefinition> enemySpawnTracks = new();
 
         public TimelineAsset BuildTimeline()
         {
@@ -53,6 +54,13 @@ namespace Project.Scenes.Battle.Scripts.Model
                 if (string.IsNullOrEmpty(controlTrackDef.TrackName)) continue;
                 var track = timeline.CreateTrack<ControlTrack>(null, controlTrackDef.TrackName);
                 controlTrackDef.Build(track);
+            }
+
+            foreach (var enemySpawnTrackDef in enemySpawnTracks)
+            {
+                if (string.IsNullOrEmpty(enemySpawnTrackDef.TrackName)) continue;
+                var track = timeline.CreateTrack<SignalTrack>(null, enemySpawnTrackDef.TrackName);
+                enemySpawnTrackDef.Build(track);
             }
 
             return timeline;
@@ -239,6 +247,47 @@ namespace Project.Scenes.Battle.Scripts.Model
             {
                 controlAsset.prefabGameObject = sourceObject;
             }
+        }
+    }
+
+    [Serializable]
+    public class EnemySpawnTrackDefinition
+    {
+        [SerializeField] string trackName;
+        [SerializeField] List<EnemySpawnDefinition> spawns = new();
+
+        public string TrackName => trackName;
+
+        public void Build(SignalTrack track)
+        {
+            foreach (var spawnDef in spawns)
+            {
+                spawnDef.Build(track);
+            }
+        }
+    }
+
+    [Serializable]
+    public class EnemySpawnDefinition
+    {
+        [SerializeField, Min(0)] double time;
+        [SerializeField] Vector3 spawnPosition;
+        [SerializeField] int maxHp;
+
+        public void Build(SignalTrack track)
+        {
+            if (!track) return;
+
+            // ランタイムでSignalAssetを動的生成
+            var signal = ScriptableObject.CreateInstance<EnemySpawnSignal>();
+            signal.name = $"EnemySpawn_{time}";
+            signal.hideFlags = HideFlags.DontSave;
+
+            // プロパティを設定
+            signal.SetProperties(spawnPosition, maxHp);
+
+            var emitter = track.CreateMarker<SignalEmitter>(time);
+            emitter.asset = signal;
         }
     }
 }
