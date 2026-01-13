@@ -10,6 +10,9 @@ namespace Project.Scenes.Battle.Scripts.Model
     {
         [SerializeField] List<SignalTrackDefinition> signalTracks = new();
         [SerializeField] List<AnimationTrackDefinition> animationTracks = new();
+        [SerializeField] List<ActivationTrackDefinition> activationTracks = new();
+        [SerializeField] List<AudioTrackDefinition> audioTracks = new();
+        [SerializeField] List<ControlTrackDefinition> controlTracks = new();
 
         public TimelineAsset BuildTimeline()
         {
@@ -29,6 +32,27 @@ namespace Project.Scenes.Battle.Scripts.Model
                 if (string.IsNullOrEmpty(animationTrackDef.TrackName)) continue;
                 var track = timeline.CreateTrack<AnimationTrack>(null, animationTrackDef.TrackName);
                 animationTrackDef.Build(track);
+            }
+
+            foreach (var activationTrackDef in activationTracks)
+            {
+                if (string.IsNullOrEmpty(activationTrackDef.TrackName)) continue;
+                var track = timeline.CreateTrack<ActivationTrack>(null, activationTrackDef.TrackName);
+                activationTrackDef.Build(track);
+            }
+
+            foreach (var audioTrackDef in audioTracks)
+            {
+                if (string.IsNullOrEmpty(audioTrackDef.TrackName)) continue;
+                var track = timeline.CreateTrack<AudioTrack>(null, audioTrackDef.TrackName);
+                audioTrackDef.Build(track);
+            }
+
+            foreach (var controlTrackDef in controlTracks)
+            {
+                if (string.IsNullOrEmpty(controlTrackDef.TrackName)) continue;
+                var track = timeline.CreateTrack<ControlTrack>(null, controlTrackDef.TrackName);
+                controlTrackDef.Build(track);
             }
 
             return timeline;
@@ -102,6 +126,118 @@ namespace Project.Scenes.Battle.Scripts.Model
             if (clip.asset is AnimationPlayableAsset playableAsset)
             {
                 playableAsset.clip = animationClip;
+            }
+        }
+    }
+
+    [Serializable]
+    public class ActivationTrackDefinition
+    {
+        [SerializeField] string trackName;
+        [SerializeField] List<ActivationClipDefinition> clips = new();
+
+        public string TrackName => trackName;
+
+        public void Build(ActivationTrack track)
+        {
+            foreach (var clipDef in clips)
+            {
+                clipDef.Build(track);
+            }
+        }
+    }
+
+    [Serializable]
+    public class ActivationClipDefinition
+    {
+        [SerializeField, Min(0)] double start;
+        [SerializeField, Min(0)] double duration = 1.0;
+
+        public void Build(ActivationTrack track)
+        {
+            if (!track) return;
+
+            var clip = track.CreateDefaultClip();
+            clip.start = start;
+            clip.duration = duration;
+        }
+    }
+
+    [Serializable]
+    public class AudioTrackDefinition
+    {
+        [SerializeField] string trackName;
+        [SerializeField] List<AudioClipDefinition> clips = new();
+
+        public string TrackName => trackName;
+
+        public void Build(AudioTrack track)
+        {
+            foreach (var clipDef in clips)
+            {
+                clipDef.Build(track);
+            }
+        }
+    }
+
+    [Serializable]
+    public class AudioClipDefinition
+    {
+        [SerializeField, Min(0)] double start;
+        [SerializeField, Min(0)] double duration;
+        [SerializeField] AudioClip audioClip;
+
+        public void Build(AudioTrack track)
+        {
+            if (!track || !audioClip) return;
+
+            var clip = track.CreateClip<AudioPlayableAsset>();
+            clip.start = start;
+            clip.duration = duration > 0 ? duration : audioClip.length;
+
+            if (clip.asset is AudioPlayableAsset playableAsset)
+            {
+                playableAsset.clip = audioClip;
+            }
+        }
+    }
+
+    [Serializable]
+    public class ControlTrackDefinition
+    {
+        [SerializeField] string trackName;
+        [SerializeField] List<ControlClipDefinition> clips = new();
+
+        public string TrackName => trackName;
+
+        public void Build(ControlTrack track)
+        {
+            foreach (var clipDef in clips)
+            {
+                clipDef.Build(track);
+            }
+        }
+    }
+
+    [Serializable]
+    public class ControlClipDefinition
+    {
+        [SerializeField, Min(0)] double start;
+        [SerializeField, Min(0)] double duration = 1.0;
+        [SerializeField] GameObject sourceObject;
+
+        public void Build(ControlTrack track)
+        {
+            if (!track || !sourceObject) return;
+
+            var clip = track.CreateDefaultClip();
+            clip.start = start;
+            clip.duration = duration;
+
+            // Set the prefab reference to ControlPlayableAsset
+            if (clip.asset is ControlPlayableAsset controlAsset)
+            {
+                controlAsset.prefabGameObject = sourceObject;
             }
         }
     }
