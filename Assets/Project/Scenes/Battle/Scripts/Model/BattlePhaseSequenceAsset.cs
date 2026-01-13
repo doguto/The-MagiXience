@@ -13,6 +13,27 @@ namespace Project.Scenes.Battle.Scripts.Model
 
         public BattleSequenceType SequenceType => sequenceType;
         public IReadOnlyList<BattlePhaseDefinition> Phases => phases;
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            // アセット名に"Boss"が含まれていればBoss、そうでなければWay
+            bool isBoss = name.Contains("Boss", System.StringComparison.OrdinalIgnoreCase);
+            bool isWay = name.Contains("Way", System.StringComparison.OrdinalIgnoreCase);
+            if (isBoss && sequenceType != BattleSequenceType.Boss)
+            {
+                sequenceType = BattleSequenceType.Boss;
+                Debug.LogWarning($"BattlePhaseSequenceAsset: {name} is automatically set to Boss", this);
+                UnityEditor.EditorUtility.SetDirty(this);
+            }
+            else if (isWay && sequenceType != BattleSequenceType.Way)
+            {
+                sequenceType = BattleSequenceType.Way;
+                Debug.LogWarning($"BattlePhaseSequenceAsset: {name} is automatically set to Way", this);
+                UnityEditor.EditorUtility.SetDirty(this);
+            }
+        }
+#endif
     }
 
     public enum BattleSequenceType
