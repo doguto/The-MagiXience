@@ -47,33 +47,24 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
             var situation = runtimeModel.CurrentSituation;
 
             string scenarioId = GenerateScenarioId(stageNumber, situation);
-            string situationFolder = situation == GameSituation.Way ? "Way" : "Boss";
+            string situationFolder = situation == BattleSituation.Way ? "Way" : "Boss";
             var path = $"{GamePath.DataStorepath}/Stage{stageNumber}/{situationFolder}/{scenarioId}.asset";
             Debug.Log($"[ScenarioModelRepository] Loading scenario: {scenarioId} from {path}");
-            try
+
+            var data = UnityEngine.AddressableAssets.Addressables
+                .LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
+            if (data != null)
             {
-                var data = UnityEngine.AddressableAssets.Addressables
-                    .LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
-                if (data != null)
-                {
-                    Debug.Log($"[ScenarioModelRepository] Loaded scenario: {scenarioId}");
-                    return data;
-                }
-            }
-            catch
-            {
-                Debug.LogWarning($"[ScenarioModelRepository] Failed to load {scenarioId}, using test_scenario.");
+                Debug.Log($"[ScenarioModelRepository] Loaded scenario: {scenarioId}");
+                return data;
             }
 
-            // フォールバック: test_scenarioを使用
-            var fallbackPath = $"{GamePath.DataStorepath}/test_scenario.asset";
-            return UnityEngine.AddressableAssets.Addressables
-                .LoadAssetAsync<ScenarioData>(fallbackPath).WaitForCompletion();
+            throw new System.Exception($"Failed to load scenario: {scenarioId}");
         }
 
-        string GenerateScenarioId(int stageNumber, GameSituation situation)
+        string GenerateScenarioId(int stageNumber, BattleSituation situation)
         {
-            string situationSuffix = situation == GameSituation.Way ? "Way" : "Boss";
+            string situationSuffix = situation == BattleSituation.Way ? "Way" : "Boss";
             return $"Stage{stageNumber}{situationSuffix}Scenario";
         }
 

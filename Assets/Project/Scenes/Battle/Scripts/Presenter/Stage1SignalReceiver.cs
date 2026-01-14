@@ -8,18 +8,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     {
         public void OnNotify(Playable origin, INotification notification, object context)
         {
-            if (notification is SignalEmitter emitter)
+             if (notification is not SignalEmitter emitter) return;
+             
+            // カスタムSignalAssetの場合
+            if (emitter.asset is Model.EnemySpawnSignal enemySpawnSignal)
             {
-                // カスタムSignalAssetの場合
-                if (emitter.asset is Model.EnemySpawnSignal enemySpawnSignal)
-                {
-                    HandleEnemySpawn(enemySpawnSignal);
-                }
-                // 標準SignalAssetの場合
-                else
-                {
-                    HandleSignal(emitter);
-                }
+                HandleEnemySpawn(enemySpawnSignal);
+            }
+            // 標準SignalAssetの場合
+            else
+            {
+                HandleSignal(emitter);
             }
         }
 
@@ -33,19 +32,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // Signal名に基づいて処理を分岐
             switch (signalName)
             {
-                case "Stage1_Sample":
-                    SampleFunc();
-                    break;
-
                 default:
                     Debug.LogWarning($"[Stage1SignalReceiver] Unknown signal: {signalName}", this);
                     break;
             }
         }
-        void SampleFunc()
-        {
-            Debug.Log("[Stage1SignalReceiver] Playing intro effect", this);
-        }
+
 
         void HandleEnemySpawn(Model.EnemySpawnSignal signal)
         {

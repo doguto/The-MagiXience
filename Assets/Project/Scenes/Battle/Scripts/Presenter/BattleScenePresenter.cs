@@ -175,16 +175,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void CompleteStage()
         {
-            try
-            {
-                stageModel?.Clear();
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Failed to mark stage as cleared: {e.Message}", this);
-                battleCompleted.OnNext(Unit.Default);
-                return;
-            }
+            stageModel?.Clear();
 
             // 次のステージをロード
             var nextStageModel = ResolveStageModel();

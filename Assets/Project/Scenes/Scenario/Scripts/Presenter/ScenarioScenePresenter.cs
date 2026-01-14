@@ -4,6 +4,7 @@ using Project.Scenes.Scenario.Scripts.Model;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scenes.Scenario.Scripts.View;
 using Project.Scripts.Model;
+using Project.Scripts.Repository.ModelRepository;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -30,6 +31,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
         void Update()
         {
+            // TODO: 新InputManagerのものに置き換え予定
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Z))
             {
                 OnPressNext();
@@ -43,7 +45,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 Debug.Log("[ScenarioScenePresenter] Scenario End. Advance to Next Sequence");
 
                 // シナリオ完了時にSituationを変更
-                var runtimeModel = Project.Scripts.Repository.ModelRepository.RuntimeModelRepository.Instance.Get();
+                var runtimeModel = RuntimeModelRepository.Instance.Get();
 
                 runtimeModel.AdvanceToNextSequence();
 
