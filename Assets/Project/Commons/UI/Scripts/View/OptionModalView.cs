@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Project.Commons.UI.Scripts.View
 {
@@ -28,6 +29,6 @@ namespace Project.Commons.UI.Scripts.View
                 keyConfigButton.Init();
             }
         }
-        
+
     }
 }

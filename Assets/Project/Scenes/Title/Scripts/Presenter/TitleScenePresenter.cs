@@ -19,7 +19,6 @@ namespace Project.Scenes.Title.Scripts.Presenter
         TitleModelRepository titleModelRepository;
         TitleModel titleModel;
 
-        IDisposable modalEvent;
 
         void Awake()
         {
@@ -31,19 +30,22 @@ namespace Project.Scenes.Title.Scripts.Presenter
 
         void Start()
         {
+            base.Start();
             titleMenuView.InitStart();
 
             titleMenuView.OnPressedStart.Subscribe(x => StartGame(x).Forget());
-            titleMenuView.OnPressedOption.Subscribe(_ =>
+            titleMenuView.OnPressedOption.Subscribe(async _ =>
             {
+                titleMenuView.SetInteractable(false);
                 globalScenePresenter.OptionModalPresenter.Open();
-                modalEvent = globalScenePresenter.OptionModalPresenter.OnClosed.Subscribe(_ =>
-                {
-                    titleMenuView.InitStart();
-                    modalEvent.Dispose();
-                });
+                
+                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(useFirstValue: true);
+                
+                titleMenuView.SetInteractable(true);
+                titleMenuView.InitStart();
 
             });
+            
             titleMenuView.OnPressedExit.Subscribe(ExitGame);
         }
 

@@ -4,6 +4,7 @@ using Project.Scripts.Model;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Project.Commons.UI.Scripts.Presenter
 {
@@ -26,7 +27,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             optionModalView.OnPressedCancel.Subscribe(_ =>
             {
                 gameObject.SetActive(false);
-                if (runtimeModel.IsInGame) onClosed.OnNext(Unit.Default);
+                onClosed.OnNext(Unit.Default);
             }).AddTo(this);
             optionModalView.OnPressedSave.Subscribe(_ =>
             {
@@ -36,6 +37,7 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         public void Open()
         {
+            
             if (gameObject == null)
             {
                 Debug.Log("null");

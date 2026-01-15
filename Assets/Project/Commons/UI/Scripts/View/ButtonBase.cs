@@ -47,6 +47,10 @@ namespace Project.Commons.UI.Scripts.View
         {
             IsOpened = isOpened;
             IsFocused = isFocused;
+            if (isFocused)
+            {
+                EventSystem.current.SetSelectedGameObject(gameObject);
+            }
         }
 
         protected virtual void PressButton()

@@ -9,6 +9,7 @@ namespace Project.Scenes.Title.Scripts.View
 {
     public class TitleMenuView : MonoBehaviour
     {
+        [SerializeField] CanvasGroup buttonList;
         [SerializeField] SimpleButton startButton;
         [SerializeField] SimpleButton optionButton;
         [SerializeField] SimpleButton exitButton;
@@ -38,6 +39,12 @@ namespace Project.Scenes.Title.Scripts.View
         public void SetActive(bool active)
         {
             gameObject.SetActive(active);
+        }
+
+        public void SetInteractable(bool interactable)
+        {
+            buttonList.interactable = interactable;
+            buttonList.blocksRaycasts = interactable;
         }
     }
 }
