@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f92af5f91ed75704092ce4223786056e, type: 3}
+  m_Name: Stage1WayScenario
+  m_EditorClassIdentifier: 
+  steps:
+  - function: ShowCastMessage
+    args:
+    - 
+    - "\u2026\u2026\u2026\u2026\u3002"
+  - function: ShowCast
+    args:
+    - "\u30C6\u30F3"
+    - 1
+    - Default
+    - 0.1
+    - LL
+    - 1
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u2026\u2026\u2026\u2026\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Additional
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u30ED\u30B3\u3001\u5C45\u308B\u304B\uFF1F"
+  - function: ShowCast
+    args:
+    - "\u30ED\u30B3"
+    - 1
+    - Default
+    - 0.1
+    - RR
+    - 1
+  - function: ShakeCastV
+    args:
+    - "\u30ED\u30B3"
+    - -25
+    - 5
+    - 1
+  - function: ShowCastMessage
+    args:
+    - "\u30ED\u30B3"
+    - "\u2026\u2026\u306A\u3041\u306B\u3002\u3069\u3046\u304B\u3057\u305F\u306E\uFF1F"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Default
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u65E5\u98DF\u304C\u8D77\u3053\u308B\u3002"
+  - function: ShowCastMessage
+    args:
+    - "\u30ED\u30B3"
+    - "\u2026\u2026\u65E5\u98DF\uFF1F"
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u305D\u3046\u3001\u65E5\u98DF\uFF3F\uFF3F\u3068\u540D\u4ED8\u3051\u305F\u3002\n\u967D\u306E\u529B\u306E\u6E90\u3067\u3042\u308B\u592A\u967D\u306E\u5149\u304C\u3001\u9670\u306E\u529B\u306E\u6E90\u305F\u308B\u6708\u306B\u3088\u3063\u3066\u55B0\u308F\u308C\u308B\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Additional
+  - function: ShowCastMessage
+    args:
+    - "\u30C6\u30F3"
+    - "\u65E5\u98DF\u306B\u4F34\u3063\u3066\u9670\u967D\u306E\u5747\u8861\u306F\u7834\u308C\u3001\u5168\u3066\u306E\u9B54\u529B\u304C\u6C3E\u6FEB\u3092\u8D77\u3053\u3059\u3002\n\u9B54\u79D1\u30BB\u30AB\u30A4\u306E\u6C11\u306B\u3068\u3063\u3066\u3001\u3053\u308C\u306F\u672A\u66FD\u6709\u306E\u5371\u6A5F\u3060\u3002"

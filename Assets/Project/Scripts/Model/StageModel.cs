@@ -9,6 +9,10 @@ namespace Project.Scripts.Model
     {
         public StageData StageData { get; }
 
+        public int StageNumber => StageData.stageNumber;
+        public string WaySequenceAddress => StageData.waySequenceAddress;
+        public string BossSequenceAddress => StageData.bossSequenceAddress;
+
         public Sprite CharaImage { get; }
         public bool IsOpened { get; private set; }
         public bool IsCleared { get; private set; }
@@ -39,7 +43,8 @@ namespace Project.Scripts.Model
 
             IsCleared = true;
             UserModel.StageClear(StageData.stageNumber);
-            RuntimeModel.CurrentStageNumber = -1;
+            // TODO: ステージ進行用と、タイトルに戻る用の２つのエントリーポイントを用意する
+            // RuntimeModel.ExitStage();
         }
 
         public (string id, string title) GetIdAndTitle()
