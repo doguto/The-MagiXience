@@ -47,7 +47,7 @@ namespace Project.Commons.UI.Scripts.View
         {
             IsOpened = isOpened;
             IsFocused = isFocused;
-            if (isFocused)
+            if (IsFocused)
             {
                 EventSystem.current.SetSelectedGameObject(gameObject);
             }

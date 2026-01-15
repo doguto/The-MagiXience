@@ -22,13 +22,12 @@ namespace Project.Commons.UI.Scripts.View
 
         public void InitStart()
         {
-            cancelButton.Init(isFocused:true);
+            cancelButton.Init(isFocused: true);
             saveButton.Init();
             foreach (var keyConfigButton in keyConfigButtons)
             {
                 keyConfigButton.Init();
             }
         }
-
     }
 }

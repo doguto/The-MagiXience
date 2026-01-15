@@ -22,8 +22,6 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         void Start()
         {
-            optionModalView.InitStart();
-            
             optionModalView.OnPressedCancel.Subscribe(_ =>
             {
                 gameObject.SetActive(false);
@@ -37,13 +35,12 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         public void Open()
         {
-            
             if (gameObject == null)
             {
                 Debug.Log("null");
             }
             gameObject.SetActive(true);
+            optionModalView.InitStart();
         }
-        
     }
 }

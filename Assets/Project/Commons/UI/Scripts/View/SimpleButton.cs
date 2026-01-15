@@ -39,6 +39,7 @@ namespace Project.Commons.UI.Scripts.View
         protected override void OnFocused()
         {
             base.OnFocused();
+            Debug.Log(myTransform, this);
             myTransform.localScale = originalLocalScale * scaleChangeRatio;
         }
 

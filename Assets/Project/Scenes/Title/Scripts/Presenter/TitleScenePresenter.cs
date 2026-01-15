@@ -45,7 +45,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
                 titleMenuView.InitStart();
 
             });
-            
+
             titleMenuView.OnPressedExit.Subscribe(ExitGame);
         }
 
