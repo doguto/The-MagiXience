@@ -1,4 +1,7 @@
-﻿using Project.Scenes.Global.Scripts.View;
+﻿using Project.Commons.UI.Scripts.Presenter;
+using Project.Commons.UI.Scripts.View;
+using Project.Scenes.Global.Scripts.View;
+using UnityEditor;
 using UnityEngine;
 
 namespace Project.Scenes.Global.Scripts.Presenter
@@ -7,5 +10,8 @@ namespace Project.Scenes.Global.Scripts.Presenter
     public class GlobalScenePresenter : MonoBehaviour
     {
         [SerializeField] SoundManagerView soundManagerView;
+        [SerializeField] OptionModalPresenter optionModalPresenter;
+        
+        public OptionModalPresenter OptionModalPresenter => optionModalPresenter;
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using Cysharp.Threading.Tasks;
+using Project.Commons.UI.Scripts.Presenter;
 using Project.Scripts.Model;
 using Project.Scenes.Title.Scripts.Model;
 using Project.Scenes.Title.Scripts.Repository.ModelRepository;
@@ -13,10 +15,10 @@ namespace Project.Scenes.Title.Scripts.Presenter
     public class TitleScenePresenter : MonoPresenter
     {
         [SerializeField] TitleMenuView titleMenuView;
-
+        
         TitleModelRepository titleModelRepository;
-
         TitleModel titleModel;
+
 
         void Awake()
         {
@@ -28,9 +30,22 @@ namespace Project.Scenes.Title.Scripts.Presenter
 
         void Start()
         {
+            base.Start();
             titleMenuView.InitStart();
 
             titleMenuView.OnPressedStart.Subscribe(x => StartGame(x).Forget());
+            titleMenuView.OnPressedOption.Subscribe(async _ =>
+            {
+                titleMenuView.SetInteractable(false);
+                globalScenePresenter.OptionModalPresenter.Open();
+                
+                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(useFirstValue: true);
+                
+                titleMenuView.SetInteractable(true);
+                titleMenuView.InitStart();
+
+            });
+
             titleMenuView.OnPressedExit.Subscribe(ExitGame);
         }
 
