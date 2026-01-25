@@ -23,12 +23,21 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
             }
 
             var models = new List<BattlePhaseModelBase>(asset.Phases.Count);
-         foreach (var definition in asset.Phases)
+            foreach (var definition in asset.Phases)
             {
-                models.Add(BattlePhaseModelFactory.Create(definition));
+                models.Add(CreatePhaseModel(definition));
             }
 
             return new BattleSequenceModel(asset.SequenceType, models);
+        }
+        
+        public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
+        {
+            return definition.ExitCondition switch
+            {
+                BattlePhaseExitCondition.TimeLimit => new TimeLimitBattlePhaseModel(definition),
+                _ => throw new NotSupportedException($"Exit condition {definition.ExitCondition} is not supported yet."),
+            };
         }
     }
 }

@@ -18,8 +18,8 @@ namespace Project.Scenes.Battle.Scripts.Model
         private void OnValidate()
         {
             // アセット名に"Boss"が含まれていればBoss、そうでなければWay
-            bool isBoss = name.Contains("Boss", System.StringComparison.OrdinalIgnoreCase);
-            bool isWay = name.Contains("Way", System.StringComparison.OrdinalIgnoreCase);
+            bool isBoss = name.Contains("Boss", StringComparison.OrdinalIgnoreCase);
+            bool isWay = name.Contains("Way", StringComparison.OrdinalIgnoreCase);
             if (isBoss && sequenceType != BattleSequenceType.Boss)
             {
                 sequenceType = BattleSequenceType.Boss;
