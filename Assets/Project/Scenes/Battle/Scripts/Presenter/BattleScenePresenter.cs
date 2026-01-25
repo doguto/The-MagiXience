@@ -108,9 +108,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void HandleSequenceCompleted(BattleSequenceType sequenceType)
+        void HandleSequenceCompleted(BattleSituation situation)
         {
-            if (sequenceType == BattleSequenceType.Way)
+            if (situation == BattleSituation.Way)
             {
                 TransitionToScenario(StartBossSequence);
             }

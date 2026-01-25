@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Project.Scripts.Model;
 
 namespace Project.Scenes.Battle.Scripts.Model
 {
@@ -7,13 +8,13 @@ namespace Project.Scenes.Battle.Scripts.Model
         readonly IReadOnlyList<BattlePhaseModelBase> phases;
         int currentIndex = -1;
 
-        public BattleSequenceModel(BattleSequenceType sequenceType, IReadOnlyList<BattlePhaseModelBase> phases)
+        public BattleSequenceModel(BattleSituation situation, IReadOnlyList<BattlePhaseModelBase> phases)
         {
-            SequenceType = sequenceType;
+            Situation = situation;
             this.phases = phases;
         }
 
-        public BattleSequenceType SequenceType { get; }
+        public BattleSituation Situation { get; }
         public bool HasPhases => phases.Count > 0;
         public IReadOnlyList<BattlePhaseModelBase> Phases => phases;
 

@@ -28,7 +28,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
                 models.Add(CreatePhaseModel(definition));
             }
 
-            return new BattleSequenceModel(asset.SequenceType, models);
+            return new BattleSequenceModel(asset.Situation, models);
         }
         
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
