@@ -6,10 +6,6 @@ using UnityEngine.InputSystem;
 
 namespace Project.Scripts.Model
 {
-    /// <summary>
-    /// Input Systemを使用したキー設定管理モデル
-    /// バインディングのオーバーライドと永続化を管理
-    /// </summary>
     public class KeyConfigModel : ModelBase
     {
         readonly KeyConfigData keyConfigData;
@@ -22,17 +18,13 @@ namespace Project.Scripts.Model
             this.keyConfigData = userModel.UserData.keyConfigData;
             this.inputActions = inputActions;
             
-            // 保存されているバインディングオーバーライドを適用
             LoadBindingOverrides();
         }
 
-        /// <summary>
-        /// 保存されているバインディングオーバーライドをInput Actionに適用
-        /// </summary>
         void LoadBindingOverrides()
         {
-            if (keyConfigData.bindingOverrides == null || keyConfigData.bindingOverrides.Count == 0)
-                return;
+            if (keyConfigData.bindingOverrides == null) return;
+            if (keyConfigData.bindingOverrides.Count == 0) return;
 
             foreach (var bindingOverride in keyConfigData.bindingOverrides)
             {
@@ -51,12 +43,6 @@ namespace Project.Scripts.Model
             }
         }
 
-        /// <summary>
-        /// 特定のアクションのバインディングをオーバーライド
-        /// </summary>
-        /// <param name="actionName">アクション名（例: "Player/Move"）</param>
-        /// <param name="bindingIndex">バインディングのインデックス</param>
-        /// <param name="newPath">新しいバインディングパス（例: "<Keyboard>/w"）</param>
         public void SetBindingOverride(string actionName, int bindingIndex, string newPath)
         {
             var action = inputActions.FindAction(actionName);
@@ -72,10 +58,8 @@ namespace Project.Scripts.Model
                 return;
             }
 
-            // バインディングをオーバーライド
             action.ApplyBindingOverride(bindingIndex, newPath);
 
-            // データに保存
             var binding = action.bindings[bindingIndex];
             var bindingId = binding.id.ToString();
             
@@ -99,9 +83,6 @@ namespace Project.Scripts.Model
             userModel.Save();
         }
 
-        /// <summary>
-        /// すべてのバインディングをデフォルトに戻す
-        /// </summary>
         public void ResetAllBindings()
         {
             inputActions.RemoveAllBindingOverrides();
@@ -109,9 +90,6 @@ namespace Project.Scripts.Model
             userModel.Save();
         }
 
-        /// <summary>
-        /// 特定のアクションのバインディングをデフォルトに戻す
-        /// </summary>
         public void ResetActionBindings(string actionName)
         {
             var action = inputActions.FindAction(actionName);
@@ -119,7 +97,6 @@ namespace Project.Scripts.Model
 
             action.RemoveAllBindingOverrides();
             
-            // 保存データから該当するオーバーライドを削除（逆順ループで安全に削除）
             for (int i = keyConfigData.bindingOverrides.Count - 1; i >= 0; i--)
             {
                 if (keyConfigData.bindingOverrides[i].actionName == actionName)
@@ -130,30 +107,18 @@ namespace Project.Scripts.Model
             userModel.Save();
         }
 
-        /// <summary>
-        /// Input ActionAssetへの参照を取得
-        /// </summary>
         public InputActionAsset GetInputActions() => inputActions;
         
-        /// <summary>
-        /// 特定のアクションを取得
-        /// </summary>
         public InputAction GetAction(string actionName)
         {
             return inputActions.FindAction(actionName);
         }
         
-        /// <summary>
-        /// すべてのバインディングオーバーライドをJSON形式で取得
-        /// </summary>
         public string GetBindingOverridesJson()
         {
             return inputActions.SaveBindingOverridesAsJson();
         }
         
-        /// <summary>
-        /// JSON形式のバインディングオーバーライドを読み込む
-        /// </summary>
         public void LoadBindingOverridesJson(string json)
         {
             inputActions.LoadBindingOverridesFromJson(json);

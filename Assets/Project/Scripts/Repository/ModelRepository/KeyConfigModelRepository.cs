@@ -17,14 +17,10 @@ namespace Project.Scripts.Repository.ModelRepository
             userModelRepository = UserModelRepository.Instance;
         }
         
-        /// <summary>
-        /// InputActionAssetを設定
-        /// GlobalScenePresenterから呼び出される想定
-        /// </summary>
         public void Initialize(InputActionAsset inputActions)
         {
             this.inputActions = inputActions;
-            keyConfigModel = null; // 再初期化のためクリア
+            keyConfigModel = null;
         }
 
         public KeyConfigModel Get()
@@ -33,7 +29,6 @@ namespace Project.Scripts.Repository.ModelRepository
             
             if (inputActions == null)
             {
-                // InputActionsが未設定の場合はResourcesからロード
                 inputActions = Resources.Load<InputActionAsset>("InputSystem_Actions");
                 if (inputActions == null)
                 {
