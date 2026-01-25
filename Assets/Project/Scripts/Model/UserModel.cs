@@ -8,7 +8,7 @@ namespace Project.Scripts.Model
 {
     public class UserModel : ModelBase
     {
-        UserData UserData { get; set; }
+        public UserData UserData { get; set; }
 
         public int ClearedStageNumber => UserData.clearedStageNumber;
 
