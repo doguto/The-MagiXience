@@ -39,10 +39,14 @@ namespace Project.Scripts.Model
                 var action = inputActions.FindAction(bindingOverride.actionName);
                 if (action == null) continue;
 
-                var bindingIndex = action.bindings.IndexOf(b => b.id.ToString() == bindingOverride.bindingId);
-                if (bindingIndex != -1)
+                var bindings = action.bindings;
+                for (int i = 0; i < bindings.Count; i++)
                 {
-                    action.ApplyBindingOverride(bindingIndex, bindingOverride.overridePath);
+                    if (bindings[i].id.ToString() == bindingOverride.bindingId)
+                    {
+                        action.ApplyBindingOverride(i, bindingOverride.overridePath);
+                        break;
+                    }
                 }
             }
         }
@@ -52,7 +56,7 @@ namespace Project.Scripts.Model
         /// </summary>
         /// <param name="actionName">アクション名（例: "Player/Move"）</param>
         /// <param name="bindingIndex">バインディングのインデックス</param>
-        /// <param name="newPath">新しいバインディングパス（例: "&lt;Keyboard&gt;/w"）</param>
+        /// <param name="newPath">新しいバインディングパス（例: "<Keyboard>/w"）</param>
         public void SetBindingOverride(string actionName, int bindingIndex, string newPath)
         {
             var action = inputActions.FindAction(actionName);
@@ -115,8 +119,14 @@ namespace Project.Scripts.Model
 
             action.RemoveAllBindingOverrides();
             
-            // 保存データから該当するオーバーライドを削除
-            keyConfigData.bindingOverrides.RemoveAll(o => o.actionName == actionName);
+            // 保存データから該当するオーバーライドを削除（逆順ループで安全に削除）
+            for (int i = keyConfigData.bindingOverrides.Count - 1; i >= 0; i--)
+            {
+                if (keyConfigData.bindingOverrides[i].actionName == actionName)
+                {
+                    keyConfigData.bindingOverrides.RemoveAt(i);
+                }
+            }
             userModel.Save();
         }
 

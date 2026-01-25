@@ -33,7 +33,7 @@ namespace Project.Scripts.Repository.ModelRepository
             
             if (inputActions == null)
             {
-                // InputActionsが未設定の場合はAddressablesからロード
+                // InputActionsが未設定の場合はResourcesからロード
                 inputActions = Resources.Load<InputActionAsset>("InputSystem_Actions");
                 if (inputActions == null)
                 {
