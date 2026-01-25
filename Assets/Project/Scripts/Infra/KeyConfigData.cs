@@ -1,34 +1,28 @@
 using System;
-using UnityEngine;
+using System.Collections.Generic;
 
 namespace Project.Scripts.Infra
 {
+    /// <summary>
+    /// キー設定のバインディングオーバーライドを保存するデータクラス
+    /// 新しいInput Systemのバインディングオーバーライドを文字列として保存
+    /// </summary>
     [Serializable]
     public class KeyConfigData
     {
-        // デフォルト値の定数
-        const KeyCode DefaultMoveUpKey = KeyCode.UpArrow;
-        const KeyCode DefaultMoveDownKey = KeyCode.DownArrow;
-        const KeyCode DefaultMoveLeftKey = KeyCode.LeftArrow;
-        const KeyCode DefaultMoveRightKey = KeyCode.RightArrow;
-        const KeyCode DefaultAttackKey = KeyCode.Z;
+        /// <summary>
+        /// Input Actionのバインディングオーバーライドを保存
+        /// キー: アクション名 (例: "Player/Move", "Player/Attack")
+        /// 値: バインディングオーバーライドのJSON文字列
+        /// </summary>
+        public List<BindingOverride> bindingOverrides = new();
         
-        // 移動キー設定
-        public KeyCode moveUpKey = DefaultMoveUpKey;
-        public KeyCode moveDownKey = DefaultMoveDownKey;
-        public KeyCode moveLeftKey = DefaultMoveLeftKey;
-        public KeyCode moveRightKey = DefaultMoveRightKey;
-        
-        // 攻撃キー設定
-        public KeyCode attackKey = DefaultAttackKey;
-        
-        public void ResetToDefault()
+        [Serializable]
+        public class BindingOverride
         {
-            moveUpKey = DefaultMoveUpKey;
-            moveDownKey = DefaultMoveDownKey;
-            moveLeftKey = DefaultMoveLeftKey;
-            moveRightKey = DefaultMoveRightKey;
-            attackKey = DefaultAttackKey;
+            public string actionName;
+            public string bindingId;
+            public string overridePath;
         }
     }
 }

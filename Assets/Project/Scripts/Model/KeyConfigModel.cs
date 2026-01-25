@@ -1,70 +1,152 @@
 using System;
-using System.IO;
+using System.Linq;
 using Project.Scripts.Infra;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Project.Scripts.Model
 {
+    /// <summary>
+    /// Input Systemを使用したキー設定管理モデル
+    /// バインディングのオーバーライドと永続化を管理
+    /// </summary>
     public class KeyConfigModel : ModelBase
     {
-        KeyConfigData keyConfigData;
+        readonly KeyConfigData keyConfigData;
         readonly UserModel userModel;
+        readonly InputActionAsset inputActions;
 
-        public KeyCode MoveUpKey => keyConfigData.moveUpKey;
-        public KeyCode MoveDownKey => keyConfigData.moveDownKey;
-        public KeyCode MoveLeftKey => keyConfigData.moveLeftKey;
-        public KeyCode MoveRightKey => keyConfigData.moveRightKey;
-        public KeyCode AttackKey => keyConfigData.attackKey;
-
-        public KeyConfigModel(UserModel userModel)
+        public KeyConfigModel(UserModel userModel, InputActionAsset inputActions)
         {
             this.userModel = userModel;
-            keyConfigData = userModel.UserData.keyConfigData;
+            this.keyConfigData = userModel.UserData.keyConfigData;
+            this.inputActions = inputActions;
+            
+            // 保存されているバインディングオーバーライドを適用
+            LoadBindingOverrides();
         }
 
-        public void SetMoveUpKey(KeyCode keyCode)
+        /// <summary>
+        /// 保存されているバインディングオーバーライドをInput Actionに適用
+        /// </summary>
+        void LoadBindingOverrides()
         {
-            keyConfigData.moveUpKey = keyCode;
+            if (keyConfigData.bindingOverrides == null || keyConfigData.bindingOverrides.Count == 0)
+                return;
+
+            foreach (var bindingOverride in keyConfigData.bindingOverrides)
+            {
+                var action = inputActions.FindAction(bindingOverride.actionName);
+                if (action == null) continue;
+
+                var bindingIndex = action.bindings.IndexOf(b => b.id.ToString() == bindingOverride.bindingId);
+                if (bindingIndex != -1)
+                {
+                    action.ApplyBindingOverride(bindingIndex, bindingOverride.overridePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 特定のアクションのバインディングをオーバーライド
+        /// </summary>
+        /// <param name="actionName">アクション名（例: "Player/Move"）</param>
+        /// <param name="bindingIndex">バインディングのインデックス</param>
+        /// <param name="newPath">新しいバインディングパス（例: "&lt;Keyboard&gt;/w"）</param>
+        public void SetBindingOverride(string actionName, int bindingIndex, string newPath)
+        {
+            var action = inputActions.FindAction(actionName);
+            if (action == null)
+            {
+                Debug.LogError($"Action not found: {actionName}");
+                return;
+            }
+
+            if (bindingIndex < 0 || bindingIndex >= action.bindings.Count)
+            {
+                Debug.LogError($"Invalid binding index: {bindingIndex}");
+                return;
+            }
+
+            // バインディングをオーバーライド
+            action.ApplyBindingOverride(bindingIndex, newPath);
+
+            // データに保存
+            var binding = action.bindings[bindingIndex];
+            var bindingId = binding.id.ToString();
+            
+            var existingOverride = keyConfigData.bindingOverrides
+                .FirstOrDefault(o => o.actionName == actionName && o.bindingId == bindingId);
+
+            if (existingOverride != null)
+            {
+                existingOverride.overridePath = newPath;
+            }
+            else
+            {
+                keyConfigData.bindingOverrides.Add(new KeyConfigData.BindingOverride
+                {
+                    actionName = actionName,
+                    bindingId = bindingId,
+                    overridePath = newPath
+                });
+            }
+
             userModel.Save();
         }
 
-        public void SetMoveDownKey(KeyCode keyCode)
+        /// <summary>
+        /// すべてのバインディングをデフォルトに戻す
+        /// </summary>
+        public void ResetAllBindings()
         {
-            keyConfigData.moveDownKey = keyCode;
+            inputActions.RemoveAllBindingOverrides();
+            keyConfigData.bindingOverrides.Clear();
             userModel.Save();
         }
 
-        public void SetMoveLeftKey(KeyCode keyCode)
+        /// <summary>
+        /// 特定のアクションのバインディングをデフォルトに戻す
+        /// </summary>
+        public void ResetActionBindings(string actionName)
         {
-            keyConfigData.moveLeftKey = keyCode;
+            var action = inputActions.FindAction(actionName);
+            if (action == null) return;
+
+            action.RemoveAllBindingOverrides();
+            
+            // 保存データから該当するオーバーライドを削除
+            keyConfigData.bindingOverrides.RemoveAll(o => o.actionName == actionName);
             userModel.Save();
         }
 
-        public void SetMoveRightKey(KeyCode keyCode)
+        /// <summary>
+        /// Input ActionAssetへの参照を取得
+        /// </summary>
+        public InputActionAsset GetInputActions() => inputActions;
+        
+        /// <summary>
+        /// 特定のアクションを取得
+        /// </summary>
+        public InputAction GetAction(string actionName)
         {
-            keyConfigData.moveRightKey = keyCode;
-            userModel.Save();
+            return inputActions.FindAction(actionName);
         }
-
-        public void SetAttackKey(KeyCode keyCode)
+        
+        /// <summary>
+        /// すべてのバインディングオーバーライドをJSON形式で取得
+        /// </summary>
+        public string GetBindingOverridesJson()
         {
-            keyConfigData.attackKey = keyCode;
-            userModel.Save();
+            return inputActions.SaveBindingOverridesAsJson();
         }
-
-        public void ResetToDefault()
+        
+        /// <summary>
+        /// JSON形式のバインディングオーバーライドを読み込む
+        /// </summary>
+        public void LoadBindingOverridesJson(string json)
         {
-            keyConfigData.ResetToDefault();
-            userModel.Save();
-        }
-
-        public bool IsKeyUsed(KeyCode keyCode)
-        {
-            return keyCode == keyConfigData.moveUpKey ||
-                   keyCode == keyConfigData.moveDownKey ||
-                   keyCode == keyConfigData.moveLeftKey ||
-                   keyCode == keyConfigData.moveRightKey ||
-                   keyCode == keyConfigData.attackKey;
+            inputActions.LoadBindingOverridesFromJson(json);
         }
     }
 }
