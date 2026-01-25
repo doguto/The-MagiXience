@@ -5,7 +5,7 @@ using UnityEngine.AddressableAssets;
 
 namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 {
-    public class BattleSequenceRepository
+    public class BattleSequenceModelRepository
     {
         readonly Dictionary<string, BattleSequenceAsset> cache = new();
 
