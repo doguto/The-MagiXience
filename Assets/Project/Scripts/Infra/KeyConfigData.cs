@@ -6,27 +6,29 @@ namespace Project.Scripts.Infra
     [Serializable]
     public class KeyConfigData
     {
+        // デフォルト値の定数
+        const KeyCode DefaultMoveUpKey = KeyCode.UpArrow;
+        const KeyCode DefaultMoveDownKey = KeyCode.DownArrow;
+        const KeyCode DefaultMoveLeftKey = KeyCode.LeftArrow;
+        const KeyCode DefaultMoveRightKey = KeyCode.RightArrow;
+        const KeyCode DefaultAttackKey = KeyCode.Z;
+        
         // 移動キー設定
-        public KeyCode moveUpKey = KeyCode.UpArrow;
-        public KeyCode moveDownKey = KeyCode.DownArrow;
-        public KeyCode moveLeftKey = KeyCode.LeftArrow;
-        public KeyCode moveRightKey = KeyCode.RightArrow;
+        public KeyCode moveUpKey = DefaultMoveUpKey;
+        public KeyCode moveDownKey = DefaultMoveDownKey;
+        public KeyCode moveLeftKey = DefaultMoveLeftKey;
+        public KeyCode moveRightKey = DefaultMoveRightKey;
         
         // 攻撃キー設定
-        public KeyCode attackKey = KeyCode.Z;
-        
-        public KeyConfigData()
-        {
-            ResetToDefault();
-        }
+        public KeyCode attackKey = DefaultAttackKey;
         
         public void ResetToDefault()
         {
-            moveUpKey = KeyCode.UpArrow;
-            moveDownKey = KeyCode.DownArrow;
-            moveLeftKey = KeyCode.LeftArrow;
-            moveRightKey = KeyCode.RightArrow;
-            attackKey = KeyCode.Z;
+            moveUpKey = DefaultMoveUpKey;
+            moveDownKey = DefaultMoveDownKey;
+            moveLeftKey = DefaultMoveLeftKey;
+            moveRightKey = DefaultMoveRightKey;
+            attackKey = DefaultAttackKey;
         }
     }
 }
