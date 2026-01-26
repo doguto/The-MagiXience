@@ -40,24 +40,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
         void OnPressNext()
         {
-            if (scenarioModel.IsEnd)
-            {
-                Debug.Log("[ScenarioScenePresenter] Scenario End. Advance to Next Sequence");
-
-                // シナリオ完了時にSituationを変更
-                var runtimeModel = RuntimeModelRepository.Instance.Get();
-
-                runtimeModel.AdvanceToNextSequence();
-
-                scenarioCompleted.OnNext(Unit.Default);
-                // シナリオシーンをアンロード
-                SceneManager.UnloadSceneAsync(SceneRouterModel.Scenario);
-                ScenarioModelRepository.Instance.Refresh();
-                return;
-            }
-
             scenarioModel.Next();
-
             ExecuteSteps();
         }
 
@@ -147,6 +130,20 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 }
 
                 scenarioModel.Next();
+            }
+
+            if (scenarioModel.IsEnd)
+            {
+                Debug.Log("[ScenarioScenePresenter] Scenario End. Advance to Next Sequence");
+
+                // シナリオ完了時にSituationを変更
+                var runtimeModel = RuntimeModelRepository.Instance.Get();
+                runtimeModel.AdvanceToNextSequence();
+
+                scenarioCompleted.OnNext(Unit.Default);
+                // シナリオシーンをアンロード
+                SceneManager.UnloadSceneAsync(SceneRouterModel.Scenario);
+                ScenarioModelRepository.Instance.Refresh();
             }
         }
 
