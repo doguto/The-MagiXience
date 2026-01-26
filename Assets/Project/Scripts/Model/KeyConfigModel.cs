@@ -27,16 +27,22 @@ namespace Project.Scripts.Model
 
             foreach (var bindingOverride in keyConfigData.bindingOverrides)
             {
+                Debug.Log($"[KeyConfigModel] Finding Action: {bindingOverride.actionName}");
                 var action = inputActions.FindAction(bindingOverride.actionName);
                 if (action == null) continue;
 
+                Debug.Log($"[KeyConfigModel] Find Action: {bindingOverride.actionName}, Id: {bindingOverride.bindingId}");
+
                 var bindings = action.bindings;
                 for (var i = 0; i < bindings.Count; i++)
+                {
+                    Debug.Log($"[KeyConfigModel] ActionName: {bindings[i].action} BindingsId: {bindings[i].id}");
                     if (bindings[i].id.ToString() == bindingOverride.bindingId)
                     {
                         action.ApplyBindingOverride(i, bindingOverride.overridePath);
                         break;
                     }
+                }
             }
         }
 
@@ -97,10 +103,12 @@ namespace Project.Scripts.Model
             action.RemoveAllBindingOverrides();
 
             for (var i = keyConfigData.bindingOverrides.Count - 1; i >= 0; i--)
+            {
                 if (keyConfigData.bindingOverrides[i].actionName == actionName)
                 {
                     keyConfigData.bindingOverrides.RemoveAt(i);
                 }
+            }
 
             userModel.Save();
         }
