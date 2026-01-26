@@ -6,17 +6,17 @@ namespace Project.Scripts.Repository.ModelRepository
 {
     public class KeyConfigModelRepository
     {
-        public static KeyConfigModelRepository Instance { get; } = new();
-
         readonly UserModelRepository userModelRepository;
-        KeyConfigModel keyConfigModel;
         InputActionAsset inputActions;
+        KeyConfigModel keyConfigModel;
 
         public KeyConfigModelRepository()
         {
             userModelRepository = UserModelRepository.Instance;
         }
-        
+
+        public static KeyConfigModelRepository Instance { get; } = new();
+
         public void Initialize(InputActionAsset inputActions)
         {
             this.inputActions = inputActions;
@@ -26,7 +26,7 @@ namespace Project.Scripts.Repository.ModelRepository
         public KeyConfigModel Get()
         {
             if (keyConfigModel != null) return keyConfigModel;
-            
+
             if (inputActions == null)
             {
                 inputActions = Resources.Load<InputActionAsset>("InputSystem_Actions");
@@ -36,12 +36,12 @@ namespace Project.Scripts.Repository.ModelRepository
                     return null;
                 }
             }
-            
+
             var userModel = userModelRepository.Get();
             keyConfigModel = new KeyConfigModel(userModel, inputActions);
             return keyConfigModel;
         }
-        
+
         public void Refresh()
         {
             keyConfigModel = null;

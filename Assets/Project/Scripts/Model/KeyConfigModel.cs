@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Project.Scripts.Infra;
 using UnityEngine;
@@ -8,16 +7,16 @@ namespace Project.Scripts.Model
 {
     public class KeyConfigModel : ModelBase
     {
+        readonly InputActionAsset inputActions;
         readonly KeyConfigData keyConfigData;
         readonly UserModel userModel;
-        readonly InputActionAsset inputActions;
 
         public KeyConfigModel(UserModel userModel, InputActionAsset inputActions)
         {
             this.userModel = userModel;
-            this.keyConfigData = userModel.UserData.keyConfigData;
+            keyConfigData = userModel.UserData.keyConfigData;
             this.inputActions = inputActions;
-            
+
             LoadBindingOverrides();
         }
 
@@ -32,14 +31,12 @@ namespace Project.Scripts.Model
                 if (action == null) continue;
 
                 var bindings = action.bindings;
-                for (int i = 0; i < bindings.Count; i++)
-                {
+                for (var i = 0; i < bindings.Count; i++)
                     if (bindings[i].id.ToString() == bindingOverride.bindingId)
                     {
                         action.ApplyBindingOverride(i, bindingOverride.overridePath);
                         break;
                     }
-                }
             }
         }
 
@@ -62,9 +59,11 @@ namespace Project.Scripts.Model
 
             var binding = action.bindings[bindingIndex];
             var bindingId = binding.id.ToString();
-            
+
             var existingOverride = keyConfigData.bindingOverrides
-                .FirstOrDefault(o => o.actionName == actionName && o.bindingId == bindingId);
+                                                .FirstOrDefault(o =>
+                                                    o.actionName == actionName && o.bindingId == bindingId
+                                                );
 
             if (existingOverride != null)
             {
@@ -96,29 +95,31 @@ namespace Project.Scripts.Model
             if (action == null) return;
 
             action.RemoveAllBindingOverrides();
-            
-            for (int i = keyConfigData.bindingOverrides.Count - 1; i >= 0; i--)
-            {
+
+            for (var i = keyConfigData.bindingOverrides.Count - 1; i >= 0; i--)
                 if (keyConfigData.bindingOverrides[i].actionName == actionName)
                 {
                     keyConfigData.bindingOverrides.RemoveAt(i);
                 }
-            }
+
             userModel.Save();
         }
 
-        public InputActionAsset GetInputActions() => inputActions;
-        
+        public InputActionAsset GetInputActions()
+        {
+            return inputActions;
+        }
+
         public InputAction GetAction(string actionName)
         {
             return inputActions.FindAction(actionName);
         }
-        
+
         public string GetBindingOverridesJson()
         {
             return inputActions.SaveBindingOverridesAsJson();
         }
-        
+
         public void LoadBindingOverridesJson(string json)
         {
             inputActions.LoadBindingOverridesFromJson(json);
