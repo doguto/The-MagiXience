@@ -101,14 +101,50 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     var position = step.args.Length > 4 ? step.args[4] : "";
                     var unknownArg2 = step.args.Length > 5 ? step.args[5] : "";
 
+                    // 表情Spriteを取得
+                    Sprite faceSprite = null;
+                    if (position == "LL" && scenarioModel.PlayerFaceSprites != null)
+                    {
+                        scenarioModel.PlayerFaceSprites.TryGetValue(faceExpression, out faceSprite);
+                    }
+                    else if (position == "RR" && scenarioModel.EnemyFaceSprites != null)
+                    {
+                        scenarioModel.EnemyFaceSprites.TryGetValue(faceExpression, out faceSprite);
+                    }
+
                     scenarioView.ShowCast(characterName, unknownArg1, faceExpression,
                         displayTime, position, unknownArg2,
-                        scenarioModel.PlayerStillSprite, scenarioModel.EnemyStillSprite);
+                        scenarioModel.PlayerStillSprite, scenarioModel.EnemyStillSprite,
+                        faceSprite);
 
                     scenarioModel.Next();
                     continue;
                 }
 
+                if (step.function == "ChangeCastAnimation")
+                {
+                    var characterName = step.args.Length > 0 ? step.args[0] : "";
+                    var faceExpression = step.args.Length > 1 ? step.args[1] : "";
+
+                    // キャラ名から位置を判定(簡易実装)
+                    bool isPlayer = characterName == "テン";
+
+                    // 表情Spriteを取得
+                    Sprite faceSprite = null;
+                    if (isPlayer && scenarioModel.PlayerFaceSprites != null)
+                    {
+                        scenarioModel.PlayerFaceSprites.TryGetValue(faceExpression, out faceSprite);
+                    }
+                    else if (!isPlayer && scenarioModel.EnemyFaceSprites != null)
+                    {
+                        scenarioModel.EnemyFaceSprites.TryGetValue(faceExpression, out faceSprite);
+                    }
+
+                    scenarioView.ChangeFaceExpression(faceSprite);
+
+                    scenarioModel.Next();
+                    continue;
+                }
 
                 scenarioModel.Next();
             }
