@@ -16,7 +16,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         void Awake()
         {
-            soundModelRepository = new SoundModelRepository();
+            soundModelRepository = SoundModelRepository.Instance;
         }
 
         public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default)
