@@ -9,16 +9,15 @@ namespace Project.Scripts.Model
         readonly SoundAssetRepository soundAssetRepository = new();
 
         AudioClip audioClip;
+        public AudioClip AudioClip => audioClip ?? LoadAudioClip();
+
+        public BgmData BgmData { get; }
+        public string Name => BgmData.name;
 
         public BgmModel(BgmData bgmData)
         {
             BgmData = bgmData;
         }
-
-        public AudioClip AudioClip => audioClip ?? LoadAudioClip();
-
-        public BgmData BgmData { get; }
-        public string Name => BgmData.name;
 
         AudioClip LoadAudioClip()
         {
