@@ -1,7 +1,8 @@
+using System;
 using Cysharp.Threading.Tasks;
-using Project.Scenes.Global.Scripts.Model;
 using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
+using Project.Scripts.Repository.ModelRepository;
 using UnityEngine;
 
 namespace Project.Scenes.Global.Scripts.Presenter
@@ -11,22 +12,17 @@ namespace Project.Scenes.Global.Scripts.Presenter
         [SerializeField] AudioSource bgmAudioSource;
         [SerializeField] AudioSource seAudioSource;
 
-        SoundModel soundModel;
+        SoundModelRepository soundModelRepository;
 
         void Awake()
         {
-            soundModel = new SoundModel();
+            soundModelRepository = new SoundModelRepository();
         }
 
-        public async UniTask PlayBGM(SceneType sceneType, BgmType bgmType = BgmType.Default)
+        public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default)
         {
-            var bgmClip = soundModel.GetBGM(sceneType, bgmType);
-
-            if (bgmClip == null)
-            {
-                Debug.LogWarning($"BGM not found: {sceneType}_{bgmType}");
-                return;
-            }
+            var bgmModel = soundModelRepository.GetBgmModel(sceneType, bgmType);
+            var bgmClip = bgmModel.AudioClip;
 
             bgmAudioSource.clip = bgmClip;
             bgmAudioSource.loop = true;
@@ -40,17 +36,20 @@ namespace Project.Scenes.Global.Scripts.Presenter
             bgmAudioSource.Stop();
         }
 
-        public void PlaySE(string seName)
+        public void PlaySE(SeType seType)
         {
-            var seClip = soundModel.GetSE(seName);
-
-            if (seClip == null)
-            {
-                Debug.LogWarning($"SE not found: {seName}");
-                return;
-            }
+            var seModel = soundModelRepository.GetSeModel(seType);
+            var seClip = seModel.AudioClip;
 
             seAudioSource.PlayOneShot(seClip);
+        }
+
+        public async UniTask PlaySEAsync(SeType seType)
+        {
+            var seModel = soundModelRepository.GetSeModel(seType);
+            var seClip = seModel.AudioClip;
+            seAudioSource.PlayOneShot(seClip);
+            await UniTask.CompletedTask;
         }
 
         public void SetBGMVolume(float volume)

@@ -20,12 +20,12 @@ namespace Project.Scripts.Repository.AssetRepository
             return audioClip;
         }
 
-        public AudioClip LoadSE(string seName)
+        public AudioClip LoadSE(SeType seType)
         {
             var address = ZString.Format(
                 "{0}/Sounds/se/{1}",
                 GamePath.TexturesPath,
-                seName
+                seType.ToString()
             );
 
             var audioClip = Addressables.LoadAssetAsync<AudioClip>(address).WaitForCompletion();
