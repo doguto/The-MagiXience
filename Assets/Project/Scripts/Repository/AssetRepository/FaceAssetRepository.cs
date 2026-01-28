@@ -27,10 +27,15 @@ namespace Project.Scripts.Repository.AssetRepository
                 sprite =>
                 {
                     var spriteName = sprite.name;
-                    var parts = spriteName.Split('_');
-                    if (parts.Length >= 2)
+                    // スプライト名の形式: {characterName}_{expressionType}_Face_0
+                    // characterNameの長さ + 1（アンダースコア）を開始位置とする
+                    var charNameLength = characterName.Length + 1;
+                    var faceIndex = spriteName.LastIndexOf("_Face_");
+                    
+                    if (faceIndex > charNameLength)
                     {
-                        var expressionKey = parts[1];
+                        // expressionTypeを抽出: charNameLengthからfaceIndexまでの部分
+                        var expressionKey = spriteName.Substring(charNameLength, faceIndex - charNameLength);
                         if (!faceDictionary.ContainsKey(expressionKey))
                         {
                             faceDictionary.Add(expressionKey, sprite);
