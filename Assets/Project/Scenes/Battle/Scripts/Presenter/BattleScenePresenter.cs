@@ -14,14 +14,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField, Min(1)] int initialStageNumber = 1;
 
-        readonly BattleSequenceRepository sequenceRepository = new();
+        readonly BattleSequenceModelRepository sequenceModelRepository = new();
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
 
         StageModel stageModel;
         BattleSequenceModel waySequence;
         BattleSequenceModel bossSequence;
-        System.Action pendingScenarioCallback;
+        Action pendingScenarioCallback;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
@@ -99,7 +99,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             try
             {
-                return sequenceRepository.Load(address);
+                return sequenceModelRepository.Load(address);
             }
             catch (Exception e)
             {
@@ -108,9 +108,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void HandleSequenceCompleted(BattleSequenceType sequenceType)
+        void HandleSequenceCompleted(BattleSituation situation)
         {
-            if (sequenceType == BattleSequenceType.Way)
+            if (situation == BattleSituation.Way)
             {
                 TransitionToScenario(StartBossSequence);
             }
@@ -120,7 +120,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void TransitionToScenario(System.Action onCompleteOrSkip)
+        void TransitionToScenario(Action onCompleteOrSkip)
         {
             // ScenarioIdは不要、ScenarioModelRepositoryがRuntimeModelから自動決定
             Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);

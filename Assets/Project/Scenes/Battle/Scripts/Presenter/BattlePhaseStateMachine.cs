@@ -3,6 +3,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Playables;
 using Project.Scenes.Battle.Scripts.Model;
+using Project.Scripts.Model;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -12,14 +13,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] BattleTimelineBindingMap bindingMap;
 
         readonly Subject<BattlePhaseModelBase> phaseStarted = new();
-        readonly Subject<BattleSequenceType> sequenceCompleted = new();
+        readonly Subject<BattleSituation> sequenceCompleted = new();
 
         BattleSequenceModel activeSequence;
         BattlePhaseModelBase activePhase;
         IDisposable exitSubscription;
 
         public IObservable<BattlePhaseModelBase> OnPhaseStarted => phaseStarted;
-        public IObservable<BattleSequenceType> OnSequenceCompleted => sequenceCompleted;
+        public IObservable<BattleSituation> OnSequenceCompleted => sequenceCompleted;
 
         public void PlaySequence(BattleSequenceModel sequence)
         {
@@ -29,14 +30,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            Debug.Log($"[BattlePhaseStateMachine] PlaySequence called for {sequence.SequenceType}", this);
+            Debug.Log($"[BattlePhaseStateMachine] PlaySequence called for {sequence.Situation}", this);
             Stop();
             activeSequence = sequence;
             activeSequence.Reset();
 
             if (!activeSequence.HasPhases)
             {
-                sequenceCompleted.OnNext(activeSequence.SequenceType);
+                sequenceCompleted.OnNext(activeSequence.Situation);
                 DisposeSequence(activeSequence);
                 activeSequence = null;
                 return;
@@ -60,7 +61,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (nextPhase == null)
             {
                 playableDirector?.Stop();
-                sequenceCompleted.OnNext(activeSequence.SequenceType);
+                sequenceCompleted.OnNext(activeSequence.Situation);
                 DisposeSequence(activeSequence);
                 activeSequence = null;
                 activePhase = null;
@@ -105,7 +106,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public void Stop()
         {
-            Debug.Log($"[BattlePhaseStateMachine] Stop called, activeSequence: {activeSequence?.SequenceType}", this);
+            Debug.Log($"[BattlePhaseStateMachine] Stop called, activeSequence: {activeSequence?.Situation}", this);
             exitSubscription?.Dispose();
             exitSubscription = null;
 
@@ -131,7 +132,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.SequenceType} with {sequence.Phases.Count} phases", this);
+            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.Situation} with {sequence.Phases.Count} phases", this);
             foreach (var phase in sequence.Phases)
             {
                 Debug.Log($"[BattlePhaseStateMachine] Disposing phase {phase.PhaseId}", this);
