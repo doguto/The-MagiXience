@@ -21,7 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             timeline.name = $"{name}_Runtime";
             timeline.hideFlags = HideFlags.DontSave;
 
-                        BuildTracks<SignalTrack, SignalEmitterDefinition, SignalTrackDefinition>(timeline, signalTracks);
+            BuildTracks<SignalTrack, SignalEmitterDefinition, SignalTrackDefinition>(timeline, signalTracks);
             BuildTracks<AnimationTrack, AnimationClipDefinition, AnimationTrackDefinition>(timeline, animationTracks);
             BuildTracks<ActivationTrack, ActivationClipDefinition, ActivationTrackDefinition>(timeline, activationTracks);
             BuildTracks<AudioTrack, AudioClipDefinition, AudioTrackDefinition>(timeline, audioTracks);
