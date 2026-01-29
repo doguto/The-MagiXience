@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Project.Commons.UI.Scripts.View;
+using Project.Scripts.Extensions.Message;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -21,7 +22,7 @@ namespace Project.Scenes.Title.Scripts.View
         public IObservable<Unit> OnPressedOption => optionButton.OnPressed;
         public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
 
-        public void Init((Sprite memberStill, Sprite backGround)sprites)
+        public void Init((Sprite memberStill, Sprite backGround) sprites)
         {
             memberStillRenderer.sprite = sprites.memberStill;
             backGroundRenderer.sprite = sprites.backGround;

@@ -8,74 +8,74 @@ namespace Project.Scenes.Global.Scripts.Presenter
     public class InputManager : MonoBehaviour
     {
         // カスタムInputActionAsset
-        InputSystem_Actions inputSystem_Actions;
+        InputSystem_Actions inputSystemActions;
 
         public void Setup()
         {
-            inputSystem_Actions = new InputSystem_Actions();
+            inputSystemActions = new InputSystem_Actions();
 
             // Move
-            inputSystem_Actions.Player.Move.started += OnPlayerMove;
-            inputSystem_Actions.Player.Move.performed += OnPlayerMove;
-            inputSystem_Actions.Player.Move.canceled += OnPlayerMove;
+            inputSystemActions.Player.Move.started += OnPlayerMove;
+            inputSystemActions.Player.Move.performed += OnPlayerMove;
+            inputSystemActions.Player.Move.canceled += OnPlayerMove;
 
             // Look
-            inputSystem_Actions.Player.Look.started += OnPlayerLook;
-            inputSystem_Actions.Player.Look.performed += OnPlayerLook;
-            inputSystem_Actions.Player.Look.canceled += OnPlayerLook;
+            inputSystemActions.Player.Look.started += OnPlayerLook;
+            inputSystemActions.Player.Look.performed += OnPlayerLook;
+            inputSystemActions.Player.Look.canceled += OnPlayerLook;
 
             // Attack
-            inputSystem_Actions.Player.Attack.started += OnPlayerAttack;
+            inputSystemActions.Player.Attack.started += OnPlayerAttack;
 
             // Jump
-            inputSystem_Actions.Player.Jump.started += OnPlayerJump;
+            inputSystemActions.Player.Jump.started += OnPlayerJump;
 
             // Interact
-            inputSystem_Actions.Player.Interact.started += OnPlayerInteract;
-            inputSystem_Actions.Player.Interact.performed += OnPlayerInteract;
-            inputSystem_Actions.Player.Interact.canceled += OnPlayerInteract;
+            inputSystemActions.Player.Interact.started += OnPlayerInteract;
+            inputSystemActions.Player.Interact.performed += OnPlayerInteract;
+            inputSystemActions.Player.Interact.canceled += OnPlayerInteract;
 
             // Crouch
-            inputSystem_Actions.Player.Crouch.started += OnPlayerCrouch;
-            inputSystem_Actions.Player.Crouch.canceled += OnPlayerCrouch;
+            inputSystemActions.Player.Crouch.started += OnPlayerCrouch;
+            inputSystemActions.Player.Crouch.canceled += OnPlayerCrouch;
 
             // Sprint
-            inputSystem_Actions.Player.Sprint.started += OnPlayerSprint;
-            inputSystem_Actions.Player.Sprint.canceled += OnPlayerSprint;
+            inputSystemActions.Player.Sprint.started += OnPlayerSprint;
+            inputSystemActions.Player.Sprint.canceled += OnPlayerSprint;
 
             // Previous
-            inputSystem_Actions.Player.Previous.started += OnPlayerPrevious;
+            inputSystemActions.Player.Previous.started += OnPlayerPrevious;
 
             // Next
-            inputSystem_Actions.Player.Next.started += OnPlayerNext;
+            inputSystemActions.Player.Next.started += OnPlayerNext;
 
             // UI - Navigate
-            inputSystem_Actions.UI.Navigate.started += OnUINavigate;
-            inputSystem_Actions.UI.Navigate.performed += OnUINavigate;
-            inputSystem_Actions.UI.Navigate.canceled += OnUINavigate;
+            inputSystemActions.UI.Navigate.started += OnUINavigate;
+            inputSystemActions.UI.Navigate.performed += OnUINavigate;
+            inputSystemActions.UI.Navigate.canceled += OnUINavigate;
 
             // UI - Submit
-            inputSystem_Actions.UI.Submit.started += OnUISubmit;
+            inputSystemActions.UI.Submit.started += OnUISubmit;
 
             // UI - Cancel
-            inputSystem_Actions.UI.Cancel.started += OnUICancel;
+            inputSystemActions.UI.Cancel.started += OnUICancel;
 
             // UI - Point
-            inputSystem_Actions.UI.Point.started += OnUIPoint;
-            inputSystem_Actions.UI.Point.performed += OnUIPoint;
+            inputSystemActions.UI.Point.started += OnUIPoint;
+            inputSystemActions.UI.Point.performed += OnUIPoint;
 
             // UI - Click
-            inputSystem_Actions.UI.Click.started += OnUIClick;
+            inputSystemActions.UI.Click.started += OnUIClick;
 
             // UI - Right Click
-            inputSystem_Actions.UI.RightClick.started += OnUIRightClick;
+            inputSystemActions.UI.RightClick.started += OnUIRightClick;
 
             // UI - Middle Click
-            inputSystem_Actions.UI.MiddleClick.started += OnUIMiddleClick;
+            inputSystemActions.UI.MiddleClick.started += OnUIMiddleClick;
 
             // UI - Scroll Wheel
-            inputSystem_Actions.UI.ScrollWheel.started += OnUIScrollWheel;
-            inputSystem_Actions.UI.ScrollWheel.performed += OnUIScrollWheel;
+            inputSystemActions.UI.ScrollWheel.started += OnUIScrollWheel;
+            inputSystemActions.UI.ScrollWheel.performed += OnUIScrollWheel;
         }
 
         public void OnPlayerMove(InputAction.CallbackContext context)
