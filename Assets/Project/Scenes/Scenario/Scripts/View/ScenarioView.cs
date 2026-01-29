@@ -8,10 +8,10 @@ namespace Project.Scenes.Scenario.Scripts.View
     {
         [SerializeField] TextMeshProUGUI characterNameText;
         [SerializeField] TextMeshProUGUI contentsText;
-        [SerializeField] Image playerImage;
-        [SerializeField] Image enemyImage;
+        [SerializeField] SpriteRenderer playerSpriteRenderer;
+        [SerializeField] SpriteRenderer enemySpriteRenderer;
         [SerializeField] Image faceImage;
-        
+
         public void ShowCastMessage(string characterName, string message)
         {
             // TODO: まだ関数の中身は未実装
@@ -26,14 +26,15 @@ namespace Project.Scenes.Scenario.Scripts.View
             contentsText.text = message ?? "";
         }
 
-        public void ShowCast(string characterName, string unknownArg1, string faceExpression, 
-            string displayTime, string position, string unknownArg2, 
-            Sprite playerSprite, Sprite enemySprite)
+        public void ShowCast(string characterName, string unknownArg1, string faceExpression,
+            string displayTime, string position, string unknownArg2,
+            Sprite playerSprite, Sprite enemySprite, Sprite faceSprite)
         {
-            // TODO: displayTime, faceExpression, unknownArgsの処理は後で実装
-            
+            // TODO: displayTime, unknownArgsの処理は後で実装
+
             // 位置に応じてSpriteを表示
             // TODO: 位置は定数で定義
+            ChangeFaceExpression(faceSprite);
             if (position == "LL")
             {
                 // 左側 = プレイヤー
@@ -53,6 +54,14 @@ namespace Project.Scenes.Scenario.Scripts.View
             // TODO
         }
 
+        public void ChangeFaceExpression(Sprite faceSprite)
+        {
+            if (faceSprite != null)
+            {
+                faceImage.sprite = faceSprite;
+                faceImage.gameObject.SetActive(true);
+            }
+        }
 
         public void StopGrayingCast(string characterName)
         {
