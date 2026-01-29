@@ -1,4 +1,4 @@
-﻿using Project.Scenes.Global.Scripts.Presenter.Message;
+﻿using Project.Scripts.Extensions.Message;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;

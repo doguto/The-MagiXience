@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Project.Scenes.Global.Scripts.Presenter.Message
+namespace Project.Scripts.Extensions.Message
 {
     public struct PlayerMoveMessage
     {
