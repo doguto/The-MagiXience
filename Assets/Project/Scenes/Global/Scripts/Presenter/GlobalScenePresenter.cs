@@ -43,7 +43,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
                 }
             }
 
-            inputManager.Setup();
+            inputManager.Setup(keyConfigModel.GetInputActions());
         }
     }
 }

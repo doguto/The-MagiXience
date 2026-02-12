@@ -8,83 +8,105 @@ namespace Project.Scenes.Global.Scripts.Presenter
     public class InputManager : MonoBehaviour
     {
         // カスタムInputActionAsset
-        InputSystem_Actions inputSystemActions;
+        InputActionAsset inputActionAsset;
 
-        public void Setup()
+        public void Setup(InputActionAsset inputActions)
         {
-            inputSystemActions = new InputSystem_Actions();
+            inputActionAsset = inputActions;
+
+            // Player ActionMap
+            var playerMap = inputActionAsset.FindActionMap("Player");
 
             // Move
-            inputSystemActions.Player.Move.started += OnPlayerMove;
-            inputSystemActions.Player.Move.performed += OnPlayerMove;
-            inputSystemActions.Player.Move.canceled += OnPlayerMove;
+            var moveAction = playerMap.FindAction("Move");
+            moveAction.started += OnPlayerMove;
+            moveAction.performed += OnPlayerMove;
+            moveAction.canceled += OnPlayerMove;
 
             // Look
-            inputSystemActions.Player.Look.started += OnPlayerLook;
-            inputSystemActions.Player.Look.performed += OnPlayerLook;
-            inputSystemActions.Player.Look.canceled += OnPlayerLook;
+            var lookAction = playerMap.FindAction("Look");
+            lookAction.started += OnPlayerLook;
+            lookAction.performed += OnPlayerLook;
+            lookAction.canceled += OnPlayerLook;
 
             // Attack
-            inputSystemActions.Player.Attack.started += OnPlayerAttack;
+            var attackAction = playerMap.FindAction("Attack");
+            attackAction.started += OnPlayerAttack;
 
             // Jump
-            inputSystemActions.Player.Jump.started += OnPlayerJump;
+            var jumpAction = playerMap.FindAction("Jump");
+            jumpAction.started += OnPlayerJump;
 
             // Interact
-            inputSystemActions.Player.Interact.started += OnPlayerInteract;
-            inputSystemActions.Player.Interact.performed += OnPlayerInteract;
-            inputSystemActions.Player.Interact.canceled += OnPlayerInteract;
+            var interactAction = playerMap.FindAction("Interact");
+            interactAction.started += OnPlayerInteract;
+            interactAction.performed += OnPlayerInteract;
+            interactAction.canceled += OnPlayerInteract;
 
             // Crouch
-            inputSystemActions.Player.Crouch.started += OnPlayerCrouch;
-            inputSystemActions.Player.Crouch.canceled += OnPlayerCrouch;
+            var crouchAction = playerMap.FindAction("Crouch");
+            crouchAction.started += OnPlayerCrouch;
+            crouchAction.canceled += OnPlayerCrouch;
 
             // Sprint
-            inputSystemActions.Player.Sprint.started += OnPlayerSprint;
-            inputSystemActions.Player.Sprint.canceled += OnPlayerSprint;
+            var sprintAction = playerMap.FindAction("Sprint");
+            sprintAction.started += OnPlayerSprint;
+            sprintAction.canceled += OnPlayerSprint;
 
             // Previous
-            inputSystemActions.Player.Previous.started += OnPlayerPrevious;
+            var previousAction = playerMap.FindAction("Previous");
+            previousAction.started += OnPlayerPrevious;
 
             // Next
-            inputSystemActions.Player.Next.started += OnPlayerNext;
+            var nextAction = playerMap.FindAction("Next");
+            nextAction.started += OnPlayerNext;
+
+            // UI ActionMap
+            var uiMap = inputActionAsset.FindActionMap("UI");
 
             // UI - Navigate
-            inputSystemActions.UI.Navigate.started += OnUINavigate;
-            inputSystemActions.UI.Navigate.performed += OnUINavigate;
-            inputSystemActions.UI.Navigate.canceled += OnUINavigate;
+            var navigateAction = uiMap.FindAction("Navigate");
+            navigateAction.started += OnUINavigate;
+            navigateAction.performed += OnUINavigate;
+            navigateAction.canceled += OnUINavigate;
 
             // UI - Submit
-            inputSystemActions.UI.Submit.started += OnUISubmit;
+            var submitAction = uiMap.FindAction("Submit");
+            submitAction.started += OnUISubmit;
 
             // UI - Cancel
-            inputSystemActions.UI.Cancel.started += OnUICancel;
+            var cancelAction = uiMap.FindAction("Cancel");
+            cancelAction.started += OnUICancel;
 
             // UI - Point
-            inputSystemActions.UI.Point.started += OnUIPoint;
-            inputSystemActions.UI.Point.performed += OnUIPoint;
+            var pointAction = uiMap.FindAction("Point");
+            pointAction.started += OnUIPoint;
+            pointAction.performed += OnUIPoint;
 
             // UI - Click
-            inputSystemActions.UI.Click.started += OnUIClick;
+            var clickAction = uiMap.FindAction("Click");
+            clickAction.started += OnUIClick;
 
             // UI - Right Click
-            inputSystemActions.UI.RightClick.started += OnUIRightClick;
+            var rightClickAction = uiMap.FindAction("RightClick");
+            rightClickAction.started += OnUIRightClick;
 
             // UI - Middle Click
-            inputSystemActions.UI.MiddleClick.started += OnUIMiddleClick;
+            var middleClickAction = uiMap.FindAction("MiddleClick");
+            middleClickAction.started += OnUIMiddleClick;
 
             // UI - Scroll Wheel
-            inputSystemActions.UI.ScrollWheel.started += OnUIScrollWheel;
-            inputSystemActions.UI.ScrollWheel.performed += OnUIScrollWheel;
+            var scrollWheelAction = uiMap.FindAction("ScrollWheel");
+            scrollWheelAction.started += OnUIScrollWheel;
+            scrollWheelAction.performed += OnUIScrollWheel;
 
             // InputSystemを有効化
-            inputSystemActions.Enable();
+            inputActionAsset.Enable();
         }
 
         void OnDestroy()
         {
-            inputSystemActions?.Disable();
-            inputSystemActions?.Dispose();
+            inputActionAsset?.Disable();
         }
 
         public void OnPlayerMove(InputAction.CallbackContext context)
