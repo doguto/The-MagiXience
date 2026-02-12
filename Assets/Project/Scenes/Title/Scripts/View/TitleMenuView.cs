@@ -21,7 +21,7 @@ namespace Project.Scenes.Title.Scripts.View
         public IObservable<Unit> OnPressedOption => optionButton.OnPressed;
         public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
 
-        public void Init((Sprite memberStill, Sprite backGround)sprites)
+        public void Init((Sprite memberStill, Sprite backGround) sprites)
         {
             memberStillRenderer.sprite = sprites.memberStill;
             backGroundRenderer.sprite = sprites.backGround;
@@ -32,7 +32,6 @@ namespace Project.Scenes.Title.Scripts.View
             startButton.Init(isFocused: true);
             optionButton.Init();
             exitButton.Init();
-
             EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
 
