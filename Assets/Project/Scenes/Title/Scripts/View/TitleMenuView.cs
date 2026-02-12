@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Project.Commons.UI.Scripts.View;
-using Project.Scripts.Extensions.Message;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
