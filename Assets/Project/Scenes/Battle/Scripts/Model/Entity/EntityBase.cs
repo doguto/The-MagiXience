@@ -1,0 +1,78 @@
+using System;
+using UniRx;
+using UnityEngine;
+using Project.Scenes.Battle.Scripts.Model.Movement;
+
+namespace Project.Scenes.Battle.Scripts.Model.Entity
+{
+    public abstract class EntityBase
+    {
+        readonly ReactiveProperty<int> currentHp = new();
+        readonly CompositeDisposable disposables = new();
+
+        IMovementStrategy movementStrategy;
+
+        protected EntityBase(int maxHp, Vector3 initialPosition)
+        {
+            MaxHp = maxHp;
+            currentHp.Value = maxHp;
+            Position = initialPosition;
+            currentHp.AddTo(disposables);
+        }
+
+        public int MaxHp { get; }
+        public IReadOnlyReactiveProperty<int> CurrentHp => currentHp;
+        public bool IsAlive => currentHp.Value > 0;
+        public Vector3 Position { get; protected set; }
+
+        public void TakeDamage(int damage)
+        {
+            if (!IsAlive) return;
+            if (damage < 0)
+            {
+                Debug.LogWarning($"Negative damage value: {damage}");
+                return;
+            }
+
+            currentHp.Value = Mathf.Max(0, currentHp.Value - damage);
+
+            if (currentHp.Value <= 0)
+            {
+                OnDeath();
+            }
+        }
+
+        public void SetMovementStrategy(IMovementStrategy strategy)
+        {
+            movementStrategy = strategy;
+            movementStrategy?.Initialize();
+        }
+
+        public void UpdateMovement(float deltaTime)
+        {
+            if (movementStrategy == null || !IsAlive) return;
+
+            Vector3 newPosition = movementStrategy.UpdateMovement(Position, deltaTime);
+            Position = newPosition;
+        }
+
+        public IMovementStrategy MovementStrategy => movementStrategy;
+
+        // ObjectPool用
+        protected void ResetHp()
+        {
+            currentHp.Value = MaxHp;
+        }
+
+        public abstract void OnCollision(EntityBase other);
+
+        public abstract bool IsPlayer { get; }
+
+        protected virtual void OnDeath() { }
+
+        public virtual void Dispose()
+        {
+            disposables.Dispose();
+        }
+    }
+}
