@@ -1,5 +1,7 @@
 ﻿using System;
+using Cysharp.Threading.Tasks;
 using Project.Commons.UI.Scripts.View;
+using Project.Scripts.Extensions;
 using Project.Scripts.Model;
 using Project.Scripts.Presenter;
 using UniRx;
@@ -8,7 +10,7 @@ using UnityEngine.EventSystems;
 
 namespace Project.Commons.UI.Scripts.Presenter
 {
-    public class OptionModalPresenter: MonoPresenter
+    public class OptionModalPresenter : MonoPresenter
     {
         [SerializeField] OptionModalView optionModalView;
         readonly Subject<Unit> onClosed = new();
@@ -22,13 +24,17 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         void Start()
         {
+            base.Start();
+
             optionModalView.OnPressedCancel.Subscribe(_ =>
             {
+                soundManager.PlaySEAsync(SeType.Cancel).Forget();
                 gameObject.SetActive(false);
                 onClosed.OnNext(Unit.Default);
             }).AddTo(this);
             optionModalView.OnPressedSave.Subscribe(_ =>
             {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
                 //TODO saveする
             }).AddTo(this);
         }
@@ -39,6 +45,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             {
                 Debug.Log("null");
             }
+
             gameObject.SetActive(true);
             optionModalView.InitStart();
         }

@@ -2,6 +2,7 @@
 {
     public enum SeType
     {
-        Click
+        Click,
+        Cancel
     }
 }
