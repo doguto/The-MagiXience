@@ -86,14 +86,17 @@ namespace Project.Scenes.Global.Scripts.Presenter
             // UI - Click
             var clickAction = uiMap.FindAction("Click");
             clickAction.started += OnUIClick;
+            clickAction.performed += OnUIClick;
 
             // UI - Right Click
             var rightClickAction = uiMap.FindAction("RightClick");
             rightClickAction.started += OnUIRightClick;
+            rightClickAction.performed += OnUIRightClick;
 
             // UI - Middle Click
             var middleClickAction = uiMap.FindAction("MiddleClick");
             middleClickAction.started += OnUIMiddleClick;
+            middleClickAction.performed += OnUIMiddleClick;
 
             // UI - Scroll Wheel
             var scrollWheelAction = uiMap.FindAction("ScrollWheel");
