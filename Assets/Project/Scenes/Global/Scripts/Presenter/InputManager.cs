@@ -106,7 +106,133 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         void OnDestroy()
         {
-            inputActionAsset?.Disable();
+            if (inputActionAsset == null) return;
+
+            // Player ActionMapの購読解除
+            var playerMap = inputActionAsset.FindActionMap("Player");
+            if (playerMap != null)
+            {
+                var moveAction = playerMap.FindAction("Move");
+                if (moveAction != null)
+                {
+                    moveAction.started -= OnPlayerMove;
+                    moveAction.performed -= OnPlayerMove;
+                    moveAction.canceled -= OnPlayerMove;
+                }
+
+                var lookAction = playerMap.FindAction("Look");
+                if (lookAction != null)
+                {
+                    lookAction.started -= OnPlayerLook;
+                    lookAction.performed -= OnPlayerLook;
+                    lookAction.canceled -= OnPlayerLook;
+                }
+
+                var attackAction = playerMap.FindAction("Attack");
+                if (attackAction != null)
+                {
+                    attackAction.started -= OnPlayerAttack;
+                }
+
+                var jumpAction = playerMap.FindAction("Jump");
+                if (jumpAction != null)
+                {
+                    jumpAction.started -= OnPlayerJump;
+                }
+
+                var interactAction = playerMap.FindAction("Interact");
+                if (interactAction != null)
+                {
+                    interactAction.started -= OnPlayerInteract;
+                    interactAction.performed -= OnPlayerInteract;
+                    interactAction.canceled -= OnPlayerInteract;
+                }
+
+                var crouchAction = playerMap.FindAction("Crouch");
+                if (crouchAction != null)
+                {
+                    crouchAction.started -= OnPlayerCrouch;
+                    crouchAction.canceled -= OnPlayerCrouch;
+                }
+
+                var sprintAction = playerMap.FindAction("Sprint");
+                if (sprintAction != null)
+                {
+                    sprintAction.started -= OnPlayerSprint;
+                    sprintAction.canceled -= OnPlayerSprint;
+                }
+
+                var previousAction = playerMap.FindAction("Previous");
+                if (previousAction != null)
+                {
+                    previousAction.started -= OnPlayerPrevious;
+                }
+
+                var nextAction = playerMap.FindAction("Next");
+                if (nextAction != null)
+                {
+                    nextAction.started -= OnPlayerNext;
+                }
+            }
+
+            // UI ActionMapの購読解除
+            var uiMap = inputActionAsset.FindActionMap("UI");
+            if (uiMap != null)
+            {
+                var navigateAction = uiMap.FindAction("Navigate");
+                if (navigateAction != null)
+                {
+                    navigateAction.started -= OnUINavigate;
+                    navigateAction.performed -= OnUINavigate;
+                    navigateAction.canceled -= OnUINavigate;
+                }
+
+                var submitAction = uiMap.FindAction("Submit");
+                if (submitAction != null)
+                {
+                    submitAction.started -= OnUISubmit;
+                }
+
+                var cancelAction = uiMap.FindAction("Cancel");
+                if (cancelAction != null)
+                {
+                    cancelAction.started -= OnUICancel;
+                }
+
+                var pointAction = uiMap.FindAction("Point");
+                if (pointAction != null)
+                {
+                    pointAction.started -= OnUIPoint;
+                    pointAction.performed -= OnUIPoint;
+                }
+
+                var clickAction = uiMap.FindAction("Click");
+                if (clickAction != null)
+                {
+                    clickAction.started -= OnUIClick;
+                }
+
+                var rightClickAction = uiMap.FindAction("RightClick");
+                if (rightClickAction != null)
+                {
+                    rightClickAction.started -= OnUIRightClick;
+                }
+
+                var middleClickAction = uiMap.FindAction("MiddleClick");
+                if (middleClickAction != null)
+                {
+                    middleClickAction.started -= OnUIMiddleClick;
+                }
+
+                var scrollWheelAction = uiMap.FindAction("ScrollWheel");
+                if (scrollWheelAction != null)
+                {
+                    scrollWheelAction.started -= OnUIScrollWheel;
+                    scrollWheelAction.performed -= OnUIScrollWheel;
+                }
+            }
+
+            inputActionAsset.Disable();
         }
 
         public void OnPlayerMove(InputAction.CallbackContext context)
