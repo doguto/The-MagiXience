@@ -12,7 +12,7 @@ namespace Project.Scripts.Repository.AssetRepository
             var address = ZString.Format(
                 "{0}/Sounds/Bgm/{1}_{2}",
                 GamePath.TexturesPath,
-                sceneType.ToSceneName(),
+                sceneType.ToString(),
                 bgmType.ToString()
             );
 
