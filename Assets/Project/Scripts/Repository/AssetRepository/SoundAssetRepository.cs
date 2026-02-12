@@ -10,9 +10,9 @@ namespace Project.Scripts.Repository.AssetRepository
         public AudioClip LoadBGM(SceneType sceneType, BgmType bgmType)
         {
             var address = ZString.Format(
-                "{0}/Sounds/bgm/{1}_{2}",
+                "{0}/Sounds/Bgm/{1}_{2}",
                 GamePath.TexturesPath,
-                sceneType.ToString(),
+                sceneType.ToSceneName(),
                 bgmType.ToString()
             );
 
@@ -23,7 +23,7 @@ namespace Project.Scripts.Repository.AssetRepository
         public AudioClip LoadSE(SeType seType)
         {
             var address = ZString.Format(
-                "{0}/Sounds/se/{1}",
+                "{0}/Sounds/Se/{1}",
                 GamePath.TexturesPath,
                 seType.ToString()
             );

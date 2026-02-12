@@ -25,7 +25,7 @@ namespace Project.Scripts.Presenter
                 Debug.LogWarning("GlobalScenePresenterが見つかりません", this);
             }
 
-            soundManager = globalScenePresenter.SoundManagerPresenter;
+            soundManager = globalScenePresenter!.SoundManagerPresenter;
         }
     }
 }

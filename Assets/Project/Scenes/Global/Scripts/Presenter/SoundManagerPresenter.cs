@@ -17,6 +17,10 @@ namespace Project.Scenes.Global.Scripts.Presenter
         void Awake()
         {
             soundModelRepository = SoundModelRepository.Instance;
+
+            // TODO: UserDataから音量設定を取得して設定する
+            SetBGMVolume(15);
+            SetSEVolume(15);
         }
 
         public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default)
@@ -52,14 +56,14 @@ namespace Project.Scenes.Global.Scripts.Presenter
             await UniTask.CompletedTask;
         }
 
-        public void SetBGMVolume(float volume)
+        public void SetBGMVolume(int volume)
         {
-            bgmAudioSource.volume = Mathf.Clamp01(volume);
+            bgmAudioSource.volume = Mathf.Clamp01(volume / 100.0f);
         }
 
-        public void SetSEVolume(float volume)
+        public void SetSEVolume(int volume)
         {
-            seAudioSource.volume = Mathf.Clamp01(volume);
+            seAudioSource.volume = Mathf.Clamp01(volume / 100.0f);
         }
     }
 }

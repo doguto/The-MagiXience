@@ -5,6 +5,7 @@ using Project.Scripts.Model;
 using Project.Scenes.Title.Scripts.Model;
 using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scenes.Title.Scripts.View;
+using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
     public class TitleScenePresenter : MonoPresenter
     {
         [SerializeField] TitleMenuView titleMenuView;
-        
+
         TitleModelRepository titleModelRepository;
         TitleModel titleModel;
 
@@ -24,7 +25,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
         {
             titleModelRepository = TitleModelRepository.Instance;
             titleModel = titleModelRepository.Get();
-            
+
             titleMenuView.Init(titleModel.GetBackGroundSprites());
         }
 
@@ -38,21 +39,22 @@ namespace Project.Scenes.Title.Scripts.Presenter
             {
                 titleMenuView.SetInteractable(false);
                 globalScenePresenter.OptionModalPresenter.Open();
-                
-                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(useFirstValue: true);
-                
+
+                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
+
                 titleMenuView.SetInteractable(true);
                 titleMenuView.InitStart();
-
             });
 
             titleMenuView.OnPressedExit.Subscribe(ExitGame);
+
+            soundManager!.PlayBGMAsync(SceneType.Title).Forget();
         }
 
         async UniTask StartGame(Unit _)
         {
             // TitleScene 以外で TitleModel は使用しないのでクリアする
-            titleModelRepository.Refresh(); 
+            titleModelRepository.Refresh();
 
             await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
 
