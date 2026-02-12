@@ -16,6 +16,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         public SoundManagerPresenter SoundManagerPresenter => soundManagerPresenter;
         [SerializeField] InputActionAsset inputActions;
+        [SerializeField] InputManager inputManager;
 
         public OptionModalPresenter OptionModalPresenter => optionModalPresenter;
         public KeyConfigModel KeyConfigModel => KeyConfigModelRepository.Instance.Get();
@@ -42,6 +43,8 @@ namespace Project.Scenes.Global.Scripts.Presenter
                     inputModule.actionsAsset = keyConfigModel.GetInputActions();
                 }
             }
+
+            inputManager.Setup(keyConfigModel.GetInputActions());
         }
     }
 }
