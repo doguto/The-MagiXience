@@ -34,8 +34,6 @@ namespace Project.Scenes.Title.Scripts.View
             optionButton.Init();
             exitButton.Init();
             EventSystem.current.SetSelectedGameObject(startButton.gameObject);
-
-            MessageBroker.Default.Receive<PlayerAttackMessage>().Subscribe(_ => Debug.Log("HOGE!"));
         }
 
         public void SetActive(bool active)
