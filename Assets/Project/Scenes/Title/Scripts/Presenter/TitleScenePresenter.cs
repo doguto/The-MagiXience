@@ -1,6 +1,4 @@
-using System;
 using Cysharp.Threading.Tasks;
-using Project.Commons.UI.Scripts.Presenter;
 using Project.Scripts.Model;
 using Project.Scenes.Title.Scripts.Model;
 using Project.Scenes.Title.Scripts.Repository.ModelRepository;
@@ -34,9 +32,14 @@ namespace Project.Scenes.Title.Scripts.Presenter
             base.Start();
             titleMenuView.InitStart();
 
-            titleMenuView.OnPressedStart.Subscribe(x => StartGame(x).Forget());
+            titleMenuView.OnPressedStart.Subscribe(x =>
+            {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
+                StartGame(x).Forget();
+            });
             titleMenuView.OnPressedOption.Subscribe(async _ =>
             {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
                 titleMenuView.SetInteractable(false);
                 globalScenePresenter.OptionModalPresenter.Open();
 
@@ -46,7 +49,11 @@ namespace Project.Scenes.Title.Scripts.Presenter
                 titleMenuView.InitStart();
             });
 
-            titleMenuView.OnPressedExit.Subscribe(ExitGame);
+            titleMenuView.OnPressedExit.Subscribe(_ =>
+            {
+                soundManager.PlaySE(SeType.Cancel);
+                ExitGame();
+            });
 
             soundManager!.PlayBGMAsync(SceneType.Title).Forget();
         }
@@ -62,7 +69,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             SceneManager.UnloadSceneAsync(gameObject.scene.name);
         }
 
-        void ExitGame(Unit _)
+        void ExitGame()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
