@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Project.Scenes.Global.Scripts.Presenter;
 using Project.Scripts.Repository.ModelRepository;
 using UnityEngine;
@@ -6,8 +7,9 @@ namespace Project.Scripts.Presenter
 {
     public class MonoPresenter : MonoBehaviour
     {
-        protected GlobalScenePresenter globalScenePresenter;
-        
+        [CanBeNull] protected GlobalScenePresenter globalScenePresenter;
+        [CanBeNull] protected SoundManagerPresenter soundManager;
+
         protected RuntimeModelRepository RuntimeModelRepository => RuntimeModelRepository.Instance;
 
         // 代入だとMonoランタイムの起動前にStageModelRepositoryのコンストラクタが呼ばれてしまうので、
@@ -22,6 +24,8 @@ namespace Project.Scripts.Presenter
             {
                 Debug.LogWarning("GlobalScenePresenterが見つかりません", this);
             }
+
+            soundManager = globalScenePresenter!.SoundManagerPresenter;
         }
     }
 }
