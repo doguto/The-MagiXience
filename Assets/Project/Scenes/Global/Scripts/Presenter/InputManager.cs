@@ -1,4 +1,5 @@
 ﻿using Project.Scripts.Extensions.Message;
+using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,7 +12,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
         InputActionAsset inputActionAsset;
         
         // 購読解除用のアクションとハンドラーのペア
-        private readonly System.Collections.Generic.List<(InputAction action, System.Action<InputAction.CallbackContext> handler, InputActionPhase phase)> actionHandlers = new System.Collections.Generic.List<(InputAction, System.Action<InputAction.CallbackContext>, InputActionPhase)>();
+        private readonly List<(InputAction, System.Action<InputAction.CallbackContext>, InputActionPhase)> actionHandlers = new List<(InputAction, System.Action<InputAction.CallbackContext>, InputActionPhase)>();
 
         private enum InputActionPhase
         {
@@ -157,7 +158,6 @@ namespace Project.Scenes.Global.Scripts.Presenter
                 }
             }
             
-            actionHandlers.Clear();
             inputActionAsset.Disable();
         }
 
