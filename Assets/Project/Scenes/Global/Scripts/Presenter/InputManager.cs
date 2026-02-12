@@ -1,4 +1,5 @@
 ﻿using Project.Scripts.Extensions.Message;
+using System;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
         InputActionAsset inputActionAsset;
         
         // 購読解除用のアクションとハンドラーのペア
-        private readonly List<(InputAction, System.Action<InputAction.CallbackContext>, InputActionPhase)> actionHandlers = new List<(InputAction, System.Action<InputAction.CallbackContext>, InputActionPhase)>();
+        private readonly List<(InputAction, Action<InputAction.CallbackContext>, InputActionPhase)> registeredActionHandlers = new List<(InputAction, Action<InputAction.CallbackContext>, InputActionPhase)>();
 
         private enum InputActionPhase
         {
@@ -21,7 +22,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
             Canceled
         }
 
-        private void RegisterAction(InputAction action, System.Action<InputAction.CallbackContext> handler, InputActionPhase phase)
+        private void RegisterAction(InputAction action, Action<InputAction.CallbackContext> handler, InputActionPhase phase)
         {
             if (action == null) return;
             
@@ -38,7 +39,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
                     break;
             }
             
-            actionHandlers.Add((action, handler, phase));
+            registeredActionHandlers.Add((action, handler, phase));
         }
 
         public void Setup(InputActionAsset inputActions)
@@ -143,7 +144,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
             if (inputActionAsset == null) return;
 
             // 登録されたすべてのアクションハンドラーを購読解除
-            foreach (var (action, handler, phase) in actionHandlers)
+            foreach (var (action, handler, phase) in registeredActionHandlers)
             {
                 if (action == null) continue;
                 
