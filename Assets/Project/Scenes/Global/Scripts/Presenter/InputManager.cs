@@ -76,6 +76,15 @@ namespace Project.Scenes.Global.Scripts.Presenter
             // UI - Scroll Wheel
             inputSystemActions.UI.ScrollWheel.started += OnUIScrollWheel;
             inputSystemActions.UI.ScrollWheel.performed += OnUIScrollWheel;
+
+            // InputSystemを有効化
+            inputSystemActions.Enable();
+        }
+
+        void OnDestroy()
+        {
+            inputSystemActions?.Disable();
+            inputSystemActions?.Dispose();
         }
 
         public void OnPlayerMove(InputAction.CallbackContext context)
