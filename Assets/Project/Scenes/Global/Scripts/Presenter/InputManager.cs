@@ -1,4 +1,6 @@
 ﻿using Project.Scripts.Extensions.Message;
+using System;
+using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,6 +11,36 @@ namespace Project.Scenes.Global.Scripts.Presenter
     {
         // カスタムInputActionAsset
         InputActionAsset inputActionAsset;
+        
+        // 購読解除用のアクションとハンドラーのペア
+        private readonly List<(InputAction, Action<InputAction.CallbackContext>, InputActionPhase)> registeredActionHandlers = new List<(InputAction, Action<InputAction.CallbackContext>, InputActionPhase)>();
+
+        private enum InputActionPhase
+        {
+            Started,
+            Performed,
+            Canceled
+        }
+
+        private void RegisterAction(InputAction action, Action<InputAction.CallbackContext> handler, InputActionPhase phase)
+        {
+            if (action == null) return;
+            
+            switch (phase)
+            {
+                case InputActionPhase.Started:
+                    action.started += handler;
+                    break;
+                case InputActionPhase.Performed:
+                    action.performed += handler;
+                    break;
+                case InputActionPhase.Canceled:
+                    action.canceled += handler;
+                    break;
+            }
+            
+            registeredActionHandlers.Add((action, handler, phase));
+        }
 
         public void Setup(InputActionAsset inputActions)
         {
@@ -19,69 +51,69 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
             // Move
             var moveAction = playerMap.FindAction("Move");
-            moveAction.started += OnPlayerMove;
-            moveAction.performed += OnPlayerMove;
-            moveAction.canceled += OnPlayerMove;
+            RegisterAction(moveAction, OnPlayerMove, InputActionPhase.Started);
+            RegisterAction(moveAction, OnPlayerMove, InputActionPhase.Performed);
+            RegisterAction(moveAction, OnPlayerMove, InputActionPhase.Canceled);
 
             // Look
             var lookAction = playerMap.FindAction("Look");
-            lookAction.started += OnPlayerLook;
-            lookAction.performed += OnPlayerLook;
-            lookAction.canceled += OnPlayerLook;
+            RegisterAction(lookAction, OnPlayerLook, InputActionPhase.Started);
+            RegisterAction(lookAction, OnPlayerLook, InputActionPhase.Performed);
+            RegisterAction(lookAction, OnPlayerLook, InputActionPhase.Canceled);
 
             // Attack
             var attackAction = playerMap.FindAction("Attack");
-            attackAction.started += OnPlayerAttack;
+            RegisterAction(attackAction, OnPlayerAttack, InputActionPhase.Started);
 
             // Jump
             var jumpAction = playerMap.FindAction("Jump");
-            jumpAction.started += OnPlayerJump;
+            RegisterAction(jumpAction, OnPlayerJump, InputActionPhase.Started);
 
             // Interact
             var interactAction = playerMap.FindAction("Interact");
-            interactAction.started += OnPlayerInteract;
-            interactAction.performed += OnPlayerInteract;
-            interactAction.canceled += OnPlayerInteract;
+            RegisterAction(interactAction, OnPlayerInteract, InputActionPhase.Started);
+            RegisterAction(interactAction, OnPlayerInteract, InputActionPhase.Performed);
+            RegisterAction(interactAction, OnPlayerInteract, InputActionPhase.Canceled);
 
             // Crouch
             var crouchAction = playerMap.FindAction("Crouch");
-            crouchAction.started += OnPlayerCrouch;
-            crouchAction.canceled += OnPlayerCrouch;
+            RegisterAction(crouchAction, OnPlayerCrouch, InputActionPhase.Started);
+            RegisterAction(crouchAction, OnPlayerCrouch, InputActionPhase.Canceled);
 
             // Sprint
             var sprintAction = playerMap.FindAction("Sprint");
-            sprintAction.started += OnPlayerSprint;
-            sprintAction.canceled += OnPlayerSprint;
+            RegisterAction(sprintAction, OnPlayerSprint, InputActionPhase.Started);
+            RegisterAction(sprintAction, OnPlayerSprint, InputActionPhase.Canceled);
 
             // Previous
             var previousAction = playerMap.FindAction("Previous");
-            previousAction.started += OnPlayerPrevious;
+            RegisterAction(previousAction, OnPlayerPrevious, InputActionPhase.Started);
 
             // Next
             var nextAction = playerMap.FindAction("Next");
-            nextAction.started += OnPlayerNext;
+            RegisterAction(nextAction, OnPlayerNext, InputActionPhase.Started);
 
             // UI ActionMap
             var uiMap = inputActionAsset.FindActionMap("UI");
 
             // UI - Navigate
             var navigateAction = uiMap.FindAction("Navigate");
-            navigateAction.started += OnUINavigate;
-            navigateAction.performed += OnUINavigate;
-            navigateAction.canceled += OnUINavigate;
+            RegisterAction(navigateAction, OnUINavigate, InputActionPhase.Started);
+            RegisterAction(navigateAction, OnUINavigate, InputActionPhase.Performed);
+            RegisterAction(navigateAction, OnUINavigate, InputActionPhase.Canceled);
 
             // UI - Submit
             var submitAction = uiMap.FindAction("Submit");
-            submitAction.started += OnUISubmit;
+            RegisterAction(submitAction, OnUISubmit, InputActionPhase.Started);
 
             // UI - Cancel
             var cancelAction = uiMap.FindAction("Cancel");
-            cancelAction.started += OnUICancel;
+            RegisterAction(cancelAction, OnUICancel, InputActionPhase.Started);
 
             // UI - Point
             var pointAction = uiMap.FindAction("Point");
-            pointAction.started += OnUIPoint;
-            pointAction.performed += OnUIPoint;
+            RegisterAction(pointAction, OnUIPoint, InputActionPhase.Started);
+            RegisterAction(pointAction, OnUIPoint, InputActionPhase.Performed);
 
             // UI - Click
             var clickAction = uiMap.FindAction("Click");
@@ -100,8 +132,8 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
             // UI - Scroll Wheel
             var scrollWheelAction = uiMap.FindAction("ScrollWheel");
-            scrollWheelAction.started += OnUIScrollWheel;
-            scrollWheelAction.performed += OnUIScrollWheel;
+            RegisterAction(scrollWheelAction, OnUIScrollWheel, InputActionPhase.Started);
+            RegisterAction(scrollWheelAction, OnUIScrollWheel, InputActionPhase.Performed);
 
             // InputSystemを有効化
             inputActionAsset.Enable();
@@ -109,7 +141,28 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         void OnDestroy()
         {
-            inputActionAsset?.Disable();
+            if (inputActionAsset == null) return;
+
+            // 登録されたすべてのアクションハンドラーを購読解除
+            foreach (var (action, handler, phase) in registeredActionHandlers)
+            {
+                if (action == null) continue;
+                
+                switch (phase)
+                {
+                    case InputActionPhase.Started:
+                        action.started -= handler;
+                        break;
+                    case InputActionPhase.Performed:
+                        action.performed -= handler;
+                        break;
+                    case InputActionPhase.Canceled:
+                        action.canceled -= handler;
+                        break;
+                }
+            }
+            
+            inputActionAsset.Disable();
         }
 
         public void OnPlayerMove(InputAction.CallbackContext context)
