@@ -8,9 +8,13 @@ namespace Project.Scenes.Scenario.Scripts.Model
     public class ScenarioModel : ModelBase
     {
         readonly StillAssetRepository stillAssetRepository = new();
+        readonly FaceAssetRepository faceAssetRepository = new();
 
         public Sprite PlayerStillSprite { get; private set; }
         public Sprite EnemyStillSprite { get; private set; }
+        public Dictionary<string, Sprite> PlayerFaceSprites { get; private set; }
+        public Dictionary<string, Sprite> EnemyFaceSprites { get; private set; }
+
 
         public ScenarioStep CurrentStep => steps[currentIndex];
         public bool IsEnd => currentIndex >= steps.Count;
@@ -33,6 +37,11 @@ namespace Project.Scenes.Scenario.Scripts.Model
         {
             PlayerStillSprite = stillAssetRepository.Load("Ten", false);
             EnemyStillSprite = stillAssetRepository.Load(enemyCharaName, false);
+
+            // 表情SpriteをListで取得してDictionaryに変換
+            PlayerFaceSprites = faceAssetRepository.LoadAll("Ten");
+
+            EnemyFaceSprites = faceAssetRepository.LoadAll(enemyCharaName);
         }
     }
 }

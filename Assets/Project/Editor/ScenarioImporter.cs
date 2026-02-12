@@ -12,7 +12,7 @@ namespace Project.Editor
         [MenuItem("Tools/Import Scenario")]
         public static void ImportScenario()
         {
-            string path = EditorUtility.OpenFilePanel("Select Scenario Text", "Assets", "txt");
+            string path = EditorUtility.OpenFilePanel("Select Scenario Text", "Assets/Project/Editor/Scenario", "txt");
             if (string.IsNullOrEmpty(path))
             {
                 return;
@@ -23,15 +23,15 @@ namespace Project.Editor
             data.steps = ParseScenario(content);
 
             string fileName = Path.GetFileNameWithoutExtension(path);
-            
+
             string assetPath = $"Assets/Project/DataStore/{fileName}.asset";
             AssetDatabase.CreateAsset(data, assetPath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            
+
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = data;
-            
+
             Debug.Log($"Scenario imported to: {assetPath}");
         }
 
@@ -39,7 +39,7 @@ namespace Project.Editor
         {
             var steps = new List<ScenarioStep>();
             var lines = content.Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
-            
+
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i].Trim();
