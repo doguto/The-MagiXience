@@ -29,12 +29,8 @@ namespace Project.Scripts.Repository.ModelRepository
 
             if (inputActions == null)
             {
-                inputActions = Resources.Load<InputActionAsset>("InputSystem_Actions");
-                if (inputActions == null)
-                {
-                    Debug.LogError("InputSystem_Actions not found in Resources");
-                    return null;
-                }
+                Debug.LogError("[KeyConfigModelRepository] InputActionAsset is null. Please call Initialize() first with a valid InputActionAsset.");
+                return null;
             }
 
             var userModel = userModelRepository.Get();
