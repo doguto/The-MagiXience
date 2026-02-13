@@ -10,7 +10,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         readonly ReactiveProperty<float> chargeTime = new(0f);
         readonly ReactiveProperty<bool> isInvincible = new(false);
 
-        float invincibilityTimer;
+        readonly CompositeDisposable invincibilityDisposables = new();
 
         public PlayerEntityModel(int maxHp, Vector3 initialPosition, float chargeThreshold = 1.0f, float sneakSpeedMultiplier = 0.5f, float invincibilityDuration = 1.0f)
             : base(maxHp, initialPosition)
@@ -26,7 +26,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         public float SneakSpeedMultiplier { get; }
         public float InvincibilityDuration { get; }
         public IReadOnlyReactiveProperty<bool> IsSneaking => isSneaking;
-        public IReadOnlyReactiveProperty<float> ChargeTime => chargeTime;
         public bool IsChargeComplete => chargeTime.Value >= ChargeThreshold;
         public IReadOnlyReactiveProperty<bool> IsInvincible => isInvincible;
 
@@ -47,21 +46,14 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             chargeTime.Value = Mathf.Min(chargeTime.Value + deltaTime, ChargeThreshold);
         }
 
-        public void UpdateInvincibility(float deltaTime)
-        {
-            if (!isInvincible.Value) return;
-
-            invincibilityTimer -= deltaTime;
-            if (invincibilityTimer <= 0f)
-            {
-                isInvincible.Value = false;
-            }
-        }
-
         void StartInvincibility()
         {
+            invincibilityDisposables.Clear();
             isInvincible.Value = true;
-            invincibilityTimer = InvincibilityDuration;
+
+            Observable.Timer(TimeSpan.FromSeconds(InvincibilityDuration))
+                .Subscribe(_ => isInvincible.Value = false)
+                .AddTo(invincibilityDisposables);
         }
 
         public void ResetCharge()
@@ -107,6 +99,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             isSneaking?.Dispose();
             chargeTime?.Dispose();
             isInvincible?.Dispose();
+            invincibilityDisposables?.Dispose();
         }
     }
 }

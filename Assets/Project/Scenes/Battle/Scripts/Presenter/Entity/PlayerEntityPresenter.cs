@@ -28,7 +28,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         PlayerEntityModel model;
         float lastShootTime;
         Vector2 currentMoveInput;
-        bool isAttackButtonPressed;
         readonly CompositeDisposable disposables = new();
 
         public PlayerEntityModel Model => model;
@@ -48,47 +47,34 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void BindModelToView()
         {
-            model.CurrentHp
-                .Subscribe(hp => view.UpdateHpDisplay(hp, model.MaxHp))
-                .AddTo(disposables);
-
             model.OnDeath
                 .Subscribe(_ => HandleDeath())
-                .AddTo(disposables);
-
-            model.IsSneaking
-                .Subscribe(isSneaking => view.SetSneakVisual(isSneaking))
-                .AddTo(disposables);
-
-            model.ChargeTime
-                .Subscribe(chargeTime =>
-                {
-                    float ratio = chargeTime / model.ChargeThreshold;
-                    view.UpdateChargeVisual(ratio);
-                })
-                .AddTo(disposables);
-
-            model.IsInvincible
-                .Subscribe(isInvincible => view.SetInvincibilityVisual(isInvincible))
                 .AddTo(disposables);
         }
 
         void SubscribeToInput()
         {
-            // 移動入力を購読
+            // 移動入力を保持（Updateで使用）
             MessageBroker.Default.Receive<PlayerMoveMessage>()
-                .Subscribe(msg => currentMoveInput = msg.value)
+                .Subscribe(msg =>
+                {
+                    Debug.Log($"[PlayerEntityPresenter] Move input: {msg.value}");
+                    currentMoveInput = msg.value;
+                })
                 .AddTo(disposables);
 
-            // 攻撃ボタンの購読
+            // 攻撃ボタンをイベントで処理
             MessageBroker.Default.Receive<PlayerAttackMessage>()
-                .Subscribe(_ => isAttackButtonPressed = true)
+                .Where(_ => !model.IsSneaking.Value)
+                .Where(_ => Time.time >= lastShootTime + shootCooldown)
+                .Subscribe(_ => FireNormalShot())
                 .AddTo(disposables);
 
-            // スニークボタン（Crouchを使用）の押下/解除
+            // スニークボタンの押下/解除
             MessageBroker.Default.Receive<PlayerCrouchMessage>()
                 .Subscribe(msg =>
                 {
+                    Debug.Log($"[PlayerEntityPresenter] Crouch input: {msg.isPressed}");
                     if (msg.isPressed)
                     {
                         model.SetSneaking(true);
@@ -110,18 +96,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (!model.IsAlive) return;
 
+            // 移動処理（押している間継続）
             HandleMovement();
 
+            // チャージ処理
             if (model.IsSneaking.Value)
             {
                 model.UpdateCharge(Time.deltaTime);
             }
 
-            model.UpdateInvincibility(Time.deltaTime);
-
-            HandleShooting();
-
-            view.UpdatePosition(transform.position);
+            // view.UpdatePosition(transform.position);
         }
 
         void HandleMovement()
@@ -131,20 +115,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             float currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
             Vector3 movement = new Vector3(currentMoveInput.x, currentMoveInput.y, 0) * currentSpeed * Time.deltaTime;
             transform.position += movement;
-        }
-
-        void HandleShooting()
-        {
-            if (model.IsSneaking.Value) return;
-
-            if (Time.time < lastShootTime + shootCooldown) return;
-
-            if (isAttackButtonPressed)
-            {
-                FireNormalShot();
-                lastShootTime = Time.time;
-                isAttackButtonPressed = false;
-            }
         }
 
         void FireNormalShot()
@@ -157,7 +127,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             Vector3 direction = Vector3.up;
             bulletPool.SpawnBullet(normalShotDamage, transform.position, direction * bulletSpeed, isFriendly: true);
-            view.PlayShootEffect();
+            lastShootTime = Time.time;
         }
 
         void FireChargedShot()
@@ -170,20 +140,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             Vector3 direction = Vector3.up;
             bulletPool.SpawnBullet(chargedShotDamage, transform.position, direction * bulletSpeed, isFriendly: true);
-            view.PlayShootEffect();
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 
         void HandleDeath()
         {
-            view.PlayDeathEffect();
             Debug.Log("[PlayerEntityPresenter] Player died");
-        }
-
-        public void TakeDamage(int damage)
-        {
-            model.TakeDamage(damage);
-            view.PlayDamageEffect();
         }
 
         void OnTriggerEnter2D(Collider2D other)
