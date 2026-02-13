@@ -9,6 +9,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
     {
         readonly ReactiveProperty<int> currentHp = new();
         readonly CompositeDisposable disposables = new();
+        readonly Subject<Unit> onDeath = new();
+
+        public IObservable<Unit> OnDeath => onDeath;
 
         IMovementStrategy movementStrategy;
 
@@ -38,7 +41,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
             if (currentHp.Value <= 0)
             {
-                OnDeath();
+                onDeath.OnNext(Unit.Default);
+                OnDeathCore();
             }
         }
 
@@ -68,7 +72,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         public abstract bool IsPlayer { get; }
 
-        protected virtual void OnDeath() { }
+        protected virtual void OnDeathCore() { }
 
         public virtual void Dispose()
         {
