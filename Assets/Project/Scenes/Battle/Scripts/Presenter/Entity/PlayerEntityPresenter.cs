@@ -98,7 +98,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // 移動処理（押している間継続）
             Vector3 movement = HandleMovement();
-            view.UpdatePosition(view.Position + movement);
+            view.UpdatePosition(view.GetPosition() + movement);
 
             // チャージ処理
             if (model.IsSneaking.Value)

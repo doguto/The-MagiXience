@@ -49,11 +49,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void Update()
         {
             if (model == null || !model.IsAlive) return;
-            
 
             model.UpdateMovement(Time.deltaTime);
 
-            view.UpdatePosition(transform.position);
+            view.UpdatePosition(model.Position);
         }
 
         void HandleDeath()

@@ -2,9 +2,7 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.View.Entity
 {
-    [RequireComponent(typeof(SpriteRenderer))]
-    [RequireComponent(typeof(Collider2D))]
-    public class BulletEntityView : MonoBehaviour
+    public class BulletEntityView : EntityViewBase
     {
         [SerializeField] SpriteRenderer spriteRenderer;
         // memo: TrailRendererというものがあるらしい
@@ -12,11 +10,7 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         void Awake()
         {
             spriteRenderer ??= GetComponent<SpriteRenderer>();
-        }
-
-        public void UpdatePosition(Vector3 position)
-        {
-            transform.position = position;
+            OnAwakeView();
         }
 
         public void SetVisible(bool visible)
