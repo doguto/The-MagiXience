@@ -124,7 +124,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 return;
             }
 
-            Vector3 direction = Vector3.up;
+            Vector3 direction = Vector3.right;
             bulletPool.SpawnBullet(normalShotDamage, transform.position, direction * bulletSpeed, isFriendly: true);
             lastShootTime = Time.time;
         }
