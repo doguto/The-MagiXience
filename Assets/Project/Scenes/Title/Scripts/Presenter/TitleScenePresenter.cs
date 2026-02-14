@@ -1,10 +1,9 @@
-using System;
 using Cysharp.Threading.Tasks;
-using Project.Commons.UI.Scripts.Presenter;
 using Project.Scripts.Model;
 using Project.Scenes.Title.Scripts.Model;
 using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scenes.Title.Scripts.View;
+using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
@@ -15,7 +14,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
     public class TitleScenePresenter : MonoPresenter
     {
         [SerializeField] TitleMenuView titleMenuView;
-        
+
         TitleModelRepository titleModelRepository;
         TitleModel titleModel;
 
@@ -24,7 +23,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
         {
             titleModelRepository = TitleModelRepository.Instance;
             titleModel = titleModelRepository.Get();
-            
+
             titleMenuView.Init(titleModel.GetBackGroundSprites());
         }
 
@@ -33,26 +32,36 @@ namespace Project.Scenes.Title.Scripts.Presenter
             base.Start();
             titleMenuView.InitStart();
 
-            titleMenuView.OnPressedStart.Subscribe(x => StartGame(x).Forget());
+            titleMenuView.OnPressedStart.Subscribe(x =>
+            {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
+                StartGame(x).Forget();
+            });
             titleMenuView.OnPressedOption.Subscribe(async _ =>
             {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
                 titleMenuView.SetInteractable(false);
                 globalScenePresenter.OptionModalPresenter.Open();
-                
-                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(useFirstValue: true);
-                
+
+                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
+
                 titleMenuView.SetInteractable(true);
                 titleMenuView.InitStart();
-
             });
 
-            titleMenuView.OnPressedExit.Subscribe(ExitGame);
+            titleMenuView.OnPressedExit.Subscribe(_ =>
+            {
+                soundManager.PlaySE(SeType.Cancel);
+                ExitGame();
+            });
+
+            soundManager!.PlayBGMAsync(SceneType.Title).Forget();
         }
 
         async UniTask StartGame(Unit _)
         {
             // TitleScene 以外で TitleModel は使用しないのでクリアする
-            titleModelRepository.Refresh(); 
+            titleModelRepository.Refresh();
 
             await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
 
@@ -60,7 +69,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             SceneManager.UnloadSceneAsync(gameObject.scene.name);
         }
 
-        void ExitGame(Unit _)
+        void ExitGame()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
