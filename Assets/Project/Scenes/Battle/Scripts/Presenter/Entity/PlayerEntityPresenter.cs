@@ -98,7 +98,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // 移動処理（押している間継続）
             Vector3 movement = HandleMovement();
-            view.UpdatePosition(model.Position + movement);
+            view.UpdatePosition(view.Position + movement);
 
             // チャージ処理
             if (model.IsSneaking.Value)
@@ -150,9 +150,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerEnter2D(Collider2D other)
         {
             var otherPresenter = other.GetComponent<IEntityPresenter>();
+            Debug.Log($"[PlayerEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name}");
             if (otherPresenter != null)
             {
                 model.OnCollision(otherPresenter.GetModel());
+                Debug.Log($"[PlayerEntityPresenter] Hp: {model.CurrentHp.Value}");
             }
         }
 
