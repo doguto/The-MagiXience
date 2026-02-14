@@ -43,7 +43,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             SetMovementStrategy(movementStrategy);
         }
 
-        protected override void OnDeath()
+        protected override void OnDeathCore()
         {
             Debug.Log($"[BulletEntityModel] Bullet destroyed at position {Position}");
         }

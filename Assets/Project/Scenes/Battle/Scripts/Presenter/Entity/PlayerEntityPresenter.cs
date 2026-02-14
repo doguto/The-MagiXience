@@ -97,24 +97,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (!model.IsAlive) return;
 
             // 移動処理（押している間継続）
-            HandleMovement();
+            Vector3 movement = HandleMovement();
+            view.UpdatePosition(model.Position + movement);
 
             // チャージ処理
             if (model.IsSneaking.Value)
             {
                 model.UpdateCharge(Time.deltaTime);
             }
-
-            // view.UpdatePosition(transform.position);
         }
 
-        void HandleMovement()
+        Vector3 HandleMovement()
         {
-            if (currentMoveInput.sqrMagnitude < 0.01f) return;
+            if (currentMoveInput.sqrMagnitude < 0.01f) return Vector3.zero;
 
             float currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
             Vector3 movement = new Vector3(currentMoveInput.x, currentMoveInput.y, 0) * currentSpeed * Time.deltaTime;
-            transform.position += movement;
+            return movement;
         }
 
         void FireNormalShot()
