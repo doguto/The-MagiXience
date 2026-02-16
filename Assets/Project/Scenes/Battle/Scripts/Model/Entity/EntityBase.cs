@@ -78,7 +78,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         }
 
         public IAttackStrategy AttackStrategy => attackStrategy;
-        public bool CanAttack => attackStrategy?.CanAttack ?? false;
 
         // ObjectPool用
         protected void ResetHp()

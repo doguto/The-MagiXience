@@ -1,11 +1,12 @@
-using UnityEngine;
+using System;
+using UniRx;
 
 namespace Project.Scenes.Battle.Scripts.Model.Attack
 {
-    public interface IAttackStrategy
+    public interface IAttackStrategy : IDisposable
     {
-        void Update(float deltaTime);
+        IObservable<Unit> OnAttackTiming { get; }
         void Initialize();
-        bool CanAttack { get; }
+        void Update(float deltaTime);
     }
 }

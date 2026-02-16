@@ -1,4 +1,5 @@
 using System;
+using UniRx;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Model.Attack
@@ -6,37 +7,32 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     public class IntervalAttackStrategy : IAttackStrategy
     {
         readonly float attackInterval;
-        readonly Action onAttackCallback;
+        readonly Subject<Unit> onAttackTiming = new();
+        readonly CompositeDisposable disposables = new();
 
-        float timeSinceLastAttack;
+        public IObservable<Unit> OnAttackTiming => onAttackTiming;
 
-        public IntervalAttackStrategy(float attackInterval, Action onAttackCallback)
+        public IntervalAttackStrategy(float attackInterval)
         {
             this.attackInterval = attackInterval;
-            this.onAttackCallback = onAttackCallback;
         }
-
-        public bool CanAttack { get; private set; }
 
         public void Initialize()
         {
-            timeSinceLastAttack = 0;
-            CanAttack = false;
+            Observable.Interval(TimeSpan.FromSeconds(attackInterval))
+                .Subscribe(_ => onAttackTiming.OnNext(Unit.Default))
+                .AddTo(disposables);
         }
 
         public void Update(float deltaTime)
         {
-            timeSinceLastAttack += deltaTime;
-            if (timeSinceLastAttack >= attackInterval)
-            {
-                CanAttack = true;
-                timeSinceLastAttack = 0;
-                onAttackCallback?.Invoke();
-            }
-            else
-            {
-                CanAttack = false;
-            }
+            // シンプル攻撃なので Update 不要
+        }
+
+        public void Dispose()
+        {
+            disposables?.Dispose();
+            onAttackTiming?.Dispose();
         }
     }
 }

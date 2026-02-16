@@ -30,10 +30,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view = GetComponent<EnemyEntityView>();
             // 仮のInitialize
             // 本来は外部からやるのがいいと思う
-            Initialize(transform.position, maxHp, contactDamage, new StaticMovement(), new IntervalAttackStrategy(attackInterval, FireBullet));
+            Initialize(transform.position, maxHp, contactDamage, new StaticMovement());
         }
 
-        public void Initialize(Vector3 spawnPosition, int hp, int damage, IMovementStrategy movementStrategy, IAttackStrategy attackStrategy)
+        public void Initialize(Vector3 spawnPosition, int hp, int damage, IMovementStrategy movementStrategy)
         {
             maxHp = hp;
             contactDamage = damage;
@@ -41,7 +41,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.SetMovementStrategy(movementStrategy);
 
+            // 攻撃戦略を設定
+            var attackStrategy = new IntervalAttackStrategy(attackInterval);
             model.SetAttackStrategy(attackStrategy);
+
+            // OnAttackTiming イベントで弾発射
+            model.AttackStrategy.OnAttackTiming
+                .TakeUntil(model.OnDeath)
+                .Subscribe(_ => FireBullet())
+                .AddTo(disposables);
 
             BindModelToView();
         }
@@ -102,6 +110,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             disposables.Dispose();
             model?.Dispose();
+            model?.AttackStrategy?.Dispose();
         }
 
         public EntityBase GetModel() => model;
