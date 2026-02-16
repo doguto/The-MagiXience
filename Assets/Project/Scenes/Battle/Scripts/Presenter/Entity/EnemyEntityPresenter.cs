@@ -4,6 +4,7 @@ using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model.Movement;
+using Project.Scenes.Battle.Scripts.Model.Attack;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
@@ -12,6 +13,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     {
         [SerializeField] int maxHp = 50;
         [SerializeField] int contactDamage = 10;
+        [SerializeField] BulletPool bulletPool;
+        [SerializeField] int bulletDamage = 10;
+        [SerializeField] float bulletSpeed = 5f;
+        [SerializeField] float attackInterval = 2.0f;
 
         EnemyEntityView view;
         EnemyEntityModel model;
@@ -23,16 +28,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void Awake()
         {
             view = GetComponent<EnemyEntityView>();
-            Initialize(transform.position, maxHp, contactDamage, new StaticMovement());
+            // 仮のInitialize
+            // 本来は外部からやるのがいいと思う
+            Initialize(transform.position, maxHp, contactDamage, new StaticMovement(), new IntervalAttackStrategy(attackInterval, FireBullet));
         }
 
-        public void Initialize(Vector3 spawnPosition, int hp, int damage, IMovementStrategy movementStrategy)
+        public void Initialize(Vector3 spawnPosition, int hp, int damage, IMovementStrategy movementStrategy, IAttackStrategy attackStrategy)
         {
             maxHp = hp;
             contactDamage = damage;
             model = new EnemyEntityModel(maxHp, spawnPosition, contactDamage);
 
             model.SetMovementStrategy(movementStrategy);
+
+            model.SetAttackStrategy(attackStrategy);
 
             BindModelToView();
         }
@@ -51,14 +60,28 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (model == null || !model.IsAlive) return;
 
             model.UpdateMovement(Time.deltaTime);
+            model.UpdateAttack(Time.deltaTime);
 
             view.UpdatePosition(model.Position);
+        }
+
+        void FireBullet()
+        {
+            if (bulletPool == null)
+            {
+                Debug.LogWarning("[EnemyEntityPresenter] BulletPool is not assigned!");
+                return;
+            }
+
+            Vector3 direction = Vector3.left;
+            bulletPool.SpawnBullet(bulletDamage, model.Position, direction * bulletSpeed, isFriendly: false);
+            Debug.Log("[EnemyEntityPresenter] Enemy fired bullet!");
         }
 
         void HandleDeath()
         {
             Debug.Log($"[EnemyEntityPresenter] Enemy died at {transform.position}");
-            
+
             Observable.Timer(TimeSpan.FromSeconds(1f))
                 .Subscribe(_ => Destroy(gameObject))
                 .AddTo(disposables);
