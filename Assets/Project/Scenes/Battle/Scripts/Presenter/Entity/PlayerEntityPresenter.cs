@@ -21,7 +21,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] BulletPool bulletPool;
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] int chargedShotDamage = 30;
-        [SerializeField] float bulletSpeed = 10f;
         [SerializeField] float shootCooldown = 0.2f;
 
         PlayerEntityView view;
@@ -124,8 +123,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 return;
             }
 
-            Vector3 direction = Vector3.right;
-            bulletPool.SpawnBullet(normalShotDamage, transform.position, direction * bulletSpeed, isFriendly: true);
+            bulletPool.SpawnBullet(normalShotDamage, transform.position, isFriendly: true);
             lastShootTime = Time.time;
         }
 
@@ -137,8 +135,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 return;
             }
 
-            Vector3 direction = Vector3.up;
-            bulletPool.SpawnBullet(chargedShotDamage, transform.position, direction * bulletSpeed, isFriendly: true);
+            bulletPool.SpawnBullet(chargedShotDamage, transform.position, isFriendly: true);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 

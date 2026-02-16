@@ -15,7 +15,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] int contactDamage = 10;
         [SerializeField] BulletPool bulletPool;
         [SerializeField] int bulletDamage = 10;
-        [SerializeField] float bulletSpeed = 5f;
         [SerializeField] float attackInterval = 2.0f;
 
         EnemyEntityView view;
@@ -81,9 +80,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 return;
             }
 
-            Vector3 direction = Vector3.left;
-            bulletPool.SpawnBullet(bulletDamage, model.Position, direction * bulletSpeed, isFriendly: false);
-            Debug.Log("[EnemyEntityPresenter] Enemy fired bullet!");
+            bulletPool.SpawnBullet(bulletDamage, model.Position, isFriendly: false);
         }
 
         void HandleDeath()
