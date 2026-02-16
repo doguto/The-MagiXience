@@ -10,19 +10,19 @@ namespace Project.Scenes.Battle.Scripts.Model
     public class EnemySpawnSignal : SignalAsset
     {
         [SerializeField] Vector3 spawnPosition;
-        [SerializeField] int maxHp;
+        [SerializeField] GameObject prefab;
 
         public Vector3 SpawnPosition => spawnPosition;
-        public int MaxHp => maxHp;
+        public GameObject Prefab => prefab;
 
         /// <summary>
         /// ランタイムでプロパティを設定するためのメソッド
         /// BattleTimelineBuilderAssetから動的生成時に使用
         /// </summary>
-        public void SetProperties(Vector3 position, int hp)
+        public void SetProperties(Vector3 position, GameObject prefab)
         {
             spawnPosition = position;
-            maxHp = hp;
+            this.prefab = prefab;
         }
     }
 }

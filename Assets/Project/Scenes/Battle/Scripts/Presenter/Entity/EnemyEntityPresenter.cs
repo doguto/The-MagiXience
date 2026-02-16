@@ -11,8 +11,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     [RequireComponent(typeof(EnemyEntityView))]
     public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter
     {
+        [Header("Entity Settings")]
         [SerializeField] int maxHp = 50;
         [SerializeField] int contactDamage = 10;
+
+        [Header("Movement")]
+        [SerializeField] MovementType movementType = MovementType.Static;
+        [SerializeField] Vector3 moveVelocity = Vector3.left;
+
+        [Header("Attack")]
         [SerializeField] BulletPool bulletPool;
         [SerializeField] int bulletDamage = 10;
         [SerializeField] float attackInterval = 2.0f;
@@ -27,18 +34,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void Awake()
         {
             view = GetComponent<EnemyEntityView>();
-            // 仮のInitialize
-            // 本来は外部からやるのがいいと思う
-            Initialize(transform.position, maxHp, contactDamage, new StaticMovement());
+            Initialize(transform.position);
         }
 
-        public void Initialize(Vector3 spawnPosition, int hp, int damage, IMovementStrategy movementStrategy)
+        public void Initialize(Vector3 spawnPosition)
         {
-            maxHp = hp;
-            contactDamage = damage;
             model = new EnemyEntityModel(maxHp, spawnPosition, contactDamage);
 
-            model.SetMovementStrategy(movementStrategy);
+            model.SetMovementStrategy(CreateMovementStrategy());
 
             // 攻撃戦略を設定
             var attackStrategy = new IntervalAttackStrategy(attackInterval);
@@ -81,6 +84,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             bulletPool.SpawnBullet(bulletDamage, model.Position, isFriendly: false);
+            Debug.Log("[EnemyEntityPresenter] Enemy fired bullet!");
+        }
+
+        IMovementStrategy CreateMovementStrategy()
+        {
+            return movementType switch
+            {
+                MovementType.Linear => new LinearMovement(moveVelocity),
+                MovementType.Static => new StaticMovement(),
+                _ => new StaticMovement()
+            };
         }
 
         void HandleDeath()
@@ -111,5 +125,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         public EntityBase GetModel() => model;
+    }
+
+    public enum MovementType
+    {
+        Static,
+        Linear,
     }
 }

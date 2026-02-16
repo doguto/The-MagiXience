@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
 namespace Project.Scenes.Battle.Scripts.Model
@@ -16,7 +17,7 @@ namespace Project.Scenes.Battle.Scripts.Model
     {
         [SerializeField, Min(0)] double time;
         [SerializeField] Vector3 spawnPosition;
-        [SerializeField] int maxHp;
+        [SerializeField] GameObject prefab;
 
         public void Build(SignalTrack track)
         {
@@ -28,7 +29,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             signal.hideFlags = HideFlags.DontSave;
 
             // プロパティを設定
-            signal.SetProperties(spawnPosition, maxHp);
+            signal.SetProperties(spawnPosition, prefab);
 
             var emitter = track.CreateMarker<SignalEmitter>(time);
             emitter.asset = signal;
