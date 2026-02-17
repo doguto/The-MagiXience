@@ -7,18 +7,9 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         [SerializeField] SpriteRenderer spriteRenderer;
         // memo: TrailRendererというものがあるらしい
 
-        void Awake()
-        {
-            spriteRenderer ??= GetComponent<SpriteRenderer>();
-            OnAwakeView();
-        }
-
         public void SetVisible(bool visible)
         {
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.enabled = visible;
-            }
+            spriteRenderer.enabled = visible;
         }
 
         /// ObjectPool用
