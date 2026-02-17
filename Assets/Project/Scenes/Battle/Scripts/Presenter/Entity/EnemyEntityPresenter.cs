@@ -25,7 +25,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeReference, SubclassSelector]
         IAttackConfig attackConfig = new IntervalAttackConfig();
 
-        EnemyEntityView view;
+        [Header("component references")]
+        [SerializeField] EnemyEntityView view;
+
+        void Reset()
+        {
+            view = GetComponent<EnemyEntityView>();
+        }
+        
         EnemyEntityModel model;
         readonly CompositeDisposable disposables = new();
 
@@ -34,7 +41,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
-            view = GetComponent<EnemyEntityView>();
+            if (bulletPool == null) Debug.LogError("[EnemyEntityPresenter] BulletPool is not assigned!");
             Initialize(transform.position);
         }
 
@@ -78,12 +85,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireBullet()
         {
-            if (bulletPool == null)
-            {
-                Debug.LogWarning("[EnemyEntityPresenter] BulletPool is not assigned!");
-                return;
-            }
-
             bulletPool.SpawnBullet(bulletDamage, model.Position);
             Debug.Log("[EnemyEntityPresenter] Enemy fired bullet!");
         }
@@ -92,10 +93,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void HandleDeath()
         {
             Debug.Log($"[EnemyEntityPresenter] Enemy died at {transform.position}");
-
-            Observable.Timer(TimeSpan.FromSeconds(1f))
-                .Subscribe(_ => Destroy(gameObject))
-                .AddTo(disposables);
+            Destroy(gameObject);
         }
 
         void OnTriggerEnter2D(Collider2D other)

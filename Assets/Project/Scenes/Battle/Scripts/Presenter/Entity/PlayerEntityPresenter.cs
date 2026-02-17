@@ -8,6 +8,7 @@ using Project.Scripts.Extensions.Message;
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(PlayerEntityView))]
+    [RequireComponent(typeof(SpriteRenderer))]
     public class PlayerEntityPresenter : MonoBehaviour, IEntityPresenter
     {
         [Header("Entity Settings")]
@@ -18,7 +19,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] float invincibilityDuration = 1.0f;
 
         [Header("Shooting Settings")]
-        [SerializeField] BulletPool bulletPool;
+        [SerializeField] BulletPool normalBulletPool;
+        [SerializeField] BulletPool chargeBulletPool;
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] int chargedShotDamage = 30;
         [SerializeField] float shootCooldown = 0.2f;
@@ -26,6 +28,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("component references")]
         [SerializeField] PlayerEntityView view;
         [SerializeField] SpriteRenderer spriteRenderer;
+        void Reset()
+        {
+            view = GetComponent<PlayerEntityView>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
 
         PlayerEntityModel model;
         Camera mainCamera;
@@ -38,6 +45,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
+            if (normalBulletPool == null) Debug.LogError("[PlayerEntityPresenter] NormalBulletPool is not assigned!");
+            if (chargeBulletPool == null) Debug.LogError("[PlayerEntityPresenter] ChargeBulletPool is not assigned!");
             mainCamera = Camera.main;
             model = new PlayerEntityModel(maxHp, transform.position, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
         }
@@ -136,25 +145,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireNormalShot()
         {
-            if (bulletPool == null)
-            {
-                Debug.LogWarning("[PlayerEntityPresenter] BulletPool is not assigned!");
-                return;
-            }
-
-            bulletPool.SpawnBullet(normalShotDamage, transform.position);
+            normalBulletPool.SpawnBullet(normalShotDamage, transform.position);
             lastShootTime = Time.time;
         }
 
         void FireChargedShot()
         {
-            if (bulletPool == null)
-            {
-                Debug.LogWarning("[PlayerEntityPresenter] BulletPool is not assigned!");
-                return;
-            }
-
-            bulletPool.SpawnBullet(chargedShotDamage, transform.position);
+            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 

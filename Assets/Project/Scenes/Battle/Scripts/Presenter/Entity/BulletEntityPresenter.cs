@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -9,18 +11,26 @@ using Project.Scenes.Battle.Scripts.View.Entity;
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(BulletEntityView))]
+    [RequireComponent(typeof(SpriteRenderer))]
     public class BulletEntityPresenter : MonoBehaviour, IEntityPresenter
     {
         [SerializeReference, SubclassSelector]
         IMovementConfig movementConfig = new LinearMovementConfig();
 
-        // 同Objectにアタッチされている想定だが、負荷軽減のためSerializeFieldで
         [SerializeField] BulletEntityView view;
         [SerializeField] SpriteRenderer spriteRenderer;
+        [SerializeField, Tooltip("弾のライフタイム（秒）。0以下で無制限")]
+        float lifetime = 5f;
+        void Reset()
+        {
+            view = GetComponent<BulletEntityView>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
         
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
         Camera mainCamera;
+        CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
@@ -65,6 +75,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 .Where(hp => hp <= 0)
                 .Subscribe(_ => HandleDestruction())
                 .AddTo(disposables);
+
+            // ライフタイムで自動回収
+            StartLifetimeTimer();
         }
 
         void Update()
@@ -99,6 +112,28 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                    viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
         }
 
+        void StartLifetimeTimer()
+        {
+            CancelLifetimeTimer();
+            if (lifetime <= 0f) return;
+
+            lifetimeCts = new CancellationTokenSource();
+            LifetimeTimerAsync(lifetimeCts.Token).Forget();
+        }
+
+        async UniTaskVoid LifetimeTimerAsync(CancellationToken ct)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(lifetime), cancellationToken: ct);
+            ReturnToPool();
+        }
+
+        void CancelLifetimeTimer()
+        {
+            lifetimeCts?.Cancel();
+            lifetimeCts?.Dispose();
+            lifetimeCts = null;
+        }
+
         void HandleDestruction()
         {
             ReturnToPool();
@@ -129,6 +164,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         
         public void OnReturnedToPool()
         {
+            CancelLifetimeTimer();
             view.SetVisible(false);
             gameObject.SetActive(false);
         }
@@ -140,6 +176,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
+            CancelLifetimeTimer();
             disposables.Dispose();
             model?.Dispose();
         }

@@ -47,7 +47,6 @@ MonoBehaviour:
   bulletPrefab: {fileID: 3626172051182019249, guid: 7bf2f8d22e8012a4e898c1a38d8c0d5c, type: 3}
   defaultCapacity: 20
   maxSize: 100
-  bulletLayer: 9
 --- !u!1 &7074045735317373604
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,12 +243,15 @@ MonoBehaviour:
   bulletPool: {fileID: 7996329089749057052}
   bulletDamage: 10
   attackConfig:
-    rid: -2
+    rid: 2030962193479499912
+  view: {fileID: 5041210401996759946}
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 2030962193479499891
       type: {class: StaticMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data: 
+    - rid: 2030962193479499912
+      type: {class: IntervalAttackConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        attackInterval: 2
