@@ -161,5 +161,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfd5daf7fba3164387b3052b7eeb571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
-  direction: {x: 1, y: 0, z: 0}
+  movementConfig:
+    rid: 2030962193479499847
+  references:
+    version: 2
+    RefIds:
+    - rid: 2030962193479499847
+      type: {class: LinearMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        velocity: {x: -1, y: 0, z: 0}
