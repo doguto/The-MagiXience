@@ -22,9 +22,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] int chargedShotDamage = 30;
         [SerializeField] float shootCooldown = 0.2f;
+        
+        [Header("component references")]
+        [SerializeField] PlayerEntityView view;
+        [SerializeField] SpriteRenderer spriteRenderer;
 
-        PlayerEntityView view;
         PlayerEntityModel model;
+        Camera mainCamera;
         float lastShootTime;
         Vector2 currentMoveInput;
         readonly CompositeDisposable disposables = new();
@@ -34,7 +38,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
-            view = GetComponent<PlayerEntityView>();
+            mainCamera = Camera.main;
             model = new PlayerEntityModel(maxHp, transform.position, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
         }
 
@@ -97,7 +101,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // 移動処理（押している間継続）
             Vector3 movement = HandleMovement();
-            view.UpdatePosition(view.GetPosition() + movement);
+            Vector3 newPosition = ClampToScreen(view.GetPosition() + movement);
+            view.UpdatePosition(newPosition);
 
             // チャージ処理
             if (model.IsSneaking.Value)
@@ -113,6 +118,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             float currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
             Vector3 movement = new Vector3(currentMoveInput.x, currentMoveInput.y, 0) * currentSpeed * Time.deltaTime;
             return movement;
+        }
+
+        Vector3 ClampToScreen(Vector3 position)
+        {
+            Vector3 extents = spriteRenderer.bounds.extents;
+
+            // Spriteの端がビューポート(0,0)〜(1,1)に収まるようにクランプ
+            Vector3 minWorld = mainCamera.ViewportToWorldPoint(Vector3.zero);
+            Vector3 maxWorld = mainCamera.ViewportToWorldPoint(Vector3.one);
+
+            position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
+            position.y = Mathf.Clamp(position.y, minWorld.y + extents.y, maxWorld.y - extents.y);
+
+            return position;
         }
 
         void FireNormalShot()
