@@ -56,7 +56,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            pool?.Clear();
+            if (bulletPrefab is null) return;
+            pool.Clear();
         }
     }
 }
