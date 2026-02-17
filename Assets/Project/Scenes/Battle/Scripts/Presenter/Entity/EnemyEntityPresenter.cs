@@ -84,7 +84,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 return;
             }
 
-            bulletPool.SpawnBullet(bulletDamage, model.Position, isFriendly: false);
+            bulletPool.SpawnBullet(bulletDamage, model.Position);
             Debug.Log("[EnemyEntityPresenter] Enemy fired bullet!");
         }
 

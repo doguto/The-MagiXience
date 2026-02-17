@@ -17,9 +17,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         public override void OnCollision(EntityBase other)
         {
             if (other == null || !other.IsAlive) return;
-            if (!other.IsPlayer) return;
 
-            if (other is BulletEntityModel bullet && bullet.IsFriendly)
+            // Layerフィルタ済みなのでPlayerBulletのみ到達する
+            if (other is BulletEntityModel bullet)
             {
                 TakeDamage(bullet.Damage);
             }

@@ -142,7 +142,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 return;
             }
 
-            bulletPool.SpawnBullet(normalShotDamage, transform.position, isFriendly: true);
+            bulletPool.SpawnBullet(normalShotDamage, transform.position);
             lastShootTime = Time.time;
         }
 
@@ -154,7 +154,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 return;
             }
 
-            bulletPool.SpawnBullet(chargedShotDamage, transform.position, isFriendly: true);
+            bulletPool.SpawnBullet(chargedShotDamage, transform.position);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 
@@ -166,7 +166,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerEnter2D(Collider2D other)
         {
             var otherPresenter = other.GetComponent<IEntityPresenter>();
-            Debug.Log($"[PlayerEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name}");
+            Debug.Log($"[PlayerEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name} | other.gameObject: '{other.gameObject.name}' layer: {other.gameObject.layer} ({LayerMask.LayerToName(other.gameObject.layer)}) | self layer: {gameObject.layer} ({LayerMask.LayerToName(gameObject.layer)})");
             if (otherPresenter != null)
             {
                 model.OnCollision(otherPresenter.GetModel());

@@ -35,18 +35,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             mainCamera = Camera.main;
         }
 
-        public void Initialize(int damage, Vector3 position, bool isFriendly, IObjectPool<BulletEntityPresenter> objectPool)
+        public void Initialize(int damage, Vector3 position, IObjectPool<BulletEntityPresenter> objectPool)
         {
             pool = objectPool;
             var movementStrategy = CreateMovementStrategy();
 
             if (model == null)
             {
-                model = new BulletEntityModel(damage, position, movementStrategy, isFriendly);
+                model = new BulletEntityModel(damage, position, movementStrategy);
             }
             else
             {
-                model.Reinitialize(damage, position, movementStrategy, isFriendly);
+                model.Reinitialize(damage, position, movementStrategy);
             }
 
             view.ResetView();
