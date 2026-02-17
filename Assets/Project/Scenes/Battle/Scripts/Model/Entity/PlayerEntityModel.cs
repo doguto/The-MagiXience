@@ -75,8 +75,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         public override void OnCollision(EntityBase other)
         {
-            if (other == null || !other.IsAlive) return;
-
             // Layerフィルタ済みなのでEnemyとEnemyBulletのみ到達する
             if (other is EnemyEntityModel enemy)
             {

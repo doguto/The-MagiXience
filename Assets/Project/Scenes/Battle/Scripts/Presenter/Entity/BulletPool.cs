@@ -33,7 +33,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         BulletEntityPresenter CreateBullet()
         {
-            var bullet = Instantiate(bulletPrefab, transform);
+            // 親をBulletPoolにすると、Poolが他Entityの子の場合に
+            // 親のRigidbody2DにOnTriggerEnter2Dが伝播してしまうため、ルートに生成する
+            var bullet = Instantiate(bulletPrefab);
             return bullet;
         }
 

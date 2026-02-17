@@ -19,7 +19,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         public override void OnCollision(EntityBase other)
         {
-            if (other == null || !other.IsAlive) return;
             // Layerフィルタ済みなので当たったら消滅
             TakeDamage(1);
         }
