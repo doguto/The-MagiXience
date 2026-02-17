@@ -14,9 +14,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeReference, SubclassSelector]
         IMovementConfig movementConfig = new LinearMovementConfig();
 
-        BulletEntityView view;
+        // 同Objectにアタッチされている想定だが、負荷軽減のためSerializeFieldで
+        [SerializeField] BulletEntityView view;
+        [SerializeField] SpriteRenderer spriteRenderer;
+        
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
+        Camera mainCamera;
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
@@ -28,7 +32,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
-            view = GetComponent<BulletEntityView>();
+            mainCamera = Camera.main;
         }
 
         public void Initialize(int damage, Vector3 position, bool isFriendly, IObjectPool<BulletEntityPresenter> objectPool)
@@ -82,10 +86,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         bool IsOutOfScreen()
         {
-            // カメラの視野外に出たらtrue
-            Vector3 screenPoint = Camera.main.WorldToViewportPoint(model.Position);
-            return screenPoint.x < -0.1f || screenPoint.x > 1.1f ||
-                   screenPoint.y < -0.1f || screenPoint.y > 1.1f;
+            Vector3 position = model.Position;
+            Vector3 viewportPoint = mainCamera.WorldToViewportPoint(position);
+
+            // Spriteサイズ分のマージンをビューポート座標に変換
+            Vector3 extents = spriteRenderer.bounds.extents;
+            Vector3 viewportExtents = mainCamera.WorldToViewportPoint(position + extents)
+                                    - mainCamera.WorldToViewportPoint(position);
+            float margin = Mathf.Max(Mathf.Abs(viewportExtents.x), Mathf.Abs(viewportExtents.y)) + 0.1f;
+
+            return viewportPoint.x < -margin || viewportPoint.x > 1f + margin ||
+                   viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
         }
 
         void HandleDestruction()
