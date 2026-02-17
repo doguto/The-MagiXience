@@ -11,8 +11,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     [RequireComponent(typeof(BulletEntityView))]
     public class BulletEntityPresenter : MonoBehaviour, IEntityPresenter
     {
-        [SerializeField] float speed = 5f;
-        [SerializeField] Vector3 direction = Vector3.left;
+        [SerializeReference, SubclassSelector]
+        IMovementConfig movementConfig = new LinearMovementConfig();
 
         BulletEntityView view;
         BulletEntityModel model;
@@ -21,10 +21,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public BulletEntityModel Model => model;
 
-        // Movementを切り替えるならクラス継承してここをoverride
-        protected virtual IMovementStrategy CreateMovementStrategy()
+        IMovementStrategy CreateMovementStrategy()
         {
-            return new LinearMovement(direction.normalized * speed);
+            return movementConfig?.CreateStrategy() ?? new StaticMovement();
         }
 
         void Awake()

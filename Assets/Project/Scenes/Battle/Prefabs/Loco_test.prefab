@@ -238,8 +238,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 50
   contactDamage: 10
-  movementType: 0
-  moveVelocity: {x: -1, y: 0, z: 0}
+  movementConfig:
+    rid: 2030962192989028428
   bulletPool: {fileID: 7996329089749057052}
   bulletDamage: 10
   attackInterval: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 2030962192989028428
+      type: {class: LinearMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        velocity: {x: -1, y: 0, z: 0}

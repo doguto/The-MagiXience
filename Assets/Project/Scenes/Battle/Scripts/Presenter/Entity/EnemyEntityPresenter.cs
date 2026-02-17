@@ -16,13 +16,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] int contactDamage = 10;
 
         [Header("Movement")]
-        [SerializeField] MovementType movementType = MovementType.Static;
-        [SerializeField] Vector3 moveVelocity = Vector3.left;
+        [SerializeReference, SubclassSelector]
+        IMovementConfig movementConfig = new StaticMovementConfig();
 
         [Header("Attack")]
         [SerializeField] BulletPool bulletPool;
         [SerializeField] int bulletDamage = 10;
-        [SerializeField] float attackInterval = 2.0f;
+        [SerializeReference, SubclassSelector]
+        IAttackConfig attackConfig = new IntervalAttackConfig();
 
         EnemyEntityView view;
         EnemyEntityModel model;
@@ -41,14 +42,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             model = new EnemyEntityModel(maxHp, spawnPosition, contactDamage);
 
-            model.SetMovementStrategy(CreateMovementStrategy());
+            model.SetMovementStrategy(movementConfig?.CreateStrategy() ?? new StaticMovement());
 
             // 攻撃戦略を設定
-            var attackStrategy = new IntervalAttackStrategy(attackInterval);
+            var attackStrategy = attackConfig?.CreateStrategy();
             model.SetAttackStrategy(attackStrategy);
 
             // OnAttackTiming イベントで弾発射
-            model.AttackStrategy.OnAttackTiming
+            model.AttackStrategy?.OnAttackTiming
                 .TakeUntil(model.OnDeath)
                 .Subscribe(_ => FireBullet())
                 .AddTo(disposables);
@@ -87,15 +88,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             Debug.Log("[EnemyEntityPresenter] Enemy fired bullet!");
         }
 
-        IMovementStrategy CreateMovementStrategy()
-        {
-            return movementType switch
-            {
-                MovementType.Linear => new LinearMovement(moveVelocity),
-                MovementType.Static => new StaticMovement(),
-                _ => new StaticMovement()
-            };
-        }
 
         void HandleDeath()
         {
@@ -127,9 +119,4 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public EntityBase GetModel() => model;
     }
 
-    public enum MovementType
-    {
-        Static,
-        Linear,
-    }
 }
