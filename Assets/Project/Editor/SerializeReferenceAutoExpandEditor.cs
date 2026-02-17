@@ -1,27 +1,26 @@
-using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine;
 
 namespace Project.Scripts.Editor
 {
-    [InitializeOnLoad]
-    public static class SerializeReferenceAutoExpandEditor
+    /// <summary>
+    /// MonoBehaviour の Inspector 描画時に SerializeReference フィールドを自動展開する。
+    /// finishedDefaultHeaderGUI では MonoBehaviour に対して呼ばれないケースがあるため、
+    /// CustomEditor で OnInspectorGUI をオーバーライドして対応する。
+    /// </summary>
+    [CustomEditor(typeof(MonoBehaviour), true)]
+    [CanEditMultipleObjects]
+    public class SerializeReferenceAutoExpandEditor : UnityEditor.Editor
     {
-        private static readonly HashSet<string> _initialized = new HashSet<string>();
-
-        static SerializeReferenceAutoExpandEditor()
+        public override void OnInspectorGUI()
         {
-            Selection.selectionChanged += () => _initialized.Clear();
-            UnityEditor.Editor.finishedDefaultHeaderGUI += OnHeaderGUI;
+            ExpandManagedReferences(serializedObject);
+            base.OnInspectorGUI();
         }
 
-        private static void OnHeaderGUI(UnityEditor.Editor editor)
+        internal static void ExpandManagedReferences(SerializedObject so)
         {
-            var so = editor.serializedObject;
-            int instanceId = so.targetObject.GetInstanceID();
-            string editorKey = $"{instanceId}";
-
-            if (!_initialized.Add(editorKey))
-                return;
+            so.Update();
 
             var iterator = so.GetIterator();
             bool enterChildren = true;
@@ -29,14 +28,20 @@ namespace Project.Scripts.Editor
 
             while (iterator.NextVisible(enterChildren))
             {
-                enterChildren = true;
-
-                if (iterator.propertyType == SerializedPropertyType.ManagedReference
-                    && !string.IsNullOrEmpty(iterator.managedReferenceFullTypename)
-                    && !iterator.isExpanded)
+                if (iterator.propertyType == SerializedPropertyType.ManagedReference)
                 {
-                    iterator.isExpanded = true;
-                    changed = true;
+                    if (!string.IsNullOrEmpty(iterator.managedReferenceFullTypename)
+                        && !iterator.isExpanded)
+                    {
+                        iterator.isExpanded = true;
+                        changed = true;
+                    }
+
+                    enterChildren = false;
+                }
+                else
+                {
+                    enterChildren = true;
                 }
             }
 
