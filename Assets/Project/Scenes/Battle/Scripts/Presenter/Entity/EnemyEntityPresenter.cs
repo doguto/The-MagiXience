@@ -9,6 +9,7 @@ using Project.Scenes.Battle.Scripts.Model.Attack;
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(EnemyEntityView))]
+    [RequireComponent(typeof(SpriteRenderer))]
     public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter
     {
         [Header("Entity Settings")]
@@ -27,13 +28,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         [Header("component references")]
         [SerializeField] EnemyEntityView view;
+        [SerializeField] SpriteRenderer spriteRenderer;
 
         void Reset()
         {
             view = GetComponent<EnemyEntityView>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
         }
-        
+
         EnemyEntityModel model;
+        Camera mainCamera;
         readonly CompositeDisposable disposables = new();
 
         public EnemyEntityModel Model => model;
@@ -42,6 +46,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void Awake()
         {
             if (bulletPool == null) Debug.LogError("[EnemyEntityPresenter] BulletPool is not assigned!");
+            mainCamera = Camera.main;
             Initialize(transform.position);
         }
 
@@ -81,6 +86,25 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             model.UpdateAttack(Time.deltaTime);
 
             view.UpdatePosition(model.Position);
+
+            if (IsOutOfScreen())
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        bool IsOutOfScreen()
+        {
+            Vector3 position = model.Position;
+            Vector3 viewportPoint = mainCamera.WorldToViewportPoint(position);
+
+            Vector3 extents = spriteRenderer.bounds.extents;
+            Vector3 viewportExtents = mainCamera.WorldToViewportPoint(position + extents)
+                                    - mainCamera.WorldToViewportPoint(position);
+            float margin = Mathf.Max(Mathf.Abs(viewportExtents.x), Mathf.Abs(viewportExtents.y)) + 0.1f;
+
+            return viewportPoint.x < -margin || viewportPoint.x > 1f + margin ||
+                   viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
         }
 
         void FireBullet()
