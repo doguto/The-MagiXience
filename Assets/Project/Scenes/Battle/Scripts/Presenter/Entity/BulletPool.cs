@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {

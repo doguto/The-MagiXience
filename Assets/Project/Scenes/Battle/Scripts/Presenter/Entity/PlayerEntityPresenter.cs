@@ -21,6 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] BulletPool bulletPool;
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] int chargedShotDamage = 30;
+        [SerializeField] float bulletSpeed = 10f;
         [SerializeField] float shootCooldown = 0.2f;
 
         PlayerEntityView view;
