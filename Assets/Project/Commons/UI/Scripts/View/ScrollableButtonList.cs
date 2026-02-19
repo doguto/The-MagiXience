@@ -1,3 +1,4 @@
+using Project.Scripts.Extensions.Message;
 using UnityEngine;
 
 namespace Project.Commons.UI.Scripts.View
@@ -8,33 +9,29 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] float buttonInterval;
         float targetPosition;
 
-        protected override bool MoveNextFlag => buttonListType switch
+        public override void Move(UINavigateMessage message)
         {
-            ButtonListType.Vertical => Input.GetKeyDown(KeyCode.UpArrow),
-            ButtonListType.Horizontal => Input.GetKeyDown(KeyCode.RightArrow),
-            _ => false
-        };
+            if (!IsActive) return;
 
-        protected override bool MoveBackFlag => buttonListType switch
-        {
-            ButtonListType.Vertical => Input.GetKeyDown(KeyCode.DownArrow),
-            ButtonListType.Horizontal => Input.GetKeyDown(KeyCode.LeftArrow),
-            _ => false
-        };
-
-        public override void MoveNext(bool isUp = true)
-        {
-            // 両端の場合はもう一端に行かずに移動不可にする
-            if (ButtonIndex == buttons.Count - 1 && !isUp) return;
-            if (ButtonIndex == 0 && isUp) return;
-            
-            targetPosition = isUp? targetPosition - buttonInterval : targetPosition + buttonInterval;
-            foreach (var button in buttons)
+            var isVertical = buttonListType == ButtonListType.Vertical;
+            bool isUp;
+            if (isVertical)
             {
-                button.Move(new(0, targetPosition));
+                if (message.value.y == 0) return;
+                isUp = message.value.y > 0;
+            }
+            else
+            {
+                if (message.value.x == 0) return;
+                isUp = message.value.x > 0;
             }
 
-            SetButtonIndex( isUp ? ButtonIndex - 1 : ButtonIndex + 1 );
+            if (ButtonIndex == buttons.Count - 1 && !isUp) return;
+            targetPosition = isUp ? targetPosition - buttonInterval : targetPosition + buttonInterval;
+            var moveVector = isVertical ? new Vector2(0, targetPosition) : new Vector2(targetPosition, 0);
+            foreach (var button in buttons) button.Move(moveVector);
+
+            SetButtonIndex(isUp ? ButtonIndex - 1 : ButtonIndex + 1);
         }
     }
 }
