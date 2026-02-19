@@ -20,7 +20,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             stageModels = StageModelRepository.GetAll();
         }
 
-        void Start()
+        protected override void Start()
         {
             base.Start();
 

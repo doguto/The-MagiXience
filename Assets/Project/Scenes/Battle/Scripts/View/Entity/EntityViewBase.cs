@@ -6,6 +6,10 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
     [RequireComponent(typeof(Collider2D))]
     public abstract class EntityViewBase : MonoBehaviour
     {
+        void Awake()
+        {
+            OnAwakeView();
+        }
         public void UpdatePosition(Vector3 position)
         {
             transform.position = position;
@@ -24,11 +28,6 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         protected virtual void OnAwakeView()
         {
             // サブクラスでオーバーライド可能
-        }
-
-        protected void DestroyGameObject()
-        {
-            Destroy(gameObject);
         }
     }
 }
