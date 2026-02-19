@@ -24,16 +24,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             );
         }
 
-        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, bool isFriendly)
+        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position)
         {
             var bullet = pool.Get();
-            bullet.Initialize(damage, position, isFriendly, pool);
+            bullet.Initialize(damage, position, pool);
             return bullet;
         }
 
         BulletEntityPresenter CreateBullet()
         {
-            var bullet = Instantiate(bulletPrefab, transform);
+            // 親をBulletPoolにすると、Poolが他Entityの子の場合に
+            // 親のRigidbody2DにOnTriggerEnter2Dが伝播してしまうため、ルートに生成する
+            var bullet = Instantiate(bulletPrefab);
             return bullet;
         }
 
@@ -54,7 +56,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            pool?.Clear();
+            if (bulletPrefab is null) return;
+            pool.Clear();
         }
     }
 }

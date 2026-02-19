@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 898202745961063642}
   - component: {fileID: 8877745320614750256}
   - component: {fileID: 366756060701291069}
-  m_Layer: 0
-  m_Name: PlayerBullet
+  m_Layer: 8
+  m_Name: PlayerChargeBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.86, y: -2.41, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 5, y: 5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -5808494448098210720, guid: dffef66376be4fa480fb02b19edbe903, type: 3}
+  m_Sprite: {fileID: -7174898199296445581, guid: dffef66376be4fa480fb02b19edbe903, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ae84130b17305a41b6b22139c70912c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteRenderer: {fileID: 0}
+  spriteRenderer: {fileID: 1851957906713825068}
 --- !u!114 &366756060701291069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,11 +162,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementConfig:
-    rid: 2030962193479499847
+    rid: 2030962198006464594
+  view: {fileID: 8877745320614750256}
+  spriteRenderer: {fileID: 1851957906713825068}
   references:
     version: 2
     RefIds:
-    - rid: 2030962193479499847
-      type: {class: LinearMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        velocity: {x: -1, y: 0, z: 0}
+    - rid: 2030962198006464594
+      type: {class: StaticMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data: 

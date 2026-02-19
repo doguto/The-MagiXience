@@ -8,6 +8,7 @@ using Project.Scripts.Extensions.Message;
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(PlayerEntityView))]
+    [RequireComponent(typeof(SpriteRenderer))]
     public class PlayerEntityPresenter : MonoBehaviour, IEntityPresenter
     {
         [Header("Entity Settings")]
@@ -18,13 +19,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] float invincibilityDuration = 1.0f;
 
         [Header("Shooting Settings")]
-        [SerializeField] BulletPool bulletPool;
+        [SerializeField] BulletPool normalBulletPool;
+        [SerializeField] BulletPool chargeBulletPool;
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] int chargedShotDamage = 30;
         [SerializeField] float shootCooldown = 0.2f;
+        
+        [Header("component references")]
+        [SerializeField] PlayerEntityView view;
+        [SerializeField] SpriteRenderer spriteRenderer;
+        void Reset()
+        {
+            view = GetComponent<PlayerEntityView>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
 
-        PlayerEntityView view;
         PlayerEntityModel model;
+        Camera mainCamera;
         float lastShootTime;
         Vector2 currentMoveInput;
         readonly CompositeDisposable disposables = new();
@@ -34,7 +45,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
-            view = GetComponent<PlayerEntityView>();
+            if (normalBulletPool == null) Debug.LogError("[PlayerEntityPresenter] NormalBulletPool is not assigned!");
+            if (chargeBulletPool == null) Debug.LogError("[PlayerEntityPresenter] ChargeBulletPool is not assigned!");
+            mainCamera = Camera.main;
             model = new PlayerEntityModel(maxHp, transform.position, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
         }
 
@@ -97,7 +110,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // 移動処理（押している間継続）
             Vector3 movement = HandleMovement();
-            view.UpdatePosition(view.GetPosition() + movement);
+            Vector3 newPosition = ClampToScreen(view.GetPosition() + movement);
+            view.UpdatePosition(newPosition);
 
             // チャージ処理
             if (model.IsSneaking.Value)
@@ -115,27 +129,29 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             return movement;
         }
 
+        Vector3 ClampToScreen(Vector3 position)
+        {
+            Vector3 extents = spriteRenderer.bounds.extents;
+
+            // Spriteの端がビューポート(0,0)〜(1,1)に収まるようにクランプ
+            Vector3 minWorld = mainCamera.ViewportToWorldPoint(Vector3.zero);
+            Vector3 maxWorld = mainCamera.ViewportToWorldPoint(Vector3.one);
+
+            position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
+            position.y = Mathf.Clamp(position.y, minWorld.y + extents.y, maxWorld.y - extents.y);
+
+            return position;
+        }
+
         void FireNormalShot()
         {
-            if (bulletPool == null)
-            {
-                Debug.LogWarning("[PlayerEntityPresenter] BulletPool is not assigned!");
-                return;
-            }
-
-            bulletPool.SpawnBullet(normalShotDamage, transform.position, isFriendly: true);
+            normalBulletPool.SpawnBullet(normalShotDamage, transform.position);
             lastShootTime = Time.time;
         }
 
         void FireChargedShot()
         {
-            if (bulletPool == null)
-            {
-                Debug.LogWarning("[PlayerEntityPresenter] BulletPool is not assigned!");
-                return;
-            }
-
-            bulletPool.SpawnBullet(chargedShotDamage, transform.position, isFriendly: true);
+            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 
@@ -147,7 +163,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerEnter2D(Collider2D other)
         {
             var otherPresenter = other.GetComponent<IEntityPresenter>();
-            Debug.Log($"[PlayerEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name}");
+            Debug.Log($"[PlayerEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name} | other.gameObject: '{other.gameObject.name}' layer: {other.gameObject.layer} ({LayerMask.LayerToName(other.gameObject.layer)}) | self layer: {gameObject.layer} ({LayerMask.LayerToName(gameObject.layer)})");
             if (otherPresenter != null)
             {
                 model.OnCollision(otherPresenter.GetModel());
