@@ -17,7 +17,7 @@ namespace Project.Scripts.Presenter
         protected StageModelRepository StageModelRepository => StageModelRepository.Instance;
 
         // RuntimeInitializeLoadType.BeforeSceneLoad より後に実行したいため、Start()
-        protected void Start()
+        protected virtual void Start()
         {
             globalScenePresenter = FindFirstObjectByType<GlobalScenePresenter>();
             if (!globalScenePresenter)

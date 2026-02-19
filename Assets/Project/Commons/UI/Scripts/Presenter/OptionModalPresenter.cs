@@ -22,7 +22,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             runtimeModel = RuntimeModelRepository.Get();
         }
 
-        void Start()
+        protected override void Start()
         {
             base.Start();
 
