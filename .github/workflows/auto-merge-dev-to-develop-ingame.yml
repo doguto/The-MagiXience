@@ -1,0 +1,117 @@
+# ======================================================================================
+# Workflow: Auto Merge dev to develop-ingame
+# ======================================================================================
+# Usage:
+#   - This workflow triggers automatically when a PR is merged into the `dev` branch.
+#
+# Behavior:
+#   - Skips if the merged PR originated from `develop-ingame` (to avoid loops).
+#   - Creates a PR from `dev` to `develop-ingame`.
+#   - If there are no conflicts, automatically merges the PR.
+#   - If there are conflicts, leaves the PR open for manual resolution.
+# ======================================================================================
+name: Auto Merge dev to develop-ingame
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - dev
+
+jobs:
+  auto_merge:
+    # Only run when a PR is actually merged (not just closed), and it did NOT originate from develop-ingame
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref != 'develop-ingame'
+    name: Auto Merge dev -> develop-ingame
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Create PR from dev to develop-ingame
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Check if a PR already exists
+          EXISTING_PR=$(gh pr list \
+            --base develop-ingame \
+            --head dev \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR already exists: #$EXISTING_PR"
+            echo "pr_number=$EXISTING_PR" >> "$GITHUB_OUTPUT"
+            echo "pr_created=false" >> "$GITHUB_OUTPUT"
+          else
+            PR_URL=$(gh pr create \
+              --base develop-ingame \
+              --head dev \
+              --title "Auto merge: dev -> develop-ingame" \
+              --body "devブランチの最新変更をdevelop-ingameへ自動マージします。
+
+このPRは #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }}) のマージをトリガーとして自動作成されました。" \
+              2>&1) || true
+
+            if echo "$PR_URL" | grep -q "https://"; then
+              PR_NUMBER=$(echo "$PR_URL" | sed 's|.*/pull/||')
+              echo "Created PR: $PR_URL"
+              echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+              echo "pr_created=true" >> "$GITHUB_OUTPUT"
+            elif echo "$PR_URL" | grep -qi "already exists\|nothing to merge\|No commits between"; then
+              echo "Branches are already in sync. No PR needed."
+              echo "pr_number=" >> "$GITHUB_OUTPUT"
+              echo "pr_created=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Failed to create PR."
+              echo "Output: $PR_URL"
+              echo "pr_number=" >> "$GITHUB_OUTPUT"
+              echo "pr_created=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Attempt auto merge
+        if: steps.create_pr.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.create_pr.outputs.pr_number }}
+        run: |
+          # Wait for PR mergability to be determined (GitHub needs a moment to compute merge status)
+          for i in $(seq 1 6); do
+            MERGEABLE=$(gh pr view "$PR_NUMBER" --json mergeable --jq '.mergeable' 2>/dev/null || echo "UNKNOWN")
+            if [ "$MERGEABLE" = "MERGEABLE" ] || [ "$MERGEABLE" = "CONFLICTING" ]; then
+              break
+            fi
+            echo "Waiting for merge status... attempt $i (current: $MERGEABLE)"
+            sleep 10
+          done
+
+          # Attempt to merge; if there are conflicts this will fail gracefully
+          if gh pr merge "$PR_NUMBER" \
+              --merge \
+              --subject "Auto merge: dev -> develop-ingame (#${PR_NUMBER})" \
+              --body "devブランチの最新をdevelop-ingameへ自動マージしました。" \
+              2>&1 | tee /tmp/merge_output.txt; then
+            echo "Successfully merged PR #$PR_NUMBER"
+          else
+            MERGE_OUTPUT=$(cat /tmp/merge_output.txt)
+            echo "Auto merge failed. Leaving PR #$PR_NUMBER open for manual resolution."
+            gh pr comment "$PR_NUMBER" \
+              --body "⚠️ 自動マージに失敗しました。コンフリクトが発生している可能性があります。手動でコンフリクトを解消してください。
+
+**エラー内容:**
+\`\`\`
+${MERGE_OUTPUT}
+\`\`\`"
+          fi
