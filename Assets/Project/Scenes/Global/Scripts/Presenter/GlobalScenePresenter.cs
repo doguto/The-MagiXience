@@ -34,7 +34,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
             var keyConfigModel = KeyConfigModelRepository.Instance.Get();
 
             // EventSystemのInputModuleにInputActionAssetを設定
-            var eventSystem = FindObjectOfType<EventSystem>();
+            var eventSystem = FindFirstObjectByType<EventSystem>();
             if (eventSystem != null)
             {
                 var inputModule = eventSystem.GetComponent<InputSystemUIInputModule>();

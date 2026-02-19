@@ -29,7 +29,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             runtimeModel = RuntimeModelRepository.Get();
         }
 
-        void Start()
+        protected override void Start()
         {
             pauseModalView.InitStart();
             
@@ -60,7 +60,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
             
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
-            SceneManager.UnloadSceneAsync(sceneName);
+            SceneManager.UnloadSceneAsync(sceneName).ToUniTask().Forget();
         }
     }
     

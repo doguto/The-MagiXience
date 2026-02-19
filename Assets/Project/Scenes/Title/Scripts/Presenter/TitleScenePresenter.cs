@@ -27,7 +27,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             titleMenuView.Init(titleModel.GetBackGroundSprites());
         }
 
-        void Start()
+        protected override void Start()
         {
             base.Start();
             titleMenuView.InitStart();
@@ -66,7 +66,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.StageList));
-            SceneManager.UnloadSceneAsync(gameObject.scene.name);
+            SceneManager.UnloadSceneAsync(gameObject.scene.name).ToUniTask().Forget();
         }
 
         void ExitGame()

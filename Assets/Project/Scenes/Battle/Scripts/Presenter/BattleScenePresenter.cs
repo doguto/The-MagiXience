@@ -141,7 +141,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
 
             // ScenarioScenePresenterを見つけてイベントを購読
-            var scenarioPresenter = FindObjectOfType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
+            var scenarioPresenter = FindFirstObjectByType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
             if (scenarioPresenter != null)
             {
                 scenarioPresenter.OnScenarioCompleted
