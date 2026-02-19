@@ -11,6 +11,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     [RequireComponent(typeof(BulletEntityView))]
     public class BulletEntityPresenter : MonoBehaviour, IEntityPresenter
     {
+        [SerializeField] float speed = 5f;
+        [SerializeField] Vector3 direction = Vector3.left;
+
         BulletEntityView view;
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
@@ -18,14 +21,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public BulletEntityModel Model => model;
 
+        // Movementを切り替えるならクラス継承してここをoverride
+        protected virtual IMovementStrategy CreateMovementStrategy()
+        {
+            return new LinearMovement(direction.normalized * speed);
+        }
+
         void Awake()
         {
             view = GetComponent<BulletEntityView>();
         }
 
-        public void Initialize(int damage, Vector3 position, IMovementStrategy movementStrategy, bool isFriendly, IObjectPool<BulletEntityPresenter> objectPool)
+        public void Initialize(int damage, Vector3 position, bool isFriendly, IObjectPool<BulletEntityPresenter> objectPool)
         {
             pool = objectPool;
+            var movementStrategy = CreateMovementStrategy();
 
             if (model == null)
             {
@@ -106,7 +116,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 model.OnCollision(otherPresenter.GetModel());
             }
         }
-
+        
         public void OnReturnedToPool()
         {
             view.SetVisible(false);

@@ -76,8 +76,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         public virtual void Dispose()
         {
-            onDeath.OnCompleted();
-            onDeath.Dispose();
             disposables.Dispose();
         }
     }

@@ -25,10 +25,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             );
         }
 
-        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector3 velocity, bool isFriendly)
+        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, bool isFriendly)
         {
             var bullet = pool.Get();
-            bullet.Initialize(damage, position, new LinearMovement(velocity), isFriendly, pool);
+            bullet.Initialize(damage, position, isFriendly, pool);
             return bullet;
         }
 
