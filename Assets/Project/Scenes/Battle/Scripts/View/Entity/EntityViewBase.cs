@@ -29,7 +29,5 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         {
             // サブクラスでオーバーライド可能
         }
-
-
     }
 }

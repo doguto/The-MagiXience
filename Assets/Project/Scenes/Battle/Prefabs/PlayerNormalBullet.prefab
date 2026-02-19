@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 898202745961063642}
   - component: {fileID: 8877745320614750256}
   - component: {fileID: 366756060701291069}
-  m_Layer: 0
-  m_Name: PlayerBullet
+  m_Layer: 8
+  m_Name: PlayerNormalBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ae84130b17305a41b6b22139c70912c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteRenderer: {fileID: 0}
+  spriteRenderer: {fileID: 1851957906713825068}
 --- !u!114 &366756060701291069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,5 +161,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfd5daf7fba3164387b3052b7eeb571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
-  direction: {x: 1, y: 0, z: 0}
+  movementConfig:
+    rid: 2030962193479499847
+  view: {fileID: 8877745320614750256}
+  spriteRenderer: {fileID: 1851957906713825068}
+  references:
+    version: 2
+    RefIds:
+    - rid: 2030962193479499847
+      type: {class: LinearMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        velocity: {x: 2, y: 0, z: 0}
