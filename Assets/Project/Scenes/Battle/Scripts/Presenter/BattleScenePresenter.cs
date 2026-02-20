@@ -6,6 +6,7 @@ using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
+using Project.Scenes.Battle.Scripts.Presenter.Entity;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -21,6 +22,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         BattleSequenceModel waySequence;
         BattleSequenceModel bossSequence;
         Action pendingScenarioCallback;
+        PlayerEntityPresenter playerPresenter;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
@@ -51,6 +53,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 Debug.LogError("StageModel could not be resolved.", this);
                 return;
+            }
+
+            // PlayerEntityPresenterを取得
+            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            if (playerPresenter == null)
+            {
+                Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
             }
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
@@ -124,6 +133,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // ScenarioIdは不要、ScenarioModelRepositoryがRuntimeModelから自動決定
             Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);
 
+            // シナリオ中は攻撃を禁止
+            playerPresenter?.UnsubscribeToAttackInput();
+
             // シナリオ完了後のコールバックを保存
             pendingScenarioCallback = onCompleteOrSkip;
 
@@ -157,6 +169,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void OnScenarioCompleted()
         {
             Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
+
+            // シナリオ完了後は攻撃を再開
+            playerPresenter?.SubscribeToAttackInput();
+
             pendingScenarioCallback?.Invoke();
             pendingScenarioCallback = null;
         }
