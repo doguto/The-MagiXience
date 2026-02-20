@@ -190,6 +190,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // 次のステージのシーケンスをロード
             stageModel = nextStageModel;
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
+            bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 
             // 道中シーケンスを開始
             if (waySequence != null)
