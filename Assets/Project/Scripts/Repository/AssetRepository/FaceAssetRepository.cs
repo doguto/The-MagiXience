@@ -27,11 +27,10 @@ namespace Project.Scripts.Repository.AssetRepository
                 sprite =>
                 {
                     var spriteName = sprite.name;
-                    // スプライト名の形式: {characterName}_{expressionType}_Face_0
+                    // スプライト名の形式: {characterName}_{expressionType}_Face
                     // characterNameの長さ + 1（アンダースコア）を開始位置とする
                     var charNameLength = characterName.Length + 1;
-                    var faceIndex = spriteName.LastIndexOf("_Face_");
-                    
+                    var faceIndex = spriteName.LastIndexOf("_Face");
                     if (faceIndex > charNameLength)
                     {
                         // expressionTypeを抽出: charNameLengthからfaceIndexまでの部分
