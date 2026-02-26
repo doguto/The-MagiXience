@@ -5,9 +5,9 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Project.Scenes.Global.Scripts.Presenter
+namespace Project.Scripts.Extensions
 {
-    public class InputManager : MonoBehaviour
+    public class InputManager
     {
         // カスタムInputActionAsset
         InputActionAsset inputActionAsset;
