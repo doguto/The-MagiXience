@@ -13,6 +13,11 @@ namespace Project.Commons.Debugger.Scripts.Presenter
         void Awake()
         {
             var runtimeModel = RuntimeModelRepository.Instance.Get();
+            if (runtimeModel.IsInGame)
+            {
+                Debug.Log("[DebugRuntimeModelInitializer] RuntimeModel は既にゲーム中のためデバッグ初期化をスキップしました");
+                return;
+            }
             runtimeModel.SetForDebug(stageNumber, situation);
             Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, Situation={situation} に設定しました");
         }

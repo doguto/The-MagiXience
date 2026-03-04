@@ -80,6 +80,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public void SubscribeToAttackInput()
         {
+            // 既存の入力購読が残っている場合は一度破棄してから再購読する
+            if (inputDisposables != null && !inputDisposables.IsDisposed)
+            {
+                inputDisposables.Dispose();
+            }
             inputDisposables = new CompositeDisposable();
 
             // 攻撃ボタンをイベントで処理
@@ -111,7 +116,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 .AddTo(inputDisposables);
         }
 
-        public void UnsubscribeToAttackInput()
+        public void UnsubscribeFromAttackInput()
         {
             inputDisposables?.Dispose();
             inputDisposables = new CompositeDisposable();

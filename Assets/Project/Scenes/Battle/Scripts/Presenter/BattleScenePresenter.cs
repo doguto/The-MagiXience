@@ -23,6 +23,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         BattleSequenceModel bossSequence;
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
+        bool isSceneLoadedHandlerRegistered = false;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
@@ -134,13 +135,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);
 
             // シナリオ中は攻撃を禁止
-            playerPresenter?.UnsubscribeToAttackInput();
+            playerPresenter?.UnsubscribeFromAttackInput();
 
             // シナリオ完了後のコールバックを保存
             pendingScenarioCallback = onCompleteOrSkip;
 
             // シーンロード完了を待ってからイベントを購読
-            SceneManager.sceneLoaded += OnScenarioSceneLoaded;
+            if (!isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded += OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = true;
+            }
             SceneManager.LoadScene(SceneRouterModel.Scenario, LoadSceneMode.Additive);
         }
 
@@ -149,16 +154,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (scene.name != SceneRouterModel.Scenario) return;
 
             Debug.Log($"[BattleScenePresenter] Scenario scene loaded", this);
-            SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+            
+            // ハンドラを解除
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
 
             // ScenarioScenePresenterを見つけてイベントを購読
             var scenarioPresenter = FindFirstObjectByType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
             if (scenarioPresenter != null)
             {
                 scenarioPresenter.OnScenarioCompleted
-                    .Take(1) // 1回だけ実行
-                    .Subscribe(_ => OnScenarioCompleted())
-                    .AddTo(disposables);
+                                 .Take(1) // 1回だけ実行
+                                 .Subscribe(_ => OnScenarioCompleted())
+                                 .AddTo(disposables);
             }
             else
             {
@@ -221,7 +232,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         }
 
         void OnDestroy()
-        {
+        {   
+            // 登録されているハンドラを確実に解除
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
+            
             disposables.Dispose();
             battleCompleted.Dispose();
             phaseStateMachine?.Stop();
