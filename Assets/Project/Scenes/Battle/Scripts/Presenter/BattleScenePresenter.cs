@@ -6,13 +6,13 @@ using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
+using Project.Scenes.Battle.Scripts.Presenter.Entity;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
     public class BattleScenePresenter : MonoBehaviour
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
-        [SerializeField, Min(1)] int initialStageNumber = 1;
 
         readonly BattleSequenceModelRepository sequenceModelRepository = new();
         readonly Subject<Unit> battleCompleted = new();
@@ -22,6 +22,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         BattleSequenceModel waySequence;
         BattleSequenceModel bossSequence;
         Action pendingScenarioCallback;
+        PlayerEntityPresenter playerPresenter;
+        bool isSceneLoadedHandlerRegistered = false;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
@@ -54,6 +56,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // PlayerEntityPresenterを取得
+            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            if (playerPresenter == null)
+            {
+                Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
+            }
+
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 
@@ -75,7 +84,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         StageModel ResolveStageModel()
         {
             var runtimeModel = RuntimeModelRepository.Instance.Get();
-            var stageNumber = runtimeModel.CurrentStageNumber < initialStageNumber ? initialStageNumber : runtimeModel.CurrentStageNumber;
+            var stageNumber = runtimeModel.CurrentStageNumber < 1 ? 1 : runtimeModel.CurrentStageNumber;
 
             try
             {
@@ -125,11 +134,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // ScenarioIdは不要、ScenarioModelRepositoryがRuntimeModelから自動決定
             Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);
 
+            // シナリオ中は攻撃を禁止
+            playerPresenter?.UnsubscribeFromAttackInput();
+
             // シナリオ完了後のコールバックを保存
             pendingScenarioCallback = onCompleteOrSkip;
 
             // シーンロード完了を待ってからイベントを購読
-            SceneManager.sceneLoaded += OnScenarioSceneLoaded;
+            if (!isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded += OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = true;
+            }
             SceneManager.LoadScene(SceneRouterModel.Scenario, LoadSceneMode.Additive);
         }
 
@@ -138,16 +154,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (scene.name != SceneRouterModel.Scenario) return;
 
             Debug.Log($"[BattleScenePresenter] Scenario scene loaded", this);
-            SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+            
+            // ハンドラを解除
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
 
             // ScenarioScenePresenterを見つけてイベントを購読
             var scenarioPresenter = FindFirstObjectByType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
             if (scenarioPresenter != null)
             {
                 scenarioPresenter.OnScenarioCompleted
-                    .Take(1) // 1回だけ実行
-                    .Subscribe(_ => OnScenarioCompleted())
-                    .AddTo(disposables);
+                                 .Take(1) // 1回だけ実行
+                                 .Subscribe(_ => OnScenarioCompleted())
+                                 .AddTo(disposables);
             }
             else
             {
@@ -158,6 +180,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void OnScenarioCompleted()
         {
             Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
+
+            // シナリオ完了後は攻撃を再開
+            playerPresenter?.SubscribeToAttackInput();
+
             pendingScenarioCallback?.Invoke();
             pendingScenarioCallback = null;
         }
@@ -190,6 +216,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // 次のステージのシーケンスをロード
             stageModel = nextStageModel;
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
+            bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 
             // 道中シーケンスを開始
             if (waySequence != null)
@@ -205,7 +232,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         }
 
         void OnDestroy()
-        {
+        {   
+            // 登録されているハンドラを確実に解除
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
+            
             disposables.Dispose();
             battleCompleted.Dispose();
             phaseStateMachine?.Stop();

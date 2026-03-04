@@ -39,6 +39,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float lastShootTime;
         Vector2 currentMoveInput;
         readonly CompositeDisposable disposables = new();
+        CompositeDisposable inputDisposables;
 
         public PlayerEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
@@ -54,7 +55,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void Start()
         {
             BindModelToView();
-            SubscribeToInput();
+            SubscribeToMoveInput();
+            SubscribeToAttackInput();
         }
 
         void BindModelToView()
@@ -64,7 +66,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 .AddTo(disposables);
         }
 
-        void SubscribeToInput()
+        void SubscribeToMoveInput()
         {
             // 移動入力を保持（Updateで使用）
             MessageBroker.Default.Receive<PlayerMoveMessage>()
@@ -74,13 +76,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     currentMoveInput = msg.value;
                 })
                 .AddTo(disposables);
+        }
+
+        public void SubscribeToAttackInput()
+        {
+            // 既存の入力購読が残っている場合は一度破棄してから再購読する
+            if (inputDisposables != null && !inputDisposables.IsDisposed)
+            {
+                inputDisposables.Dispose();
+            }
+            inputDisposables = new CompositeDisposable();
 
             // 攻撃ボタンをイベントで処理
             MessageBroker.Default.Receive<PlayerAttackMessage>()
                 .Where(_ => !model.IsSneaking.Value)
                 .Where(_ => Time.time >= lastShootTime + shootCooldown)
                 .Subscribe(_ => FireNormalShot())
-                .AddTo(disposables);
+                .AddTo(inputDisposables);
 
             // スニークボタンの押下/解除
             MessageBroker.Default.Receive<PlayerCrouchMessage>()
@@ -101,7 +113,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                         model.SetSneaking(false);
                     }
                 })
-                .AddTo(disposables);
+                .AddTo(inputDisposables);
+        }
+
+        public void UnsubscribeFromAttackInput()
+        {
+            inputDisposables?.Dispose();
+            inputDisposables = new CompositeDisposable();
         }
 
         void Update()

@@ -31,7 +31,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             Debug.Log($"[BattlePhaseStateMachine] PlaySequence called for {sequence.Situation}", this);
-            Stop();
+            Stop(sequenceToKeep: sequence);
             activeSequence = sequence;
             activeSequence.Reset();
 
@@ -104,7 +104,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             playableDirector.Play();
         }
 
-        public void Stop()
+        public void Stop(BattleSequenceModel sequenceToKeep = null)
         {
             Debug.Log($"[BattlePhaseStateMachine] Stop called, activeSequence: {activeSequence?.Situation}", this);
             exitSubscription?.Dispose();
@@ -118,7 +118,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             activePhase?.Exit();
             activePhase = null;
 
-            if (activeSequence != null)
+            if (activeSequence != null && activeSequence != sequenceToKeep)
             {
                 DisposeSequence(activeSequence);
                 activeSequence = null;
