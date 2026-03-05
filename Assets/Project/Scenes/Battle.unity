@@ -119,6 +119,50 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &439110979
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 439110981}
+  - component: {fileID: 439110980}
+  m_Layer: 0
+  m_Name: enemyTracker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &439110980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439110979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 673fb8b8604fa084f9d78e8c2a17541f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &439110981
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439110979}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &937993894
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -342,6 +386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4172ac9c776176348a60684fe9d8cdf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTracker: {fileID: 439110980}
 --- !u!4 &1635331042
 Transform:
   m_ObjectHideFlags: 0
@@ -579,6 +624,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   phaseStateMachine: {fileID: 2011392385}
+  enemyTracker: {fileID: 439110980}
 --- !u!114 &2011392385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -707,3 +753,4 @@ SceneRoots:
   - {fileID: 2011392386}
   - {fileID: 2072124215}
   - {fileID: 937993894}
+  - {fileID: 439110981}

@@ -8,6 +8,12 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
     public class BattleSequenceModelRepository
     {
         readonly Dictionary<string, BattleSequenceAsset> cache = new();
+        readonly IEnemyTracker enemyTracker;
+
+        public BattleSequenceModelRepository(IEnemyTracker enemyTracker)
+        {
+            this.enemyTracker = enemyTracker;
+        }
 
         public BattleSequenceModel Load(string address)
         {
@@ -36,6 +42,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
             return definition.ExitCondition switch
             {
                 BattlePhaseExitCondition.TimeLimit => new TimeLimitBattlePhaseModel(definition),
+                BattlePhaseExitCondition.AllEnemiesDefeated => new AllEnemiesDefeatedBattlePhaseModel(definition, enemyTracker),
                 _ => throw new NotSupportedException($"Exit condition {definition.ExitCondition} is not supported yet."),
             };
         }

@@ -94,7 +94,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             playableDirector.playableAsset = timeline;
             playableDirector.time = 0;
             playableDirector.Evaluate();
-            playableDirector.extrapolationMode = DirectorWrapMode.Loop;
+            playableDirector.extrapolationMode = DirectorWrapMode.Hold;
 
             if (bindingMap)
             {

@@ -10,6 +10,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     /// </summary>
     public class EnemySpawnReceiver : MonoBehaviour, INotificationReceiver
     {
+        [SerializeField] EnemyTracker enemyTracker;
         public void OnNotify(Playable origin, INotification notification, object context)
         {
             if (notification is not SignalEmitter emitter) return;
@@ -33,6 +34,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (presenter == null)
             {
                 Debug.LogWarning($"[EnemySpawnReceiver] Spawned prefab '{signal.Prefab.name}' has no EnemyEntityPresenter.", this);
+            }
+            else if (enemyTracker != null)
+            {
+                enemyTracker.RegisterEnemy(presenter);
             }
             Debug.Log($"[EnemySpawnReceiver] Spawned '{signal.Prefab.name}' at {signal.SpawnPosition}", this);
         }

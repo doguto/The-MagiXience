@@ -13,8 +13,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     public class BattleScenePresenter : MonoBehaviour
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
+        [SerializeField] EnemyTracker enemyTracker;
 
-        readonly BattleSequenceModelRepository sequenceModelRepository = new();
+        BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
 
@@ -29,6 +30,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void Awake()
         {
+            sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
         }
 
