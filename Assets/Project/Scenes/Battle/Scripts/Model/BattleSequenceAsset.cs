@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Timeline;
 using Project.Scripts.Model;
+using Project.Scenes.Battle.Scripts.Model.ExitCondition;
 
 namespace Project.Scenes.Battle.Scripts.Model
 {
@@ -41,15 +42,14 @@ namespace Project.Scenes.Battle.Scripts.Model
     public class BattlePhaseDefinition
     {
         [SerializeField] string phaseId;
-        [SerializeField, Min(0.1f)] float timeLimitSeconds = 10f;
         [Header("Timeline")]
         [SerializeField] BattleTimelineBuilderAsset timelineBuilder;
-        [SerializeField] BattlePhaseExitCondition exitCondition = BattlePhaseExitCondition.TimeLimit;
+        [SerializeReference, SubclassSelector]
+        IExitConditionConfig exitConditionConfig = new TimeLimitExitConditionConfig();
 
         public string PhaseId => phaseId;
-        public float TimeLimitSeconds => timeLimitSeconds;
         public BattleTimelineBuilderAsset TimelineBuilder => timelineBuilder;
-        public BattlePhaseExitCondition ExitCondition => exitCondition;
+        public IExitConditionConfig ExitConditionConfig => exitConditionConfig;
 
         public TimelineAsset CreateTimeline()
         {

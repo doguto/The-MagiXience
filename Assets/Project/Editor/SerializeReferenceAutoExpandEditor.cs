@@ -51,4 +51,15 @@ namespace Project.Scripts.Editor
             }
         }
     }
+
+    [CustomEditor(typeof(ScriptableObject), true)]
+    [CanEditMultipleObjects]
+    public class SerializeReferenceAutoExpandScriptableObjectEditor : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            SerializeReferenceAutoExpandEditor.ExpandManagedReferences(serializedObject);
+            base.OnInspectorGUI();
+        }
+    }
 }

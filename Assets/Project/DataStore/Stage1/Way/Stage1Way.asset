@@ -15,10 +15,20 @@ MonoBehaviour:
   situation: 0
   phases:
   - phaseId: 1
-    timeLimitSeconds: 3
     timelineBuilder: {fileID: 11400000, guid: 8b2777b81e77cf8428ce16f32dc0f27b, type: 2}
-    exitCondition: 1
+    exitConditionConfig:
+      rid: 8577112207561064520
   - phaseId: 2
-    timeLimitSeconds: 0.1
     timelineBuilder: {fileID: 11400000, guid: 8b2777b81e77cf8428ce16f32dc0f27b, type: 2}
-    exitCondition: 0
+    exitConditionConfig:
+      rid: 8577112204612468808
+  references:
+    version: 2
+    RefIds:
+    - rid: 8577112204612468808
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 10
+    - rid: 8577112207561064520
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 

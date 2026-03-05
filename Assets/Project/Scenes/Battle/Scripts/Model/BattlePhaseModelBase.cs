@@ -24,7 +24,6 @@ namespace Project.Scenes.Battle.Scripts.Model
 
         public string PhaseId => Definition.PhaseId;
         public TimelineAsset TimelineAsset => ResolveTimeline();
-        public float TimeLimitSeconds => Definition.TimeLimitSeconds;
         public IObservable<Unit> OnExitPhase => exitSubject;
 
         public TimelineAsset ResolveTimeline()

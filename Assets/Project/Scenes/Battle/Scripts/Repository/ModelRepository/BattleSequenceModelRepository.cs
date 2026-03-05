@@ -39,12 +39,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
         
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
         {
-            return definition.ExitCondition switch
-            {
-                BattlePhaseExitCondition.TimeLimit => new TimeLimitBattlePhaseModel(definition),
-                BattlePhaseExitCondition.AllEnemiesDefeated => new AllEnemiesDefeatedBattlePhaseModel(definition, enemyTracker),
-                _ => throw new NotSupportedException($"Exit condition {definition.ExitCondition} is not supported yet."),
-            };
+            return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker);
         }
     }
 }

@@ -5,14 +5,16 @@ namespace Project.Scenes.Battle.Scripts.Model
 {
     public class TimeLimitBattlePhaseModel : BattlePhaseModelBase
     {
-        public TimeLimitBattlePhaseModel(BattlePhaseDefinition definition) : base(definition)
+        readonly float timeLimitSeconds;
+
+        public TimeLimitBattlePhaseModel(BattlePhaseDefinition definition, float timeLimitSeconds) : base(definition)
         {
-            
+            this.timeLimitSeconds = timeLimitSeconds;
         }
 
         protected override void OnEnter()
         {
-            Observable.Timer(TimeSpan.FromSeconds(TimeLimitSeconds))
+            Observable.Timer(TimeSpan.FromSeconds(timeLimitSeconds))
                 .Subscribe(_ => CompletePhase())
                 .AddTo(Disposables);
         }
