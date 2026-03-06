@@ -7,7 +7,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     public class IntervalAttackConfig : IAttackConfig
     {
         [SerializeField] float attackInterval = 2.0f;
-        public IAttackStrategy CreateStrategy()
+        public IAttackStrategy CreateStrategy(IPlayerPositionProvider playerPositionProvider)
         {
             return new IntervalAttackStrategy(attackInterval);
         }

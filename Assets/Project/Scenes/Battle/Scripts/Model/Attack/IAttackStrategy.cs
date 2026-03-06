@@ -5,7 +5,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 {
     public interface IAttackStrategy : IDisposable
     {
-        IObservable<Unit> OnAttackTiming { get; }
+        IObservable<AttackEvent> OnAttackTiming { get; }
         void Initialize();
         void Update(float deltaTime);
     }

@@ -12,5 +12,11 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         {
             return new LinearMovement(velocity);
         }
+
+        public IMovementStrategy CreateStrategy(Vector2 direction)
+        {
+            float speed = velocity.magnitude;
+            return new LinearMovement((Vector3)direction.normalized * speed);
+        }
     }
 }

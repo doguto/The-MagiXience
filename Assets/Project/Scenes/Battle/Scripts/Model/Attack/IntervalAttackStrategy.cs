@@ -7,10 +7,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     public class IntervalAttackStrategy : IAttackStrategy
     {
         readonly float attackInterval;
-        readonly Subject<Unit> onAttackTiming = new();
+        readonly Subject<AttackEvent> onAttackTiming = new();
         readonly CompositeDisposable disposables = new();
 
-        public IObservable<Unit> OnAttackTiming => onAttackTiming;
+        public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
 
         public IntervalAttackStrategy(float attackInterval)
         {
@@ -20,7 +20,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public void Initialize()
         {
             Observable.Interval(TimeSpan.FromSeconds(attackInterval))
-                .Subscribe(_ => onAttackTiming.OnNext(Unit.Default))
+                .Subscribe(_ => onAttackTiming.OnNext(AttackEvent.Single(Vector2.left)))
                 .AddTo(disposables);
         }
 

@@ -10,7 +10,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(EnemyEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter
+    public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter, IPlayerPositionProvider
     {
         [Header("Entity Settings")]
         [SerializeField] int maxHp = 50;
@@ -38,15 +38,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         EnemyEntityModel model;
         Camera mainCamera;
+        PlayerEntityPresenter playerPresenter;
         readonly CompositeDisposable disposables = new();
 
         public EnemyEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
 
+        // IPlayerPositionProvider
+        public Vector3 PlayerPosition => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
+
         void Awake()
         {
             if (bulletPool == null) Debug.LogError("[EnemyEntityPresenter] BulletPool is not assigned!");
             mainCamera = Camera.main;
+            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             Initialize(transform.position);
         }
 
@@ -56,14 +61,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.SetMovementStrategy(movementConfig?.CreateStrategy() ?? new StaticMovement());
 
+            // AimAttackConfig には敵の位置プロバイダを注入
+            if (attackConfig is AimAttackConfig aimConfig)
+            {
+                aimConfig.SetEnemyPositionProvider(() => model.Position);
+            }
+
             // 攻撃戦略を設定
-            var attackStrategy = attackConfig?.CreateStrategy();
+            var attackStrategy = attackConfig?.CreateStrategy(this);
             model.SetAttackStrategy(attackStrategy);
 
             // OnAttackTiming イベントで弾発射
             model.AttackStrategy?.OnAttackTiming
                 .TakeUntil(model.OnDeath)
-                .Subscribe(_ => FireBullet())
+                .Subscribe(ev => FireBullet(ev))
                 .AddTo(disposables);
 
             BindModelToView();
@@ -107,10 +118,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                    viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
         }
 
-        void FireBullet()
+        void FireBullet(AttackEvent ev)
         {
-            bulletPool.SpawnBullet(bulletDamage, model.Position);
-            Debug.Log("[EnemyEntityPresenter] Enemy fired bullet!");
+            foreach (var dir in ev.Directions)
+            {
+                bulletPool.SpawnBullet(bulletDamage, model.Position, dir);
+            }
         }
 
 

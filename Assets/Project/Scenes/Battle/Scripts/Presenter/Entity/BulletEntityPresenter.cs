@@ -35,9 +35,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public BulletEntityModel Model => model;
 
-        IMovementStrategy CreateMovementStrategy()
+        IMovementStrategy CreateMovementStrategy(Vector2 direction)
         {
-            return movementConfig?.CreateStrategy() ?? new StaticMovement();
+            if (movementConfig == null) return new StaticMovement();
+            return direction != Vector2.zero
+                ? movementConfig.CreateStrategy(direction)
+                : movementConfig.CreateStrategy();
         }
 
         void Awake()
@@ -45,10 +48,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             mainCamera = Camera.main;
         }
 
-        public void Initialize(int damage, Vector3 position, IObjectPool<BulletEntityPresenter> objectPool)
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool)
         {
             pool = objectPool;
-            var movementStrategy = CreateMovementStrategy();
+            var movementStrategy = CreateMovementStrategy(direction);
 
             if (model == null)
             {
