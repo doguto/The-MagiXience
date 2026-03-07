@@ -85,6 +85,11 @@ namespace Project.Scripts.Extensions
             RegisterAction(sprintAction, OnPlayerSprint, InputActionPhase.Started);
             RegisterAction(sprintAction, OnPlayerSprint, InputActionPhase.Canceled);
 
+            // Charge
+            var chargeAction = playerMap.FindAction("Charge");
+            RegisterAction(chargeAction, OnPlayerCharge, InputActionPhase.Started);
+            RegisterAction(chargeAction, OnPlayerCharge, InputActionPhase.Canceled);
+
             // Previous
             var previousAction = playerMap.FindAction("Previous");
             RegisterAction(previousAction, OnPlayerPrevious, InputActionPhase.Started);
@@ -203,6 +208,11 @@ namespace Project.Scripts.Extensions
         public void OnPlayerSprint(InputAction.CallbackContext context)
         {
             MessageBroker.Default.Publish(new PlayerSprintMessage { isPressed = context.started });
+        }
+
+        public void OnPlayerCharge(InputAction.CallbackContext context)
+        {
+            MessageBroker.Default.Publish(new PlayerChargeMessage { isPressed = context.started });
         }
 
         public void OnPlayerPrevious(InputAction.CallbackContext context)

@@ -34,6 +34,11 @@ namespace Project.Scripts.Extensions.Message
         public bool isPressed;
     }
 
+    public struct PlayerChargeMessage
+    {
+        public bool isPressed;
+    }
+
     public struct PlayerPreviousMessage
     {
     }
