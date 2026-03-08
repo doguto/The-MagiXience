@@ -26,12 +26,21 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
             var strategies = new List<IMovementStrategy>(steps.Count);
             foreach (var step in steps)
             {
-                if (step is AnimationMovementConfig animConfig && injectedAnimator != null)
-                    strategies.Add(animConfig.CreateStrategy(injectedAnimator));
-                else
-                    strategies.Add(step?.CreateStrategy() ?? new StaticMovement());
+                strategies.Add(CreateStrategyFromStep(step));
             }
             return new SequentialMovement(strategies);
+        }
+
+        IMovementStrategy CreateStrategyFromStep(IMovementConfig step)
+        {
+            if (injectedAnimator != null)
+            {
+                if (step is AnimationMovementConfig animConfig)
+                    return animConfig.CreateStrategy(injectedAnimator);
+                if (step is TimedMovementConfig timedConfig)
+                    return timedConfig.CreateStrategy(injectedAnimator);
+            }
+            return step?.CreateStrategy() ?? new StaticMovement();
         }
 
         public IMovementStrategy CreateStrategy(Vector2 direction)

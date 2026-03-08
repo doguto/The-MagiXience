@@ -59,6 +59,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             model = new EnemyEntityModel(maxHp, spawnPosition, contactDamage);
 
+            // AnimationMovementConfig を含む SequentialMovementConfig には Animator を注入する
+            if (movementConfig is SequentialMovementConfig seqConfig)
+            {
+                var animator = GetComponent<Animator>();
+                if (animator != null) seqConfig.InjectAnimator(animator);
+            }
+
             model.SetMovementStrategy(movementConfig?.CreateStrategy() ?? new StaticMovement());
 
             // AimAttackConfig には敵の位置プロバイダを注入

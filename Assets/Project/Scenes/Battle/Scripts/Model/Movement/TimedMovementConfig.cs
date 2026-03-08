@@ -25,5 +25,15 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
             var innerStrategy = inner?.CreateStrategy(direction) ?? new StaticMovement();
             return new TimedMovement(innerStrategy, duration);
         }
+
+        public IMovementStrategy CreateStrategy(Animator animator)
+        {
+            IMovementStrategy innerStrategy = inner switch
+            {
+                AnimationMovementConfig animConfig => animConfig.CreateStrategy(animator),
+                _ => inner?.CreateStrategy() ?? new StaticMovement()
+            };
+            return new TimedMovement(innerStrategy, duration);
+        }
     }
 }
