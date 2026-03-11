@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks.Triggers;
 using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
@@ -40,6 +41,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Camera mainCamera;
         PlayerEntityPresenter playerPresenter;
         readonly CompositeDisposable disposables = new();
+        bool isEnteredScreen = false;
 
         public EnemyEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
@@ -121,15 +123,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                                     - mainCamera.WorldToViewportPoint(position);
             float margin = Mathf.Max(Mathf.Abs(viewportExtents.x), Mathf.Abs(viewportExtents.y)) + 0.1f;
 
-            return viewportPoint.x < -margin || viewportPoint.x > 1f + margin ||
-                   viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
+            bool outOfScreen = viewportPoint.x < -margin || viewportPoint.x > 1f + margin ||
+                               viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
+
+            if (!outOfScreen) isEnteredScreen = true;
+
+            return isEnteredScreen && outOfScreen;
         }
 
         void FireBullet(AttackEvent ev)
         {
             foreach (var dir in ev.Directions)
             {
-                bulletPool.SpawnBullet(bulletDamage, model.Position, dir);
+                bulletPool.SpawnBullet(bulletDamage, bulletPool.transform.position, dir);
             }
         }
 
