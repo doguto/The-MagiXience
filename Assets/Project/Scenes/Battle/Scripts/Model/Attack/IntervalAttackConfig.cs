@@ -7,9 +7,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     public class IntervalAttackConfig : IAttackConfig
     {
         [SerializeField] float attackInterval = 2.0f;
-        public IAttackStrategy CreateStrategy(IPlayerPositionProvider playerPositionProvider)
+        [SerializeReference, SubclassSelector] IDirectionProvider directionProvider;
+
+        public IAttackStrategy CreateStrategy(IPlayerPositionProvider playerPositionProvider, Func<Vector3> getEnemyPosition)
         {
-            return new IntervalAttackStrategy(attackInterval);
+            var provider = directionProvider ?? new FixedDirectionConfig();
+            provider.Initialize(playerPositionProvider, getEnemyPosition);
+            return new IntervalAttackStrategy(attackInterval, provider);
         }
     }
 }

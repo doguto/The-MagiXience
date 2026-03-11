@@ -70,14 +70,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.SetMovementStrategy(movementConfig?.CreateStrategy() ?? new StaticMovement());
 
-            // AimAttackConfig には敵の位置プロバイダを注入
-            if (attackConfig is AimAttackConfig aimConfig)
-            {
-                aimConfig.SetEnemyPositionProvider(() => model.Position);
-            }
-
             // 攻撃戦略を設定
-            var attackStrategy = attackConfig?.CreateStrategy(this);
+            var attackStrategy = attackConfig?.CreateStrategy(this, () => model.Position);
             model.SetAttackStrategy(attackStrategy);
 
             // OnAttackTiming イベントで弾発射

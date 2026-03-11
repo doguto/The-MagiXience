@@ -10,18 +10,18 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         readonly float attackInterval;
         readonly int wayCount;
         readonly float spreadAngle;
-        readonly Vector2 baseDirection;
+        readonly IDirectionProvider directionProvider;
         readonly Subject<AttackEvent> onAttackTiming = new();
         readonly CompositeDisposable disposables = new();
 
         public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
 
-        public NWayAttackStrategy(float attackInterval, int wayCount, float spreadAngle, Vector2 baseDirection)
+        public NWayAttackStrategy(float attackInterval, int wayCount, float spreadAngle, IDirectionProvider directionProvider)
         {
             this.attackInterval = attackInterval;
             this.wayCount = wayCount;
             this.spreadAngle = spreadAngle;
-            this.baseDirection = baseDirection.normalized;
+            this.directionProvider = directionProvider;
         }
 
         public void Initialize()
@@ -35,6 +35,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         AttackEvent CreateAttackEvent()
         {
+            var baseDirection = directionProvider.GetDirection();
             var directions = new List<Vector2>(wayCount);
             float baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg;
 

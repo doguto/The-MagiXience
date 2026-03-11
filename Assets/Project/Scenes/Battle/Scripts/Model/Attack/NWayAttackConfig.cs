@@ -9,11 +9,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] float attackInterval = 2.0f;
         [SerializeField] int wayCount = 3;
         [SerializeField] float spreadAngle = 60f;
-        [SerializeField] Vector2 baseDirection = Vector2.left;
+        [SerializeReference, SubclassSelector] IDirectionProvider directionProvider;
 
-        public IAttackStrategy CreateStrategy(IPlayerPositionProvider playerPositionProvider)
+        public IAttackStrategy CreateStrategy(IPlayerPositionProvider playerPositionProvider, Func<Vector3> getEnemyPosition)
         {
-            return new NWayAttackStrategy(attackInterval, wayCount, spreadAngle, baseDirection);
+            var provider = directionProvider ?? new FixedDirectionConfig();
+            provider.Initialize(playerPositionProvider, getEnemyPosition);
+            return new NWayAttackStrategy(attackInterval, wayCount, spreadAngle, provider);
         }
     }
 }
