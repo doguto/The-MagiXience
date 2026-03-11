@@ -8,7 +8,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     {
         [SerializeField] Vector2 direction = Vector2.left;
 
-        public void Initialize(IPlayerPositionProvider playerPositionProvider, Func<Vector3> getEnemyPosition) { }
+        public void Initialize(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition) { }
 
         public Vector2 GetDirection() => direction.normalized;
     }

@@ -11,10 +11,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] float spreadAngle = 60f;
         [SerializeReference, SubclassSelector] IDirectionProvider directionProvider;
 
-        public IAttackStrategy CreateStrategy(IPlayerPositionProvider playerPositionProvider, Func<Vector3> getEnemyPosition)
+        public IAttackStrategy CreateStrategy(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition)
         {
             var provider = directionProvider ?? new FixedDirectionConfig();
-            provider.Initialize(playerPositionProvider, getEnemyPosition);
+            provider.Initialize(getPlayerPosition, getEnemyPosition);
             return new NWayAttackStrategy(attackInterval, wayCount, spreadAngle, provider);
         }
     }

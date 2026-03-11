@@ -11,7 +11,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(EnemyEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter, IPlayerPositionProvider
+    public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter
     {
         [Header("Entity Settings")]
         [SerializeField] int maxHp = 50;
@@ -46,9 +46,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public EnemyEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
 
-        // IPlayerPositionProvider
-        public Vector3 PlayerPosition => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
-
         void Awake()
         {
             if (bulletPool == null) Debug.LogError("[EnemyEntityPresenter] BulletPool is not assigned!");
@@ -71,7 +68,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             model.SetMovementStrategy(movementConfig?.CreateStrategy() ?? new StaticMovement());
 
             // 攻撃戦略を設定
-            var attackStrategy = attackConfig?.CreateStrategy(this, () => model.Position);
+            var attackStrategy = attackConfig?.CreateStrategy(() => playerPresenter.transform.position, () => model.Position);
             model.SetAttackStrategy(attackStrategy);
 
             // OnAttackTiming イベントで弾発射
