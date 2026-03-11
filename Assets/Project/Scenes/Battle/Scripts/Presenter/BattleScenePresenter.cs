@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,10 +8,12 @@ using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scripts.Extensions;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
-    public class BattleScenePresenter : MonoBehaviour
+    public class BattleScenePresenter : MonoPresenter
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField] EnemyTracker enemyTracker;
@@ -34,8 +37,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
         }
 
-        void Start()
+        protected override void Start()
         {
+            base.Start();
+
             if (!phaseStateMachine)
             {
                 Debug.LogError("BattlePhaseStateMachine is not assigned.", this);
@@ -72,21 +77,35 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (startSituation == BattleSituation.Boss && bossSequence != null)
             {
                 Debug.Log("[BattleScenePresenter] Starting from boss sequence.", this);
+                PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
             }
             else if (waySequence != null)
             {
+                PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
             }
             else if (bossSequence != null)
             {
                 Debug.LogWarning("Way sequence is missing. Starting from boss sequence.", this);
+                PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
             }
             else
             {
                 Debug.LogWarning("No battle sequences are configured for this stage.", this);
             }
+        }
+
+        void PlayBgmForSituation(BattleSituation situation)
+        {
+            if (soundManager == null) return;
+
+            var stageNumber = stageModel.StageNumber;
+            // SceneType.Stage1=3, Stage2=4, ... なので stageNumber+2 で変換
+            var sceneType = (SceneType)(stageNumber + 2);
+            var bgmType = situation == BattleSituation.Boss ? BgmType.BattleBoss : BgmType.BattleWay;
+            soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
         }
 
         StageModel ResolveStageModel()
@@ -204,6 +223,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            PlayBgmForSituation(BattleSituation.Boss);
             phaseStateMachine.PlaySequence(bossSequence);
         }
 
