@@ -72,7 +72,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             MessageBroker.Default.Receive<PlayerMoveMessage>()
                 .Subscribe(msg =>
                 {
-                    Debug.Log($"[PlayerEntityPresenter] Move input: {msg.value}");
                     currentMoveInput = msg.value;
                 })
                 .AddTo(disposables);
@@ -156,7 +155,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             Vector3 maxWorld = mainCamera.ViewportToWorldPoint(Vector3.one);
 
             position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
-            position.y = Mathf.Clamp(position.y, minWorld.y + extents.y, maxWorld.y - extents.y);
+            position.y = Mathf.Clamp(position.y, minWorld.y + extents.y - 0.2f, maxWorld.y - extents.y - 2.1f);
 
             return position;
         }
