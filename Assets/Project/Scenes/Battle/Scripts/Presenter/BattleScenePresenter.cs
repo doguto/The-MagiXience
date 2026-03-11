@@ -68,7 +68,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 
-            if (waySequence != null)
+            var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
+            if (startSituation == BattleSituation.Boss && bossSequence != null)
+            {
+                Debug.Log("[BattleScenePresenter] Starting from boss sequence.", this);
+                phaseStateMachine.PlaySequence(bossSequence);
+            }
+            else if (waySequence != null)
             {
                 phaseStateMachine.PlaySequence(waySequence);
             }
