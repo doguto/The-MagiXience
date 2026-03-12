@@ -23,17 +23,19 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
                 return DOVirtual.DelayedCall(0f, () => { });
             }
 
-            // OverrideController のセットアップだけ先に済ませておく（再生はしない）
-            var overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-            var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>(1);
-            overrideController.GetOverrides(overrides);
-            overrides[0] = new KeyValuePair<AnimationClip, AnimationClip>(overrides[0].Key, clip);
-            overrideController.ApplyOverrides(overrides);
-            animator.runtimeAnimatorController = overrideController;
-
-            // OnStart（このステップが実際に始まるタイミング）で再生を開始する
+            // OverrideController のセットアップも含めて OnStart に移す。
+            // runtimeAnimatorController への代入だけで Unity がステートをリセット・再生してしまうため。
             return DOVirtual.DelayedCall(clip.length, () => { })
-                .OnStart(() => animator.Play("Base", layerIndex, 0f));
+                .OnStart(() =>
+                {
+                    var overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+                    var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>(1);
+                    overrideController.GetOverrides(overrides);
+                    overrides[0] = new KeyValuePair<AnimationClip, AnimationClip>(overrides[0].Key, clip);
+                    overrideController.ApplyOverrides(overrides);
+                    animator.runtimeAnimatorController = overrideController;
+                    animator.Play("Base", layerIndex, 0f);
+                });
         }
     }
 }
