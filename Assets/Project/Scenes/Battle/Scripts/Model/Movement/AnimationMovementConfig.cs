@@ -1,40 +1,39 @@
 using System;
+using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Model.Movement
 {
     /// <summary>
-    /// AnimationMovement 用の Config。
-    /// clip を Inspector で指定し、Initialize() のタイミングで AnimatorOverrideController を使って動的に差し替える。
-    /// SequentialMovementConfig のステップとして配置する。
+    /// AnimationClip を再生し、クリップ終了まで待機する移動ステップ。
+    /// Sequence の前のステップが終わったタイミングで再生を開始する。
     /// </summary>
     [Serializable]
-    public class AnimationMovementConfig : IMovementConfig
+    public class AnimationMovementConfig : IMovementStep
     {
         [SerializeField] AnimationClip clip;
         [SerializeField] int layerIndex = 0;
 
-        /// <summary>Presenter 側から Animator を渡して Strategy を生成する。</summary>
-        public IMovementStrategy CreateStrategy(Animator animator)
+        public Tween Play(Transform target, Vector2 direction, Animator animator)
         {
-            if (clip == null)
+            if (animator == null || clip == null)
             {
-                Debug.LogWarning("[AnimationMovementConfig] AnimationClip が設定されていません。StaticMovement にフォールバックします。");
-                return new StaticMovement();
+                Debug.LogWarning("[AnimationMovementConfig] Animator または AnimationClip が未設定です。");
+                return DOVirtual.DelayedCall(0f, () => { });
             }
-            return new AnimationMovement(animator, clip, layerIndex);
-        }
 
-        // IMovementConfig の実装（Animatorなしでは動かないのでフォールバックとして StaticMovement）
-        public IMovementStrategy CreateStrategy()
-        {
-            Debug.LogWarning("[AnimationMovementConfig] Animator が注入されていません。StaticMovement にフォールバックします。");
-            return new StaticMovement();
-        }
+            // OverrideController のセットアップだけ先に済ませておく（再生はしない）
+            var overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+            var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>(1);
+            overrideController.GetOverrides(overrides);
+            overrides[0] = new KeyValuePair<AnimationClip, AnimationClip>(overrides[0].Key, clip);
+            overrideController.ApplyOverrides(overrides);
+            animator.runtimeAnimatorController = overrideController;
 
-        public IMovementStrategy CreateStrategy(Vector2 direction)
-        {
-            return CreateStrategy();
+            // OnStart（このステップが実際に始まるタイミング）で再生を開始する
+            return DOVirtual.DelayedCall(clip.length, () => { })
+                .OnStart(() => animator.Play("Base", layerIndex, 0f));
         }
     }
 }

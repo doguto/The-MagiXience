@@ -1,5 +1,6 @@
 using System;
-using Cysharp.Threading.Tasks.Triggers;
+using System.Collections.Generic;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
@@ -19,7 +20,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         [Header("Movement")]
         [SerializeReference, SubclassSelector]
-        IMovementConfig movementConfig = new StaticMovementConfig();
+        List<IMovementStep> movementSteps = new() { new InfiniteMovementConfig() };
 
         [Header("Attack")]
         [SerializeField] BulletPool bulletPool;
@@ -40,6 +41,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         EnemyEntityModel model;
         Camera mainCamera;
         PlayerEntityPresenter playerPresenter;
+        Sequence movementSequence;
         readonly CompositeDisposable disposables = new();
         bool isEnteredScreen = false;
 
@@ -56,32 +58,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public void Initialize(Vector3 spawnPosition)
         {
-            model = new EnemyEntityModel(maxHp, spawnPosition, contactDamage);
+            transform.position = spawnPosition;
+            model = new EnemyEntityModel(maxHp, contactDamage);
 
-            // AnimationMovementConfig を含む SequentialMovementConfig には Animator を注入する
-            if (movementConfig is SequentialMovementConfig seqConfig)
-            {
-                var animator = GetComponent<Animator>();
-                if (animator != null) seqConfig.InjectAnimator(animator);
-            }
+            var animator = GetComponent<Animator>();
+            StartMovementSequence(animator);
 
-            model.SetMovementStrategy(movementConfig?.CreateStrategy() ?? new StaticMovement());
-
-            // 攻撃戦略を設定
-            var attackStrategy = attackConfig?.CreateStrategy(() => playerPresenter.transform.position, () => model.Position);
+            var attackStrategy = attackConfig?.CreateStrategy(
+                () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero,
+                () => transform.position);
             model.SetAttackStrategy(attackStrategy);
 
-            // OnAttackTiming イベントで弾発射
             model.AttackStrategy?.OnAttackTiming
                 .TakeUntil(model.OnDeath)
                 .Subscribe(ev => FireBullet(ev))
                 .AddTo(disposables);
 
-            BindModelToView();
-        }
-
-        void BindModelToView()
-        {
             model.OnDeath
                 .Subscribe(_ => HandleDeath())
                 .AddTo(disposables);
@@ -89,14 +81,27 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdatePosition(transform.position);
         }
 
+        void StartMovementSequence(Animator animator)
+        {
+            movementSequence?.Kill();
+
+            if (movementSteps == null || movementSteps.Count == 0) return;
+
+            movementSequence = DOTween.Sequence();
+            foreach (var step in movementSteps)
+            {
+                if (step == null) continue;
+                movementSequence.Append(step.Play(transform, Vector2.zero, animator));
+            }
+        }
+
         void Update()
         {
             if (model == null || !model.IsAlive) return;
 
-            model.UpdateMovement(Time.deltaTime);
             model.UpdateAttack(Time.deltaTime);
 
-            view.UpdatePosition(model.Position);
+            view.UpdatePosition(transform.position);
 
             if (IsOutOfScreen())
             {
@@ -106,7 +111,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         bool IsOutOfScreen()
         {
-            Vector3 position = model.Position;
+            Vector3 position = transform.position;
             Vector3 viewportPoint = mainCamera.WorldToViewportPoint(position);
 
             Vector3 extents = spriteRenderer.bounds.extents;
@@ -130,9 +135,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
         }
 
-
         void HandleDeath()
         {
+            movementSequence?.Kill();
             Debug.Log($"[EnemyEntityPresenter] Enemy died at {transform.position}");
             Destroy(gameObject);
         }
@@ -140,16 +145,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerEnter2D(Collider2D other)
         {
             var otherPresenter = other.GetComponent<IEntityPresenter>();
-            Debug.Log($"[EnemyEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name}");
             if (otherPresenter != null)
             {
                 model.OnCollision(otherPresenter.GetModel());
-                Debug.Log($"[EnemyEntityPresenter] Hp: {model.CurrentHp.Value}");
             }
         }
 
         void OnDestroy()
         {
+            movementSequence?.Kill();
             disposables.Dispose();
             model?.Dispose();
             model?.AttackStrategy?.Dispose();
@@ -157,5 +161,4 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public EntityBase GetModel() => model;
     }
-
 }
