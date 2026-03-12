@@ -16,8 +16,16 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)
         {
             Vector3 dir = ((Vector3)(overrideDirection != Vector2.zero ? overrideDirection : direction)).normalized;
-            var strategy = new AcceleratedMovement(dir * initialSpeed, dir * acceleration, maxSpeed);
-            return PullMovementHelper.Wrap(target, strategy, duration);
+            Vector3 velocity = dir * initialSpeed;
+            float accel = acceleration;
+            float max = maxSpeed;
+
+            return PullMovementHelper.Create(target, duration, (t, dt) =>
+            {
+                velocity += dir * accel * dt;
+                if (max > 0f) velocity = Vector3.ClampMagnitude(velocity, max);
+                t.position += velocity * dt;
+            });
         }
     }
 }

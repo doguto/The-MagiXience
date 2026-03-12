@@ -7,7 +7,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     /// Tweenベースの移動ステップ。
     /// Play() を呼ぶと Tween を生成して返す。DOTween.Sequence の Append に渡せる。
     /// direction: 自機狙いなど外部から方向を渡す場合に使用。不要なら Vector2.zero。
-    /// animator: AnimationMovementStep で必要。不要なら null。
+    /// animator: AnimationMovementConfig で必要。不要なら null。
     /// </summary>
     public interface IMovementStep
     {

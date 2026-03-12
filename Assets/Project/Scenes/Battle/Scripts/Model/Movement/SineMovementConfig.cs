@@ -14,7 +14,17 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
 
         public Tween Play(Transform target, Vector2 direction, Animator animator)
         {
-            return PullMovementHelper.Wrap(target, new SineMovement(baseVelocity, amplitude, frequency), duration);
+            Vector3 sineAxis = new Vector3(-baseVelocity.y, baseVelocity.x, 0f).normalized;
+            float elapsed = 0f;
+            float prevSineValue = 0f;
+
+            return PullMovementHelper.Create(target, duration, (t, dt) =>
+            {
+                elapsed += dt;
+                float sineValue = Mathf.Sin(elapsed * frequency * 2f * Mathf.PI) * amplitude;
+                t.position += baseVelocity * dt + sineAxis * (sineValue - prevSineValue);
+                prevSineValue = sineValue;
+            });
         }
     }
 }

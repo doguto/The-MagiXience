@@ -13,7 +13,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
 
         public Tween Play(Transform target, Vector2 direction, Animator animator)
         {
-            return PullMovementHelper.Wrap(target, new QuadraticMovement(initialVelocity, acceleration), duration);
+            Vector3 velocity = initialVelocity;
+
+            return PullMovementHelper.Create(target, duration, (t, dt) =>
+            {
+                velocity += acceleration * dt;
+                t.position += velocity * dt;
+            });
         }
     }
 }

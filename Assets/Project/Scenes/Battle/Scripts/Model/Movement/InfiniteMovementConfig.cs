@@ -18,8 +18,12 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
             Vector3 vel = overrideDirection != Vector2.zero
                 ? (Vector3)(overrideDirection.normalized) * velocity.magnitude
                 : velocity;
-            IMovementStrategy strategy = vel != Vector3.zero ? new LinearMovement(vel) : new StaticMovement();
-            return PullMovementHelper.Wrap(target, strategy, duration: 0f);
+
+            if (vel == Vector3.zero)
+                return PullMovementHelper.Create(target, 0f, (_, __) => { });
+
+            return PullMovementHelper.Create(target, 0f, (t, dt) =>
+                t.position += vel * dt);
         }
     }
 }
