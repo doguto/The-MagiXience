@@ -25,8 +25,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Attack")]
         [SerializeField] BulletPool bulletPool;
         [SerializeField] int bulletDamage = 10;
-        [SerializeReference, SubclassSelector]
-        IAttackConfig attackConfig = new IntervalAttackConfig();
+        [SerializeField] AttackTimeline attackTimeline;
 
         [Header("component references")]
         [SerializeField] EnemyEntityView view;
@@ -64,10 +63,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             var animator = GetComponent<Animator>();
             StartMovementSequence(animator);
 
-            var attackStrategy = attackConfig?.CreateStrategy(
-                () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero,
-                () => transform.position);
-            model.SetAttackStrategy(attackStrategy);
+            if (attackTimeline != null)
+            {
+                Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
+                attackTimeline.InitializeProviders(getPlayerPos, () => transform.position);
+            }
+            model.SetAttackStrategy(attackTimeline);
 
             model.AttackStrategy?.OnAttackTiming
                 .TakeUntil(model.OnDeath)
