@@ -9,15 +9,16 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     public class AttackTimeline : IAttackStrategy
     {
         [SerializeField] bool loop;
-        [SerializeField, Min(0.01f)] float loopDuration = 3f;
+        [SerializeField] float loopStart;
+        [SerializeField] float loopEnd = 5f;
+        [SerializeField, Min(0.01f)] float cycleDuration = 2f;
         [SerializeField] List<AttackTimelineEntry> entries = new();
 
-        readonly Subject<AttackEvent> onAttackTiming = new();
-        bool[] fired;
-        float elapsed;
-        
+        Subject<AttackEvent> onAttackTiming;
+        CompositeDisposable disposables;
+
         public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
-        public bool IsCompleted => !loop && fired != null && Array.TrueForAll(fired, f => f);
+        public bool IsCompleted { get; private set; }
 
         public void InitializeProviders(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition)
         {
@@ -29,38 +30,44 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         public void Initialize()
         {
-            elapsed = 0f;
-            fired = new bool[entries.Count];
-        }
+            onAttackTiming = new Subject<AttackEvent>();
+            disposables = new CompositeDisposable();
+            IsCompleted = false;
 
-        public void Update(float deltaTime)
-        {
-            if (IsCompleted) return;
+            if (!loop || entries.Count == 0) return;
 
-            elapsed += deltaTime;
+            int totalCycles = Mathf.FloorToInt((loopEnd - loopStart) / cycleDuration);
 
-            for (var i = 0; i < entries.Count; i++)
+            for (int cycle = 0; cycle <= totalCycles; cycle++)
             {
-                if (!fired[i] && elapsed >= entries[i].time)
+                foreach (var entry in entries)
                 {
-                    fired[i] = true;
-                    var entry = entries[i];
-                    if (entry.signal != null)
-                    {
-                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider));
-                    }
+                    float fireTime = loopStart + cycle * cycleDuration + entry.time;
+                    if (fireTime > loopEnd) continue;
+
+                    Observable.Timer(TimeSpan.FromSeconds(fireTime))
+                        .Subscribe(_ =>
+                        {
+                            if (entry.signal != null)
+                            {
+                                onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider));
+                            }
+                        })
+                        .AddTo(disposables);
                 }
             }
 
-            if (loop && elapsed >= loopDuration)
-            {
-                elapsed -= loopDuration;
-                for (var i = 0; i < fired.Length; i++) fired[i] = false;
-            }
+            // loopEnd到達で完了
+            Observable.Timer(TimeSpan.FromSeconds(loopEnd))
+                .Subscribe(_ => IsCompleted = true)
+                .AddTo(disposables);
         }
+
+        public void Update(float deltaTime) { }
 
         public void Dispose()
         {
+            disposables?.Dispose();
             onAttackTiming?.Dispose();
         }
     }
