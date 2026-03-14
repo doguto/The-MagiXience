@@ -34,32 +34,52 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             disposables = new CompositeDisposable();
             IsCompleted = false;
 
-            if (!loop || entries.Count == 0) return;
+            if (entries.Count == 0) return;
 
-            int totalCycles = Mathf.FloorToInt((loopEnd - loopStart) / cycleDuration);
-
-            for (int cycle = 0; cycle <= totalCycles; cycle++)
+            if (loop)
             {
+                int totalCycles = Mathf.FloorToInt((loopEnd - loopStart) / cycleDuration);
+
+                for (int cycle = 0; cycle <= totalCycles; cycle++)
+                {
+                    foreach (var entry in entries)
+                    {
+                        float fireTime = loopStart + cycle * cycleDuration + entry.time;
+                        if (fireTime > loopEnd) continue;
+
+                        ScheduleEntry(entry, fireTime);
+                    }
+                }
+
+                Observable.Timer(TimeSpan.FromSeconds(loopEnd))
+                    .Subscribe(_ => IsCompleted = true)
+                    .AddTo(disposables);
+            }
+            else
+            {
+                float maxTime = 0f;
                 foreach (var entry in entries)
                 {
-                    float fireTime = loopStart + cycle * cycleDuration + entry.time;
-                    if (fireTime > loopEnd) continue;
-
-                    Observable.Timer(TimeSpan.FromSeconds(fireTime))
-                        .Subscribe(_ =>
-                        {
-                            if (entry.signal != null)
-                            {
-                                onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider));
-                            }
-                        })
-                        .AddTo(disposables);
+                    ScheduleEntry(entry, entry.time);
+                    if (entry.time > maxTime) maxTime = entry.time;
                 }
-            }
 
-            // loopEnd到達で完了
-            Observable.Timer(TimeSpan.FromSeconds(loopEnd))
-                .Subscribe(_ => IsCompleted = true)
+                Observable.Timer(TimeSpan.FromSeconds(maxTime))
+                    .Subscribe(_ => IsCompleted = true)
+                    .AddTo(disposables);
+            }
+        }
+
+        void ScheduleEntry(AttackTimelineEntry entry, float fireTime)
+        {
+            Observable.Timer(TimeSpan.FromSeconds(fireTime))
+                .Subscribe(_ =>
+                {
+                    if (entry.signal != null)
+                    {
+                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider));
+                    }
+                })
                 .AddTo(disposables);
         }
 
