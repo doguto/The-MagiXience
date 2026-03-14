@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Timeline;
+using Project.Scenes.Battle.Scripts.Model.Attack;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 
 namespace Project.Scenes.Battle.Scripts.Model
 {
@@ -14,6 +16,14 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] List<AudioTrackDefinition> audioTracks = new();
         [SerializeField] List<ControlTrackDefinition> controlTracks = new();
         [SerializeField] List<EnemySpawnTrackDefinition> enemySpawnTracks = new();
+
+        [Header("Boss")]
+        [SerializeField] AttackTimeline bossAttackTimeline;
+        [SerializeReference, SubclassSelector]
+        List<IMovementStep> bossMovementSteps = new();
+
+        public AttackTimeline BossAttackTimeline => bossAttackTimeline;
+        public IReadOnlyList<IMovementStep> BossMovementSteps => bossMovementSteps;
 
         public TimelineAsset BuildTimeline()
         {

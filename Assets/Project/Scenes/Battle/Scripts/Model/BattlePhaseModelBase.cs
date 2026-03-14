@@ -23,6 +23,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         protected CompositeDisposable Disposables { get; } = new();
 
         public string PhaseId => Definition.PhaseId;
+        public BattleTimelineBuilderAsset Builder => Definition.TimelineBuilder;
         public TimelineAsset TimelineAsset => ResolveTimeline();
         public IObservable<Unit> OnExitPhase => exitSubject;
 

@@ -27,6 +27,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         BattleSequenceModel bossSequence;
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
+        BossEntityPresenter bossPresenter;
         bool isSceneLoadedHandlerRegistered = false;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
@@ -68,6 +69,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (playerPresenter == null)
             {
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
+            }
+
+            bossPresenter = FindFirstObjectByType<BossEntityPresenter>();
+            if (bossPresenter != null)
+            {
+                phaseStateMachine.OnPhaseStarted
+                    .Subscribe(phase => bossPresenter.OnPhaseStarted(phase))
+                    .AddTo(disposables);
             }
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
