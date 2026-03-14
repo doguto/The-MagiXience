@@ -12,10 +12,14 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     [Serializable]
     public class PathMovementConfig : IMovementStep
     {
+        public const int CustomCurveValue = TweenMovementConfig.CustomCurveValue;
+
         [SerializeField] Vector3[] waypoints = { new Vector3(-3f, 0f, 0f) };
         [SerializeField, Min(0.01f)] float duration = 1f;
         [SerializeField] PathType pathType = PathType.CatmullRom;
-        [SerializeField] Ease ease = Ease.Linear;
+        [SerializeField] int easeValue = (int)Ease.Linear;
+        [SerializeField] AnimationCurve customCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+        [SerializeField] EaseCurvePreset curvePreset;
         [SerializeField] bool isRelative = true;
 
         public Tween Play(Transform target, Vector2 direction, Animator animator)
@@ -32,8 +36,15 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
                 resolvedWaypoints = waypoints;
             }
 
-            return target.DOPath(resolvedWaypoints, duration, pathType, PathMode.Sidescroller2D)
-                .SetEase(ease);
+            var tween = target.DOPath(resolvedWaypoints, duration, pathType, PathMode.Sidescroller2D);
+
+            if (easeValue == CustomCurveValue)
+            {
+                var curve = curvePreset != null ? curvePreset.Curve : customCurve;
+                return tween.SetEase(curve);
+            }
+
+            return tween.SetEase((Ease)easeValue);
         }
     }
 }
