@@ -14,8 +14,8 @@ namespace Project.Scenes.Battle.Scripts.Model
     [Serializable]
     public class AnimationClipDefinition : IClipDefinition<AnimationTrack>
     {
-        [SerializeField, Min(0)] double start;
-        [SerializeField, Min(0)] double duration;
+        [SerializeField] double start;
+        [SerializeField] double duration;
         [SerializeField] AnimationClip animationClip;
 
         public void Build(AnimationTrack track)

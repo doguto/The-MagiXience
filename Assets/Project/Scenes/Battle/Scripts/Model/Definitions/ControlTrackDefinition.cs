@@ -14,8 +14,8 @@ namespace Project.Scenes.Battle.Scripts.Model
     [Serializable]
     public class ControlClipDefinition : IClipDefinition<ControlTrack>
     {
-        [SerializeField, Min(0)] double start;
-        [SerializeField, Min(0)] double duration = 1.0;
+        [SerializeField] double start;
+        [SerializeField] double duration = 1.0;
         [SerializeField] GameObject sourceObject;
 
         public void Build(ControlTrack track)
