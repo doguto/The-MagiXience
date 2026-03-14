@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 898202745961063642}
   - component: {fileID: 8877745320614750256}
   - component: {fileID: 366756060701291069}
-  m_Layer: 8
-  m_Name: PlayerChargeBullet
+  m_Layer: 10
+  m_Name: EnemyBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,13 +28,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7477573057972596773}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.86, y: -2.41, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!212 &1851957906713825068
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -79,8 +79,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -7174898199296445581, guid: dffef66376be4fa480fb02b19edbe903, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: -9095717837082945937, guid: bd3cb4af8406d4436a2ae8c2aafe1f8d, type: 3}
+  m_Color: {r: 0.9529412, g: 0.64705884, b: 0.2901961, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -128,13 +128,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.22, y: 1.22}
+    oldSize: {x: 1, y: 2}
     newSize: {x: 0.23, y: 0.23}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.6, y: 1.4}
   m_EdgeRadius: 0
 --- !u!114 &8877745320614750256
 MonoBehaviour:
@@ -162,12 +162,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementConfig:
-    rid: 2030962198006464594
+    rid: 2030962193479499847
   view: {fileID: 8877745320614750256}
   spriteRenderer: {fileID: 1851957906713825068}
+  lifetime: 10
   references:
     version: 2
     RefIds:
-    - rid: 2030962198006464594
-      type: {class: StaticMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data: 
+    - rid: 2030962193479499847
+      type: {class: LinearMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        velocity: {x: -6, y: 0, z: 0}
