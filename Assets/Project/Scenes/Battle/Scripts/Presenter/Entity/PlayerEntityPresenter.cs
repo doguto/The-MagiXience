@@ -97,7 +97,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             MessageBroker.Default.Receive<PlayerCrouchMessage>()
                 .Subscribe(msg =>
                 {
-                    Debug.Log($"[PlayerEntityPresenter] Crouch input: {msg.isPressed}");
                     if (msg.isPressed)
                     {
                         model.SetSneaking(true);

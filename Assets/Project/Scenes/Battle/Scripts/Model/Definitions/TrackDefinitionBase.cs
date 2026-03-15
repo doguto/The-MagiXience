@@ -16,6 +16,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] List<TClipDefinition> clips = new();
 
         public string TrackName => trackName;
+        public IReadOnlyList<TClipDefinition> Clips => clips;
 
         public virtual void Build(TTrack track)
         {

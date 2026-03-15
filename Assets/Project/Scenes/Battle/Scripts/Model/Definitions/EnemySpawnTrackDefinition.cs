@@ -19,6 +19,8 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] Vector3 spawnPosition;
         [SerializeField] GameObject prefab;
 
+        public double Time => time;
+
         public void Build(SignalTrack track)
         {
             if (!track) return;

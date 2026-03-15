@@ -24,6 +24,22 @@ namespace Project.Scenes.Battle.Scripts.Model
         public AttackPreset BossAttackPreset => bossAttackPreset;
         public MovementPreset BossMovementPreset => bossMovementPreset;
 
+        public double LastEnemySpawnTime
+        {
+            get
+            {
+                double last = -1;
+                foreach (var track in enemySpawnTracks)
+                {
+                    foreach (var clip in track.Clips)
+                    {
+                        if (clip.Time > last) last = clip.Time;
+                    }
+                }
+                return last;
+            }
+        }
+
         public TimelineAsset BuildTimeline()
         {
             var timeline = ScriptableObject.CreateInstance<TimelineAsset>();
