@@ -62,7 +62,7 @@ GameObject:
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
   m_Layer: 7
-  m_Name: Phase3A
+  m_Name: Phase6C-1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -97,76 +97,139 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 10
-  contactDamage: 10
+  contactDamage: 5
+  movementPreset: {fileID: 0}
   movementSteps:
-  - rid: 8577112408172003548
+  - rid: 8577112429281935644
+  - rid: 8577112429281935651
+  - rid: 8577112429281935670
+  - rid: 8577112429281935607
   bulletPool: {fileID: 7996329089749057052}
-  bulletDamage: 10
+  bulletDamage: 5
+  attackPreset: {fileID: 0}
   attackTimeline:
     loop: 0
-    loopStart: 0
-    loopEnd: 5
-    cycleDuration: 2
-    entries: []
+    loopStart: 1
+    loopEnd: 3
+    cycleDuration: 1
+    entries:
+    - time: 2.3
+      signal:
+        rid: 8577112429281935883
+      directionProvider:
+        rid: 8577112429281935879
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
     version: 2
     RefIds:
-    - rid: 8577112408172003548
-      type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 8577112429281935607
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        waypoints:
-        - {x: -3, y: -1, z: 0}
-        - {x: -4, y: -3, z: 0}
-        - {x: -4.3, y: -9, z: 0}
-        duration: 6
-        pathType: 1
-        easeValue: -1
+        targetOffset: {x: 10, y: 2, z: 0}
+        duration: 0.8
+        easeValue: 1
         customCurve:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3
             time: 0
             value: 0
-            inSlope: 3.0350144
-            outSlope: 3.0350144
+            inSlope: 0
+            outSlope: 1
             tangentMode: 0
             weightedMode: 0
             inWeight: 0
-            outWeight: 0.08756883
-          - serializedVersion: 3
-            time: 0.3467697
-            value: 0.6059025
-            inSlope: 0.09443082
-            outSlope: 0.09443082
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.1738879
-            outWeight: 0.11941429
-          - serializedVersion: 3
-            time: 0.8653298
-            value: 0.65875036
-            inSlope: 0.32938245
-            outSlope: 0.32938245
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.33333334
-            outWeight: 0.54143274
+            outWeight: 0
           - serializedVersion: 3
             time: 1
-            value: 1.0023804
-            inSlope: 1.6473737
-            outSlope: 1.6473737
+            value: 1
+            inSlope: 1
+            outSlope: 0
             tangentMode: 0
             weightedMode: 0
-            inWeight: 0.08976552
+            inWeight: 0
             outWeight: 0
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-        curvePreset: {fileID: 11400000, guid: 90f2358a8082145468cdedc8e8c0a14a, type: 2}
-        isRelative: 1
+        curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8577112429281935644
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 7, y: -1, z: 0}
+        duration: 0.8
+        easeValue: 1
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8577112429281935651
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 5, y: 2, z: 0}
+        duration: 1.2
+        easeValue: 1
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8577112429281935670
+      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        duration: 3
+    - rid: 8577112429281935879
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112429281935883
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0

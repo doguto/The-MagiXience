@@ -17,6 +17,65 @@ MonoBehaviour:
   activationTracks: []
   audioTracks: []
   controlTracks: []
-  enemySpawnTracks:
-  - trackName: EnemySpawn
-    clips: []
+  enemySpawnTracks: []
+  bossAttackTimeline:
+    loop: 1
+    loopStart: 0
+    loopEnd: 30
+    cycleDuration: 4
+    entries:
+    - time: 2
+      signal:
+        rid: 8577112342479242228
+      directionProvider:
+        rid: 8577112342479242230
+    - time: 2.3
+      signal:
+        rid: 8577112342479242231
+      directionProvider:
+        rid: 8577112342479242232
+  bossMovementSteps:
+  - rid: 8577112342479242225
+  - rid: 8577112342479242226
+  - rid: 8577112342479242227
+  references:
+    version: 2
+    RefIds:
+    - rid: 8577112342479242225
+      type: {class: SineMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        baseVelocity: {x: -5, y: 0, z: 0}
+        amplitude: 1
+        frequency: 1
+        duration: 2
+    - rid: 8577112342479242226
+      type: {class: AcceleratedMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        direction: {x: 1, y: 1}
+        initialSpeed: 1
+        acceleration: 5
+        maxSpeed: 10
+        duration: 0.8
+    - rid: 8577112342479242227
+      type: {class: AnimationMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        clip: {fileID: 7400000, guid: 078c8b4be1fae1746871f433e4750d2d, type: 2}
+        layerIndex: 0
+    - rid: 8577112342479242228
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 10
+        spreadAngle: 15
+    - rid: 8577112342479242230
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112342479242231
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 10
+        spreadAngle: 15
+    - rid: 8577112342479242232
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: -0.1}

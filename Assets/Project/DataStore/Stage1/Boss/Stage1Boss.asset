@@ -12,13 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea724a92a126f174c82eefb1b61cba64, type: 3}
   m_Name: Stage1Boss
   m_EditorClassIdentifier: 
-  sequenceType: 1
+  situation: 1
   phases:
   - phaseId: 1
-    timeLimitSeconds: 5
-    timelineBuilder: {fileID: 11400000, guid: 77560f74d2394ff4698187ed781a1be0, type: 2}
-    exitCondition: 0
+    timelineBuilder: {fileID: 11400000, guid: 1807408860171b44ca0aba800ad0c938, type: 2}
+    exitConditionConfig:
+      rid: 8577112342479241342
   - phaseId: 2
-    timeLimitSeconds: 5
-    timelineBuilder: {fileID: 11400000, guid: 77560f74d2394ff4698187ed781a1be0, type: 2}
-    exitCondition: 0
+    timelineBuilder: {fileID: 11400000, guid: 1807408860171b44ca0aba800ad0c938, type: 2}
+    exitConditionConfig:
+      rid: 8577112342479241343
+  references:
+    version: 2
+    RefIds:
+    - rid: 8577112342479241342
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 10
+    - rid: 8577112342479241343
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 10
