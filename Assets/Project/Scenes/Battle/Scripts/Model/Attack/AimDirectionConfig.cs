@@ -20,5 +20,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             var direction = ((Vector2)(getPlayerPosition() - getEnemyPosition())).normalized;
             return direction == Vector2.zero ? Vector2.left : direction;
         }
+
+        public IDirectionProvider Clone() => new AimDirectionConfig();
     }
 }

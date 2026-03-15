@@ -83,6 +83,23 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 .AddTo(disposables);
         }
 
+        public AttackTimeline DeepCopy()
+        {
+            var copy = new AttackTimeline
+            {
+                loop = loop,
+                loopStart = loopStart,
+                loopEnd = loopEnd,
+                cycleDuration = cycleDuration,
+                entries = new List<AttackTimelineEntry>(entries.Count)
+            };
+            foreach (var entry in entries)
+            {
+                copy.entries.Add(entry.DeepCopy());
+            }
+            return copy;
+        }
+
         public void Update(float deltaTime) { }
 
         public void Dispose()

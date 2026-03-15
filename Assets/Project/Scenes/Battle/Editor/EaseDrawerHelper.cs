@@ -96,13 +96,15 @@ namespace Project.Editor
             return rect;
         }
 
+        static readonly string DefaultSaveDir = Application.dataPath + "/Project/DataStore";
+
         static void SavePreset(SerializedProperty property)
         {
-            var path = EditorUtility.SaveFilePanelInProject(
+            var path = ToAssetsPath(EditorUtility.SaveFilePanel(
                 "Save Ease Curve Preset",
+                DefaultSaveDir,
                 "NewEaseCurvePreset",
-                "asset",
-                "Save the current curve as a reusable preset.");
+                "asset"));
 
             if (string.IsNullOrEmpty(path)) return;
 
@@ -118,6 +120,18 @@ namespace Project.Editor
 
             property.FindPropertyRelative("curvePreset").objectReferenceValue = preset;
             property.serializedObject.ApplyModifiedProperties();
+        }
+
+        static string ToAssetsPath(string absolutePath)
+        {
+            if (string.IsNullOrEmpty(absolutePath)) return null;
+            var dataPath = Application.dataPath;
+            if (!absolutePath.StartsWith(dataPath))
+            {
+                Debug.LogError("Assets フォルダ外には保存できません。");
+                return null;
+            }
+            return "Assets" + absolutePath.Substring(dataPath.Length);
         }
     }
 }

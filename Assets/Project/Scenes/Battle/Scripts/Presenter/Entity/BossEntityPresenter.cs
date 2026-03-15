@@ -57,8 +57,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             var builder = phase.Builder;
             if (builder == null) return;
 
-            ApplyAttackTimeline(builder.BossAttackTimeline);
-            StartMovementSequence(builder.BossMovementSteps);
+            var attackTimeline = builder.BossAttackPreset != null
+                ? builder.BossAttackPreset.CreateTimeline()
+                : null;
+            ApplyAttackTimeline(attackTimeline);
+
+            var movementSteps = builder.BossMovementPreset != null
+                ? builder.BossMovementPreset.Steps
+                : null;
+            StartMovementSequence(movementSteps);
         }
 
         void ApplyAttackTimeline(AttackTimeline attackTimeline)

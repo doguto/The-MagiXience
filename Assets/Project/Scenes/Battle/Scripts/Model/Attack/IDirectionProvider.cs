@@ -7,5 +7,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     {
         void Initialize(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition);
         Vector2 GetDirection();
+        IDirectionProvider Clone();
     }
 }

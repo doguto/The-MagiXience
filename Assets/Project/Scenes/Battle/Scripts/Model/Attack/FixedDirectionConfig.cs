@@ -11,5 +11,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public void Initialize(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition) { }
 
         public Vector2 GetDirection() => direction.normalized;
+
+        public IDirectionProvider Clone() => new FixedDirectionConfig { direction = direction };
     }
 }

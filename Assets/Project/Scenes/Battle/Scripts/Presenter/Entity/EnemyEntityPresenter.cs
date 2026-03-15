@@ -19,12 +19,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] int contactDamage = 10;
 
         [Header("Movement")]
+        [SerializeField] MovementPreset movementPreset;
         [SerializeReference, SubclassSelector]
         List<IMovementStep> movementSteps = new() { new InfiniteMovementConfig() };
 
         [Header("Attack")]
         [SerializeField] BulletPool bulletPool;
         [SerializeField] int bulletDamage = 10;
+        [SerializeField] AttackPreset attackPreset;
         [SerializeField] AttackTimeline attackTimeline;
 
         [Header("component references")]
@@ -61,14 +63,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             model = new EnemyEntityModel(maxHp, contactDamage);
 
             var animator = GetComponent<Animator>();
-            StartMovementSequence(animator);
 
-            if (attackTimeline != null)
+            // Movement: プリセット優先、なければインライン
+            IReadOnlyList<IMovementStep> steps = movementPreset != null
+                ? movementPreset.Steps
+                : movementSteps;
+            StartMovementSequence(steps, animator);
+
+            // Attack: プリセット優先、なければインライン
+            AttackTimeline timeline = attackPreset != null
+                ? attackPreset.CreateTimeline()
+                : attackTimeline;
+
+            if (timeline != null)
             {
                 Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
-                attackTimeline.InitializeProviders(getPlayerPos, () => transform.position);
+                timeline.InitializeProviders(getPlayerPos, () => transform.position);
             }
-            model.SetAttackStrategy(attackTimeline);
+            model.SetAttackStrategy(timeline);
 
             model.AttackStrategy?.OnAttackTiming
                 .TakeUntil(model.OnDeath)
@@ -82,14 +94,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdatePosition(transform.position);
         }
 
-        void StartMovementSequence(Animator animator)
+        void StartMovementSequence(IReadOnlyList<IMovementStep> steps, Animator animator)
         {
             movementSequence?.Kill();
 
-            if (movementSteps == null || movementSteps.Count == 0) return;
+            if (steps == null || steps.Count == 0) return;
 
             movementSequence = DOTween.Sequence();
-            foreach (var step in movementSteps)
+            foreach (var step in steps)
             {
                 if (step == null) continue;
                 movementSequence.Append(step.Play(transform, Vector2.zero, animator));

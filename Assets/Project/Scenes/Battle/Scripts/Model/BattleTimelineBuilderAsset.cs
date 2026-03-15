@@ -18,12 +18,11 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] List<EnemySpawnTrackDefinition> enemySpawnTracks = new();
 
         [Header("Boss")]
-        [SerializeField] AttackTimeline bossAttackTimeline;
-        [SerializeReference, SubclassSelector]
-        List<IMovementStep> bossMovementSteps = new();
+        [SerializeField] AttackPreset bossAttackPreset;
+        [SerializeField] MovementPreset bossMovementPreset;
 
-        public AttackTimeline BossAttackTimeline => bossAttackTimeline;
-        public IReadOnlyList<IMovementStep> BossMovementSteps => bossMovementSteps;
+        public AttackPreset BossAttackPreset => bossAttackPreset;
+        public MovementPreset BossMovementPreset => bossMovementPreset;
 
         public TimelineAsset BuildTimeline()
         {
