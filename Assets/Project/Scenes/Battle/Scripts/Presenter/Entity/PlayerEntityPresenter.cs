@@ -167,7 +167,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireChargedShot()
         {
-            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f);
+            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f, isPlayerBullet: true);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 

@@ -44,15 +44,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             mainCamera = Camera.main;
         }
 
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool)
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false)
         {
             pool = objectPool;
             transform.position = position;
 
             if (model == null)
-                model = new BulletEntityModel(damage);
+                model = new BulletEntityModel(damage, isPlayerBullet);
             else
-                model.Reinitialize(damage);
+                model.Reinitialize(damage, isPlayerBullet);
 
             StartMovementSequence(direction);
 
