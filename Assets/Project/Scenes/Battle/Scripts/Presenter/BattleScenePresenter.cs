@@ -156,7 +156,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
             else
             {
-                TransitionToScenario(CompleteStage);
+                TransitionToScenario(DemoClear);
             }
         }
 
@@ -213,7 +213,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
 
             // シナリオ完了後は攻撃を再開
-            playerPresenter?.SubscribeToAttackInput();
+            // temp: デモ版ではボス戦終了後に攻撃できない
+            if (RuntimeModelRepository.Instance.Get().CurrentSituation == BattleSituation.Boss)  
+                playerPresenter?.SubscribeToAttackInput();
 
             pendingScenarioCallback?.Invoke();
             pendingScenarioCallback = null;
@@ -231,6 +233,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             phaseStateMachine.PlaySequence(bossSequence);
         }
 
+        async void DemoClear()
+        {
+            stageModel?.Clear();
+
+            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
+
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
+        }
+        
         void CompleteStage()
         {
             stageModel?.Clear();

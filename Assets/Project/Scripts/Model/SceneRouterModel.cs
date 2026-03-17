@@ -6,7 +6,7 @@ namespace Project.Scripts.Model
         public const string Title = "Title";
         public const string StageList = "StageList";
         public const string Scenario = "Scenario";
-        public const string BattleBoss = "BattleBoss";
-        public const string BattleWay = "BattleWay";
+        public const string Battle = "Battle";
+        public const string DemoClear = "DemoClear";
     }
 }
