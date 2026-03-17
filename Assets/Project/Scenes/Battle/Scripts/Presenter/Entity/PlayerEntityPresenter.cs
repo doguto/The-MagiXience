@@ -38,6 +38,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Camera mainCamera;
         float lastShootTime;
         Vector2 currentMoveInput;
+        Vector2 pendingPush;
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
 
@@ -57,6 +58,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             BindModelToView();
             SubscribeToMoveInput();
             SubscribeToAttackInput();
+            SubscribeToSpectrumBarPush();
         }
 
         void BindModelToView()
@@ -73,6 +75,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 .Subscribe(msg =>
                 {
                     currentMoveInput = msg.value;
+                })
+                .AddTo(disposables);
+        }
+
+        void SubscribeToSpectrumBarPush()
+        {
+            MessageBroker.Default.Receive<SpectrumBarPushMessage>()
+                .Subscribe(msg =>
+                {
+                    pendingPush += msg.pushDirection * msg.pushForce;
                 })
                 .AddTo(disposables);
         }
@@ -124,8 +136,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (!model.IsAlive) return;
 
-            // 移動処理（押している間継続）
+            // 移動処理（押している間継続）+ スペクトラムバーからの押し戻し
             Vector3 movement = HandleMovement();
+            movement += (Vector3)pendingPush * Time.deltaTime;
+            pendingPush = Vector2.zero;
             Vector3 newPosition = ClampToScreen(view.GetPosition() + movement);
             view.UpdatePosition(newPosition);
 

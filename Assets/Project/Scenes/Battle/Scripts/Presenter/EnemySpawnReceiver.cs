@@ -30,15 +30,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             var instance = Instantiate(signal.Prefab, signal.SpawnPosition, Quaternion.identity);
-            var presenter = instance.GetComponent<EnemyEntityPresenter>();
+            var presenter = instance.GetComponent<IEntityPresenter>();
             if (presenter == null)
             {
-                Debug.LogWarning($"[EnemySpawnReceiver] Spawned prefab '{signal.Prefab.name}' has no EnemyEntityPresenter.", this);
+                Debug.LogWarning($"[EnemySpawnReceiver] Spawned prefab '{signal.Prefab.name}' has no IEntityPresenter.", this);
             }
-            else if (enemyTracker != null)
+
+            // EnemyEntityPresenterの場合のみトラッカーに登録
+            if (presenter is EnemyEntityPresenter enemyPresenter && enemyTracker != null)
             {
-                enemyTracker.RegisterEnemy(presenter);
+                enemyTracker.RegisterEnemy(enemyPresenter);
             }
+
             Debug.Log($"[EnemySpawnReceiver] Spawned '{signal.Prefab.name}' at {signal.SpawnPosition}", this);
         }
     }
