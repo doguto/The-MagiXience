@@ -12,7 +12,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle };
 
-        public AttackEvent CreateEvent(IDirectionProvider directionProvider)
+        public AttackEvent CreateEvent(IDirectionProvider directionProvider, int bulletPoolIndex = 0)
         {
             var baseDirection = directionProvider.GetDirection();
             var directions = new List<Vector2>(wayCount);
@@ -45,7 +45,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 }
             }
 
-            return new AttackEvent(directions);
+            return new AttackEvent(directions, bulletPoolIndex);
         }
     }
 }

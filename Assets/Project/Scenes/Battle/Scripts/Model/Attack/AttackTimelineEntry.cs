@@ -9,6 +9,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] public float time;
         [SerializeReference, SubclassSelector] public IAttackSignal signal;
         [SerializeReference, SubclassSelector] public IDirectionProvider directionProvider = new FixedDirectionConfig();
+        [SerializeField] public int bulletPoolIndex;
 
         public AttackTimelineEntry DeepCopy()
         {
@@ -16,7 +17,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             {
                 time = time,
                 signal = signal?.Clone(),
-                directionProvider = directionProvider?.Clone()
+                directionProvider = directionProvider?.Clone(),
+                bulletPoolIndex = bulletPoolIndex
             };
         }
     }

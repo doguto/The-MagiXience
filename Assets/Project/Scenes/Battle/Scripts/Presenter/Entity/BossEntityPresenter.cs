@@ -19,7 +19,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] int contactDamage = 20;
 
         [Header("Attack")]
-        [SerializeField] BulletPool bulletPool;
+        [SerializeField] BulletPool[] bulletPools;
         [SerializeField] int bulletDamage = 10;
 
         [Header("Component References")]
@@ -40,7 +40,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
-            if (bulletPool == null) Debug.LogError("[BossEntityPresenter] BulletPool is not assigned!");
+            if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
 
             model = new EnemyEntityModel(maxHp, contactDamage);
@@ -113,10 +113,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireBullet(AttackEvent ev)
         {
+            var pool = GetBulletPool(ev.BulletPoolIndex);
+            if (pool == null) return;
+
             foreach (var dir in ev.Directions)
             {
-                bulletPool.SpawnBullet(bulletDamage, bulletPool.transform.position, dir);
+                pool.SpawnBullet(bulletDamage, pool.transform.position, dir);
             }
+        }
+
+        BulletPool GetBulletPool(int index)
+        {
+            if (bulletPools == null || bulletPools.Length == 0) return null;
+            if (index < 0 || index >= bulletPools.Length) return bulletPools[0];
+            return bulletPools[index];
         }
 
         void HandleDeath()
