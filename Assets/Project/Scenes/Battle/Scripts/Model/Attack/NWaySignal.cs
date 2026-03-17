@@ -10,6 +10,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] int wayCount = 3;
         [SerializeField] float spreadAngle = 60f;
 
+        public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle };
+
         public AttackEvent CreateEvent(IDirectionProvider directionProvider)
         {
             var baseDirection = directionProvider.GetDirection();

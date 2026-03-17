@@ -15,7 +15,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             return new AttackTimelineEntry
             {
                 time = time,
-                signal = signal,
+                signal = signal?.Clone(),
                 directionProvider = directionProvider?.Clone()
             };
         }
