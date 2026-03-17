@@ -153,8 +153,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void HandleSequenceCompleted(BattleSituation situation)
+        async void HandleSequenceCompleted(BattleSituation situation)
         {
+            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: destroyCancellationToken);
+
             if (situation == BattleSituation.Way)
             {
                 TransitionToScenario(StartBossSequence);
