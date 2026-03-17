@@ -85,7 +85,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
             if (startSituation == BattleSituation.Boss && bossSequence != null)
             {
-                Debug.Log("[BattleScenePresenter] Starting from boss sequence.", this);
                 PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
             }
@@ -94,15 +93,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
             }
-            else if (bossSequence != null)
-            {
-                Debug.LogWarning("Way sequence is missing. Starting from boss sequence.", this);
-                PlayBgmForSituation(BattleSituation.Boss);
-                phaseStateMachine.PlaySequence(bossSequence);
-            }
             else
             {
-                Debug.LogWarning("No battle sequences are configured for this stage.", this);
+                Debug.LogError("No battle sequences are configured for this stage.", this);
             }
         }
 
@@ -261,6 +254,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (waySequence != null)
             {
                 Debug.Log($"[BattleScenePresenter] Starting next stage {stageModel.StageNumber}", this);
+                PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
             }
             else
