@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.Model;
+using Project.Scenes.Battle.Scripts.Model.Entity;
 using UnityEngine.AddressableAssets;
 
 namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
@@ -9,10 +10,16 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
     {
         readonly Dictionary<string, BattleSequenceAsset> cache = new();
         readonly IEnemyTracker enemyTracker;
+        Func<EntityBase> getBossModel;
 
         public BattleSequenceModelRepository(IEnemyTracker enemyTracker)
         {
             this.enemyTracker = enemyTracker;
+        }
+
+        public void SetBossModelProvider(Func<EntityBase> provider)
+        {
+            getBossModel = provider;
         }
 
         public BattleSequenceModel Load(string address)
@@ -36,10 +43,10 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 
             return new BattleSequenceModel(asset.Situation, models, asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement);
         }
-        
+
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
         {
-            return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker);
+            return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker, getBossModel);
         }
     }
 }

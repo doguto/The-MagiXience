@@ -36,6 +36,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void Awake()
         {
             sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
+            sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
         }
 
