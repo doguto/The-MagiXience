@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
+using Project.Scenes.Battle.Scripts.Model.ExitCondition;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
@@ -11,6 +13,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
         readonly Dictionary<string, BattleSequenceAsset> cache = new();
         readonly IEnemyTracker enemyTracker;
         Func<EntityBase> getBossModel;
+        Func<AudioSource> getBgmAudioSource;
 
         public BattleSequenceModelRepository(IEnemyTracker enemyTracker)
         {
@@ -20,6 +23,11 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
         public void SetBossModelProvider(Func<EntityBase> provider)
         {
             getBossModel = provider;
+        }
+
+        public void SetBgmAudioSourceProvider(Func<AudioSource> provider)
+        {
+            getBgmAudioSource = provider;
         }
 
         public BattleSequenceModel Load(string address)
@@ -46,6 +54,11 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
         {
+            if (definition.ExitConditionConfig is BgmPositionExitConditionConfig bgmConfig)
+            {
+                bgmConfig.GetBgmAudioSource = getBgmAudioSource;
+            }
+
             return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker, getBossModel);
         }
     }

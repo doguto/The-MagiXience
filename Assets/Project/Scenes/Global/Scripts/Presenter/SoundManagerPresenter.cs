@@ -12,6 +12,8 @@ namespace Project.Scenes.Global.Scripts.Presenter
         [SerializeField] AudioSource bgmAudioSource;
         [SerializeField] AudioSource seAudioSource;
 
+        public AudioSource BgmAudioSource => bgmAudioSource;
+
         SoundModelRepository soundModelRepository;
 
         void Awake()

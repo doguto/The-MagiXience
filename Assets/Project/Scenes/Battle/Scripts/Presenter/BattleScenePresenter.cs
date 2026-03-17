@@ -37,6 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
             sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
+            sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
         }
 
