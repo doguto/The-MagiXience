@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -71,20 +72,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
             }
 
-            bossPresenter = FindFirstObjectByType<BossEntityPresenter>();
-            if (bossPresenter != null)
-            {
-                phaseStateMachine.OnPhaseStarted
-                    .Subscribe(phase => bossPresenter.OnPhaseStarted(phase))
-                    .AddTo(disposables);
-            }
-
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 
             var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
             if (startSituation == BattleSituation.Boss && bossSequence != null)
             {
+                SpawnBoss();
                 PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
             }
@@ -97,6 +91,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 Debug.LogError("No battle sequences are configured for this stage.", this);
             }
+        }
+
+        public void PlayBossBgm()
+        {
+            PlayBgmForSituation(BattleSituation.Boss);
         }
 
         void PlayBgmForSituation(BattleSituation situation)
@@ -221,6 +220,51 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             pendingScenarioCallback = null;
         }
 
+        public void SpawnBoss()
+        {
+            if (bossPresenter != null)
+            {
+                Debug.LogWarning("[BattleScenePresenter] Boss already spawned.", this);
+                return;
+            }
+
+            if (bossSequence == null || bossSequence.BossPrefab == null)
+            {
+                Debug.LogWarning("[BattleScenePresenter] BossPrefab is not configured in boss sequence.", this);
+                return;
+            }
+
+            var instance = Instantiate(bossSequence.BossPrefab, bossSequence.BossSpawnPosition, Quaternion.identity);
+            bossPresenter = instance.GetComponent<BossEntityPresenter>();
+
+            if (bossPresenter == null)
+            {
+                Debug.LogError("[BattleScenePresenter] Spawned boss prefab has no BossEntityPresenter.", this);
+                return;
+            }
+
+            phaseStateMachine.OnPhaseStarted
+                .Subscribe(phase => bossPresenter.OnPhaseStarted(phase))
+                .AddTo(disposables);
+
+            PlayEntranceMovement(instance.transform);
+
+            Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
+        }
+
+        void PlayEntranceMovement(Transform bossTransform)
+        {
+            var steps = bossSequence.BossEntranceMovement;
+            if (steps == null || steps.Count == 0) return;
+
+            var sequence = DOTween.Sequence();
+            foreach (var step in steps)
+            {
+                if (step == null) continue;
+                sequence.Append(step.Play(bossTransform, Vector2.zero, bossTransform.GetComponent<Animator>()));
+            }
+        }
+
         void StartBossSequence()
         {
             if (bossSequence == null)
@@ -229,7 +273,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            PlayBgmForSituation(BattleSituation.Boss);
             phaseStateMachine.PlaySequence(bossSequence);
         }
 

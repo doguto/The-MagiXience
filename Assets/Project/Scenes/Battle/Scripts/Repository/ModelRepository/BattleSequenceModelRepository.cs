@@ -34,7 +34,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
                 models.Add(CreatePhaseModel(definition));
             }
 
-            return new BattleSequenceModel(asset.Situation, models);
+            return new BattleSequenceModel(asset.Situation, models, asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement);
         }
         
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)

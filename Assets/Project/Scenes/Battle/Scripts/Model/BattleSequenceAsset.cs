@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Timeline;
 using Project.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.ExitCondition;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 
 namespace Project.Scenes.Battle.Scripts.Model
 {
@@ -13,8 +14,17 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] BattleSituation situation = BattleSituation.Way;
         [SerializeField] List<BattlePhaseDefinition> phases = new();
 
+        [Header("Boss Prefab")]
+        [SerializeField] GameObject bossPrefab;
+        [SerializeField] Vector3 bossSpawnPosition;
+        [SerializeReference, SubclassSelector]
+        List<IMovementStep> bossEntranceMovement = new();
+
         public BattleSituation Situation => situation;
         public IReadOnlyList<BattlePhaseDefinition> Phases => phases;
+        public GameObject BossPrefab => bossPrefab;
+        public Vector3 BossSpawnPosition => bossSpawnPosition;
+        public IReadOnlyList<IMovementStep> BossEntranceMovement => bossEntranceMovement;
 
 #if UNITY_EDITOR
         private void OnValidate()

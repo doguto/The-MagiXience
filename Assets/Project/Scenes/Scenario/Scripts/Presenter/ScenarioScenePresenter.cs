@@ -1,5 +1,6 @@
 using System;
 using UniRx;
+using Project.Scenes.Battle.Scripts.Presenter;
 using Project.Scenes.Scenario.Scripts.Model;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scenes.Scenario.Scripts.View;
@@ -99,6 +100,38 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                         displayTime, position, unknownArg2,
                         scenarioModel.PlayerStillSprite, scenarioModel.EnemyStillSprite,
                         faceSprite);
+
+                    scenarioModel.Next();
+                    continue;
+                }
+
+                if (step.function == "SpawnBoss")
+                {
+                    var battleScenePresenter = FindFirstObjectByType<BattleScenePresenter>();
+                    if (battleScenePresenter != null)
+                    {
+                        battleScenePresenter.SpawnBoss();
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[ScenarioScenePresenter] BattleScenePresenter not found, cannot spawn boss.");
+                    }
+
+                    scenarioModel.Next();
+                    continue;
+                }
+
+                if (step.function == "PlayBossBgm")
+                {
+                    var battleScenePresenter = FindFirstObjectByType<BattleScenePresenter>();
+                    if (battleScenePresenter != null)
+                    {
+                        battleScenePresenter.PlayBossBgm();
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[ScenarioScenePresenter] BattleScenePresenter not found, cannot play boss BGM.");
+                    }
 
                     scenarioModel.Next();
                     continue;
