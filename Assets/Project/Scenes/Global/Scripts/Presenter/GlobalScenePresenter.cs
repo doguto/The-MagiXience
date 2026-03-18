@@ -1,4 +1,5 @@
 using Project.Commons.UI.Scripts.Presenter;
+using Project.Scripts.Extensions;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         public SoundManagerPresenter SoundManagerPresenter => soundManagerPresenter;
         [SerializeField] InputActionAsset inputActions;
-        [SerializeField] InputManager inputManager;
+        InputManager inputManager;
 
         public OptionModalPresenter OptionModalPresenter => optionModalPresenter;
         public KeyConfigModel KeyConfigModel => KeyConfigModelRepository.Instance.Get();
@@ -44,6 +45,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
                 }
             }
 
+            inputManager = new InputManager();
             inputManager.Setup(keyConfigModel.GetInputActions());
         }
     }
