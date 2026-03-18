@@ -95,7 +95,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 .AddTo(inputDisposables);
 
             // スニークボタンの押下/解除
-            MessageBroker.Default.Receive<PlayerCrouchMessage>()
+            MessageBroker.Default.Receive<PlayerChargeMessage>()
                 .Subscribe(msg =>
                 {
                     Debug.Log($"[PlayerEntityPresenter] Crouch input: {msg.isPressed}");
