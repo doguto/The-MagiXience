@@ -3,6 +3,7 @@ using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scripts.Extensions.Message;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
@@ -51,6 +52,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (chargeBulletPool == null) Debug.LogError("[PlayerEntityPresenter] ChargeBulletPool is not assigned!");
             mainCamera = Camera.main;
             model = new PlayerEntityModel(maxHp, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
+            PlayerPositionReference.Transform = transform;
         }
 
         void Start()
@@ -203,6 +205,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
+            if (PlayerPositionReference.Transform == transform)
+                PlayerPositionReference.Transform = null;
             disposables.Dispose();
             model?.Dispose();
         }

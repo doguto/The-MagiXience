@@ -48,61 +48,39 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
             Vector3 moveStart = Vector3.zero;
             Vector3 moveEnd = Vector3.zero;
             float cycleElapsed = 0f;
-            bool initialized = false;
 
-            return CreateLinearTimer(target, duration, (t, dt) =>
-            {
-                // Sequence 内で前のステップ完了後に初めて呼ばれるので、
-                // ここで初期化すれば正しい現在位置を取得できる
-                if (!initialized)
+            return PullMovementHelper.Create(target, duration,
+                onStart: t =>
                 {
-                    initialized = true;
                     moveStart = t.position;
                     moveEnd = CalcNextTarget(moveStart);
-                }
-
-                cycleElapsed += dt;
-
-                if (cycleElapsed >= cycleDuration)
+                },
+                onUpdate: (t, dt) =>
                 {
-                    // サイクル完了 → 次の移動先を決める
-                    t.position = moveEnd;
-                    moveStart = moveEnd;
-                    moveEnd = CalcNextTarget(moveStart);
-                    cycleElapsed -= cycleDuration;
-                }
+                    cycleElapsed += dt;
 
-                if (cycleElapsed < moveDuration)
-                {
-                    // 移動フェーズ
-                    float rawT = Mathf.Clamp01(cycleElapsed / moveDuration);
-                    float easedT = DOVirtual.EasedValue(0f, 1f, rawT, moveEase);
-                    t.position = Vector3.Lerp(moveStart, moveEnd, easedT);
-                }
-                else
-                {
-                    // 停止フェーズ
-                    t.position = moveEnd;
-                }
-            });
-        }
+                    if (cycleElapsed >= cycleDuration)
+                    {
+                        // サイクル完了 → 次の移動先を決める
+                        t.position = moveEnd;
+                        moveStart = moveEnd;
+                        moveEnd = CalcNextTarget(moveStart);
+                        cycleElapsed -= cycleDuration;
+                    }
 
-        /// <summary>
-        /// PullMovementHelper と同等だが、Ease.Linear を明示して
-        /// dt が実時間と一致するようにしたバージョン。
-        /// </summary>
-        static Tween CreateLinearTimer(Transform target, float duration, Action<Transform, float> onUpdate)
-        {
-            const float InfiniteDuration = 999999f;
-            float prevElapsed = 0f;
-            float actualDuration = duration <= 0f ? InfiniteDuration : duration;
-
-            return DOVirtual.Float(0f, actualDuration, actualDuration, elapsed =>
-            {
-                float delta = elapsed - prevElapsed;
-                prevElapsed = elapsed;
-                onUpdate(target, delta);
-            }).SetEase(Ease.Linear);
+                    if (cycleElapsed < moveDuration)
+                    {
+                        // 移動フェーズ
+                        float rawT = Mathf.Clamp01(cycleElapsed / moveDuration);
+                        float easedT = DOVirtual.EasedValue(0f, 1f, rawT, moveEase);
+                        t.position = Vector3.Lerp(moveStart, moveEnd, easedT);
+                    }
+                    else
+                    {
+                        // 停止フェーズ
+                        t.position = moveEnd;
+                    } 
+                }, ease: Ease.Linear);
         }
 
         Vector3 CalcNextTarget(Vector3 current)
