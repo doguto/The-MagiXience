@@ -27,6 +27,8 @@ namespace Project.Commons.UI.Scripts.View
             }
 
             if (ButtonIndex == buttons.Count - 1 && !isUp) return;
+            if (ButtonIndex == 0 && isUp) return;
+            
             targetPosition = isUp ? targetPosition - buttonInterval : targetPosition + buttonInterval;
             var moveVector = isVertical ? new Vector2(0, targetPosition) : new Vector2(targetPosition, 0);
             foreach (var button in buttons) button.Move(moveVector);

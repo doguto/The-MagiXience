@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
-using NUnit.Framework;
 using Project.Commons.UI.Scripts.View;
 using UniRx;
 using UnityEngine;
@@ -21,12 +19,14 @@ namespace Project.Scenes.StageList.Scripts.View
         readonly Subject<int> onButtonChanged = new();
         public IObservable<int> OnButtonChanged => onButtonChanged;
 
-        public void Init()
+        public void Init(IReadOnlyList<bool> isOpenedList)
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
 
             for (int i = 0; i < simpleButtons.Count; i++)
             {
+                var isOpened = i < isOpenedList.Count && isOpenedList[i];
+                simpleButtons[i].Init(isOpened: isOpened, isFocused: i == 0 && isOpened);
                 simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
             }
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Model;
 using Project.Scenes.StageList.Scripts.View;
@@ -24,7 +25,8 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         {
             base.Start();
 
-            stageCardListView.Init();
+            var isOpenedList = stageModels.Select(m => m.IsOpened).ToList();
+            stageCardListView.Init(isOpenedList);
             for (var i = 0; i < stageModels.Count; i++)
             {
                 stageCardListView.stageCardViews[i].Setup(stageModels[i].GetIdAndTitle());
