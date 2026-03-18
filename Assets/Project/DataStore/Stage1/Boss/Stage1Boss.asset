@@ -17,11 +17,15 @@ MonoBehaviour:
   - phaseId: 1
     timelineBuilder: {fileID: 11400000, guid: 1807408860171b44ca0aba800ad0c938, type: 2}
     exitConditionConfig:
-      rid: 8577112342479241342
+      rid: 8577112494358659157
   - phaseId: 2
-    timelineBuilder: {fileID: 11400000, guid: 1807408860171b44ca0aba800ad0c938, type: 2}
+    timelineBuilder: {fileID: 11400000, guid: 2ae690913a2479c46991dc6e9e49c607, type: 2}
     exitConditionConfig:
-      rid: 8577112342479241343
+      rid: 8577112494358659159
+  - phaseId: 3
+    timelineBuilder: {fileID: 11400000, guid: 31aa75ee9da31104787114cc69c28a0d, type: 2}
+    exitConditionConfig:
+      rid: 8577112454036455612
   bossPrefab: {fileID: 5806677969891141097, guid: c0649156baeca8740b78c7a7fc736c8a, type: 3}
   bossSpawnPosition: {x: 10, y: 0, z: 0}
   bossEntranceMovement:
@@ -29,14 +33,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8577112342479241342
-      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        timeLimitSeconds: 1
-    - rid: 8577112342479241343
-      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        timeLimitSeconds: 1
     - rid: 8577112454036455607
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -69,3 +65,15 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 0
+    - rid: 8577112454036455612
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 0
+    - rid: 8577112494358659157
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 75
+    - rid: 8577112494358659159
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 2976121

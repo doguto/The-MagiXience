@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2673297773542630575}
   - component: {fileID: 2942049943378260693}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BulletPool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 48493280270176189}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -1.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -47,6 +47,53 @@ MonoBehaviour:
   bulletPrefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
   defaultCapacity: 20
   maxSize: 100
+--- !u!1 &2361133633318884410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3857806321933950535}
+  - component: {fileID: 329598891345423902}
+  m_Layer: 7
+  m_Name: BulletPool (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3857806321933950535
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2361133633318884410}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.5, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4129410463985431996}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &329598891345423902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2361133633318884410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 366756060701291069, guid: 6c4c5a8baea65b34693a3743dda73630, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &5806677969891141097
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,7 +108,7 @@ GameObject:
   - component: {fileID: 1827464944305382855}
   - component: {fileID: 8148139622960645157}
   - component: {fileID: 347101923740473628}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Loco
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -82,6 +129,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2673297773542630575}
+  - {fileID: 3857806321933950535}
+  - {fileID: 7033918595132574914}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5078212579173189540
@@ -151,9 +200,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e03ed9e7a71bb104da997bf4950beaec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 200
+  maxHp: 400
   contactDamage: 20
-  bulletPool: {fileID: 2942049943378260693}
+  bulletPools:
+  - {fileID: 2942049943378260693}
+  - {fileID: 329598891345423902}
+  - {fileID: 690873686039083119}
   bulletDamage: 10
   view: {fileID: 1827464944305382855}
 --- !u!114 &1827464944305382855
@@ -232,3 +284,50 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!1 &9044268402132076768
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7033918595132574914}
+  - component: {fileID: 690873686039083119}
+  m_Layer: 7
+  m_Name: BulletPool (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7033918595132574914
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9044268402132076768}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.5, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4129410463985431996}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &690873686039083119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9044268402132076768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
