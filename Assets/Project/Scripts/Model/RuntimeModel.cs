@@ -42,5 +42,13 @@
             CurrentStageNumber = -1;
             CurrentSituation = BattleSituation.Way;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        public void SetForDebug(int stageNumber, BattleSituation situation)
+        {
+            CurrentStageNumber = stageNumber;
+            CurrentSituation = situation;
+        }
+#endif
     }
 }
