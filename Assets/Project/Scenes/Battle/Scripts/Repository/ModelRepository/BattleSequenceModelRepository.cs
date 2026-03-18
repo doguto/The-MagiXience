@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.Model;
+using Project.Scenes.Battle.Scripts.Model.Entity;
+using Project.Scenes.Battle.Scripts.Model.ExitCondition;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
@@ -8,6 +11,24 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
     public class BattleSequenceModelRepository
     {
         readonly Dictionary<string, BattleSequenceAsset> cache = new();
+        readonly IEnemyTracker enemyTracker;
+        Func<EntityBase> getBossModel;
+        Func<AudioSource> getBgmAudioSource;
+
+        public BattleSequenceModelRepository(IEnemyTracker enemyTracker)
+        {
+            this.enemyTracker = enemyTracker;
+        }
+
+        public void SetBossModelProvider(Func<EntityBase> provider)
+        {
+            getBossModel = provider;
+        }
+
+        public void SetBgmAudioSourceProvider(Func<AudioSource> provider)
+        {
+            getBgmAudioSource = provider;
+        }
 
         public BattleSequenceModel Load(string address)
         {
@@ -28,16 +49,17 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
                 models.Add(CreatePhaseModel(definition));
             }
 
-            return new BattleSequenceModel(asset.Situation, models);
+            return new BattleSequenceModel(asset.Situation, models, asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement);
         }
-        
+
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
         {
-            return definition.ExitCondition switch
+            if (definition.ExitConditionConfig is BgmPositionExitConditionConfig bgmConfig)
             {
-                BattlePhaseExitCondition.TimeLimit => new TimeLimitBattlePhaseModel(definition),
-                _ => throw new NotSupportedException($"Exit condition {definition.ExitCondition} is not supported yet."),
-            };
+                bgmConfig.GetBgmAudioSource = getBgmAudioSource;
+            }
+
+            return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker, getBossModel);
         }
     }
 }

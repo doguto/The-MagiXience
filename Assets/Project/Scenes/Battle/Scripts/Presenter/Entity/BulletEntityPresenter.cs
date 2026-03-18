@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -15,49 +17,44 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     public class BulletEntityPresenter : MonoBehaviour, IEntityPresenter
     {
         [SerializeReference, SubclassSelector]
-        IMovementConfig movementConfig = new LinearMovementConfig();
+        List<IMovementStep> movementSteps = new() { new InfiniteMovementConfig() };
 
         [SerializeField] BulletEntityView view;
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField, Tooltip("弾のライフタイム（秒）。0以下で無制限")]
         float lifetime = 5f;
+
         void Reset()
         {
             view = GetComponent<BulletEntityView>();
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
-        
+
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
         Camera mainCamera;
+        Sequence movementSequence;
         CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
-
-        IMovementStrategy CreateMovementStrategy()
-        {
-            return movementConfig?.CreateStrategy() ?? new StaticMovement();
-        }
 
         void Awake()
         {
             mainCamera = Camera.main;
         }
 
-        public void Initialize(int damage, Vector3 position, IObjectPool<BulletEntityPresenter> objectPool)
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false)
         {
             pool = objectPool;
-            var movementStrategy = CreateMovementStrategy();
+            transform.position = position;
 
             if (model == null)
-            {
-                model = new BulletEntityModel(damage, position, movementStrategy);
-            }
+                model = new BulletEntityModel(damage, isPlayerBullet);
             else
-            {
-                model.Reinitialize(damage, position, movementStrategy);
-            }
+                model.Reinitialize(damage, isPlayerBullet);
+
+            StartMovementSequence(direction);
 
             view.ResetView();
             view.UpdatePosition(position);
@@ -65,18 +62,29 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             BindModelToView();
         }
 
+        void StartMovementSequence(Vector2 direction)
+        {
+            movementSequence?.Kill();
+
+            if (movementSteps == null || movementSteps.Count == 0) return;
+
+            movementSequence = DOTween.Sequence();
+            foreach (var step in movementSteps)
+            {
+                if (step == null) continue;
+                movementSequence.Append(step.Play(transform, direction, null));
+            }
+        }
+
         void BindModelToView()
         {
-            // 既存のサブスクリプションをクリア
             disposables.Clear();
 
-            // HP変化を監視（弾が死んだら破棄）
             model.CurrentHp
                 .Where(hp => hp <= 0)
                 .Subscribe(_ => HandleDestruction())
                 .AddTo(disposables);
 
-            // ライフタイムで自動回収
             StartLifetimeTimer();
         }
 
@@ -84,13 +92,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (model == null || !model.IsAlive) return;
 
-            // MovementStrategyで移動処理
-            model.UpdateMovement(Time.deltaTime);
+            view.UpdatePosition(transform.position);
 
-            // 位置をViewに反映
-            view.UpdatePosition(model.Position);
-
-            // 画面外判定（簡易実装）
             if (IsOutOfScreen())
             {
                 ReturnToPool();
@@ -99,10 +102,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         bool IsOutOfScreen()
         {
-            Vector3 position = model.Position;
+            Vector3 position = transform.position;
             Vector3 viewportPoint = mainCamera.WorldToViewportPoint(position);
 
-            // Spriteサイズ分のマージンをビューポート座標に変換
             Vector3 extents = spriteRenderer.bounds.extents;
             Vector3 viewportExtents = mainCamera.WorldToViewportPoint(position + extents)
                                     - mainCamera.WorldToViewportPoint(position);
@@ -134,37 +136,29 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             lifetimeCts = null;
         }
 
-        void HandleDestruction()
-        {
-            ReturnToPool();
-        }
+        void HandleDestruction() => ReturnToPool();
 
         void ReturnToPool()
         {
+            movementSequence?.Kill();
             if (pool != null)
-            {
                 pool.Release(this);
-            }
             else
-            {
                 Destroy(gameObject);
-            }
         }
 
         void OnTriggerEnter2D(Collider2D other)
         {
             if (model == null || !model.IsAlive) return;
-
             var otherPresenter = other.GetComponent<IEntityPresenter>();
             if (otherPresenter != null)
-            {
                 model.OnCollision(otherPresenter.GetModel());
-            }
         }
-        
+
         public void OnReturnedToPool()
         {
             CancelLifetimeTimer();
+            movementSequence?.Kill();
             view.SetVisible(false);
             gameObject.SetActive(false);
         }
@@ -177,6 +171,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             CancelLifetimeTimer();
+            movementSequence?.Kill();
             disposables.Dispose();
             model?.Dispose();
         }

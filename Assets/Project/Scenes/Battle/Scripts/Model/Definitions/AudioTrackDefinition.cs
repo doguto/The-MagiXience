@@ -14,8 +14,8 @@ namespace Project.Scenes.Battle.Scripts.Model
     [Serializable]
     public class AudioClipDefinition : IClipDefinition<AudioTrack>
     {
-        [SerializeField, Min(0)] double start;
-        [SerializeField, Min(0)] double duration;
+        [SerializeField] double start;
+        [SerializeField] double duration;
         [SerializeField] AudioClip audioClip;
 
         public void Build(AudioTrack track)

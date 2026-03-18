@@ -14,7 +14,7 @@ namespace Project.Scenes.Battle.Scripts.Model
     [Serializable]
     public class SignalEmitterDefinition : IClipDefinition<SignalTrack>
     {
-        [SerializeField, Min(0)] double time;
+        [SerializeField] double time;
         [SerializeField] SignalAsset signal;
 
         public void Build(SignalTrack track)

@@ -1,4 +1,6 @@
 using System;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,14 +9,17 @@ using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scripts.Extensions;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
-    public class BattleScenePresenter : MonoBehaviour
+    public class BattleScenePresenter : MonoPresenter
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
+        [SerializeField] EnemyTracker enemyTracker;
 
-        readonly BattleSequenceModelRepository sequenceModelRepository = new();
+        BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
 
@@ -23,17 +28,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         BattleSequenceModel bossSequence;
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
+        BossEntityPresenter bossPresenter;
         bool isSceneLoadedHandlerRegistered = false;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
         void Awake()
         {
+            sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
+            sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
+            sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
         }
 
-        void Start()
+        protected override void Start()
         {
+            base.Start();
+
             if (!phaseStateMachine)
             {
                 Debug.LogError("BattlePhaseStateMachine is not assigned.", this);
@@ -66,19 +77,38 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 
-            if (waySequence != null)
+            var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
+            if (startSituation == BattleSituation.Boss && bossSequence != null)
             {
-                phaseStateMachine.PlaySequence(waySequence);
-            }
-            else if (bossSequence != null)
-            {
-                Debug.LogWarning("Way sequence is missing. Starting from boss sequence.", this);
+                SpawnBoss();
+                PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
+            }
+            else if (waySequence != null)
+            {
+                PlayBgmForSituation(BattleSituation.Way);
+                phaseStateMachine.PlaySequence(waySequence);
             }
             else
             {
-                Debug.LogWarning("No battle sequences are configured for this stage.", this);
+                Debug.LogError("No battle sequences are configured for this stage.", this);
             }
+        }
+
+        public void PlayBossBgm()
+        {
+            PlayBgmForSituation(BattleSituation.Boss);
+        }
+
+        void PlayBgmForSituation(BattleSituation situation)
+        {
+            if (soundManager == null) return;
+
+            var stageNumber = stageModel.StageNumber;
+            // SceneType.Stage1=3, Stage2=4, ... なので stageNumber+2 で変換
+            var sceneType = (SceneType)(stageNumber + 2);
+            var bgmType = situation == BattleSituation.Boss ? BgmType.BattleBoss : BgmType.BattleWay;
+            soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
         }
 
         StageModel ResolveStageModel()
@@ -117,15 +147,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void HandleSequenceCompleted(BattleSituation situation)
+        async void HandleSequenceCompleted(BattleSituation situation)
         {
+            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: destroyCancellationToken);
+
             if (situation == BattleSituation.Way)
             {
                 TransitionToScenario(StartBossSequence);
             }
             else
             {
-                TransitionToScenario(CompleteStage);
+                TransitionToScenario(DemoClear);
             }
         }
 
@@ -182,10 +214,57 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
 
             // シナリオ完了後は攻撃を再開
-            playerPresenter?.SubscribeToAttackInput();
+            // temp: デモ版ではボス戦終了後に攻撃できない
+            if (RuntimeModelRepository.Instance.Get().CurrentSituation == BattleSituation.Boss)  
+                playerPresenter?.SubscribeToAttackInput();
 
             pendingScenarioCallback?.Invoke();
             pendingScenarioCallback = null;
+        }
+
+        public void SpawnBoss()
+        {
+            if (bossPresenter != null)
+            {
+                Debug.LogWarning("[BattleScenePresenter] Boss already spawned.", this);
+                return;
+            }
+
+            if (bossSequence == null || bossSequence.BossPrefab == null)
+            {
+                Debug.LogWarning("[BattleScenePresenter] BossPrefab is not configured in boss sequence.", this);
+                return;
+            }
+
+            var instance = Instantiate(bossSequence.BossPrefab, bossSequence.BossSpawnPosition, Quaternion.identity);
+            bossPresenter = instance.GetComponent<BossEntityPresenter>();
+
+            if (bossPresenter == null)
+            {
+                Debug.LogError("[BattleScenePresenter] Spawned boss prefab has no BossEntityPresenter.", this);
+                return;
+            }
+
+            phaseStateMachine.OnPhaseStarted
+                .Subscribe(phase => bossPresenter.OnPhaseStarted(phase))
+                .AddTo(disposables);
+
+            PlayEntranceMovement(instance.transform);
+
+            Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
+        }
+
+        void PlayEntranceMovement(Transform bossTransform)
+        {
+            var steps = bossSequence.BossEntranceMovement;
+            if (steps == null || steps.Count == 0) return;
+
+            var sequence = DOTween.Sequence();
+            foreach (var step in steps)
+            {
+                if (step == null) continue;
+                sequence.Append(step.Play(bossTransform, Vector2.zero, bossTransform.GetComponent<Animator>()));
+            }
         }
 
         void StartBossSequence()
@@ -199,6 +278,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             phaseStateMachine.PlaySequence(bossSequence);
         }
 
+        async void DemoClear()
+        {
+            stageModel?.Clear();
+
+            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
+
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
+        }
+        
         void CompleteStage()
         {
             stageModel?.Clear();
@@ -222,6 +310,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (waySequence != null)
             {
                 Debug.Log($"[BattleScenePresenter] Starting next stage {stageModel.StageNumber}", this);
+                PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
             }
             else

@@ -15,9 +15,11 @@ namespace Project.Scenes.Battle.Scripts.Model
     [Serializable]
     public class EnemySpawnDefinition : IClipDefinition<SignalTrack>
     {
-        [SerializeField, Min(0)] double time;
+        [SerializeField] double time;
         [SerializeField] Vector3 spawnPosition;
         [SerializeField] GameObject prefab;
+
+        public double Time => time;
 
         public void Build(SignalTrack track)
         {

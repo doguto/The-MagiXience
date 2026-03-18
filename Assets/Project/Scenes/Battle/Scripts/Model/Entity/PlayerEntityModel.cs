@@ -12,8 +12,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         readonly CompositeDisposable invincibilityDisposables = new();
 
-        public PlayerEntityModel(int maxHp, Vector3 initialPosition, float chargeThreshold = 1.0f, float sneakSpeedMultiplier = 0.5f, float invincibilityDuration = 1.0f)
-            : base(maxHp, initialPosition)
+        public PlayerEntityModel(int maxHp, float chargeThreshold = 1.0f, float sneakSpeedMultiplier = 0.5f, float invincibilityDuration = 1.0f)
+            : base(maxHp)
         {
             ChargeThreshold = chargeThreshold;
             SneakSpeedMultiplier = sneakSpeedMultiplier;

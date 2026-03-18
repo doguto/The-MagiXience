@@ -3,6 +3,7 @@ using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scripts.Extensions.Message;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
@@ -38,6 +39,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Camera mainCamera;
         float lastShootTime;
         Vector2 currentMoveInput;
+        Vector2 pendingPush;
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
 
@@ -49,7 +51,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (normalBulletPool == null) Debug.LogError("[PlayerEntityPresenter] NormalBulletPool is not assigned!");
             if (chargeBulletPool == null) Debug.LogError("[PlayerEntityPresenter] ChargeBulletPool is not assigned!");
             mainCamera = Camera.main;
-            model = new PlayerEntityModel(maxHp, transform.position, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
+            model = new PlayerEntityModel(maxHp, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
+            PlayerPositionReference.Transform = transform;
         }
 
         void Start()
@@ -57,6 +60,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             BindModelToView();
             SubscribeToMoveInput();
             SubscribeToAttackInput();
+            SubscribeToSpectrumBarPush();
         }
 
         void BindModelToView()
@@ -72,8 +76,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             MessageBroker.Default.Receive<PlayerMoveMessage>()
                 .Subscribe(msg =>
                 {
-                    Debug.Log($"[PlayerEntityPresenter] Move input: {msg.value}");
                     currentMoveInput = msg.value;
+                })
+                .AddTo(disposables);
+        }
+
+        void SubscribeToSpectrumBarPush()
+        {
+            MessageBroker.Default.Receive<SpectrumBarPushMessage>()
+                .Subscribe(msg =>
+                {
+                    pendingPush += msg.pushDirection * msg.pushForce;
                 })
                 .AddTo(disposables);
         }
@@ -98,7 +111,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             MessageBroker.Default.Receive<PlayerCrouchMessage>()
                 .Subscribe(msg =>
                 {
-                    Debug.Log($"[PlayerEntityPresenter] Crouch input: {msg.isPressed}");
                     if (msg.isPressed)
                     {
                         model.SetSneaking(true);
@@ -126,8 +138,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (!model.IsAlive) return;
 
-            // 移動処理（押している間継続）
+            // 移動処理（押している間継続）+ スペクトラムバーからの押し戻し
             Vector3 movement = HandleMovement();
+            movement += (Vector3)pendingPush * Time.deltaTime;
+            pendingPush = Vector2.zero;
             Vector3 newPosition = ClampToScreen(view.GetPosition() + movement);
             view.UpdatePosition(newPosition);
 
@@ -156,7 +170,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             Vector3 maxWorld = mainCamera.ViewportToWorldPoint(Vector3.one);
 
             position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
-            position.y = Mathf.Clamp(position.y, minWorld.y + extents.y, maxWorld.y - extents.y);
+            position.y = Mathf.Clamp(position.y, minWorld.y + extents.y - 0.2f, maxWorld.y - extents.y - 2.1f);
 
             return position;
         }
@@ -169,7 +183,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireChargedShot()
         {
-            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f);
+            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f, isPlayerBullet: true);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 
@@ -191,6 +205,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
+            if (PlayerPositionReference.Transform == transform)
+                PlayerPositionReference.Transform = null;
             disposables.Dispose();
             model?.Dispose();
         }

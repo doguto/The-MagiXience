@@ -20,15 +20,22 @@ MonoBehaviour:
   enemySpawnTracks:
   - trackName: EnemySpawn
     clips:
-    - time: 0
-      spawnPosition: {x: 0, y: 0, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 7dd67b1173231da4ebddf0bd31e69e46, type: 3}
-    - time: 1
-      spawnPosition: {x: 1, y: 0, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 7dd67b1173231da4ebddf0bd31e69e46, type: 3}
-    - time: 2
-      spawnPosition: {x: 2, y: 0, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 7dd67b1173231da4ebddf0bd31e69e46, type: 3}
-    - time: 3
-      spawnPosition: {x: 3, y: 0, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 7dd67b1173231da4ebddf0bd31e69e46, type: 3}
+    - time: 2.5
+      spawnPosition: {x: 10, y: 0, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 009be7b31e38e8442a0c53b201d7b238, type: 3}
+    - time: 3.2
+      spawnPosition: {x: 10, y: -2, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 009be7b31e38e8442a0c53b201d7b238, type: 3}
+    - time: 4
+      spawnPosition: {x: 10, y: 2, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 009be7b31e38e8442a0c53b201d7b238, type: 3}
+  bossAttackTimeline:
+    loop: 0
+    loopStart: 0
+    loopEnd: 5
+    cycleDuration: 2
+    entries: []
+  bossMovementSteps: []
+  references:
+    version: 2
+    RefIds: []
