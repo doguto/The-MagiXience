@@ -5,9 +5,9 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Project.Scenes.Global.Scripts.Presenter
+namespace Project.Scripts.Extensions
 {
-    public class InputManager : MonoBehaviour
+    public class InputManager
     {
         // カスタムInputActionAsset
         InputActionAsset inputActionAsset;
@@ -84,6 +84,11 @@ namespace Project.Scenes.Global.Scripts.Presenter
             var sprintAction = playerMap.FindAction("Sprint");
             RegisterAction(sprintAction, OnPlayerSprint, InputActionPhase.Started);
             RegisterAction(sprintAction, OnPlayerSprint, InputActionPhase.Canceled);
+
+            // Charge
+            var chargeAction = playerMap.FindAction("Charge");
+            RegisterAction(chargeAction, OnPlayerCharge, InputActionPhase.Started);
+            RegisterAction(chargeAction, OnPlayerCharge, InputActionPhase.Canceled);
 
             // Previous
             var previousAction = playerMap.FindAction("Previous");
@@ -203,6 +208,11 @@ namespace Project.Scenes.Global.Scripts.Presenter
         public void OnPlayerSprint(InputAction.CallbackContext context)
         {
             MessageBroker.Default.Publish(new PlayerSprintMessage { isPressed = context.started });
+        }
+
+        public void OnPlayerCharge(InputAction.CallbackContext context)
+        {
+            MessageBroker.Default.Publish(new PlayerChargeMessage { isPressed = context.started });
         }
 
         public void OnPlayerPrevious(InputAction.CallbackContext context)

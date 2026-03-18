@@ -11,7 +11,7 @@ namespace Project.Scripts.Infra
         [Serializable]
         public class BindingOverride
         {
-            public string actionName;
+            public string actionPath;
             public string bindingId;
             public string overridePath;
         }
