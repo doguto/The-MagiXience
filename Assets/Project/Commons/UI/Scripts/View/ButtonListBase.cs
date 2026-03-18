@@ -17,7 +17,7 @@ namespace Project.Commons.UI.Scripts.View
 
         void Start()
         {
-            MessageBroker.Default.Receive<UINavigateMessage>().Subscribe(Move);
+            MessageBroker.Default.Receive<UINavigateMessage>().Subscribe(Move).AddTo(this);
         }
 
         public virtual void Init(ButtonListType buttonListType, int index = 0, bool isActive = false)
