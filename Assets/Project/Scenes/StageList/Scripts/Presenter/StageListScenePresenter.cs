@@ -7,7 +7,6 @@ using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Project.Scenes.StageList.Scripts.Presenter
 {
@@ -48,15 +47,11 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         {
             soundManager.PlaySEAsync(SeType.Click).Forget();
 
-            var loadTask = SceneManager.LoadSceneAsync(SceneRouterModel.Battle, LoadSceneMode.Additive).ToUniTask();
-
             var runtimeModel = RuntimeModelRepository.Get();
             runtimeModel.CurrentStageType = BattleStageTypeExtensions.FromInt(buttonIndex);
             runtimeModel.CurrentSituation = BattleSituation.Way;
 
-            await loadTask;
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Battle));
-            SceneManager.UnloadSceneAsync(SceneRouterModel.StageList);
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);
         }
     }
 }

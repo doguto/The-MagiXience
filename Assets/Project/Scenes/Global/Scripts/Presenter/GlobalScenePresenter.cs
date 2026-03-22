@@ -22,6 +22,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
         public OptionModalPresenter OptionModalPresenter => optionModalPresenter;
         public KeyConfigModel KeyConfigModel => KeyConfigModelRepository.Instance.Get();
         public InputActionAsset InputActions => inputActions;
+        public SceneNavigator SceneNavigator { get; } = new SceneNavigator();
 
         void Awake()
         {
