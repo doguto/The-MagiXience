@@ -59,6 +59,20 @@ namespace Project.Scripts.Model
             }
         }
 
+        public class BindingChange
+        {
+            public KeyConfigAction Action { get; }
+            public KeySlot Slot { get; }
+            public string Path { get; }
+
+            public BindingChange(KeyConfigAction action, KeySlot slot, string path)
+            {
+                Action = action;
+                Slot = slot;
+                Path = path;
+            }
+        }
+
         readonly InputActionAsset inputActions;
         readonly KeyConfigData keyConfigData;
         readonly UserModel userModel;
@@ -80,9 +94,9 @@ namespace Project.Scripts.Model
         Dictionary<KeyConfigAction, KeyConfigEntry> CreateEntries()
         {
             return new Dictionary<KeyConfigAction, KeyConfigEntry>
-        {
             {
-                KeyConfigAction.Up,
+                {
+                    KeyConfigAction.Up,
                     new KeyConfigEntry(
                         KeyConfigAction.Up,
                         "上",
@@ -110,7 +124,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Down,
                     new KeyConfigEntry(
-                KeyConfigAction.Down,
+                        KeyConfigAction.Down,
                         "下",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -136,7 +150,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Left,
                     new KeyConfigEntry(
-                KeyConfigAction.Left,
+                        KeyConfigAction.Left,
                         "左",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -162,7 +176,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Right,
                     new KeyConfigEntry(
-                KeyConfigAction.Right,
+                        KeyConfigAction.Right,
                         "右",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -186,7 +200,7 @@ namespace Project.Scripts.Model
                     )
                 },
                 {
-                KeyConfigAction.Attack,
+                    KeyConfigAction.Attack,
                     new KeyConfigEntry(
                         KeyConfigAction.Attack,
                         "攻撃",
@@ -212,7 +226,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Charge,
                     new KeyConfigEntry(
-                KeyConfigAction.Charge,
+                        KeyConfigAction.Charge,
                         "チャージ",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -236,7 +250,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Submit,
                     new KeyConfigEntry(
-                KeyConfigAction.Submit,
+                        KeyConfigAction.Submit,
                         "決定",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -260,7 +274,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Cancel,
                     new KeyConfigEntry(
-                KeyConfigAction.Cancel,
+                        KeyConfigAction.Cancel,
                         "戻る",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -330,24 +344,69 @@ namespace Project.Scripts.Model
             return entries[action].DisplayName;
         }
 
-        public string GetDisplayString(KeyConfigAction action, KeySlot slot)
+        public bool HasSlot(KeyConfigAction action, KeySlot slot)
+        {
+            return entries[action].TargetsBySlot.TryGetValue(slot, out var targets) && targets.Count > 0;
+        }
+
+        public string GetBindingPath(KeyConfigAction action, KeySlot slot)
         {
             var target = GetPrimaryTarget(action, slot);
-            if (target == null) return "-";
+            if (target == null) return string.Empty;
 
             var inputAction = inputActions.FindAction(target.ActionPath);
-            if (inputAction == null) return "-";
+            if (inputAction == null) return target.DefaultPath;
 
             var bindingIndex = FindBindingIndexById(inputAction, target.BindingId);
-            if (bindingIndex < 0) return "-";
+            if (bindingIndex < 0) return target.DefaultPath;
 
-            var effectivePath = inputAction.bindings[bindingIndex].effectivePath;
-            if (string.IsNullOrEmpty(effectivePath)) return "-";
+            return string.IsNullOrEmpty(inputAction.bindings[bindingIndex].effectivePath)
+                ? target.DefaultPath
+                : inputAction.bindings[bindingIndex].effectivePath;
+        }
+
+        public string GetDefaultPath(KeyConfigAction action, KeySlot slot)
+        {
+            var target = GetPrimaryTarget(action, slot);
+            return target?.DefaultPath ?? string.Empty;
+        }
+
+        public string GetDisplayString(KeyConfigAction action, KeySlot slot)
+        {
+            var path = GetBindingPath(action, slot);
+            if (string.IsNullOrEmpty(path)) return "-";
 
             return InputControlPath.ToHumanReadableString(
-                effectivePath,
+                path,
                 InputControlPath.HumanReadableStringOptions.OmitDevice
             );
+        }
+
+        public void ApplyChanges(IReadOnlyList<BindingChange> changes)
+        {
+            foreach (var change in changes)
+            {
+                if (!entries[change.Action].TargetsBySlot.TryGetValue(change.Slot, out var targets))
+                {
+                    continue;
+                }
+
+                var defaultPath = GetDefaultPath(change.Action, change.Slot);
+
+                foreach (var target in targets)
+                {
+                    if (change.Path == defaultPath)
+                    {
+                        RemoveBindingOverride(target.ActionPath, target.BindingId, false);
+                    }
+                    else
+                    {
+                        ApplyBindingOverride(target.ActionPath, target.BindingId, change.Path, false);
+                    }
+                }
+            }
+
+            userModel.Save();
         }
 
         public void SetBindingOverride(KeyConfigAction action, KeySlot slot, string newPath)

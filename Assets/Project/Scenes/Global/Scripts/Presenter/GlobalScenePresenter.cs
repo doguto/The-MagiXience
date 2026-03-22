@@ -13,6 +13,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
     public class GlobalScenePresenter : MonoBehaviour
     {
         [SerializeField] OptionModalPresenter optionModalPresenter;
+        [SerializeField] KeyConfigModalPresenter keyConfigModalPresenter;
         [SerializeField] SoundManagerPresenter soundManagerPresenter;
 
         public SoundManagerPresenter SoundManagerPresenter => soundManagerPresenter;
@@ -20,6 +21,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
         InputManager inputManager;
 
         public OptionModalPresenter OptionModalPresenter => optionModalPresenter;
+        public KeyConfigModalPresenter KeyConfigModalPresenter => keyConfigModalPresenter;
         public KeyConfigModel KeyConfigModel => KeyConfigModelRepository.Instance.Get();
         public InputActionAsset InputActions => inputActions;
 
