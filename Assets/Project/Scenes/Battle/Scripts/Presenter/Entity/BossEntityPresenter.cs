@@ -10,6 +10,8 @@ using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Model.Attack;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.View.Entity;
+using Project.Scenes.Global.Scripts.Presenter;
+using Project.Scripts.Extensions;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
@@ -34,6 +36,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         EnemyEntityModel model;
         PlayerEntityPresenter playerPresenter;
+        SoundManagerPresenter soundManager;
         Tween currentTween;
         CancellationTokenSource movementCts;
         readonly CompositeDisposable disposables = new();
@@ -45,6 +48,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            soundManager = FindFirstObjectByType<SoundManagerPresenter>();
 
             model = new EnemyEntityModel(maxHp, contactDamage);
 
@@ -134,6 +138,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             var pool = GetBulletPool(ev.BulletPoolIndex);
             if (pool == null) return;
+
+            if (ev.SeType != SeType.None)
+            {
+                soundManager?.PlaySE(ev.SeType);
+            }
 
             foreach (var dir in ev.Directions)
             {
