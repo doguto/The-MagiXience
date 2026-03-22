@@ -52,6 +52,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
 
             var runtimeModel = RuntimeModelRepository.Get();
             runtimeModel.CurrentStageType = BattleStageTypeExtensions.FromInt(buttonIndex);
+            runtimeModel.CurrentSituation = BattleSituation.Way;
 
             await loadTask;
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Battle));
