@@ -34,12 +34,24 @@ namespace Project.Scenes.StageList.Scripts.Presenter
 
             ShowCharaImage(0);
             stageCardListView.OnButtonChanged.Subscribe(ShowCharaImage);
+            stageCardListView.OnButtonPressed.Subscribe(i => LoadBattleScene(i).Forget());
         }
 
         void ShowCharaImage(int buttonIndex)
         {
             var charaImage = stageModels[buttonIndex].CharaImage;
             stageCardListView.SetCharaImage(charaImage);
+        }
+
+        async UniTask LoadBattleScene(int buttonIndex)
+        {
+            soundManager.PlaySEAsync(SeType.Click).Forget();
+
+            var runtimeModel = RuntimeModelRepository.Get();
+            runtimeModel.CurrentStageType = stageModels[buttonIndex].BattleStageType;
+            runtimeModel.CurrentSituation = BattleSituation.Way;
+
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);
         }
     }
 }
