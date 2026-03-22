@@ -5,6 +5,7 @@ using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scripts.Extensions.Message;
+using Project.Scripts.Model;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
@@ -12,23 +13,27 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     [RequireComponent(typeof(SpriteRenderer))]
     public class PlayerEntityPresenter : MonoBehaviour, IEntityPresenter
     {
-        [Header("Entity Settings")]
-        [SerializeField] int maxHp = 100;
+        [Header("Entity Settings")] [SerializeField]
+        int maxHp = 100;
+
         [SerializeField] float moveSpeed = 5f;
         [SerializeField] float chargeThreshold = 1.0f;
         [SerializeField] float sneakSpeedMultiplier = 0.5f;
         [SerializeField] float invincibilityDuration = 1.0f;
 
-        [Header("Shooting Settings")]
-        [SerializeField] BulletPool normalBulletPool;
+        [Header("Shooting Settings")] [SerializeField]
+        BulletPool normalBulletPool;
+
         [SerializeField] BulletPool chargeBulletPool;
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] int chargedShotDamage = 30;
         [SerializeField] float shootCooldown = 0.2f;
-        
-        [Header("component references")]
-        [SerializeField] PlayerEntityView view;
+
+        [Header("component references")] [SerializeField]
+        PlayerEntityView view;
+
         [SerializeField] SpriteRenderer spriteRenderer;
+
         void Reset()
         {
             view = GetComponent<PlayerEntityView>();
@@ -43,6 +48,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
 
+        IDisposable sceneNavigationSubscription;
+
         public PlayerEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
 
@@ -50,7 +57,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (normalBulletPool == null) Debug.LogError("[PlayerEntityPresenter] NormalBulletPool is not assigned!");
             if (chargeBulletPool == null) Debug.LogError("[PlayerEntityPresenter] ChargeBulletPool is not assigned!");
-            mainCamera = Camera.main;
+
+            sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(OnEnteredScene).AddTo(this);
+
             model = new PlayerEntityModel(maxHp, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
             PlayerPositionReference.Transform = transform;
         }
@@ -63,32 +72,35 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             SubscribeToSpectrumBarPush();
         }
 
+        void OnEnteredScene(SceneNavigationMessage message)
+        {
+            if (message.SceneName != SceneRouterModel.Battle) return;
+            if (message.State != SceneNavigationState.Completed) return;
+
+            sceneNavigationSubscription?.Dispose();
+            mainCamera = Camera.main;
+        }
+
         void BindModelToView()
         {
             model.OnDeath
-                .Subscribe(_ => HandleDeath())
-                .AddTo(disposables);
+                 .Subscribe(_ => HandleDeath())
+                 .AddTo(disposables);
         }
 
         void SubscribeToMoveInput()
         {
             // 移動入力を保持（Updateで使用）
             MessageBroker.Default.Receive<PlayerMoveMessage>()
-                .Subscribe(msg =>
-                {
-                    currentMoveInput = msg.value;
-                })
-                .AddTo(disposables);
+                         .Subscribe(msg => { currentMoveInput = msg.value; })
+                         .AddTo(disposables);
         }
 
         void SubscribeToSpectrumBarPush()
         {
             MessageBroker.Default.Receive<SpectrumBarPushMessage>()
-                .Subscribe(msg =>
-                {
-                    pendingPush += msg.pushDirection * msg.pushForce;
-                })
-                .AddTo(disposables);
+                         .Subscribe(msg => { pendingPush += msg.pushDirection * msg.pushForce; })
+                         .AddTo(disposables);
         }
 
         public void SubscribeToAttackInput()
@@ -98,34 +110,36 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 inputDisposables.Dispose();
             }
+
             inputDisposables = new CompositeDisposable();
 
             // 攻撃ボタンをイベントで処理
             MessageBroker.Default.Receive<PlayerAttackMessage>()
-                .Where(_ => !model.IsSneaking.Value)
-                .Where(_ => Time.time >= lastShootTime + shootCooldown)
-                .Subscribe(_ => FireNormalShot())
-                .AddTo(inputDisposables);
+                         .Where(_ => !model.IsSneaking.Value)
+                         .Where(_ => Time.time >= lastShootTime + shootCooldown)
+                         .Subscribe(_ => FireNormalShot())
+                         .AddTo(inputDisposables);
 
             // スニークボタンの押下/解除
             MessageBroker.Default.Receive<PlayerChargeMessage>()
-                .Subscribe(msg =>
-                {
-                    if (msg.isPressed)
-                    {
-                        model.SetSneaking(true);
-                    }
-                    else
-                    {
-                        if (model.IsChargeComplete)
-                        {
-                            FireChargedShot();
-                            model.ResetCharge();
-                        }
-                        model.SetSneaking(false);
-                    }
-                })
-                .AddTo(inputDisposables);
+                         .Subscribe(msg =>
+                         {
+                             if (msg.isPressed)
+                             {
+                                 model.SetSneaking(true);
+                             }
+                             else
+                             {
+                                 if (model.IsChargeComplete)
+                                 {
+                                     FireChargedShot();
+                                     model.ResetCharge();
+                                 }
+
+                                 model.SetSneaking(false);
+                             }
+                         })
+                         .AddTo(inputDisposables);
         }
 
         public void UnsubscribeFromAttackInput()
@@ -136,13 +150,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Update()
         {
+            if (!mainCamera) return;
             if (!model.IsAlive) return;
 
             // 移動処理（押している間継続）+ スペクトラムバーからの押し戻し
-            Vector3 movement = HandleMovement();
+            var movement = HandleMovement();
             movement += (Vector3)pendingPush * Time.deltaTime;
             pendingPush = Vector2.zero;
-            Vector3 newPosition = ClampToScreen(view.GetPosition() + movement);
+            var newPosition = ClampToScreen(view.GetPosition() + movement);
             view.UpdatePosition(newPosition);
 
             // チャージ処理
@@ -156,18 +171,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (currentMoveInput.sqrMagnitude < 0.01f) return Vector3.zero;
 
-            float currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
-            Vector3 movement = new Vector3(currentMoveInput.x, currentMoveInput.y, 0) * currentSpeed * Time.deltaTime;
+            var currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
+            var movement = new Vector3(currentMoveInput.x, currentMoveInput.y, 0) * currentSpeed * Time.deltaTime;
             return movement;
         }
 
         Vector3 ClampToScreen(Vector3 position)
         {
-            Vector3 extents = spriteRenderer.bounds.extents;
+            var extents = spriteRenderer.bounds.extents;
 
             // Spriteの端がビューポート(0,0)〜(1,1)に収まるようにクランプ
-            Vector3 minWorld = mainCamera.ViewportToWorldPoint(Vector3.zero);
-            Vector3 maxWorld = mainCamera.ViewportToWorldPoint(Vector3.one);
+            var minWorld = mainCamera.ViewportToWorldPoint(Vector3.zero);
+            var maxWorld = mainCamera.ViewportToWorldPoint(Vector3.one);
 
             position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
             position.y = Mathf.Clamp(position.y, minWorld.y + extents.y - 0.2f, maxWorld.y - extents.y - 2.1f);
@@ -206,11 +221,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             if (PlayerPositionReference.Transform == transform)
+            {
                 PlayerPositionReference.Transform = null;
+            }
+
             disposables.Dispose();
             model?.Dispose();
         }
 
-        public EntityBase GetModel() => model;
+        public EntityBase GetModel()
+        {
+            return model;
+        }
     }
 }
