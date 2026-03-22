@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 1
+  maxHp: 30
   contactDamage: 5
   movementPreset: {fileID: 0}
   movementSteps:
@@ -115,9 +115,9 @@ MonoBehaviour:
     entries:
     - time: 3
       signal:
-        rid: 8577112587349262358
+        rid: 8577112587349262613
       directionProvider:
-        rid: 8577112587349262360
+        rid: 8577112587349262614
       bulletPoolIndex: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
@@ -216,17 +216,18 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 1
-    - rid: 8577112587349262358
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 8577112587349262360
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
     - rid: 8577112587349262364
       type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
         velocity: {x: 1, y: 0, z: 0}
+    - rid: 8577112587349262613
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 3
+        spreadAngle: 60
+    - rid: 8577112587349262614
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
