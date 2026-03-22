@@ -1,4 +1,5 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+using System;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
@@ -23,7 +24,10 @@ namespace Project.Commons.Debugger.Scripts.Presenter
 
             runtimeModel.SetForDebug(stageNumber, situation);
             Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, Situation={situation} に設定しました");
+        }
 
+        void Start()
+        {
             MessageBroker.Default.Publish(new SceneNavigationMessage(SceneNavigationState.Completed, "Battle"));
         }
     }
