@@ -23,20 +23,17 @@ namespace Project.Scenes.Battle.Scripts.Model
 
         public AttackPreset BossAttackPreset => bossAttackPreset;
         public MovementPreset BossMovementPreset => bossMovementPreset;
-
-        public double LastEnemySpawnTime
+ 
+        public int TotalEnemySpawnCount
         {
             get
             {
-                double last = -1;
+                int count = 0;
                 foreach (var track in enemySpawnTracks)
                 {
-                    foreach (var clip in track.Clips)
-                    {
-                        if (clip.Time > last) last = clip.Time;
-                    }
+                    count += track.Clips.Count;
                 }
-                return last;
+                return count;
             }
         }
 
