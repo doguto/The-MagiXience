@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Project.Scenes.StageList.Scripts.View
 {
-    public class StageCardListView : MonoBehaviour
+    public class StageCardListView : MonoBehaviour, IDisposable
     {
         [SerializeField] ScrollableButtonList scrollableButtonList;
         [SerializeField] List<SimpleButton> simpleButtons;
@@ -52,6 +52,12 @@ namespace Project.Scenes.StageList.Scripts.View
         {
             var index = simpleButtons.FindIndex(b => b.IsFocused);
             onButtonPressed.OnNext(index);
+        }
+
+        public void Dispose()
+        {
+            onButtonChanged?.Dispose();
+            onButtonPressed?.Dispose();
         }
     }
 }

@@ -2,13 +2,13 @@
 {
     public enum BattleStageType
     {
-        _1 = 1,
-        _2 = 2,
-        _3 = 3,
-        _4 = 4,
-        _5 = 5,
-        _6 = 6,
-        Ex = 7,
+        Stage1 = 1,
+        Stage2 = 2,
+        Stage3 = 3,
+        Stage4 = 4,
+        Stage5 = 5,
+        Stage6 = 6,
+        StageEx = 7,
         Null = -1
     }
 
