@@ -48,7 +48,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             soundManager.PlaySEAsync(SeType.Click).Forget();
 
             var runtimeModel = RuntimeModelRepository.Get();
-            runtimeModel.CurrentStageType = BattleStageTypeExtensions.FromInt(buttonIndex);
+            runtimeModel.CurrentStageType = stageModels[buttonIndex].BattleStageType;
             runtimeModel.CurrentSituation = BattleSituation.Way;
 
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);

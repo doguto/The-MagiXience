@@ -28,5 +28,12 @@
 
             return BattleStageType.Null;
         }
+
+        public static BattleStageType Next(this BattleStageType stageType)
+        {
+            var currentNumber = stageType.AsInt();
+            currentNumber++;
+            return FromInt(currentNumber);
+        }
     }
 }

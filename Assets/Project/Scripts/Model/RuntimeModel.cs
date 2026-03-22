@@ -29,13 +29,13 @@ namespace Project.Scripts.Model
             if (CurrentSituation == BattleSituation.Way)
             {
                 CurrentSituation = BattleSituation.Boss;
-                UnityEngine.Debug.Log($"[RuntimeModel] Stage {CurrentStageType}: Way → Boss");
+                UnityEngine.Debug.Log($"[RuntimeModel] Stage {CurrentStageType.AsInt()}: Way → Boss");
             }
             else
             {
-                CurrentStageType++;
+                CurrentStageType = CurrentStageType.Next();
                 CurrentSituation = BattleSituation.Way;
-                UnityEngine.Debug.Log($"[RuntimeModel] Stage advanced: {CurrentStageType - 1} → {CurrentStageType}");
+                UnityEngine.Debug.Log($"[RuntimeModel] Stage advanced: {CurrentStageType.AsInt() - 1} → {CurrentStageType.AsInt()}");
             }
         }
 

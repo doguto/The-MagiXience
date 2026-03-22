@@ -11,6 +11,7 @@ namespace Project.Scripts.Model
         public StageData StageData { get; }
 
         public int StageNumber => StageData.stageNumber;
+        public BattleStageType BattleStageType => BattleStageTypeExtensions.FromInt(StageData.stageNumber);
         public string WaySequenceAddress => StageData.waySequenceAddress;
         public string BossSequenceAddress => StageData.bossSequenceAddress;
 
