@@ -42,6 +42,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         PlayerEntityModel model;
         Camera mainCamera;
+        Camera MainCamera => mainCamera != null ? mainCamera : mainCamera = Camera.main;
         float lastShootTime;
         Vector2 currentMoveInput;
         Vector2 pendingPush;
@@ -79,6 +80,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             sceneNavigationSubscription?.Dispose();
             mainCamera = Camera.main;
+            Debug.Log($"[PlayerEntityPresenter] MainCamera Set {mainCamera.name}", mainCamera.gameObject);
         }
 
         void BindModelToView()
@@ -150,7 +152,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Update()
         {
-            if (!mainCamera) return;
             if (!model.IsAlive) return;
 
             // 移動処理（押している間継続）+ スペクトラムバーからの押し戻し
@@ -181,8 +182,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             var extents = spriteRenderer.bounds.extents;
 
             // Spriteの端がビューポート(0,0)〜(1,1)に収まるようにクランプ
-            var minWorld = mainCamera.ViewportToWorldPoint(Vector3.zero);
-            var maxWorld = mainCamera.ViewportToWorldPoint(Vector3.one);
+            var minWorld = MainCamera.ViewportToWorldPoint(Vector3.zero);
+            var maxWorld = MainCamera.ViewportToWorldPoint(Vector3.one);
 
             position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
             position.y = Mathf.Clamp(position.y, minWorld.y + extents.y - 0.2f, maxWorld.y - extents.y - 2.1f);

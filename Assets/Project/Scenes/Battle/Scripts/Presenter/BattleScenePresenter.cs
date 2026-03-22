@@ -10,6 +10,7 @@ using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scripts.Extensions;
+using Project.Scripts.Extensions.Message;
 using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
@@ -31,6 +32,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         BossEntityPresenter bossPresenter;
         bool isSceneLoadedHandlerRegistered = false;
 
+        IDisposable sceneNavigationSubscription;
+
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
         void Awake()
@@ -39,12 +42,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
             sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
+
+            sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
+            {
+                if (message.SceneName != SceneRouterModel.Battle) return;
+                if (message.State != SceneNavigationState.Completed) return;
+
+                Debug.Log("[BattleScenePresenter] Start Event", this);
+                sceneNavigationSubscription?.Dispose();
+                StartBattle();
+            });
         }
 
-        protected override void Start()
+        void StartBattle()
         {
-            base.Start();
-
             if (!phaseStateMachine)
             {
                 Debug.LogError("BattlePhaseStateMachine is not assigned.", this);
