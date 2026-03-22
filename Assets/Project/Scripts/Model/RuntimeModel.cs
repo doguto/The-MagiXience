@@ -1,4 +1,6 @@
-﻿namespace Project.Scripts.Model
+﻿using Project.Scripts.Extensions;
+
+namespace Project.Scripts.Model
 {
     public enum BattleSituation
     {
@@ -8,13 +10,13 @@
 
     public class RuntimeModel : ModelBase
     {
-        public int CurrentStageNumber { get; internal set; } = -1;
-        public bool IsInGame => CurrentStageNumber != -1;
+        public BattleStageType CurrentStageType { get; set; } = BattleStageType.Null;
+        public bool IsInGame => CurrentStageType != BattleStageType.Null;
         public BattleSituation CurrentSituation { get; set; } = BattleSituation.Way;
 
         public int GetScenarioNumber()
         {
-            return (CurrentStageNumber - 1) * 2 + (CurrentSituation == BattleSituation.Boss ? 2 : 1);
+            return (CurrentStageType.AsInt() - 1) * 2 + (CurrentSituation == BattleSituation.Boss ? 2 : 1);
         }
 
         public void SetSituation(BattleSituation situation)
@@ -27,26 +29,26 @@
             if (CurrentSituation == BattleSituation.Way)
             {
                 CurrentSituation = BattleSituation.Boss;
-                UnityEngine.Debug.Log($"[RuntimeModel] Stage {CurrentStageNumber}: Way → Boss");
+                UnityEngine.Debug.Log($"[RuntimeModel] Stage {CurrentStageType}: Way → Boss");
             }
             else
             {
-                CurrentStageNumber++;
+                CurrentStageType++;
                 CurrentSituation = BattleSituation.Way;
-                UnityEngine.Debug.Log($"[RuntimeModel] Stage advanced: {CurrentStageNumber - 1} → {CurrentStageNumber}");
+                UnityEngine.Debug.Log($"[RuntimeModel] Stage advanced: {CurrentStageType - 1} → {CurrentStageType}");
             }
         }
 
         public void ExitStage()
         {
-            CurrentStageNumber = -1;
+            CurrentStageType = BattleStageType.Null;
             CurrentSituation = BattleSituation.Way;
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         public void SetForDebug(int stageNumber, BattleSituation situation)
         {
-            CurrentStageNumber = stageNumber;
+            CurrentStageType = BattleStageTypeExtensions.FromInt(stageNumber);
             CurrentSituation = situation;
         }
 #endif

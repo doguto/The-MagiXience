@@ -8,7 +8,7 @@ namespace Project.Scripts.Presenter
     public class MonoPresenter : MonoBehaviour
     {
         [CanBeNull] protected GlobalScenePresenter globalScenePresenter;
-        [CanBeNull] protected SoundManagerPresenter soundManager;
+        [NotNull] protected SoundManagerPresenter soundManager;
 
         protected RuntimeModelRepository RuntimeModelRepository => RuntimeModelRepository.Instance;
 

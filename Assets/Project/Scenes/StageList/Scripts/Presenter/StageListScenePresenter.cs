@@ -7,6 +7,7 @@ using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Project.Scenes.StageList.Scripts.Presenter
 {
@@ -34,12 +35,27 @@ namespace Project.Scenes.StageList.Scripts.Presenter
 
             ShowCharaImage(0);
             stageCardListView.OnButtonChanged.Subscribe(ShowCharaImage);
+            stageCardListView.OnButtonPressed.Subscribe(i => LoadBattleScene(i).Forget());
         }
 
         void ShowCharaImage(int buttonIndex)
         {
             var charaImage = stageModels[buttonIndex].CharaImage;
             stageCardListView.SetCharaImage(charaImage);
+        }
+
+        async UniTask LoadBattleScene(int buttonIndex)
+        {
+            soundManager.PlaySEAsync(SeType.Click).Forget();
+
+            var loadTask = SceneManager.LoadSceneAsync(SceneRouterModel.Battle, LoadSceneMode.Additive).ToUniTask();
+
+            var runtimeModel = RuntimeModelRepository.Get();
+            runtimeModel.CurrentStageType = BattleStageTypeExtensions.FromInt(buttonIndex);
+
+            await loadTask;
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Battle));
+            SceneManager.UnloadSceneAsync(SceneRouterModel.StageList);
         }
     }
 }

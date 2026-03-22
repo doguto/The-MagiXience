@@ -52,8 +52,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             phaseStateMachine.OnSequenceCompleted
-                .Subscribe(HandleSequenceCompleted)
-                .AddTo(disposables);
+                             .Subscribe(HandleSequenceCompleted)
+                             .AddTo(disposables);
 
             InitializeAndStart();
         }
@@ -114,7 +114,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         StageModel ResolveStageModel()
         {
             var runtimeModel = RuntimeModelRepository.Instance.Get();
-            var stageNumber = runtimeModel.CurrentStageNumber < 1 ? 1 : runtimeModel.CurrentStageNumber;
+            var stageNumber = runtimeModel.CurrentStageType.AsInt() < 1 ? 1 : runtimeModel.CurrentStageType.AsInt();
 
             try
             {
@@ -178,6 +178,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 SceneManager.sceneLoaded += OnScenarioSceneLoaded;
                 isSceneLoadedHandlerRegistered = true;
             }
+
             SceneManager.LoadScene(SceneRouterModel.Scenario, LoadSceneMode.Additive);
         }
 
@@ -186,7 +187,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (scene.name != SceneRouterModel.Scenario) return;
 
             Debug.Log($"[BattleScenePresenter] Scenario scene loaded", this);
-            
+
             // ハンドラを解除
             if (isSceneLoadedHandlerRegistered)
             {
@@ -215,8 +216,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             // シナリオ完了後は攻撃を再開
             // temp: デモ版ではボス戦終了後に攻撃できない
-            if (RuntimeModelRepository.Instance.Get().CurrentSituation == BattleSituation.Boss)  
+            if (RuntimeModelRepository.Instance.Get().CurrentSituation == BattleSituation.Boss)
+            {
                 playerPresenter?.SubscribeToAttackInput();
+            }
 
             pendingScenarioCallback?.Invoke();
             pendingScenarioCallback = null;
@@ -246,8 +249,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             phaseStateMachine.OnPhaseStarted
-                .Subscribe(phase => bossPresenter.OnPhaseStarted(phase))
-                .AddTo(disposables);
+                             .Subscribe(phase => bossPresenter.OnPhaseStarted(phase))
+                             .AddTo(disposables);
 
             PlayEntranceMovement(instance.transform);
 
@@ -286,7 +289,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
         }
-        
+
         void CompleteStage()
         {
             stageModel?.Clear();
@@ -321,14 +324,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         }
 
         void OnDestroy()
-        {   
+        {
             // 登録されているハンドラを確実に解除
             if (isSceneLoadedHandlerRegistered)
             {
                 SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
                 isSceneLoadedHandlerRegistered = false;
             }
-            
+
             disposables.Dispose();
             battleCompleted.Dispose();
             phaseStateMachine?.Stop();

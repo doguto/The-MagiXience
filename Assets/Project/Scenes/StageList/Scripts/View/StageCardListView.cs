@@ -13,21 +13,24 @@ namespace Project.Scenes.StageList.Scripts.View
         [SerializeField] ScrollableButtonList scrollableButtonList;
         [SerializeField] List<SimpleButton> simpleButtons;
         [SerializeField] SpriteRenderer charaImage;
-        
+
         public List<StageCardView> stageCardViews;
-        
+
         readonly Subject<int> onButtonChanged = new();
+        readonly Subject<int> onButtonPressed = new();
         public IObservable<int> OnButtonChanged => onButtonChanged;
+        public IObservable<int> OnButtonPressed => onButtonPressed;
 
         public void Init(IReadOnlyList<bool> isOpenedList)
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
 
-            for (int i = 0; i < simpleButtons.Count; i++)
+            for (var i = 0; i < simpleButtons.Count; i++)
             {
                 var isOpened = i < isOpenedList.Count && isOpenedList[i];
-                simpleButtons[i].Init(isOpened: isOpened, isFocused: i == 0 && isOpened);
+                simpleButtons[i].Init(isOpened, i == 0 && isOpened);
                 simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
+                simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
             }
         }
 
@@ -43,6 +46,12 @@ namespace Project.Scenes.StageList.Scripts.View
         {
             var index = simpleButtons.FindIndex(b => b.IsFocused);
             onButtonChanged.OnNext(index);
+        }
+
+        void PublishOnButtonPressed(Unit _)
+        {
+            var index = simpleButtons.FindIndex(b => b.IsFocused);
+            onButtonPressed.OnNext(index);
         }
     }
 }
