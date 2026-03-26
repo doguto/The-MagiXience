@@ -7,7 +7,6 @@ using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Project.Scenes.Title.Scripts.Presenter
 {
@@ -63,10 +62,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             // TitleScene 以外で TitleModel は使用しないのでクリアする
             titleModelRepository.Refresh();
 
-            await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
-
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.StageList));
-            SceneManager.UnloadSceneAsync(gameObject.scene.name).ToUniTask().Forget();
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.StageList, gameObject.scene.name);
         }
 
         void ExitGame()

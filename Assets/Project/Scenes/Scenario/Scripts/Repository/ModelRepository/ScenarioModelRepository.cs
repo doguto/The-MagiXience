@@ -29,10 +29,11 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
                 scenarioModel.LoadData(data.steps);
 
                 // キャラクター画像をロード
-                var stageNumber = runtimeModel.CurrentStageNumber;
-                var enemyCharaName = GetEnemyCharaName(stageNumber);
+                var stageType = runtimeModel.CurrentStageType;
+                var enemyCharaName = GetEnemyCharaName(stageType.AsInt());
                 scenarioModel.LoadCharacterSprites(enemyCharaName);
             }
+
             return scenarioModel;
         }
 
@@ -43,16 +44,16 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
 
         ScenarioData LoadData()
         {
-            var stageNumber = runtimeModel.CurrentStageNumber;
+            var stageNumber = runtimeModel.CurrentStageType.AsInt();
             var situation = runtimeModel.CurrentSituation;
 
-            string scenarioId = GenerateScenarioId(stageNumber, situation);
-            string situationFolder = situation == BattleSituation.Way ? "Way" : "Boss";
+            var scenarioId = GenerateScenarioId(stageNumber, situation);
+            var situationFolder = situation == BattleSituation.Way ? "Way" : "Boss";
             var path = $"{GamePath.DataStorepath}/Stage{stageNumber}/{situationFolder}/{scenarioId}.asset";
             Debug.Log($"[ScenarioModelRepository] Loading scenario: {scenarioId} from {path}");
 
             var data = UnityEngine.AddressableAssets.Addressables
-                .LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
+                                  .LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
             if (data != null)
             {
                 Debug.Log($"[ScenarioModelRepository] Loaded scenario: {scenarioId}");
@@ -64,7 +65,7 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
 
         string GenerateScenarioId(int stageNumber, BattleSituation situation)
         {
-            string situationSuffix = situation == BattleSituation.Way ? "Way" : "Boss";
+            var situationSuffix = situation == BattleSituation.Way ? "Way" : "Boss";
             return $"Stage{stageNumber}{situationSuffix}Scenario";
         }
 
@@ -75,4 +76,3 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
         }
     }
 }
-
