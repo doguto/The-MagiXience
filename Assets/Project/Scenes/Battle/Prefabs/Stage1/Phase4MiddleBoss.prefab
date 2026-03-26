@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 2045916267942487860}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1, y: 0, z: 0}
+  m_LocalPosition: {x: -2.5, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -61,9 +61,8 @@ GameObject:
   - component: {fileID: 6449588308833420115}
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
-  - component: {fileID: 3221278940719757087}
   m_Layer: 7
-  m_Name: Phase4
+  m_Name: Phase4MiddleBoss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8334555279690838701}
@@ -97,84 +96,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 1
+  maxHp: 200
   contactDamage: 5
-  movementPreset: {fileID: 11400000, guid: e33e7045a0a56144db5624591b1a7aca, type: 2}
+  movementPreset: {fileID: 0}
   movementSteps:
-  - rid: 8577112408172003471
-  - rid: 8577112408172003480
-  - rid: 8577112408172003524
+  - rid: 8577112587349262553
+  - rid: 8577112587349262555
   bulletPool: {fileID: 7996329089749057052}
   bulletDamage: 10
   attackPreset: {fileID: 0}
   attackTimeline:
-    loop: 0
-    loopStart: 0
-    loopEnd: 5
-    cycleDuration: 2
+    loop: 1
+    loopStart: 2
+    loopEnd: 100
+    cycleDuration: 6
     entries:
-    - time: 2
+    - time: 0
       signal:
-        rid: 8577112429281935496
+        rid: 8577112587349262556
       directionProvider:
-        rid: 8577112429281935494
+        rid: 8577112587349262557
+      bulletPoolIndex: 0
+    - time: 0.75
+      signal:
+        rid: 8577112587349262559
+      directionProvider:
+        rid: 8577112587349262560
+      bulletPoolIndex: 0
+    - time: 1.5
+      signal:
+        rid: 8577112587349262561
+      directionProvider:
+        rid: 8577112587349262562
+      bulletPoolIndex: 0
+    - time: 2.25
+      signal:
+        rid: 8577112587349262563
+      directionProvider:
+        rid: 8577112587349262564
+      bulletPoolIndex: 0
+    - time: 3
+      signal:
+        rid: 8577112587349262565
+      directionProvider:
+        rid: 8577112587349262566
+      bulletPoolIndex: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
     version: 2
     RefIds:
-    - rid: 8577112408172003471
-      type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 8577112587349262553
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        waypoints:
-        - {x: -4, y: 0, z: 0}
-        - {x: -5, y: -1, z: 0}
-        - {x: -5.5, y: -2, z: 0}
-        duration: 2
-        pathType: 1
-        easeValue: -1
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 11400000, guid: 67e10c668f7ab8441a4f7529d1298501, type: 2}
-        isRelative: 1
-    - rid: 8577112408172003480
-      type: {class: QuadraticMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        initialVelocity: {x: -0.25, y: -1, z: 0}
-        acceleration: {x: 1, y: 0, z: 0}
-        duration: 0
-    - rid: 8577112408172003524
-      type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        waypoints:
-        - {x: 4, y: 0, z: 0}
-        - {x: 5, y: -1, z: 0}
-        - {x: 5.5, y: -2, z: 0}
+        targetOffset: {x: 3.8, y: 0, z: 0}
         duration: 1
-        pathType: 1
-        easeValue: -1
+        easeValue: 3
         customCurve:
           serializedVersion: 2
           m_Curve:
@@ -199,14 +176,57 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-        curvePreset: {fileID: 11400000, guid: b3d2f20121f0315428449965377bae68, type: 2}
-        isRelative: 1
-    - rid: 8577112429281935494
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 8577112429281935496
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+        curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8577112587349262555
+      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        duration: 0
+    - rid: 8577112587349262556
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 12
+        spreadAngle: 30
+    - rid: 8577112587349262557
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112587349262559
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 12
+        spreadAngle: 30
+    - rid: 8577112587349262560
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 1}
+    - rid: 8577112587349262561
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 12
+        spreadAngle: 30
+    - rid: 8577112587349262562
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112587349262563
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 12
+        spreadAngle: 30
+    - rid: 8577112587349262564
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 1}
+    - rid: 8577112587349262565
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 12
+        spreadAngle: 30
+    - rid: 8577112587349262566
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -263,7 +283,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
+  m_Sprite: {fileID: 4653426274120862573, guid: 996bf70840f953a439ef3739175da099, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -308,17 +328,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.5, y: -0.4}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 2.78, y: 3.16}
     newSize: {x: 3.84, y: 3.84}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.2, y: 1.2}
   m_EdgeRadius: 0
 --- !u!50 &4966291700737868264
 Rigidbody2D:
@@ -347,25 +367,3 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!95 &3221278940719757087
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7074045735317373604}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a4250950769c74b41af8ecdb96de3b0b, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0

@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
+  m_Name: Phase1Down
+  m_EditorClassIdentifier: 
+  steps:
+  - rid: 8577112587349262584
+  - rid: 8577112587349262585
+  - rid: 8577112587349262586
+  references:
+    version: 2
+    RefIds:
+    - rid: 8577112587349262584
+      type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        waypoints:
+        - {x: 2.56, y: 0.2, z: 0}
+        duration: 2.5
+        pathType: 1
+        easeValue: 3
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8577112587349262585
+      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        duration: 1
+    - rid: 8577112587349262586
+      type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        waypoints:
+        - {x: 0, y: -1.3, z: 0}
+        - {x: -7, y: -2.6, z: 0}
+        - {x: -14, y: -3.9, z: 0}
+        duration: 4
+        pathType: 1
+        easeValue: 2
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0

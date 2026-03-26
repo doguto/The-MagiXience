@@ -33,7 +33,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
         Camera mainCamera;
-        Sequence movementSequence;
+        Tween currentTween;
+        CancellationTokenSource movementCts;
         CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
 
@@ -64,16 +65,32 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void StartMovementSequence(Vector2 direction)
         {
-            movementSequence?.Kill();
+            StopMovement();
 
             if (movementSteps == null || movementSteps.Count == 0) return;
 
-            movementSequence = DOTween.Sequence();
+            movementCts = new CancellationTokenSource();
+            RunMovementStepsAsync(direction, movementCts.Token).Forget();
+        }
+
+        async UniTaskVoid RunMovementStepsAsync(Vector2 direction, CancellationToken ct)
+        {
             foreach (var step in movementSteps)
             {
                 if (step == null) continue;
-                movementSequence.Append(step.Play(transform, direction, null));
+                ct.ThrowIfCancellationRequested();
+                currentTween = step.Play(transform, direction, null);
+                await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
             }
+        }
+
+        void StopMovement()
+        {
+            movementCts?.Cancel();
+            movementCts?.Dispose();
+            movementCts = null;
+            currentTween?.Kill();
+            currentTween = null;
         }
 
         void BindModelToView()
@@ -140,7 +157,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void ReturnToPool()
         {
-            movementSequence?.Kill();
+            StopMovement();
             if (pool != null)
                 pool.Release(this);
             else
@@ -158,7 +175,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public void OnReturnedToPool()
         {
             CancelLifetimeTimer();
-            movementSequence?.Kill();
+            StopMovement();
             view.SetVisible(false);
             gameObject.SetActive(false);
         }
@@ -171,7 +188,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             CancelLifetimeTimer();
-            movementSequence?.Kill();
+            StopMovement();
             disposables.Dispose();
             model?.Dispose();
         }

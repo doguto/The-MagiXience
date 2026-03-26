@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scripts.Extensions;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Model.Attack
@@ -12,7 +13,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle };
 
-        public AttackEvent CreateEvent(IDirectionProvider directionProvider, int bulletPoolIndex = 0)
+        public AttackEvent CreateEvent(IDirectionProvider directionProvider, int bulletPoolIndex = 0, SeType seType = SeType.None)
         {
             var baseDirection = directionProvider.GetDirection();
             var directions = new List<Vector2>(wayCount);
@@ -45,7 +46,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 }
             }
 
-            return new AttackEvent(directions, bulletPoolIndex);
+            return new AttackEvent(directions, bulletPoolIndex, seType);
         }
     }
 }

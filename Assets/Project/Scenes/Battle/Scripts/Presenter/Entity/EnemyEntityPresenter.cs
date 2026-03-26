@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UniRx;
 using UnityEngine;
@@ -44,7 +46,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Camera mainCamera;
         Camera MainCamera => mainCamera != null ? mainCamera : mainCamera = Camera.main;
         PlayerEntityPresenter playerPresenter;
-        Sequence movementSequence;
+        Tween currentTween;
+        CancellationTokenSource movementCts;
         readonly CompositeDisposable disposables = new();
         bool isEnteredScreen = false;
 
@@ -98,16 +101,32 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void StartMovementSequence(IReadOnlyList<IMovementStep> steps, Animator animator)
         {
-            movementSequence?.Kill();
+            StopMovement();
 
             if (steps == null || steps.Count == 0) return;
 
-            movementSequence = DOTween.Sequence();
+            movementCts = new CancellationTokenSource();
+            RunMovementStepsAsync(steps, animator, movementCts.Token).Forget();
+        }
+
+        async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Animator animator, CancellationToken ct)
+        {
             foreach (var step in steps)
             {
                 if (step == null) continue;
-                movementSequence.Append(step.Play(transform, Vector2.zero, animator));
+                ct.ThrowIfCancellationRequested();
+                currentTween = step.Play(transform, Vector2.zero, animator);
+                await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
             }
+        }
+
+        void StopMovement()
+        {
+            movementCts?.Cancel();
+            movementCts?.Dispose();
+            movementCts = null;
+            currentTween?.Kill();
+            currentTween = null;
         }
 
         void Update()
@@ -149,7 +168,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void HandleDeath()
         {
-            movementSequence?.Kill();
+            StopMovement();
             Debug.Log($"[EnemyEntityPresenter] Enemy died at {transform.position}");
             Destroy(gameObject);
         }
@@ -165,7 +184,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            movementSequence?.Kill();
+            StopMovement();
             disposables.Dispose();
             model?.Dispose();
             model?.AttackStrategy?.Dispose();

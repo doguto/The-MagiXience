@@ -54,12 +54,23 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
         {
-            if (definition.ExitConditionConfig is BgmPositionExitConditionConfig bgmConfig)
+            InjectDependencies(definition.ExitConditionConfig);
+            return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker, getBossModel);
+        }
+
+        void InjectDependencies(IExitConditionConfig config)
+        {
+            if (config is BgmPositionExitConditionConfig bgmConfig)
             {
                 bgmConfig.GetBgmAudioSource = getBgmAudioSource;
             }
-
-            return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker, getBossModel);
+            else if (config is CompositeExitConditionConfig compositeConfig)
+            {
+                foreach (var inner in compositeConfig.Conditions)
+                {
+                    InjectDependencies(inner);
+                }
+            } 
         }
     }
 }

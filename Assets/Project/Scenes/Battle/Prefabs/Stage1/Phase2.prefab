@@ -78,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8334555279690838701}
@@ -96,11 +96,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 1
+  maxHp: 30
   contactDamage: 5
-  movementPreset: {fileID: 11400000, guid: ddfe5df26ab2ba841bf00edeaf887b0c, type: 2}
+  movementPreset: {fileID: 0}
   movementSteps:
   - rid: 8577112408172003548
+  - rid: 8577112587349262344
+  - rid: 8577112587349262349
+  - rid: 8577112587349262364
   bulletPool: {fileID: 7996329089749057052}
   bulletDamage: 10
   attackPreset: {fileID: 0}
@@ -109,7 +112,13 @@ MonoBehaviour:
     loopStart: 0
     loopEnd: 5
     cycleDuration: 2
-    entries: []
+    entries:
+    - time: 3
+      signal:
+        rid: 8577112587349262613
+      directionProvider:
+        rid: 8577112587349262614
+      bulletPoolIndex: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
@@ -120,11 +129,10 @@ MonoBehaviour:
       data:
         waypoints:
         - {x: -3, y: 1, z: 0}
-        - {x: -4, y: 3, z: 0}
-        - {x: -5, y: 9, z: 0}
-        duration: 6
+        - {x: -3.5, y: 2, z: 0}
+        duration: 2.5
         pathType: 1
-        easeValue: -1
+        easeValue: 3
         customCurve:
           serializedVersion: 2
           m_Curve:
@@ -167,8 +175,59 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-        curvePreset: {fileID: 11400000, guid: 90f2358a8082145468cdedc8e8c0a14a, type: 2}
+        curvePreset: {fileID: 0}
         isRelative: 1
+    - rid: 8577112587349262344
+      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        duration: 1
+    - rid: 8577112587349262349
+      type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        waypoints:
+        - {x: 0.5, y: 1, z: 0}
+        - {x: 3.5, y: 2, z: 0}
+        duration: 2.5
+        pathType: 1
+        easeValue: 2
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 1
+    - rid: 8577112587349262364
+      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        velocity: {x: 1, y: 0, z: 0}
+    - rid: 8577112587349262613
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 3
+        spreadAngle: 60
+    - rid: 8577112587349262614
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -225,7 +284,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
+  m_Sprite: {fileID: 7450309199561605471, guid: ea0bc0a409639854a9a0b61d18f12f0e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -270,17 +329,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.5, y: -0.4}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 2.78, y: 3.16}
     newSize: {x: 3.84, y: 3.84}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.2, y: 1.2}
   m_EdgeRadius: 0
 --- !u!50 &4966291700737868264
 Rigidbody2D:
