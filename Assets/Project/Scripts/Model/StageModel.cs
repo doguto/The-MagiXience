@@ -1,4 +1,5 @@
 ﻿using System;
+using Project.Scripts.Extensions;
 using Project.Scripts.Infra;
 using Project.Scripts.Repository.AssetRepository;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace Project.Scripts.Model
         public StageData StageData { get; }
 
         public int StageNumber => StageData.stageNumber;
+        public BattleStageType BattleStageType => BattleStageTypeExtensions.FromInt(StageData.stageNumber);
         public string WaySequenceAddress => StageData.waySequenceAddress;
         public string BossSequenceAddress => StageData.bossSequenceAddress;
 
@@ -29,7 +31,7 @@ namespace Project.Scripts.Model
 
         public void Start()
         {
-            RuntimeModel.CurrentStageNumber = StageData.stageNumber;
+            RuntimeModel.CurrentStageType = BattleStageTypeExtensions.FromInt(StageData.stageNumber);
         }
 
         public void Open()
