@@ -10,15 +10,16 @@ namespace Project.Scenes.Title.Scripts.View
     public class TitleMenuView : MonoBehaviour
     {
         [SerializeField] CanvasGroup buttonList;
-        [SerializeField] SimpleButton startButton;
-        [SerializeField] SimpleButton optionButton;
+        [SerializeField] SimpleButton startMainButton;
+        [SerializeField] SimpleButton stageSelectButton;
+        [SerializeField] SimpleButton configButton;
         [SerializeField] SimpleButton exitButton;
         [SerializeField] List<Sprite> backgroundSprites;
         [SerializeField] SpriteRenderer memberStillRenderer;
         [SerializeField] SpriteRenderer backGroundRenderer;
 
-        public IObservable<Unit> OnPressedStart => startButton.OnPressed;
-        public IObservable<Unit> OnPressedOption => optionButton.OnPressed;
+        public IObservable<Unit> OnPressedStart => stageSelectButton.OnPressed;
+        public IObservable<Unit> OnPressedOption => configButton.OnPressed;
         public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
 
         public void Init((Sprite memberStill, Sprite backGround) sprites)
@@ -29,15 +30,10 @@ namespace Project.Scenes.Title.Scripts.View
 
         public void InitStart()
         {
-            startButton.Init(isFocused: true);
-            optionButton.Init();
+            startMainButton.Init(isFocused: true);
+            stageSelectButton.Init();
+            configButton.Init();
             exitButton.Init();
-            EventSystem.current.SetSelectedGameObject(startButton.gameObject);
-        }
-
-        public void SetActive(bool active)
-        {
-            gameObject.SetActive(active);
         }
 
         public void SetInteractable(bool interactable)
