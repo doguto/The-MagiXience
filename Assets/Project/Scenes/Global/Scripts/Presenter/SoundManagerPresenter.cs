@@ -21,8 +21,8 @@ namespace Project.Scenes.Global.Scripts.Presenter
             soundModelRepository = SoundModelRepository.Instance;
 
             // TODO: UserDataから音量設定を取得して設定する
-            SetBGMVolume(15);
-            SetSEVolume(15);
+            SetBGMVolume(5);
+            SetSEVolume(5);
         }
 
         public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default)

@@ -1,6 +1,7 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using Project.Commons.UI.Scripts.View;
+using Project.Scenes.Global.Scripts.View;
 using Project.Scripts.Extensions;
 using Project.Scripts.Model;
 using Project.Scripts.Presenter;
@@ -13,6 +14,9 @@ namespace Project.Commons.UI.Scripts.Presenter
     public class KeyConfigModalPresenter : MonoPresenter
     {
         [SerializeField] KeyConfigModalView keyConfigModalView;
+        [SerializeField] Transform contentRoot;
+        [SerializeField] float keyConfigCardInterval = 1.2f;
+        [SerializeField] KeyConfigCardView keyConfigCardView;
 
         readonly Subject<Unit> onClosed = new();
         public IObservable<Unit> OnClosed => onClosed;
@@ -27,57 +31,78 @@ namespace Project.Commons.UI.Scripts.Presenter
         {
             base.Start();
 
-            var displayOrder = globalScenePresenter.KeyConfigModel.GetDisplayOrder();
-            var rowCount = Mathf.Min(displayOrder.Count, keyConfigModalView.RowCount);
-
-            for (var i = 0; i < rowCount; i++)
+            var keyConfigModel = GlobalScenePresenter.KeyConfigModel;
+            var index = 0;
+            foreach (var keyConfigAction in keyConfigModel.DisplayOrder)
             {
-                var rowIndex = i;
-                var action = displayOrder[rowIndex];
+                var instantiatePosition = contentRoot.position - new Vector3(0, keyConfigCardInterval * index, 0);
 
-                keyConfigModalView.OnPressedPrimary(rowIndex).Subscribe(_ =>
-                {
-                    soundManager.PlaySEAsync(SeType.Click).Forget();
-                    BeginRebind(action, KeyConfigModel.KeySlot.Primary);
-                }).AddTo(this);
+                // contentRoot の下に置かないと TMProUGUI が Canvas の外に出ることになり、Textが表示されない
+                var view = Instantiate(keyConfigCardView, contentRoot);
+                view.transform.position = instantiatePosition;
 
-                keyConfigModalView.OnPressedSecondary(rowIndex).Subscribe(_ =>
-                {
-                    soundManager.PlaySEAsync(SeType.Click).Forget();
-                    BeginRebind(action, KeyConfigModel.KeySlot.Secondary);
-                }).AddTo(this);
+                view.Init(
+                    keyConfigModel.GetDisplayName(keyConfigAction),
+                    keyConfigModel.GetDisplayString(keyConfigAction, KeyConfigModel.KeySlot.Primary),
+                    keyConfigModel.GetDisplayString(keyConfigAction, KeyConfigModel.KeySlot.Secondary)
+                );
 
-                keyConfigModalView.OnPressedReset(rowIndex).Subscribe(_ =>
-                {
-                    soundManager.PlaySEAsync(SeType.Cancel).Forget();
-                    if (editingModel == null) return;
-
-                    editingModel.ResetAction(action);
-                    RefreshView();
-                }).AddTo(this);
+                index++;
             }
 
-            keyConfigModalView.OnPressedSave.Subscribe(_ =>
-            {
-                soundManager.PlaySEAsync(SeType.Click).Forget();
-                SaveAndClose();
-            }).AddTo(this);
-
-            keyConfigModalView.OnPressedCancel.Subscribe(_ =>
-            {
-                soundManager.PlaySEAsync(SeType.Cancel).Forget();
-                CloseWithoutSave();
-            }).AddTo(this);
+            // var displayOrder = globalScenePresenter.KeyConfigModel.GetDisplayOrder();
+            // var rowCount = Mathf.Min(displayOrder.Count, keyConfigModalView.RowCount);
+            // Debug.Log(rowCount);
+            //
+            // for (var i = 0; i < rowCount; i++)
+            // {
+            //     var rowIndex = i;
+            //     var action = displayOrder[rowIndex];
+            //
+            //     keyConfigModalView.OnPressedPrimary(rowIndex).Subscribe(_ =>
+            //     {
+            //         soundManager.PlaySEAsync(SeType.Click).Forget();
+            //         BeginRebind(action, KeyConfigModel.KeySlot.Primary);
+            //     }).AddTo(this);
+            //
+            //     keyConfigModalView.OnPressedSecondary(rowIndex).Subscribe(_ =>
+            //     {
+            //         soundManager.PlaySEAsync(SeType.Click).Forget();
+            //         BeginRebind(action, KeyConfigModel.KeySlot.Secondary);
+            //     }).AddTo(this);
+            //
+            //     keyConfigModalView.OnPressedReset(rowIndex).Subscribe(_ =>
+            //     {
+            //         soundManager.PlaySEAsync(SeType.Cancel).Forget();
+            //         if (editingModel == null) return;
+            //
+            //         editingModel.ResetAction(action);
+            //         RefreshView();
+            //     }).AddTo(this);
+            // }
+            //
+            // keyConfigModalView.OnPressedSave.Subscribe(_ =>
+            // {
+            //     soundManager.PlaySEAsync(SeType.Click).Forget();
+            //     SaveAndClose();
+            // }).AddTo(this);
+            //
+            // keyConfigModalView.OnPressedCancel.Subscribe(_ =>
+            // {
+            //     soundManager.PlaySEAsync(SeType.Cancel).Forget();
+            //     CloseWithoutSave();
+            // }).AddTo(this);
         }
 
         public void Open()
         {
-            editingModel = new KeyConfigEditingModel(globalScenePresenter.KeyConfigModel);
+            gameObject.SetActive(true);
+
+            editingModel = new KeyConfigEditingModel(GlobalScenePresenter.KeyConfigModel);
             waitingAction = null;
             waitingSlot = null;
 
-            gameObject.SetActive(true);
-            keyConfigModalView.InitStart();
+            // keyConfigModalView.InitStart();
             RefreshView();
         }
 
@@ -105,30 +130,30 @@ namespace Project.Commons.UI.Scripts.Presenter
         {
             if (editingModel == null) return;
 
-            var displayOrder = editingModel.GetDisplayOrder();
-            var rowCount = Mathf.Min(displayOrder.Count, keyConfigModalView.RowCount);
-
-            for (var i = 0; i < rowCount; i++)
-            {
-                var action = displayOrder[i];
-
-                keyConfigModalView.SetRow(
-                    i,
-                    editingModel.GetDisplayName(action),
-                    editingModel.GetDisplayString(action, KeyConfigModel.KeySlot.Primary),
-                    editingModel.GetDisplayString(action, KeyConfigModel.KeySlot.Secondary)
-                );
-
-                if (waitingAction == action && waitingSlot == KeyConfigModel.KeySlot.Primary)
-                {
-                    keyConfigModalView.SetPrimaryWaiting(i);
-                }
-
-                if (waitingAction == action && waitingSlot == KeyConfigModel.KeySlot.Secondary)
-                {
-                    keyConfigModalView.SetSecondaryWaiting(i);
-                }
-            }
+            // var displayOrder = editingModel.GetDisplayOrder();
+            // var rowCount = Mathf.Min(displayOrder.Count, keyConfigModalView.RowCount);
+            //
+            // for (var i = 0; i < rowCount; i++)
+            // {
+            //     var action = displayOrder[i];
+            //
+            //     keyConfigModalView.SetRow(
+            //         i,
+            //         editingModel.GetDisplayName(action),
+            //         editingModel.GetDisplayString(action, KeyConfigModel.KeySlot.Primary),
+            //         editingModel.GetDisplayString(action, KeyConfigModel.KeySlot.Secondary)
+            //     );
+            //
+            //     if (waitingAction == action && waitingSlot == KeyConfigModel.KeySlot.Primary)
+            //     {
+            //         keyConfigModalView.SetPrimaryWaiting(i);
+            //     }
+            //
+            //     if (waitingAction == action && waitingSlot == KeyConfigModel.KeySlot.Secondary)
+            //     {
+            //         keyConfigModalView.SetSecondaryWaiting(i);
+            //     }
+            // }
         }
 
         void BeginRebind(KeyConfigModel.KeyConfigAction action, KeyConfigModel.KeySlot slot)
@@ -143,16 +168,13 @@ namespace Project.Commons.UI.Scripts.Presenter
 
             rebindingCaptureAction = new InputAction(type: InputActionType.Button);
             rebindingOperation = rebindingCaptureAction.PerformInteractiveRebinding()
-                .WithControlsHavingToMatchPath("<Keyboard>")
-                .OnComplete(operation =>
-                {
-                    var selectedPath = operation.selectedControl?.path;
-                    CompleteRebind(selectedPath);
-                })
-                .OnCancel(_ =>
-                {
-                    CompleteRebind(null);
-                });
+                                                       .WithControlsHavingToMatchPath("<Keyboard>")
+                                                       .OnComplete(operation =>
+                                                       {
+                                                           var selectedPath = operation.selectedControl?.path;
+                                                           CompleteRebind(selectedPath);
+                                                       })
+                                                       .OnCancel(_ => { CompleteRebind(null); });
 
             rebindingOperation.Start();
         }

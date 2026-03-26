@@ -12,7 +12,9 @@ namespace Project.Commons.UI.Scripts.Presenter
 {
     public class OptionModalPresenter : MonoPresenter
     {
+        [SerializeField] GameObject transparentBackground;
         [SerializeField] OptionModalView optionModalView;
+        [SerializeField] KeyConfigModalPresenter keyConfigModalPresenter;
         readonly Subject<Unit> onClosed = new();
         public IObservable<Unit> OnClosed => onClosed;
         RuntimeModel runtimeModel;
@@ -30,12 +32,14 @@ namespace Project.Commons.UI.Scripts.Presenter
             {
                 soundManager.PlaySEAsync(SeType.Cancel).Forget();
                 gameObject.SetActive(false);
+                transparentBackground.SetActive(false);
                 onClosed.OnNext(Unit.Default);
             }).AddTo(this);
             optionModalView.OnPressedSave.Subscribe(_ =>
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
-                //TODO saveする
+                gameObject.SetActive(false);
+                keyConfigModalPresenter.Open();
             }).AddTo(this);
         }
 
@@ -46,6 +50,7 @@ namespace Project.Commons.UI.Scripts.Presenter
                 Debug.Log("null");
             }
 
+            transparentBackground.SetActive(true);
             gameObject.SetActive(true);
             optionModalView.InitStart();
         }

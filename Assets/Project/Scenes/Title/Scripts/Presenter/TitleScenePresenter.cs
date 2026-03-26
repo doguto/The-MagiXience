@@ -41,9 +41,9 @@ namespace Project.Scenes.Title.Scripts.Presenter
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
                 titleMenuView.SetInteractable(false);
-                globalScenePresenter.OptionModalPresenter.Open();
+                GlobalScenePresenter.OptionModalPresenter.Open();
 
-                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
+                await GlobalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
 
                 titleMenuView.SetInteractable(true);
                 titleMenuView.InitStart();

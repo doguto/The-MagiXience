@@ -12,18 +12,16 @@ using UnityEngine.SceneManagement;
 
 namespace Project.Commons.UI.Scripts.Presenter
 {
-    public class PauseModalPresenter: MonoPresenter
+    public class PauseModalPresenter : MonoPresenter
     {
-        
         [SerializeField] PauseModalView pauseModalView;
         IDisposable pauseEvent;
-        
+
         readonly Subject<Unit> onClosed = new();
         public IObservable<Unit> OnClosed => onClosed;
         RuntimeModel runtimeModel;
-        
-        
-        
+
+
         void Awake()
         {
             runtimeModel = RuntimeModelRepository.Get();
@@ -32,17 +30,14 @@ namespace Project.Commons.UI.Scripts.Presenter
         protected override void Start()
         {
             pauseModalView.InitStart();
-            
-            pauseModalView.OnPressedCancel.Subscribe(_ =>
-            {
-                gameObject.SetActive(false);
-            });
+
+            pauseModalView.OnPressedCancel.Subscribe(_ => { gameObject.SetActive(false); });
             pauseModalView.OnPressedOption.Subscribe(_ =>
             {
-                globalScenePresenter.OptionModalPresenter.Open();
+                GlobalScenePresenter.OptionModalPresenter.Open();
                 gameObject.SetActive(false);
 
-                pauseEvent = globalScenePresenter.OptionModalPresenter.OnClosed.Subscribe(_ =>
+                pauseEvent = GlobalScenePresenter.OptionModalPresenter.OnClosed.Subscribe(_ =>
                 {
                     gameObject.SetActive(true);
                     pauseModalView.InitStart();
@@ -52,17 +47,15 @@ namespace Project.Commons.UI.Scripts.Presenter
             pauseModalView.OnPressedExit.Subscribe(x => LoadTitle(x).Forget()).AddTo(this);
         }
 
-        
+
         async UniTask LoadTitle(Unit _)
         {
             var sceneName = SceneManager.GetActiveScene().name;
-            
+
             await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
-            
+
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
             SceneManager.UnloadSceneAsync(sceneName).ToUniTask().Forget();
         }
     }
-    
-    
 }
