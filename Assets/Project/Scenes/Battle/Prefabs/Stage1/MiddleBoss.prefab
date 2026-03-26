@@ -107,6 +107,7 @@ MonoBehaviour:
   bulletPool: {fileID: 7996329089749057052}
   bulletDamage: 10
   attackPreset: {fileID: 0}
+  loopAttackPreset: {fileID: 0}
   attackTimeline:
     loop: 1
     loopStart: 1.5
@@ -118,16 +119,22 @@ MonoBehaviour:
         rid: 8577112454036455564
       directionProvider:
         rid: 8577112454036455568
+      bulletPoolIndex: 0
+      seType: 0
     - time: 0.5
       signal:
-        rid: 8577112454036455564
+        rid: 8577112642439610439
       directionProvider:
-        rid: 8577112454036455568
+        rid: 8577112642439610440
+      bulletPoolIndex: 0
+      seType: 0
     - time: 1
       signal:
-        rid: 8577112454036455564
+        rid: 8577112642439610441
       directionProvider:
         rid: 8577112454036455593
+      bulletPoolIndex: 0
+      seType: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
@@ -223,6 +230,19 @@ MonoBehaviour:
     - rid: 8577112454036455593
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
+    - rid: 8577112642439610439
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 3
+        spreadAngle: 10
+    - rid: 8577112642439610440
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8577112642439610441
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 3
+        spreadAngle: 10
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0

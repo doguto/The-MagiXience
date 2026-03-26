@@ -100,10 +100,11 @@ MonoBehaviour:
   contactDamage: 5
   movementPreset: {fileID: 0}
   movementSteps:
-  - rid: 8577112429281935966
+  - rid: 8577112642439610443
   bulletPool: {fileID: 7996329089749057052}
   bulletDamage: 5
   attackPreset: {fileID: 0}
+  loopAttackPreset: {fileID: 0}
   attackTimeline:
     loop: 0
     loopStart: 0
@@ -115,20 +116,20 @@ MonoBehaviour:
         rid: 8577112429281935970
       directionProvider:
         rid: 8577112429281935980
+      bulletPoolIndex: 0
+      seType: 0
     - time: 2
       signal:
         rid: 8577112429281935972
       directionProvider:
         rid: 8577112429281935981
+      bulletPoolIndex: 0
+      seType: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
     version: 2
     RefIds:
-    - rid: 8577112429281935966
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        velocity: {x: 0, y: -0.8, z: 0}
     - rid: 8577112429281935970
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -143,6 +144,18 @@ MonoBehaviour:
     - rid: 8577112429281935981
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
+    - rid: 8577112642439610443
+      type: {class: LoopMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        loop: 1
+        loopCount: 0
+        entries:
+        - preset: {fileID: 11400000, guid: ddfe5df26ab2ba841bf00edeaf887b0c, type: 2}
+          inlineSteps: []
+          repeatCount: 1
+        - preset: {fileID: 11400000, guid: e33e7045a0a56144db5624591b1a7aca, type: 2}
+          inlineSteps: []
+          repeatCount: 0
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
