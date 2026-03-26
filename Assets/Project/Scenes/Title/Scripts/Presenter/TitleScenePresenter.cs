@@ -31,6 +31,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             base.Start();
             titleMenuView.InitStart();
 
+            titleMenuView.OnPressedStartMain.Subscribe(_ => { StartMain(_).Forget(); });
             titleMenuView.OnPressedStart.Subscribe(x =>
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
@@ -55,6 +56,19 @@ namespace Project.Scenes.Title.Scripts.Presenter
             });
 
             soundManager!.PlayBGMAsync(SceneType.Title).Forget();
+        }
+
+        async UniTask StartMain(Unit _)
+        {
+            soundManager.PlaySEAsync(SeType.Click).Forget();
+
+            titleModelRepository.Refresh();
+
+            var runtimeModel = RuntimeModelRepository.Get();
+            runtimeModel.CurrentStageType = BattleStageType.Stage1;
+            runtimeModel.CurrentSituation = BattleSituation.Way;
+
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, gameObject.scene.name);
         }
 
         async UniTask StartGame(Unit _)
