@@ -51,7 +51,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             runtimeModel.CurrentStageType = stageModels[buttonIndex].BattleStageType;
             runtimeModel.CurrentSituation = BattleSituation.Way;
 
-            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);
+            await SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);
         }
     }
 }

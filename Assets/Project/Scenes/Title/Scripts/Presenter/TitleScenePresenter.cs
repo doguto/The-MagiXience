@@ -62,7 +62,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             // TitleScene 以外で TitleModel は使用しないのでクリアする
             titleModelRepository.Refresh();
 
-            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.StageList, gameObject.scene.name);
+            await SceneNavigator.NavigateTo(SceneRouterModel.StageList, gameObject.scene.name);
         }
 
         void ExitGame()
