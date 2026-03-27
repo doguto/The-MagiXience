@@ -6,11 +6,6 @@
 
 このプロジェクトは、MVPアーキテクチャパターンを採用したUnity 2Dゲームです。モジュラー設計により、保守性と拡張性を重視した開発を行っています。
 
-### 主人公とキャラクター
-
-- **主人公**: テン
-- **仲間キャラクター**: アズマ、ハナレ、コン、ロコ、スイ、タツミ、ウシトラ
-
 ## 技術スタック
 
 ### 開発環境
@@ -46,7 +41,7 @@ Magic-science-world/
 │   │   ├── Commons/       # 共通アセット
 │   │   ├── Scenes/        # シーン（Title, BattleWay, BattleBoss, など）
 │   │   ├── Scripts/       # グローバルスクリプト
-│   │   └── Textures/      # キャラクター・背景画像
+│   │   └── Textures/      # キャラクター・背景画像 Addressable管理のもの
 │   ├── Plugins/           # サードパーティライブラリ
 │   └── Settings/          # プロジェクト設定
 ├── Document/              # プロジェクトドキュメント
@@ -57,30 +52,13 @@ Magic-science-world/
 
 - **Title** - タイトル画面
 - **StageList** - ステージ選択画面
-- **BattleWay** - 通常戦闘シーン
-- **BattleBoss** - ボス戦闘シーン
+- **Battle** - 戦闘シーン
 - **Scenario** - シナリオ・ノベルパートシーン
 - **Global** - グローバル管理シーン
-
-## 開発環境のセットアップ
-
-### 必要な環境
-
-- Unity 6000.0.59f2 以上
-- Git
-
-### セットアップ手順
-
-1. リポジトリをクローン
-```bash
-git clone https://github.com/doguto/Magic-science-world.git
-```
-
-2. Unity Hub でプロジェクトを開く
-   - Unity バージョン 6000.0.59f2 を使用してください
-
-3. 依存パッケージは自動的にインストールされます
-   - Packages/manifest.json で管理されています
+  - ユーティリティGameObject等を配置する
+    - SoundManager
+    - SceneNavigator
+    - etc
 
 ## ドキュメント
 
@@ -107,7 +85,3 @@ Project.Scripts.[機能名]
 - Model: `[機能名]Model.cs`
 - View: `[機能名]View.cs`
 - Presenter: `[機能名]Presenter.cs`
-
-## ライセンス
-
-このプロジェクトは個人開発プロジェクトです。
