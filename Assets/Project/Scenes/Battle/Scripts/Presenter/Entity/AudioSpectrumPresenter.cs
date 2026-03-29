@@ -109,8 +109,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 }
                 var avg = sum / (binEnd - binStart);
 
-                // 感度を適用してターゲット高さを算出
-                var targetHeight = Mathf.Clamp(avg * sensitivity, 0f, maxBarHeight);
+                // 音量で正規化してから感度を適用してターゲット高さを算出
+                var normalizedAvg = avg / Mathf.Max(audioSource.volume, 0.01f);
+                var targetHeight = Mathf.Clamp(normalizedAvg * sensitivity, 0f, maxBarHeight);
 
                 // Lerpで滑らかに
                 smoothedHeights[i] = Mathf.Lerp(smoothedHeights[i], targetHeight, Time.deltaTime * lerpSpeed);
