@@ -16,12 +16,17 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         Subject<AttackEvent> onAttackTiming;
         CompositeDisposable disposables;
+        Func<Vector3> getPlayerPosition;
+        Func<Vector3> getEnemyPosition;
 
         public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
         public bool IsCompleted { get; private set; }
 
         public void InitializeProviders(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition)
         {
+            this.getPlayerPosition = getPlayerPosition;
+            this.getEnemyPosition = getEnemyPosition;
+
             foreach (var entry in entries)
             {
                 entry.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition);
@@ -70,8 +75,21 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             }
         }
 
-        void ScheduleEntry(AttackTimelineEntry entry, float fireTime)
+        const int MaxPresetDepth = 8;
+
+        void ScheduleEntry(AttackTimelineEntry entry, float fireTime, int depth = 0)
         {
+            if (entry.signal is PresetAttackSignal presetSignal && presetSignal.Preset != null)
+            {
+                if (depth >= MaxPresetDepth)
+                {
+                    Debug.LogError("[AttackTimeline] Preset nesting depth limit reached. Circular reference?");
+                    return;
+                }
+                ExpandPreset(presetSignal, fireTime, depth + 1);
+                return;
+            }
+
             Observable.Timer(TimeSpan.FromSeconds(fireTime))
                 .Subscribe(_ =>
                 {
@@ -81,6 +99,29 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                     }
                 })
                 .AddTo(disposables);
+        }
+
+        void ExpandPreset(PresetAttackSignal signal, float baseTime, int depth)
+        {
+            Debug.Log($"[AttackTimeline]");
+            var timeline = signal.Preset.CreateTimeline();
+            if (timeline == null || timeline.entries.Count == 0) return;
+
+            // 展開したエントリのDirectionProviderを初期化
+            foreach (var inner in timeline.entries)
+            {
+                inner.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition);
+            }
+
+            var totalCycles = signal.Loop && signal.LoopCount > 0 ? signal.LoopCount : 1;
+            for (var cycle = 0; cycle < totalCycles; cycle++)
+            {
+                foreach (var inner in timeline.entries)
+                {
+                    var innerTime = baseTime + cycle * signal.CycleDuration + inner.time;
+                    ScheduleEntry(inner, innerTime, depth);
+                }
+            }
         }
 
         public AttackTimeline DeepCopy()
