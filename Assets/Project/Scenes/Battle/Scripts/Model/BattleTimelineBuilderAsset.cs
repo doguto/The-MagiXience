@@ -19,9 +19,13 @@ namespace Project.Scenes.Battle.Scripts.Model
 
         [Header("Boss")]
         [SerializeField] AttackPreset bossAttackPreset;
+        [SerializeField] AttackPreset bossAttackPresetStrong;
+        [SerializeField, Range(0f, 100f)] float strongAttackHpThresholdPercent = 50f;
         [SerializeField] MovementPreset bossMovementPreset;
 
         public AttackPreset BossAttackPreset => bossAttackPreset;
+        public AttackPreset BossAttackPresetStrong => bossAttackPresetStrong;
+        public float StrongAttackHpThresholdPercent => strongAttackHpThresholdPercent;
         public MovementPreset BossMovementPreset => bossMovementPreset;
  
         public int TotalEnemySpawnCount

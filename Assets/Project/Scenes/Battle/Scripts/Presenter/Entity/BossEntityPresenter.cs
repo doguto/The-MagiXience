@@ -64,8 +64,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             var builder = phase.Builder;
             if (builder == null) return;
 
-            var attackTimeline = builder.BossAttackPreset != null
-                ? builder.BossAttackPreset.CreateTimeline()
+            var attackPreset = SelectAttackPreset(builder);
+            var attackTimeline = attackPreset != null
+                ? attackPreset.CreateTimeline()
                 : null;
             ApplyAttackTimeline(attackTimeline);
 
@@ -73,6 +74,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 ? builder.BossMovementPreset.Steps
                 : null;
             StartMovementSequence(movementSteps);
+        }
+
+        AttackPreset SelectAttackPreset(BattleTimelineBuilderAsset builder)
+        {
+            if (builder.BossAttackPresetStrong != null && model != null)
+            {
+                var hpPercent = (float)model.CurrentHp.Value / model.MaxHp * 100f;
+                if (hpPercent <= builder.StrongAttackHpThresholdPercent)
+                {
+                    return builder.BossAttackPresetStrong;
+                }
+            }
+            return builder.BossAttackPreset;
         }
 
         void ApplyAttackTimeline(AttackTimeline attackTimeline)
