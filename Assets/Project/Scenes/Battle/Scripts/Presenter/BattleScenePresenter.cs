@@ -36,6 +36,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
+        bool isBattleStarted;
+
         void Awake()
         {
             sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
@@ -56,6 +58,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void StartBattle()
         {
+            base.Start();
+
             if (!phaseStateMachine)
             {
                 Debug.LogError("BattlePhaseStateMachine is not assigned.", this);
