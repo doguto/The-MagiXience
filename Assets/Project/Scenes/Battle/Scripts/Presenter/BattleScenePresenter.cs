@@ -44,6 +44,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
             sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
+            ScreenBoundsCache.Initialize(gameObject.scene);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
             {
