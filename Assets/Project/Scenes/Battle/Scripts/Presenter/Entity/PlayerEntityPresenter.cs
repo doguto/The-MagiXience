@@ -3,6 +3,7 @@ using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
+using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Model;
@@ -41,8 +42,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         PlayerEntityModel model;
-        Camera mainCamera;
-        Camera MainCamera => mainCamera != null ? mainCamera : mainCamera = Camera.main;
         float lastShootTime;
         Vector2 currentMoveInput;
         Vector2 pendingPush;
@@ -79,8 +78,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (message.State != SceneNavigationState.Completed) return;
 
             sceneNavigationSubscription?.Dispose();
-            mainCamera = Camera.main;
-            Debug.Log($"[PlayerEntityPresenter] MainCamera Set {mainCamera.name}", mainCamera.gameObject);
+            Debug.Log($"[PlayerEntityPresenter] ScreenBounds initialized: ({ScreenBoundsCache.MinX}, {ScreenBoundsCache.MinY}) - ({ScreenBoundsCache.MaxX}, {ScreenBoundsCache.MaxY})");
         }
 
         void BindModelToView()
@@ -181,9 +179,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             var extents = spriteRenderer.bounds.extents;
 
-            // Spriteの端がビューポート(0,0)〜(1,1)に収まるようにクランプ
-            var minWorld = MainCamera.ViewportToWorldPoint(Vector3.zero);
-            var maxWorld = MainCamera.ViewportToWorldPoint(Vector3.one);
+            var minWorld = new Vector3(ScreenBoundsCache.MinX, ScreenBoundsCache.MinY);
+            var maxWorld = new Vector3(ScreenBoundsCache.MaxX, ScreenBoundsCache.MaxY);
 
             position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
             position.y = Mathf.Clamp(position.y, minWorld.y + extents.y - 0.2f, maxWorld.y - extents.y - 2.1f);

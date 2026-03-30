@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UniRx;
 using UnityEngine;
+using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model.Movement;
@@ -43,8 +44,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         EnemyEntityModel model;
-        Camera mainCamera;
-        Camera MainCamera => mainCamera != null ? mainCamera : mainCamera = Camera.main;
         PlayerEntityPresenter playerPresenter;
         Tween currentTween;
         CancellationTokenSource movementCts;
@@ -146,15 +145,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         bool IsOutOfScreen()
         {
             var position = transform.position;
-            var viewportPoint = MainCamera.WorldToViewportPoint(position);
-
             var extents = spriteRenderer.bounds.extents;
-            var viewportExtents = MainCamera.WorldToViewportPoint(position + extents)
-                                  - MainCamera.WorldToViewportPoint(position);
-            var margin = Mathf.Max(Mathf.Abs(viewportExtents.x), Mathf.Abs(viewportExtents.y)) + 0.1f;
+            var margin = Mathf.Max(extents.x, extents.y) + 0.1f;
 
-            var outOfScreen = viewportPoint.x < -margin || viewportPoint.x > 1f + margin ||
-                              viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
+            var outOfScreen = position.x < ScreenBoundsCache.MinX - margin || position.x > ScreenBoundsCache.MaxX + margin ||
+                              position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
 
             if (!outOfScreen) isEnteredScreen = true;
 

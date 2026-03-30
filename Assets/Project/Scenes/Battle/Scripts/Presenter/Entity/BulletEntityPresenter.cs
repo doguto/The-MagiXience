@@ -6,6 +6,7 @@ using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
+using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.View.Entity;
@@ -32,18 +33,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
-        Camera mainCamera;
         Tween currentTween;
         CancellationTokenSource movementCts;
         CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
-
-        void Awake()
-        {
-            mainCamera = Camera.main;
-        }
 
         public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false)
         {
@@ -119,16 +114,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         bool IsOutOfScreen()
         {
-            Vector3 position = transform.position;
-            Vector3 viewportPoint = mainCamera.WorldToViewportPoint(position);
+            var position = transform.position;
+            var extents = spriteRenderer.bounds.extents;
+            var margin = Mathf.Max(extents.x, extents.y) + 0.1f;
 
-            Vector3 extents = spriteRenderer.bounds.extents;
-            Vector3 viewportExtents = mainCamera.WorldToViewportPoint(position + extents)
-                                    - mainCamera.WorldToViewportPoint(position);
-            float margin = Mathf.Max(Mathf.Abs(viewportExtents.x), Mathf.Abs(viewportExtents.y)) + 0.1f;
-
-            return viewportPoint.x < -margin || viewportPoint.x > 1f + margin ||
-                   viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
+            return position.x < ScreenBoundsCache.MinX - margin || position.x > ScreenBoundsCache.MaxX + margin ||
+                   position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
         }
 
         void StartLifetimeTimer()
