@@ -12,7 +12,7 @@ namespace Project.Scenes.Battle.Scripts.Model
     public class BattleSequenceAsset : ScriptableObject
     {
         [SerializeField] BattleSituation situation = BattleSituation.Way;
-        [SerializeField] List<BattlePhaseDefinition> phases = new();
+        [SerializeField] List<SequenceGroup> sequenceGroups = new();
 
         [Header("Boss Prefab")]
         [SerializeField] GameObject bossPrefab;
@@ -21,7 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         List<IMovementStep> bossEntranceMovement = new();
 
         public BattleSituation Situation => situation;
-        public IReadOnlyList<BattlePhaseDefinition> Phases => phases;
+        public IReadOnlyList<SequenceGroup> SequenceGroups => sequenceGroups;
         public GameObject BossPrefab => bossPrefab;
         public Vector3 BossSpawnPosition => bossSpawnPosition;
         public IReadOnlyList<IMovementStep> BossEntranceMovement => bossEntranceMovement;
@@ -65,5 +65,17 @@ namespace Project.Scenes.Battle.Scripts.Model
         {
             return timelineBuilder ? timelineBuilder.BuildTimeline() : null;
         }
+    }
+
+    [Serializable]
+    public class SequenceGroup
+    {
+        [SerializeField] bool loop;
+        [SerializeField] int loopCount; // 0 = infinite
+        [SerializeField] List<BattlePhaseDefinition> phases = new();
+
+        public bool Loop => loop;
+        public int LoopCount => loopCount;
+        public IReadOnlyList<BattlePhaseDefinition> Phases => phases;
     }
 }

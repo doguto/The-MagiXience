@@ -132,8 +132,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.Situation} with {sequence.Phases.Count} phases", this);
-            foreach (var phase in sequence.Phases)
+            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.Situation} with {sequence.AllCreatedPhases.Count} phases", this);
+            foreach (var phase in sequence.AllCreatedPhases)
             {
                 Debug.Log($"[BattlePhaseStateMachine] Disposing phase {phase.PhaseId}", this);
                 phase.Dispose();
