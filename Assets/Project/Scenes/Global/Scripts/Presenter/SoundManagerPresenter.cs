@@ -16,6 +16,9 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         SoundModelRepository soundModelRepository;
 
+        int bgmLoopStartSamples;
+        int bgmLoopEndSamples;
+
         void Awake()
         {
             soundModelRepository = SoundModelRepository.Instance;
@@ -25,13 +28,28 @@ namespace Project.Scenes.Global.Scripts.Presenter
             SetSEVolume(15);
         }
 
+        void Update()
+        {
+            if (!bgmAudioSource.isPlaying || bgmLoopEndSamples <= 0) return;
+
+            if (bgmAudioSource.timeSamples >= bgmLoopEndSamples)
+            {
+                bgmAudioSource.timeSamples = bgmLoopStartSamples;
+            }
+        }
+
         public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default)
         {
             var bgmModel = soundModelRepository.GetBgmModel(sceneType, bgmType);
             var bgmClip = bgmModel.AudioClip;
 
+            bgmLoopStartSamples = bgmModel.LoopStartSamples;
+            bgmLoopEndSamples = bgmModel.LoopEndSamples > 0
+                ? bgmModel.LoopEndSamples
+                : bgmClip.samples;
+
             bgmAudioSource.clip = bgmClip;
-            bgmAudioSource.loop = true;
+            bgmAudioSource.loop = false;
             bgmAudioSource.Play();
 
             await UniTask.CompletedTask;
@@ -40,6 +58,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
         public void StopBGM()
         {
             bgmAudioSource.Stop();
+            bgmLoopEndSamples = 0;
         }
 
         public void PlaySE(SeType seType)
