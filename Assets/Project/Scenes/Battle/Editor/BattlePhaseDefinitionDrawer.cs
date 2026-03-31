@@ -1,18 +1,17 @@
 using Project.Editor;
-using Project.Scenes.Battle.Scripts.Model.Attack;
+using Project.Scenes.Battle.Scripts.Model;
 using UnityEditor;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Editor
 {
-    [CustomPropertyDrawer(typeof(AttackTimeline))]
-    public class AttackTimelineDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(BattlePhaseDefinition))]
+    public class BattlePhaseDefinitionDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            SerializeReferenceDeduplicator.DeduplicateField(
-                property.FindPropertyRelative("entries"), "signal", "directionProvider");
-
+            SerializeReferenceDeduplicator.DeduplicateAcrossNestedArrays(
+                property, "sequenceGroups", "phases", "exitConditionConfig");
             EditorGUI.PropertyField(position, property, label, true);
         }
 

@@ -1,17 +1,17 @@
 using Project.Editor;
-using Project.Scenes.Battle.Scripts.Model.Attack;
 using UnityEditor;
 using UnityEngine;
+using Project.Scenes.Battle.Scripts.Model.ExitCondition;
 
 namespace Project.Scenes.Battle.Editor
 {
-    [CustomPropertyDrawer(typeof(AttackTimeline))]
-    public class AttackTimelineDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(CompositeExitConditionConfig))]
+    public class CompositeExitConditionConfigDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            SerializeReferenceDeduplicator.DeduplicateField(
-                property.FindPropertyRelative("entries"), "signal", "directionProvider");
+            SerializeReferenceDeduplicator.DeduplicateElements(
+                property.FindPropertyRelative("conditions"));
 
             EditorGUI.PropertyField(position, property, label, true);
         }
