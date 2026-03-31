@@ -117,6 +117,15 @@ MonoBehaviour:
         rid: 8577112342479242033
       directionProvider:
         rid: 8577112429281935569
+      bulletPoolIndex: 0
+      seType: 0
+    - time: 4
+      signal:
+        rid: 8577112747257626694
+      directionProvider:
+        rid: 8577112747257626695
+      bulletPoolIndex: 0
+      seType: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
@@ -197,6 +206,13 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 1
+    - rid: 8577112747257626694
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8577112747257626695
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 2}
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -36,8 +36,18 @@ namespace Project.Scenes.Battle.Scripts.Model
                 return;
             }
 
+            var previousSamples = audioSource.timeSamples;
+
             Observable.EveryUpdate()
-                .Where(_ => audioSource != null && audioSource.timeSamples >= thresholdSamples)
+                .Where(_ =>
+                {
+                    if (audioSource == null) return false;
+                    var currentSamples = audioSource.timeSamples;
+                    // ループ検出（サンプル数が減少した）または閾値到達で完了
+                    var reached = currentSamples >= thresholdSamples || currentSamples < previousSamples;
+                    previousSamples = currentSamples;
+                    return reached;
+                })
                 .Take(1)
                 .Subscribe(_ => CompletePhase())
                 .AddTo(Disposables);

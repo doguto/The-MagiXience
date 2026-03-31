@@ -10,28 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: N 2
+  m_Name: ChorusNormal
   m_EditorClassIdentifier: 
   attackTimeline:
     loop: 1
     loopStart: 0
-    loopEnd: 10
-    cycleDuration: 0.25
+    loopEnd: 100
+    cycleDuration: 2
     entries:
     - time: 0
       signal:
-        rid: 8577112429281935435
+        rid: 8577112747257626779
       directionProvider:
-        rid: 8577112429281935437
-      bulletPoolIndex: 2
+        rid: 8577112747257626778
+      bulletPoolIndex: 3
+      seType: 0
   references:
     version: 2
     RefIds:
-    - rid: 8577112429281935435
-      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        wayCount: 10
-        spreadAngle: 15
-    - rid: 8577112429281935437
+    - rid: 8577112747257626778
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
+    - rid: 8577112747257626779
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 20
+        spreadAngle: 60

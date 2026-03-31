@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8877745320614750256}
   - component: {fileID: 366756060701291069}
   m_Layer: 10
-  m_Name: LinearBullet 1
+  m_Name: BossMelodyB
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,13 +28,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7477573057972596773}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1851957906713825068
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -79,8 +79,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -9095717837082945937, guid: bd3cb4af8406d4436a2ae8c2aafe1f8d, type: 3}
-  m_Color: {r: 0.9529412, g: 0.64705884, b: 0.2901961, a: 1}
+  m_Sprite: {fileID: 6397573364387592255, guid: d3e78990a7ba5424782fba33300a351a, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -124,17 +124,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.1, y: -1.25}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 2}
+    oldSize: {x: 2.28, y: 3.89}
     newSize: {x: 0.23, y: 0.23}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.6, y: 1.4}
+  m_Size: {x: 1, y: 0.7}
   m_EdgeRadius: 0
 --- !u!114 &8877745320614750256
 MonoBehaviour:
@@ -162,36 +162,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementSteps:
-  - rid: 8577112454036455637
-  - rid: 8577112500302774355
-  - rid: 8577112494358659148
-  - rid: 8577112500302774365
+  - rid: 8577112795563163769
   view: {fileID: 8877745320614750256}
   spriteRenderer: {fileID: 1851957906713825068}
   lifetime: 10
   references:
     version: 2
     RefIds:
-    - rid: 8577112454036455637
-      type: {class: AcceleratedMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 8577112795563163769
+      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        direction: {x: -1, y: 0}
-        initialSpeed: 3
-        acceleration: -3
-        maxSpeed: 3
-        minSpeed: 0
-        duration: 1
-    - rid: 8577112494358659148
-      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        duration: 0.5
-    - rid: 8577112500302774355
-      type: {class: AimRotateConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        duration: 0.3
-        ease: 6
-    - rid: 8577112500302774365
-      type: {class: ForwardMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        speed: 5
-        duration: 0
+        velocity: {x: -1, y: 0, z: 0}
