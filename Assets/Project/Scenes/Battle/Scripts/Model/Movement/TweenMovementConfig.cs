@@ -21,7 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         public const int CustomCurveValue = -1;
 
         [SerializeField] Vector3 targetOffset = new Vector3(-3f, 0f, 0f);
-        [SerializeField, Min(0.01f)] float duration = 1f;
+        [SerializeField, Min(0f)] float duration = 1f;
         [SerializeField] int easeValue = (int)Ease.Linear;
         [SerializeField] AnimationCurve customCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
         [SerializeField] EaseCurvePreset curvePreset;
