@@ -2,6 +2,7 @@ using System;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Timeline;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 
@@ -18,9 +19,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         BattleSequenceModel activeSequence;
         BattlePhaseModelBase activePhase;
         IDisposable exitSubscription;
+        Func<BattlePhaseModelBase, TimelineAsset> timelineResolver;
 
         public IObservable<BattlePhaseModelBase> OnPhaseStarted => phaseStarted;
         public IObservable<BattleSituation> OnSequenceCompleted => sequenceCompleted;
+
+        public void SetTimelineResolver(Func<BattlePhaseModelBase, TimelineAsset> resolver)
+            => timelineResolver = resolver;
 
         public void PlaySequence(BattleSequenceModel sequence)
         {
@@ -84,7 +89,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            var timeline = phase.ResolveTimeline();
+            var timeline = timelineResolver?.Invoke(phase) ?? phase.ResolveTimeline();
             if (!timeline)
             {
                 Debug.LogWarning($"Phase {phase.PhaseId} does not have a timeline asset.", this);

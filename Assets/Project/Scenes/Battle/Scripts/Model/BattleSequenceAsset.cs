@@ -54,16 +54,25 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] string phaseId;
         [Header("Timeline")]
         [SerializeField] BattleTimelineBuilderAsset timelineBuilder;
+        [SerializeField] BattleTimelineBuilderAsset timelineBuilderStrong;
+        [SerializeField, Range(0f, 100f)] float strongAttackHpThresholdPercent = 50f;
         [SerializeReference, SubclassSelector]
         IExitConditionConfig exitConditionConfig = new TimeLimitExitConditionConfig();
 
         public string PhaseId => phaseId;
         public BattleTimelineBuilderAsset TimelineBuilder => timelineBuilder;
+        public BattleTimelineBuilderAsset TimelineBuilderStrong => timelineBuilderStrong;
+        public float StrongAttackHpThresholdPercent => strongAttackHpThresholdPercent;
         public IExitConditionConfig ExitConditionConfig => exitConditionConfig;
 
         public TimelineAsset CreateTimeline()
         {
             return timelineBuilder ? timelineBuilder.BuildTimeline() : null;
+        }
+
+        public TimelineAsset CreateTimelineStrong()
+        {
+            return timelineBuilderStrong ? timelineBuilderStrong.BuildTimeline() : null;
         }
     }
 
