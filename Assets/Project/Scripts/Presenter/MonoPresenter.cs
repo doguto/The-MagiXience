@@ -7,8 +7,21 @@ namespace Project.Scripts.Presenter
 {
     public class MonoPresenter : MonoBehaviour
     {
-        [CanBeNull] protected GlobalScenePresenter globalScenePresenter;
+        GlobalScenePresenter globalScenePresenter;
+
+        protected GlobalScenePresenter GlobalScenePresenter
+        {
+            get
+            {
+                if (globalScenePresenter) return globalScenePresenter;
+                SetGlobalScenePresenter();
+                return globalScenePresenter;
+            }
+        }
+
         [NotNull] protected SoundManagerPresenter soundManager;
+
+        protected SceneNavigator SceneNavigator => GlobalScenePresenter.SceneNavigator;
 
         protected RuntimeModelRepository RuntimeModelRepository => RuntimeModelRepository.Instance;
 
@@ -25,7 +38,12 @@ namespace Project.Scripts.Presenter
                 Debug.LogWarning("GlobalScenePresenterが見つかりません", this);
             }
 
-            soundManager = globalScenePresenter!.SoundManagerPresenter;
+            soundManager = GlobalScenePresenter.SoundManagerPresenter;
+        }
+
+        void SetGlobalScenePresenter()
+        {
+            globalScenePresenter ??= FindFirstObjectByType<GlobalScenePresenter>();
         }
     }
 }

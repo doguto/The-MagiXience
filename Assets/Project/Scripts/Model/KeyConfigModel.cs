@@ -18,13 +18,13 @@ namespace Project.Scripts.Model
             Attack,
             Charge,
             Submit,
-            Cancel,
+            Cancel
         }
 
         public enum KeySlot
         {
             Primary,
-            Secondary,
+            Secondary
         }
 
         public class BindingTarget
@@ -59,11 +59,25 @@ namespace Project.Scripts.Model
             }
         }
 
+        public class BindingChange
+        {
+            public KeyConfigAction Action { get; }
+            public KeySlot Slot { get; }
+            public string Path { get; }
+
+            public BindingChange(KeyConfigAction action, KeySlot slot, string path)
+            {
+                Action = action;
+                Slot = slot;
+                Path = path;
+            }
+        }
+
         readonly InputActionAsset inputActions;
         readonly KeyConfigData keyConfigData;
         readonly UserModel userModel;
         readonly Dictionary<KeyConfigAction, KeyConfigEntry> entries;
-        readonly List<KeyConfigAction> displayOrder;
+        public List<KeyConfigAction> DisplayOrder { get; }
 
         public KeyConfigModel(UserModel userModel, InputActionAsset inputActions)
         {
@@ -73,16 +87,16 @@ namespace Project.Scripts.Model
             userModel.UserData.keyConfigData ??= keyConfigData;
 
             entries = CreateEntries();
-            displayOrder = CreateDisplayOrder();
+            DisplayOrder = CreateDisplayOrder();
             LoadBindingOverrides();
         }
 
         Dictionary<KeyConfigAction, KeyConfigEntry> CreateEntries()
         {
             return new Dictionary<KeyConfigAction, KeyConfigEntry>
-        {
             {
-                KeyConfigAction.Up,
+                {
+                    KeyConfigAction.Up,
                     new KeyConfigEntry(
                         KeyConfigAction.Up,
                         "上",
@@ -93,7 +107,7 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "7e383947-06f2-4657-aedc-783fe3aced74", "<Keyboard>/w"),
-                                    new("UI/Navigate", "70f4d56d-5d80-4a81-8be9-82420fa370aa", "<Keyboard>/w"),
+                                    new("UI/Navigate", "70f4d56d-5d80-4a81-8be9-82420fa370aa", "<Keyboard>/w")
                                 }
                             },
                             {
@@ -101,7 +115,7 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "4569f7f3-f0e9-4e29-a7d1-79d97e195b46", "<Keyboard>/upArrow"),
-                                    new("UI/Navigate", "60543508-b5d5-4df3-bdc8-e3f519be12c7", "<Keyboard>/upArrow"),
+                                    new("UI/Navigate", "60543508-b5d5-4df3-bdc8-e3f519be12c7", "<Keyboard>/upArrow")
                                 }
                             }
                         }
@@ -110,7 +124,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Down,
                     new KeyConfigEntry(
-                KeyConfigAction.Down,
+                        KeyConfigAction.Down,
                         "下",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -119,7 +133,7 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "3598e500-0612-4a79-8c33-d5cfb700230e", "<Keyboard>/s"),
-                                    new("UI/Navigate", "9e5167b1-e306-45f4-88bc-0e5aa43c0d15", "<Keyboard>/s"),
+                                    new("UI/Navigate", "9e5167b1-e306-45f4-88bc-0e5aa43c0d15", "<Keyboard>/s")
                                 }
                             },
                             {
@@ -127,7 +141,7 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "188d3809-9054-4bc6-85bb-2ee71280acf8", "<Keyboard>/downArrow"),
-                                    new("UI/Navigate", "6b752bc4-ba07-4d11-afa2-564b32699337", "<Keyboard>/downArrow"),
+                                    new("UI/Navigate", "6b752bc4-ba07-4d11-afa2-564b32699337", "<Keyboard>/downArrow")
                                 }
                             }
                         }
@@ -136,7 +150,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Left,
                     new KeyConfigEntry(
-                KeyConfigAction.Left,
+                        KeyConfigAction.Left,
                         "左",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -145,7 +159,7 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "feba1612-dd2c-42b5-8758-7a78d79761ea", "<Keyboard>/a"),
-                                    new("UI/Navigate", "776cc8cf-5eab-4b35-9d83-063e09270d94", "<Keyboard>/a"),
+                                    new("UI/Navigate", "776cc8cf-5eab-4b35-9d83-063e09270d94", "<Keyboard>/a")
                                 }
                             },
                             {
@@ -153,7 +167,7 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "2687a5fe-f8bb-4023-8fb5-5061928ea0a2", "<Keyboard>/leftArrow"),
-                                    new("UI/Navigate", "af654146-5fd0-4a3d-b4c5-bda6121ef630", "<Keyboard>/leftArrow"),
+                                    new("UI/Navigate", "af654146-5fd0-4a3d-b4c5-bda6121ef630", "<Keyboard>/leftArrow")
                                 }
                             }
                         }
@@ -162,7 +176,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Right,
                     new KeyConfigEntry(
-                KeyConfigAction.Right,
+                        KeyConfigAction.Right,
                         "右",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -171,7 +185,7 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "88ddea62-a339-4ac8-89b3-83d56bb418c0", "<Keyboard>/d"),
-                                    new("UI/Navigate", "329cc788-0de4-4d0f-a1ee-0343b4cc0663", "<Keyboard>/d"),
+                                    new("UI/Navigate", "329cc788-0de4-4d0f-a1ee-0343b4cc0663", "<Keyboard>/d")
                                 }
                             },
                             {
@@ -179,14 +193,14 @@ namespace Project.Scripts.Model
                                 new List<BindingTarget>
                                 {
                                     new("Player/Move", "f70c418a-bdfd-4a52-821a-33b01b6e8785", "<Keyboard>/rightArrow"),
-                                    new("UI/Navigate", "a6067903-cc5c-4e06-892d-2b77dccfe8af", "<Keyboard>/rightArrow"),
+                                    new("UI/Navigate", "a6067903-cc5c-4e06-892d-2b77dccfe8af", "<Keyboard>/rightArrow")
                                 }
                             }
                         }
                     )
                 },
                 {
-                KeyConfigAction.Attack,
+                    KeyConfigAction.Attack,
                     new KeyConfigEntry(
                         KeyConfigAction.Attack,
                         "攻撃",
@@ -196,14 +210,14 @@ namespace Project.Scripts.Model
                                 KeySlot.Primary,
                                 new List<BindingTarget>
                                 {
-                                    new("Player/Attack", "6e531e4e-dba2-4c80-b35b-e4c378faed86", "<Keyboard>/k"),
+                                    new("Player/Attack", "6e531e4e-dba2-4c80-b35b-e4c378faed86", "<Keyboard>/k")
                                 }
                             },
                             {
                                 KeySlot.Secondary,
                                 new List<BindingTarget>
                                 {
-                                    new("Player/Attack", "924410b2-3002-4248-9227-4a166338f567", "<Keyboard>/z"),
+                                    new("Player/Attack", "924410b2-3002-4248-9227-4a166338f567", "<Keyboard>/z")
                                 }
                             }
                         }
@@ -212,7 +226,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Charge,
                     new KeyConfigEntry(
-                KeyConfigAction.Charge,
+                        KeyConfigAction.Charge,
                         "チャージ",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -220,14 +234,14 @@ namespace Project.Scripts.Model
                                 KeySlot.Primary,
                                 new List<BindingTarget>
                                 {
-                                    new("Player/Charge", "ee57e007-a5f5-475b-9fed-e70f954c443b", "<Keyboard>/leftShift"),
+                                    new("Player/Charge", "ee57e007-a5f5-475b-9fed-e70f954c443b", "<Keyboard>/leftShift")
                                 }
                             },
                             {
                                 KeySlot.Secondary,
                                 new List<BindingTarget>
                                 {
-                                    new("Player/Charge", "95054fa1-126b-42fd-818f-2b659b71b3ac", "<Keyboard>/l"),
+                                    new("Player/Charge", "95054fa1-126b-42fd-818f-2b659b71b3ac", "<Keyboard>/l")
                                 }
                             }
                         }
@@ -236,7 +250,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Submit,
                     new KeyConfigEntry(
-                KeyConfigAction.Submit,
+                        KeyConfigAction.Submit,
                         "決定",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -244,14 +258,14 @@ namespace Project.Scripts.Model
                                 KeySlot.Primary,
                                 new List<BindingTarget>
                                 {
-                                    new("UI/Submit", "573e2db7-7b12-49b4-a3ab-2106fc358e0e", "<Keyboard>/enter"),
+                                    new("UI/Submit", "573e2db7-7b12-49b4-a3ab-2106fc358e0e", "<Keyboard>/enter")
                                 }
                             },
                             {
                                 KeySlot.Secondary,
                                 new List<BindingTarget>
                                 {
-                                    new("UI/Submit", "7083566c-b47c-42c7-ac2f-fa95e7c6697e", "<Keyboard>/z"),
+                                    new("UI/Submit", "7083566c-b47c-42c7-ac2f-fa95e7c6697e", "<Keyboard>/z")
                                 }
                             }
                         }
@@ -260,7 +274,7 @@ namespace Project.Scripts.Model
                 {
                     KeyConfigAction.Cancel,
                     new KeyConfigEntry(
-                KeyConfigAction.Cancel,
+                        KeyConfigAction.Cancel,
                         "戻る",
                         new Dictionary<KeySlot, IReadOnlyList<BindingTarget>>
                         {
@@ -268,19 +282,19 @@ namespace Project.Scripts.Model
                                 KeySlot.Primary,
                                 new List<BindingTarget>
                                 {
-                                    new("UI/Cancel", "b4b2df84-0cc6-4b1c-8cbf-e4e2fce90d7d", "<Keyboard>/escape"),
+                                    new("UI/Cancel", "b4b2df84-0cc6-4b1c-8cbf-e4e2fce90d7d", "<Keyboard>/escape")
                                 }
                             },
                             {
                                 KeySlot.Secondary,
                                 new List<BindingTarget>
                                 {
-                                    new("UI/Cancel", "61a48a46-5d87-4de9-8672-44930981cf58", "<Keyboard>/backspace"),
+                                    new("UI/Cancel", "61a48a46-5d87-4de9-8672-44930981cf58", "<Keyboard>/backspace")
                                 }
                             }
                         }
                     )
-                },
+                }
             };
         }
 
@@ -295,7 +309,7 @@ namespace Project.Scripts.Model
                 KeyConfigAction.Attack,
                 KeyConfigAction.Charge,
                 KeyConfigAction.Submit,
-                KeyConfigAction.Cancel,
+                KeyConfigAction.Cancel
             };
         }
 
@@ -304,20 +318,17 @@ namespace Project.Scripts.Model
             if (keyConfigData.bindingOverrides == null) return;
             if (keyConfigData.bindingOverrides.Count == 0) return;
 
-            foreach (var bindingOverride in keyConfigData.bindingOverrides)
-            {
-                ApplyBindingOverride(bindingOverride.actionPath, bindingOverride.bindingId, bindingOverride.overridePath, false);
-            }
+            foreach (var bindingOverride in keyConfigData.bindingOverrides) ApplyBindingOverride(bindingOverride.actionPath, bindingOverride.bindingId, bindingOverride.overridePath, false);
         }
 
         public IReadOnlyList<KeyConfigEntry> GetEntries()
         {
-            return displayOrder.Select(action => entries[action]).ToList();
+            return DisplayOrder.Select(action => entries[action]).ToList();
         }
 
         public IReadOnlyList<KeyConfigAction> GetDisplayOrder()
         {
-            return displayOrder;
+            return DisplayOrder;
         }
 
         public KeyConfigEntry GetEntry(KeyConfigAction action)
@@ -330,24 +341,67 @@ namespace Project.Scripts.Model
             return entries[action].DisplayName;
         }
 
-        public string GetDisplayString(KeyConfigAction action, KeySlot slot)
+        public bool HasSlot(KeyConfigAction action, KeySlot slot)
+        {
+            return entries[action].TargetsBySlot.TryGetValue(slot, out var targets) && targets.Count > 0;
+        }
+
+        public string GetBindingPath(KeyConfigAction action, KeySlot slot)
         {
             var target = GetPrimaryTarget(action, slot);
-            if (target == null) return "-";
+            if (target == null) return string.Empty;
 
             var inputAction = inputActions.FindAction(target.ActionPath);
-            if (inputAction == null) return "-";
+            if (inputAction == null) return target.DefaultPath;
 
             var bindingIndex = FindBindingIndexById(inputAction, target.BindingId);
-            if (bindingIndex < 0) return "-";
+            if (bindingIndex < 0) return target.DefaultPath;
 
-            var effectivePath = inputAction.bindings[bindingIndex].effectivePath;
-            if (string.IsNullOrEmpty(effectivePath)) return "-";
+            return string.IsNullOrEmpty(inputAction.bindings[bindingIndex].effectivePath)
+                ? target.DefaultPath
+                : inputAction.bindings[bindingIndex].effectivePath;
+        }
+
+        public string GetDefaultPath(KeyConfigAction action, KeySlot slot)
+        {
+            var target = GetPrimaryTarget(action, slot);
+            return target?.DefaultPath ?? string.Empty;
+        }
+
+        public string GetDisplayString(KeyConfigAction action, KeySlot slot)
+        {
+            var path = GetBindingPath(action, slot);
+            if (string.IsNullOrEmpty(path)) return "-";
 
             return InputControlPath.ToHumanReadableString(
-                effectivePath,
+                path,
                 InputControlPath.HumanReadableStringOptions.OmitDevice
             );
+        }
+
+        public void ApplyChanges(IReadOnlyList<BindingChange> changes)
+        {
+            foreach (var change in changes)
+            {
+                if (!entries[change.Action].TargetsBySlot.TryGetValue(change.Slot, out var targets))
+                {
+                    continue;
+                }
+
+                var defaultPath = GetDefaultPath(change.Action, change.Slot);
+
+                foreach (var target in targets)
+                    if (change.Path == defaultPath)
+                    {
+                        RemoveBindingOverride(target.ActionPath, target.BindingId, false);
+                    }
+                    else
+                    {
+                        ApplyBindingOverride(target.ActionPath, target.BindingId, change.Path, false);
+                    }
+            }
+
+            userModel.Save();
         }
 
         public void SetBindingOverride(KeyConfigAction action, KeySlot slot, string newPath)
@@ -364,10 +418,7 @@ namespace Project.Scripts.Model
                 return;
             }
 
-            foreach (var target in targets)
-            {
-                ApplyBindingOverride(target.ActionPath, target.BindingId, newPath, false);
-            }
+            foreach (var target in targets) ApplyBindingOverride(target.ActionPath, target.BindingId, newPath, false);
 
             userModel.Save();
         }
@@ -379,10 +430,7 @@ namespace Project.Scripts.Model
                 return;
             }
 
-            foreach (var target in targets)
-            {
-                RemoveBindingOverride(target.ActionPath, target.BindingId, false);
-            }
+            foreach (var target in targets) RemoveBindingOverride(target.ActionPath, target.BindingId, false);
 
             userModel.Save();
         }

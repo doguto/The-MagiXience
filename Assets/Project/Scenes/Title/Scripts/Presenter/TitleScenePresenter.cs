@@ -41,9 +41,9 @@ namespace Project.Scenes.Title.Scripts.Presenter
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
                 titleMenuView.SetInteractable(false);
-                globalScenePresenter.OptionModalPresenter.Open();
+                GlobalScenePresenter.OptionModalPresenter.Open();
 
-                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
+                await GlobalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
 
                 titleMenuView.SetInteractable(true);
                 titleMenuView.InitStart();
@@ -76,7 +76,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             // TitleScene 以外で TitleModel は使用しないのでクリアする
             titleModelRepository.Refresh();
 
-            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.StageList, gameObject.scene.name);
+            await SceneNavigator.NavigateTo(SceneRouterModel.StageList, gameObject.scene.name);
         }
 
         void ExitGame()
