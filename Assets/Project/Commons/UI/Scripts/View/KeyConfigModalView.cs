@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace Project.Commons.UI.Scripts.View
 {
+    // FIXME: KeyConfigCardをPrefab化したため、以下は使用出来ない
+    // ロジックの参考にしたいため残すが、実装完了次第ファイルごと消すこと
     public class KeyConfigModalView : MonoBehaviour
     {
         // [SerializeField] List<TMP_Text> actionNameTexts;
