@@ -29,24 +29,32 @@ namespace Project.Scenes.Battle.Scripts.Model
                 return;
             }
 
-            // 既にしきい値以上なら即完了
-            if (audioSource.timeSamples >= thresholdSamples)
-            {
-                CompletePhase();
-                return;
-            }
-
             var previousSamples = audioSource.timeSamples;
+            // OnEnter時点でしきい値以上なら、BGMループ後に改めて判定する
+            // why: BGMループ前にフェーズのループが走った場合に、連鎖的にフェーズが終了してしまうのを防ぐ
+            var waitingForLoop = previousSamples >= thresholdSamples;
 
             Observable.EveryUpdate()
                 .Where(_ =>
                 {
                     if (audioSource == null) return false;
                     var currentSamples = audioSource.timeSamples;
-                    // ループ検出（サンプル数が減少した）または閾値到達で完了
-                    var reached = currentSamples >= thresholdSamples || currentSamples < previousSamples;
+                    var looped = currentSamples < previousSamples;
                     previousSamples = currentSamples;
-                    return reached;
+
+                    if (waitingForLoop)
+                    {
+                        // BGMループで巻き戻されたら通常判定に切り替え
+                        if (looped)
+                        {
+                            waitingForLoop = false;
+                            return currentSamples >= thresholdSamples;
+                        }
+                        return false;
+                    }
+
+                    // しきい値到達、またはBGMループ（しきい値を飛び越えた）で完了
+                    return currentSamples >= thresholdSamples || looped;
                 })
                 .Take(1)
                 .Subscribe(_ => CompletePhase())
