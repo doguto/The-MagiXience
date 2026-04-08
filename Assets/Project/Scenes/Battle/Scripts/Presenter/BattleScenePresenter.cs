@@ -282,6 +282,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                              })
                              .AddTo(disposables);
 
+            bossPresenter.OnDeath
+                         .Take(1)
+                         .Subscribe(_ =>
+                         {
+                             phaseStateMachine.Stop();
+                             HandleSequenceCompleted(BattleSituation.Boss);
+                         })
+                         .AddTo(disposables);
+
             PlayEntranceMovement(instance.transform);
 
             Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
