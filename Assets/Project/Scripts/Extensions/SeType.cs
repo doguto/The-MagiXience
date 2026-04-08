@@ -4,6 +4,8 @@
     {
         None,
         Click,
-        Cancel
+        Cancel,
+        EnemyShotShort,
+        EnemyShotLong
     }
 }

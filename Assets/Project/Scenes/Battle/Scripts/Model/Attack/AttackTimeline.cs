@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scripts.Extensions;
 using UniRx;
 using UnityEngine;
 
@@ -79,14 +80,15 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         void ScheduleEntry(AttackTimelineEntry entry, float fireTime, int depth = 0)
         {
-            if (entry.signal is PresetAttackSignal presetSignal && presetSignal.Preset != null)
+            if (entry.signal is PresetAttackSignal presetSignal)
             {
+                if (presetSignal.Preset == null) return;
                 if (depth >= MaxPresetDepth)
                 {
                     Debug.LogError("[AttackTimeline] Preset nesting depth limit reached. Circular reference?");
                     return;
                 }
-                ExpandPreset(presetSignal, fireTime, depth + 1);
+                ExpandPreset(presetSignal, entry.seType, fireTime, depth + 1);
                 return;
             }
 
@@ -101,9 +103,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 .AddTo(disposables);
         }
 
-        void ExpandPreset(PresetAttackSignal signal, float baseTime, int depth)
+        void ExpandPreset(PresetAttackSignal signal, SeType parentSeType, float baseTime, int depth)
         {
-            Debug.Log($"[AttackTimeline]");
             var timeline = signal.Preset.CreateTimeline();
             if (timeline == null || timeline.entries.Count == 0) return;
 
@@ -111,6 +112,11 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             foreach (var inner in timeline.entries)
             {
                 inner.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition);
+                // 内側がNoneなら外側のseTypeを引き継ぐ
+                if (inner.seType == SeType.None && parentSeType != SeType.None)
+                {
+                    inner.seType = parentSeType;
+                }
             }
 
             var totalCycles = signal.Loop && signal.LoopCount > 0 ? signal.LoopCount : 1;
