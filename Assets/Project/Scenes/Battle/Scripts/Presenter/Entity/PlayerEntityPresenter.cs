@@ -27,6 +27,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         [SerializeField] BulletPool chargeBulletPool;
         [SerializeField] int normalShotDamage = 10;
+        [SerializeField] Vector3 chargeShotOffset = new(0, 0, 0);
         [SerializeField] int chargedShotDamage = 30;
         [SerializeField] float shootCooldown = 0.2f;
 
@@ -196,7 +197,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireChargedShot()
         {
-            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f, isPlayerBullet: true);
+            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + chargeShotOffset, isPlayerBullet: true);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
         }
 
