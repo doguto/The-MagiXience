@@ -61,7 +61,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public void OnPhaseStarted(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder)
         {
-            if (builder == null) return;
+            if (builder == null)
+            {
+                ApplyAttackTimeline(null);
+                StartMovementSequence(null);
+                return;
+            }
 
             var attackPreset = builder.BossAttackPreset;
             var attackTimeline = attackPreset != null
