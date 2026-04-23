@@ -165,43 +165,49 @@ flowchart LR
 
 ---
 
-#### ① StageData.asset にエントリーを追加
+#### ① 基本骨子を作成
+
+```
+Assets/Project/DataStore/StageN/
+  Attack/     # EnemyのInspectorで設定する攻撃のプリセットが入っている
+  Boss/
+  Ease/       # DOTweenのカスタムEaseが入っている
+  Way/        
+  Movement/   # EnemyのInspectorで設定する動きのプリセットが入っている
+
+Assets/Project/Scenes/Battle/Prefabs/StageN/
+```
+
+`waySequenceAddress`: `Assets/Project/DataStore/Stage3/Way/Stage3Way.asset`
+`bossSequenceAddress`: `Assets/Project/DataStore/Stage3/Boss/Stage3Way.asset`
+
+
+Stage1 の構成を参考にコピーして中身を差し替えるのが最速。
+> Scaffold を作りたい..
+
+---
+
+#### ② StageData.asset にエントリーを追加
 
 パス: `Assets/Project/DataStore/StageData.asset`
 Inspector で `stageData` リストに以下フィールドを持つエントリーを追加する。
 
-| フィールド | 例 | 説明 |
-|---|---|---|
-| `id` | `"3"` | ステージID（文字列） |
-| `stageNumber` | `3` | ステージ番号。`BattleStageType` enum に対応 (1〜6, EX=7) |
-| `charaStillAddress` | `"Tatsumi"` | キャラクタースチルのアドレス |
-| `title` | `"星雲列車は夜を駆ける"` | ステージタイトル |
-| `waySequenceAddress` | `"Assets/Project/DataStore/Stage3/Way/Stage3Way.asset"` | 道中シーケンスアセットのフルパス |
+| フィールド | 例                                                         | 説明 |
+|---|-----------------------------------------------------------|---|
+| `id` | `"3"`                                                     | ステージID（文字列） |
+| `stageNumber` | `3`                                                       | ステージ番号。`BattleStageType` enum に対応 (1〜6, EX=7) |
+| `charaStillAddress` | `"Tatsumi"`                                               | キャラクタースチルのアドレス |
+| `title` | `"ほげほげほげほげ"`                                              | ステージタイトル |
+| `waySequenceAddress` | `"Assets/Project/DataStore/Stage3/Way/Stage3Way.asset"`   | 道中シーケンスアセットのフルパス |
 | `bossSequenceAddress` | `"Assets/Project/DataStore/Stage3/Boss/Stage3Boss.asset"` | ボスシーケンスアセットのフルパス |
 
 > `stageNumber + 2` が `SceneType` enum のインデックスに対応するため、enum の順序を変えないこと。
 
 ---
 
-#### ② フォルダを作成
-
-```
-Assets/Project/DataStore/StageN/
-  Way/
-  Boss/
-  Movement/   ← ボス登場モーション用 Preset を置く場合
-
-Assets/Project/Scenes/Battle/Prefabs/StageN/
-```
-
-Stage1 の構成を参考にコピーして中身を差し替えるのが最速。
-
----
-
 #### ③ Prefab を作成
 
-`Assets/Project/Scenes/Battle/Prefabs/Base/` にある Base Prefab をコピーして作成する。
-フォルダを選択した状態で右クリックメニューから使用できる。
+`Assets/Project/Scenes/Battle/Prefabs/StageN/` で右クリックから各エンティティのプレふぁぶを作成する。 
 
 | Base Prefab | 作成メニュー | 主要コンポーネント | 用途 |
 |---|---|---|---|
@@ -249,28 +255,9 @@ Timeline の Control Track / Activation Track から参照するため、`Battle
 
 > トラック名は**完全一致**で検索されるため、両者を必ず一致させること。
 
----
+------
 
-#### ④ BattleTimelineBuilderAsset を作成（フェーズ数分）
-
-メニュー: `Assets > Create > Battle > Timeline Builder`
-
-各フェーズの攻撃パターン・演出を設定するアセット。
-
-| セクション | 内容 |
-|---|---|
-| Signal Tracks | タイムライン上に発火する汎用シグナル |
-| Animation Tracks | キャラや背景のアニメーション |
-| Activation Tracks | GameObject の表示/非表示 |
-| Audio Tracks | SE・BGM の再生 |
-| Control Tracks | 子Timelineの制御（演出オブジェクトを `trackName` でバインド） |
-| Enemy Spawn Tracks | 敵をスポーンするシグナル。`EnemySpawnDefinition.prefab` に③の敵Prefabをアサイン |
-| Boss Attack Preset | ボスの攻撃設定（ボスフェーズのみ） |
-| Boss Movement Preset | ボスの移動設定（ボスフェーズのみ） |
-
----
-
-#### ⑤ BattleSequenceAsset（道中）を作成
+#### ④ BattleSequenceAsset（道中）を作成
 
 メニュー: `Assets > Create > Battle > Phase Sequence`  
 ファイル名に `Way` を含めると `situation` が自動で `Way` にセットされる。
@@ -306,6 +293,26 @@ Timeline の Control Track / Activation Track から参照するため、`Battle
 
 ---
 
+#### ⑤ BattleTimelineBuilderAsset （道中）を作成（フェーズ数分）
+
+メニュー: `Assets > Create > Battle > Timeline Builder`
+
+![img.png](img.png)
+
+各フェーズの攻撃パターン・演出を設定するアセット。
+
+| セクション | 内容 |
+|---|---|
+| Signal Tracks | タイムライン上に発火する汎用シグナル |
+| Animation Tracks | キャラや背景のアニメーション |
+| Activation Tracks | GameObject の表示/非表示 |
+| Audio Tracks | SE・BGM の再生 |
+| Control Tracks | 子Timelineの制御（演出オブジェクトを `trackName` でバインド） |
+| Enemy Spawn Tracks | 敵をスポーンするシグナル。`EnemySpawnDefinition.prefab` に③の敵Prefabをアサイン |
+| Boss Attack Preset | ボスの攻撃設定（ボスフェーズのみ） |
+| Boss Movement Preset | ボスの移動設定（ボスフェーズのみ） |
+
+
 #### ⑥ BattleSequenceAsset（ボス）を作成
 
 道中と同じ手順。ファイル名に `Boss` を含めると `situation` が自動で `Boss` になる。
@@ -320,7 +327,13 @@ Timeline の Control Track / Activation Track から参照するため、`Battle
 
 ---
 
-#### ⑦ シナリオアセットを作成
+### ⑦ ⑤のボス版を作成
+
+---
+
+#### ⑧ シナリオアセットを作成
+
+※ 基本的に `Tools/Import Scenario` を使用して `.txt` を取り込めば良い。
 
 `ScenarioModelRepository` がファイル名を以下のルールで自動解決するため、**命名規則を厳守**すること。
 
@@ -333,7 +346,7 @@ Timeline の Control Track / Activation Track から参照するため、`Battle
 
 ---
 
-#### ⑧ Addressables に全アセットを登録
+#### ⑨ Addressables に全アセットを登録
 
 以下のアセットをすべて Addressables に追加し、**アドレスをアセットのフルパスと一致させる**。
 （`BattleSequenceModelRepository` と `ScenarioModelRepository` がフルパスをアドレスとして直接使用するため）
@@ -346,8 +359,9 @@ Timeline の Control Track / Activation Track から参照するため、`Battle
 
 ---
 
-#### ⑨ BgmData.asset に BGM エントリーを追加
+#### ⑩ BgmData.asset に BGM エントリーを追加
 
+※ これは全てあるはずなので、ゲームを起動して動いていればスキップしてok
 パス: `Assets/Project/DataStore/BgmData.asset`
 
 `bgmData` リストに道中・ボスの2エントリーを追加する。
