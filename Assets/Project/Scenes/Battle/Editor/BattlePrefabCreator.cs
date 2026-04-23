@@ -8,6 +8,7 @@ namespace Project.Scenes.Battle.Editor
     {
         const string SourcePrefabPath = "Assets/Project/Scenes/Battle/Prefabs/Base/EnemyEntityBase.prefab";
         const string BulletPrefabPath = "Assets/Project/Scenes/Battle/Prefabs/Base/Bullet.prefab";
+        const string BossPrefabPath = "Assets/Project/Scenes/Battle/Prefabs/Base/Boss.prefab";
 
         [MenuItem("Assets/Create/Battle/Enemy Entity Base")]
         public static void CreateEnemyEntityBase()
@@ -45,6 +46,26 @@ namespace Project.Scenes.Battle.Editor
 
         [MenuItem("Assets/Create/Battle/Bullet", true)]
         public static bool CreateBulletValidation()
+        {
+            return !string.IsNullOrEmpty(GetSelectedFolderPath());
+        }
+
+        [MenuItem("Assets/Create/Battle/Boss")]
+        public static void CreateBoss()
+        {
+            var targetFolder = GetSelectedFolderPath();
+            var newPath = AssetDatabase.GenerateUniqueAssetPath(targetFolder + "/Boss.prefab");
+
+            AssetDatabase.CopyAsset(BossPrefabPath, newPath);
+            AssetDatabase.Refresh();
+
+            var newAsset = AssetDatabase.LoadAssetAtPath<Object>(newPath);
+            Selection.activeObject = newAsset;
+            EditorGUIUtility.PingObject(newAsset);
+        }
+
+        [MenuItem("Assets/Create/Battle/Boss", true)]
+        public static bool CreateBossValidation()
         {
             return !string.IsNullOrEmpty(GetSelectedFolderPath());
         }
