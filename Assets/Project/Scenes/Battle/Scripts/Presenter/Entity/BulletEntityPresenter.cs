@@ -40,10 +40,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public BulletEntityModel Model => model;
 
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false)
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default)
         {
             pool = objectPool;
             transform.position = position;
+            transform.rotation = rotation == default ? Quaternion.identity : rotation;
 
             if (model == null)
                 model = new BulletEntityModel(damage, isPlayerBullet);

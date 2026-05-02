@@ -91,7 +91,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
-            attackTimeline.InitializeProviders(getPlayerPos, () => transform.position);
+            attackTimeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation);
             model.SetAttackStrategy(attackTimeline);
 
             model.AttackStrategy.OnAttackTiming
@@ -151,7 +151,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             foreach (var dir in ev.Directions)
             {
-                pool.SpawnBullet(bulletDamage, pool.transform.position, dir);
+                pool.SpawnBullet(bulletDamage, pool.transform.position, dir, rotation: transform.rotation);
             }
         }
 

@@ -19,18 +19,20 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         CompositeDisposable disposables;
         Func<Vector3> getPlayerPosition;
         Func<Vector3> getEnemyPosition;
+        Func<Quaternion> getEnemyRotation;
 
         public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
         public bool IsCompleted { get; private set; }
 
-        public void InitializeProviders(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition)
+        public void InitializeProviders(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition, Func<Quaternion> getEnemyRotation)
         {
             this.getPlayerPosition = getPlayerPosition;
             this.getEnemyPosition = getEnemyPosition;
+            this.getEnemyRotation = getEnemyRotation;
 
             foreach (var entry in entries)
             {
-                entry.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition);
+                entry.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
             }
         }
 
@@ -111,7 +113,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             // 展開したエントリのDirectionProviderを初期化
             foreach (var inner in timeline.entries)
             {
-                inner.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition);
+                inner.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
                 // 内側がNoneなら外側のseTypeを引き継ぐ
                 if (inner.seType == SeType.None && parentSeType != SeType.None)
                 {

@@ -21,6 +21,10 @@ namespace Project.Scenes.Battle.Scripts.View
         [Header("Fade Out")]
         [SerializeField] float fadeOutDuration = 0.5f;
 
+        [Header("Random Rotation")]
+        [SerializeField] float rotationZMin = 0f;
+        [SerializeField] float rotationZMax = 0f;
+
         // 各LineRendererの元の右端X座標
         float[] originalEndX;
         float[] lineY;
@@ -38,7 +42,15 @@ namespace Project.Scenes.Battle.Scripts.View
 
         void OnEnable()
         {
+            ApplyRandomRotation();
             PlayReveal();
+        }
+
+        void ApplyRandomRotation()
+        {
+            var z = Random.Range(rotationZMin, rotationZMax);
+            var euler = transform.rotation.eulerAngles;
+            transform.rotation = Quaternion.Euler(euler.x, euler.y, z);
         }
 
         void OnDisable()

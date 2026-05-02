@@ -9,7 +9,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         Func<Vector3> getPlayerPosition;
         Func<Vector3> getEnemyPosition;
 
-        public void Initialize(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition)
+        public void Initialize(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition, Func<Quaternion> getEnemyRotation)
         {
             this.getPlayerPosition = getPlayerPosition;
             this.getEnemyPosition = getEnemyPosition;

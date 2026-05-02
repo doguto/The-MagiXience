@@ -24,10 +24,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             );
         }
 
-        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false)
+        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false, Quaternion rotation = default)
         {
             var bullet = pool.Get();
-            bullet.Initialize(damage, position, direction, pool, isPlayerBullet);
+            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation);
             return bullet;
         }
 

@@ -85,7 +85,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (timeline != null)
             {
                 Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
-                timeline.InitializeProviders(getPlayerPos, () => transform.position);
+                timeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation);
             }
 
             model.SetAttackStrategy(timeline);
@@ -167,7 +167,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 soundManager?.PlaySE(ev.SeType);
             }
 
-            foreach (var dir in ev.Directions) bulletPool.SpawnBullet(bulletDamage, bulletPool.transform.position, dir);
+            foreach (var dir in ev.Directions) bulletPool.SpawnBullet(bulletDamage, bulletPool.transform.position, dir, rotation: transform.rotation);
         }
 
         void HandleDeath()
