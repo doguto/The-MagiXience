@@ -10,6 +10,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     {
         [SerializeField] float speed = 5f;
         [SerializeField] int maxReflections = 1;
+        [SerializeField] bool reflectTop = true;
+        [SerializeField] bool reflectBottom = true;
+        [SerializeField] bool reflectLeft = false;
+        [SerializeField] bool reflectRight = false;
 
         public Tween Play(Transform target, Vector2 direction, Animator animator)
         {
@@ -35,17 +39,29 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
                 }
                 else if (reflections < maxReflections)
                 {
-                    if (pos.x <= minX || pos.x >= maxX)
+                    if (reflectLeft && pos.x <= minX)
                     {
                         vel.x = -vel.x;
-                        pos.x = Mathf.Clamp(pos.x, minX, maxX);
+                        pos.x = minX;
+                        reflections++;
+                    }
+                    else if (reflectRight && pos.x >= maxX)
+                    {
+                        vel.x = -vel.x;
+                        pos.x = maxX;
                         reflections++;
                     }
 
-                    if (pos.y <= minY || pos.y >= maxY)
+                    if (reflectBottom && pos.y <= minY)
                     {
                         vel.y = -vel.y;
-                        pos.y = Mathf.Clamp(pos.y, minY, maxY);
+                        pos.y = minY;
+                        reflections++;
+                    }
+                    else if (reflectTop && pos.y >= maxY)
+                    {
+                        vel.y = -vel.y;
+                        pos.y = maxY;
                         reflections++;
                     }
                 }
