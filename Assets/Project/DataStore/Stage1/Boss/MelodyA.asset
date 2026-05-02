@@ -16,12 +16,21 @@ MonoBehaviour:
   animationTracks: []
   activationTracks: []
   audioTracks: []
-  controlTracks:
-  - trackName: Control
+  controlTracks: []
+  enemySpawnTracks:
+  - trackName: EnemySpawn
     clips:
-    - start: 0
-      duration: 100
-      sourceObject: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
-  enemySpawnTracks: []
+    - time: 0
+      spawnPosition: {x: 0, y: 0, z: 0}
+      prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
+    - time: 3
+      spawnPosition: {x: 0, y: 0, z: 0}
+      prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
+    - time: 6
+      spawnPosition: {x: 0, y: 0, z: 0}
+      prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
+    - time: 9
+      spawnPosition: {x: 0, y: 0, z: 0}
+      prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
   bossAttackPreset: {fileID: 11400000, guid: fcfec0675efaebe4f9a7c03df9754e5e, type: 2}
   bossMovementPreset: {fileID: 11400000, guid: 02f4be0d3864fe54b91de92fc0035fe4, type: 2}

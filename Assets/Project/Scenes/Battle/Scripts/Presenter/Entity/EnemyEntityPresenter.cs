@@ -19,10 +19,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     [RequireComponent(typeof(SpriteRenderer))]
     public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter
     {
+        // NOTE: 新規プロパティを追加したらEnemyEntityPresenterEditor.csも編集すること
         [Header("Entity Settings")] [SerializeField]
         int maxHp = 50;
 
         [SerializeField] int contactDamage = 10;
+        [SerializeField] float lifetime = 0f;
 
         [Header("Movement")] [SerializeField] MovementPreset movementPreset;
 
@@ -50,6 +52,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         SoundManagerPresenter soundManager;
         Tween currentTween;
         CancellationTokenSource movementCts;
+        CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
         bool isEnteredScreen = false;
 
@@ -100,6 +103,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                  .AddTo(disposables);
 
             view.UpdatePosition(transform.position);
+
+            StartLifetimeCountdown();
+        }
+
+        void StartLifetimeCountdown()
+        {
+            if (lifetime <= 0f) return;
+
+            lifetimeCts = new CancellationTokenSource();
+            WaitLifetimeAsync(lifetimeCts.Token).Forget();
+        }
+
+        async UniTaskVoid WaitLifetimeAsync(CancellationToken ct)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(lifetime), cancellationToken: ct);
+            Destroy(gameObject);
         }
 
         void StartMovementSequence(IReadOnlyList<IMovementStep> steps, Animator animator)
@@ -189,6 +208,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             StopMovement();
+            lifetimeCts?.Cancel();
+            lifetimeCts?.Dispose();
+            lifetimeCts = null;
             disposables.Dispose();
             model?.Dispose();
             model?.AttackStrategy?.Dispose();

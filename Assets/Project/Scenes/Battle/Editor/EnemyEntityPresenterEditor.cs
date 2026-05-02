@@ -18,6 +18,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             // Entity Settings
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxHp"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("contactDamage"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("lifetime"));
 
             // Movement
             EditorGUILayout.Space();
