@@ -36,6 +36,39 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view = GetComponent<EnemyEntityView>();
         }
 
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+            if (Application.isPlaying) return;
+            UnityEditor.EditorApplication.delayCall += AppendChildBulletPools;
+        }
+
+        void AppendChildBulletPools()
+        {
+            if (this == null) return;
+
+            var children = GetComponentsInChildren<BulletPool>(true);
+            if (children == null || children.Length == 0) return;
+
+            var current = bulletPools ?? Array.Empty<BulletPool>();
+            var appended = new List<BulletPool>(current);
+            bool changed = false;
+
+            foreach (var child in children)
+            {
+                if (child == null) continue;
+                if (Array.IndexOf(current, child) >= 0) continue;
+                appended.Add(child);
+                changed = true;
+            }
+
+            if (!changed) return;
+
+            bulletPools = appended.ToArray();
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+#endif
+
         EnemyEntityModel model;
         PlayerEntityPresenter playerPresenter;
         SoundManagerPresenter soundManager;

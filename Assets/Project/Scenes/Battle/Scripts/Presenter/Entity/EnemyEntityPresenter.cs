@@ -31,7 +31,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeReference] [SubclassSelector]
         List<IMovementStep> movementSteps = new() { new InfiniteMovementConfig() };
 
-        [Header("Attack")] [SerializeField] BulletPool bulletPool;
+        [Header("Attack")] [SerializeField] BulletPool[] bulletPools;
         [SerializeField] int bulletDamage = 10;
         [SerializeField] GameObject[] enemySpawnPrefabs;
         [SerializeField] AttackPreset attackPreset;
@@ -49,6 +49,39 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+            if (Application.isPlaying) return;
+            UnityEditor.EditorApplication.delayCall += AppendChildBulletPools;
+        }
+
+        void AppendChildBulletPools()
+        {
+            if (this == null) return;
+
+            var children = GetComponentsInChildren<BulletPool>(true);
+            if (children == null || children.Length == 0) return;
+
+            var current = bulletPools ?? Array.Empty<BulletPool>();
+            var appended = new List<BulletPool>(current);
+            bool changed = false;
+
+            foreach (var child in children)
+            {
+                if (child == null) continue;
+                if (Array.IndexOf(current, child) >= 0) continue;
+                appended.Add(child);
+                changed = true;
+            }
+
+            if (!changed) return;
+
+            bulletPools = appended.ToArray();
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+#endif
+
         EnemyEntityModel model;
         PlayerEntityPresenter playerPresenter;
         SoundManagerPresenter soundManager;
@@ -63,7 +96,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
-            if (bulletPool == null) Debug.LogError("[EnemyEntityPresenter] BulletPool is not assigned!");
+            if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[EnemyEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             soundManager = FindFirstObjectByType<SoundManagerPresenter>();
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
@@ -197,12 +230,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireBullet(AttackEvent ev)
         {
+            var pool = GetBulletPool(ev.SourceIndex);
+            if (pool == null) return;
+
             if (ev.SeType != SeType.None)
             {
                 soundManager?.PlaySE(ev.SeType);
             }
 
-            foreach (var dir in ev.Directions) bulletPool.SpawnBullet(bulletDamage, bulletPool.transform.position, dir, rotation: transform.rotation);
+            foreach (var dir in ev.Directions) pool.SpawnBullet(bulletDamage, pool.transform.position, dir, rotation: transform.rotation);
+        }
+
+        BulletPool GetBulletPool(int index)
+        {
+            if (bulletPools == null || bulletPools.Length == 0) return null;
+            if (index < 0 || index >= bulletPools.Length) return bulletPools[0];
+            return bulletPools[index];
         }
 
         void SpawnEnemy(AttackEvent ev)

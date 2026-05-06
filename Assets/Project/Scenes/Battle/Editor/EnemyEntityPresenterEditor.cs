@@ -37,7 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             // Attack
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Attack", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletPool"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletPools"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletDamage"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("enemySpawnPrefabs"));
             EditorGUILayout.PropertyField(attackPresetProp);
