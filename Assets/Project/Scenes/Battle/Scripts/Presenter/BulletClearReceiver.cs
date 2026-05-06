@@ -6,7 +6,8 @@ using Project.Scenes.Battle.Scripts.Presenter.Entity;
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
     /// <summary>
-    /// BulletClearSignalを受け取り、シーン上の全BulletEntityPresenterをプールに返却するレシーバー
+    /// BulletClearSignalを受け取り、シーン上の全BulletEntityPresenterをプールに返却し、
+    /// 全EnemyEntityPresenterを破壊するレシーバー
     /// </summary>
     public class BulletClearReceiver : MonoBehaviour, INotificationReceiver
     {
@@ -16,6 +17,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (emitter.asset is not Model.BulletClearSignal) return;
 
             ClearAllBullets();
+            ClearAllEnemies();
         }
 
         void ClearAllBullets()
@@ -27,6 +29,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             Debug.Log($"[BulletClearReceiver] Cleared {bullets.Length} bullets.", this);
+        }
+
+        void ClearAllEnemies()
+        {
+            var enemies = FindObjectsByType<EnemyEntityPresenter>(FindObjectsSortMode.None);
+            foreach (var enemy in enemies)
+            {
+                Destroy(enemy.gameObject);
+            }
+
+            Debug.Log($"[BulletClearReceiver] Cleared {enemies.Length} enemies.", this);
         }
     }
 }
