@@ -16,6 +16,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] List<AudioTrackDefinition> audioTracks = new();
         [SerializeField] List<ControlTrackDefinition> controlTracks = new();
         [SerializeField] List<EnemySpawnTrackDefinition> enemySpawnTracks = new();
+        [SerializeField] List<BulletClearTrackDefinition> bulletClearTracks = new();
 
         [Header("Boss")]
         [SerializeField] AttackPreset bossAttackPreset;
@@ -49,6 +50,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             BuildTracks<AudioTrack, AudioClipDefinition, AudioTrackDefinition>(timeline, audioTracks);
             BuildTracks<ControlTrack, ControlClipDefinition, ControlTrackDefinition>(timeline, controlTracks);
             BuildTracks<SignalTrack, EnemySpawnDefinition, EnemySpawnTrackDefinition>(timeline, enemySpawnTracks);
+            BuildTracks<SignalTrack, BulletClearDefinition, BulletClearTrackDefinition>(timeline, bulletClearTracks);
 
             return timeline;
         }

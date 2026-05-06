@@ -147,7 +147,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void HandleDestruction() => ReturnToPool();
 
-        void ReturnToPool()
+        public void ReturnToPool()
         {
             StopMovement();
             if (pool != null)
