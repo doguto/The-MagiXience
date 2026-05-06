@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
-  m_Name: MiddleBoss
+  m_Name: DriftSample
   m_EditorClassIdentifier: 
   steps:
   - rid: 8577112454036455573
@@ -23,7 +23,7 @@ MonoBehaviour:
     - rid: 8577112454036455573
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: -4, y: 0, z: 0}
+        targetOffset: {x: 6, y: 0, z: 0}
         duration: 1.5
         easeValue: 3
         customCurve:
@@ -51,7 +51,7 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
-        isRelative: 1
+        isRelative: 0
     - rid: 8577112454036455574
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
