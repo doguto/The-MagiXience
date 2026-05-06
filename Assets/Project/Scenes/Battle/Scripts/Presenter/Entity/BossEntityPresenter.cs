@@ -38,6 +38,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         PlayerEntityPresenter playerPresenter;
         SoundManagerPresenter soundManager;
         Tween currentTween;
+        Tween entranceTween;
         CancellationTokenSource movementCts;
         readonly CompositeDisposable disposables = new();
 
@@ -111,6 +112,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             RunMovementStepsAsync(steps, animator, movementCts.Token).Forget();
         }
 
+        public void PlayEntranceMovement(IReadOnlyList<IMovementStep> steps)
+        {
+            if (steps == null || steps.Count == 0) return;
+
+            var animator = GetComponent<Animator>();
+            var sequence = DOTween.Sequence();
+            foreach (var step in steps)
+            {
+                if (step == null) continue;
+                sequence.Append(step.Play(transform, Vector2.zero, animator));
+            }
+            entranceTween = sequence;
+        }
+
         async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Animator animator, CancellationToken ct)
         {
             foreach (var step in steps)
@@ -124,6 +139,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void StopMovement()
         {
+            if (entranceTween != null && entranceTween.IsActive())
+            {
+                entranceTween.Complete();
+            }
+            entranceTween = null;
+
             movementCts?.Cancel();
             movementCts?.Dispose();
             movementCts = null;

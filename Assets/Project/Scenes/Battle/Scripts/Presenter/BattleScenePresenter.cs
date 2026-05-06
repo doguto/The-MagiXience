@@ -1,6 +1,5 @@
 using System;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -291,7 +290,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                          })
                          .AddTo(disposables);
 
-            PlayEntranceMovement(instance.transform);
+            bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);
 
             Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
         }
@@ -302,19 +301,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var bossModel = bossPresenter.Model;
             var hpPercent = (float)bossModel.CurrentHp.Value / bossModel.MaxHp * 100f;
             return hpPercent <= phase.StrongAttackHpThresholdPercent;
-        }
-
-        void PlayEntranceMovement(Transform bossTransform)
-        {
-            var steps = bossSequence.BossEntranceMovement;
-            if (steps == null || steps.Count == 0) return;
-
-            var sequence = DOTween.Sequence();
-            foreach (var step in steps)
-            {
-                if (step == null) continue;
-                sequence.Append(step.Play(bossTransform, Vector2.zero, bossTransform.GetComponent<Animator>()));
-            }
         }
 
         void StartBossSequence()
