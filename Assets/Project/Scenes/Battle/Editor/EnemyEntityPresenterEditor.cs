@@ -56,7 +56,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             EditorGUILayout.LabelField("Component References", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("view"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("spriteRenderer"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enemyTracker"));
 
             serializedObject.ApplyModifiedProperties();
         }

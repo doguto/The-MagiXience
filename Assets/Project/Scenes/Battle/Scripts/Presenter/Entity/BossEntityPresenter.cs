@@ -29,7 +29,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         [Header("Component References")]
         [SerializeField] EnemyEntityView view;
-        [SerializeField] EnemyTracker enemyTracker;
+        EnemyTracker enemyTracker;
 
         void Reset()
         {
@@ -52,6 +52,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             soundManager = FindFirstObjectByType<SoundManagerPresenter>();
+            enemyTracker = FindFirstObjectByType<EnemyTracker>();
 
             model = new EnemyEntityModel(maxHp, contactDamage);
 
