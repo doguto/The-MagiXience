@@ -33,6 +33,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         [Header("Attack")] [SerializeField] BulletPool bulletPool;
         [SerializeField] int bulletDamage = 10;
+        [SerializeField] GameObject[] enemySpawnPrefabs;
         [SerializeField] AttackPreset attackPreset;
         [SerializeField] AttackTimeline attackTimeline;
 
@@ -40,6 +41,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         EnemyEntityView view;
 
         [SerializeField] SpriteRenderer spriteRenderer;
+        [SerializeField] EnemyTracker enemyTracker;
 
         void Reset()
         {
@@ -95,7 +97,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.AttackStrategy?.OnAttackTiming
                  .TakeUntil(model.OnDeath)
-                 .Subscribe(ev => FireBullet(ev))
+                 .Subscribe(ev => HandleAttackEvent(ev))
                  .AddTo(disposables);
 
             model.OnDeath
@@ -179,6 +181,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             return isEnteredScreen && outOfScreen;
         }
 
+        void HandleAttackEvent(AttackEvent ev)
+        {
+            switch (ev.Type)
+            {
+                case AttackEventType.Bullet:
+                    FireBullet(ev);
+                    break;
+                case AttackEventType.EnemySpawn:
+                    SpawnEnemy(ev);
+                    break;
+            }
+        }
+
         void FireBullet(AttackEvent ev)
         {
             if (ev.SeType != SeType.None)
@@ -187,6 +202,32 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             foreach (var dir in ev.Directions) bulletPool.SpawnBullet(bulletDamage, bulletPool.transform.position, dir, rotation: transform.rotation);
+        }
+
+        void SpawnEnemy(AttackEvent ev)
+        {
+            var prefab = GetEnemySpawnPrefab(ev.SourceIndex);
+            if (prefab == null) return;
+
+            if (ev.SeType != SeType.None)
+            {
+                soundManager?.PlaySE(ev.SeType);
+            }
+
+            var spawnPos = transform.position + (Vector3)ev.SpawnOffset;
+            var instance = Instantiate(prefab, spawnPos, Quaternion.identity);
+
+            if (enemyTracker != null && instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
+            {
+                enemyTracker.RegisterEnemy(enemyPresenter);
+            }
+        }
+
+        GameObject GetEnemySpawnPrefab(int index)
+        {
+            if (enemySpawnPrefabs == null || enemySpawnPrefabs.Length == 0) return null;
+            if (index < 0 || index >= enemySpawnPrefabs.Length) return enemySpawnPrefabs[0];
+            return enemySpawnPrefabs[index];
         }
 
         void HandleDeath()

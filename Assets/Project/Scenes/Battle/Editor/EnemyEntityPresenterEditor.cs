@@ -39,6 +39,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             EditorGUILayout.LabelField("Attack", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletPool"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletDamage"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enemySpawnPrefabs"));
             EditorGUILayout.PropertyField(attackPresetProp);
             if (attackPresetProp.objectReferenceValue == null)
             {
@@ -55,6 +56,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             EditorGUILayout.LabelField("Component References", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("view"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("spriteRenderer"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enemyTracker"));
 
             serializedObject.ApplyModifiedProperties();
         }

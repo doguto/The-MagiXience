@@ -25,9 +25,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Attack")]
         [SerializeField] BulletPool[] bulletPools;
         [SerializeField] int bulletDamage = 10;
+        [SerializeField] GameObject[] enemySpawnPrefabs;
 
         [Header("Component References")]
         [SerializeField] EnemyEntityView view;
+        [SerializeField] EnemyTracker enemyTracker;
 
         void Reset()
         {
@@ -97,7 +99,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.AttackStrategy.OnAttackTiming
                 .TakeUntil(model.OnDeath)
-                .Subscribe(ev => FireBullet(ev))
+                .Subscribe(ev => HandleAttackEvent(ev))
                 .AddTo(disposables);
         }
 
@@ -160,9 +162,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdatePosition(transform.position);
         }
 
+        void HandleAttackEvent(AttackEvent ev)
+        {
+            switch (ev.Type)
+            {
+                case AttackEventType.Bullet:
+                    FireBullet(ev);
+                    break;
+                case AttackEventType.EnemySpawn:
+                    SpawnEnemy(ev);
+                    break;
+            }
+        }
+
         void FireBullet(AttackEvent ev)
         {
-            var pool = GetBulletPool(ev.BulletPoolIndex);
+            var pool = GetBulletPool(ev.SourceIndex);
             if (pool == null) return;
 
             if (ev.SeType != SeType.None)
@@ -176,11 +191,37 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
         }
 
+        void SpawnEnemy(AttackEvent ev)
+        {
+            var prefab = GetEnemySpawnPrefab(ev.SourceIndex);
+            if (prefab == null) return;
+
+            if (ev.SeType != SeType.None)
+            {
+                soundManager?.PlaySE(ev.SeType);
+            }
+
+            var spawnPos = transform.position + (Vector3)ev.SpawnOffset;
+            var instance = Instantiate(prefab, spawnPos, Quaternion.identity);
+
+            if (enemyTracker != null && instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
+            {
+                enemyTracker.RegisterEnemy(enemyPresenter);
+            }
+        }
+
         BulletPool GetBulletPool(int index)
         {
             if (bulletPools == null || bulletPools.Length == 0) return null;
             if (index < 0 || index >= bulletPools.Length) return bulletPools[0];
             return bulletPools[index];
+        }
+
+        GameObject GetEnemySpawnPrefab(int index)
+        {
+            if (enemySpawnPrefabs == null || enemySpawnPrefabs.Length == 0) return null;
+            if (index < 0 || index >= enemySpawnPrefabs.Length) return enemySpawnPrefabs[0];
+            return enemySpawnPrefabs[index];
         }
 
         void HandleDeath()

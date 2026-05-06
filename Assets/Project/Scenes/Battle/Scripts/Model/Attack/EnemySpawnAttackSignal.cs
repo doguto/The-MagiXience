@@ -5,13 +5,15 @@ using UnityEngine;
 namespace Project.Scenes.Battle.Scripts.Model.Attack
 {
     [Serializable]
-    public class SingleBulletSignal : IAttackSignal
+    public class EnemySpawnAttackSignal : IAttackSignal
     {
-        public IAttackSignal Clone() => new SingleBulletSignal();
+        [SerializeField] Vector2 offset;
+
+        public IAttackSignal Clone() => new EnemySpawnAttackSignal { offset = offset };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
-            return AttackEvent.Single(directionProvider.GetDirection(), sourceIndex, seType);
+            return AttackEvent.Spawn(directionProvider.GetDirection(), sourceIndex, offset, seType);
         }
     }
 }

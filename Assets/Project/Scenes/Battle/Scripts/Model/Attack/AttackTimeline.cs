@@ -99,7 +99,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 {
                     if (entry.signal != null)
                     {
-                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider, entry.bulletPoolIndex, entry.seType));
+                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider, entry.sourceIndex, entry.seType));
                     }
                 })
                 .AddTo(disposables);

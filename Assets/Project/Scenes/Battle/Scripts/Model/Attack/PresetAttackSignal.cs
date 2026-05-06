@@ -17,7 +17,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public int LoopCount => loopCount;
         public float CycleDuration => cycleDuration;
 
-        public AttackEvent CreateEvent(IDirectionProvider directionProvider, int bulletPoolIndex = 0, SeType seType = SeType.None)
+        public AttackEvent CreateEvent(IDirectionProvider directionProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
             // PresetSignalは直接CreateEventされない。AttackTimeline側で展開される。
             Debug.LogWarning("[PresetAttackSignal] CreateEvent should not be called directly. Use AttackTimeline expansion.");
