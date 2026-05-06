@@ -98,13 +98,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 1
   contactDamage: 5
+  lifetime: 0
   movementPreset: {fileID: 0}
   movementSteps:
   - rid: 8577112580335075430
   - rid: 8577112580335075461
   - rid: 8577112580335075476
-  bulletPool: {fileID: 7996329089749057052}
+  bulletPools:
+  - {fileID: 7996329089749057052}
   bulletDamage: 10
+  enemySpawnPrefabs: []
   attackPreset: {fileID: 0}
   attackTimeline:
     loop: 1
@@ -117,14 +120,14 @@ MonoBehaviour:
         rid: 8577112747257626798
       directionProvider:
         rid: 8577112747257626812
-      bulletPoolIndex: 0
+      sourceIndex: 0
       seType: 4
     - time: 0
       signal:
         rid: 8577112747257626816
       directionProvider:
         rid: 8577112747257626817
-      bulletPoolIndex: 0
+      sourceIndex: 0
       seType: 4
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}

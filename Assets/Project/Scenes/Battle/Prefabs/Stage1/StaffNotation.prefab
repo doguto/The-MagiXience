@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 97200579802229265}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -174,7 +174,7 @@ Transform:
   m_GameObject: {fileID: 287649131809705193}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -296,6 +296,53 @@ LineRenderer:
   m_UseWorldSpace: 0
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!1 &453369389197206567
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8691069264831403357}
+  - component: {fileID: 3136275006982705995}
+  m_Layer: 7
+  m_Name: MelodyA (3)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8691069264831403357
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453369389197206567}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 10787300235750822}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3136275006982705995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453369389197206567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &913846329265887603
 GameObject:
   m_ObjectHideFlags: 0
@@ -322,7 +369,7 @@ Transform:
   m_GameObject: {fileID: 913846329265887603}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13, y: 0, z: 0}
   m_LocalScale: {x: 0.9, y: 1.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -383,6 +430,53 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1279864267793286052
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4019975271504697909}
+  - component: {fileID: 7624241062384489895}
+  m_Layer: 7
+  m_Name: MelodyA (4)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4019975271504697909
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1279864267793286052}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.25, z: 0}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 10787300235750822}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7624241062384489895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1279864267793286052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &2798522301261492832
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,7 +503,7 @@ Transform:
   m_GameObject: {fileID: 2798522301261492832}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -531,6 +625,53 @@ LineRenderer:
   m_UseWorldSpace: 0
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!1 &3267198319897555338
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6494410173910128824}
+  - component: {fileID: 7459542183088705548}
+  m_Layer: 7
+  m_Name: MelodyA (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6494410173910128824
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3267198319897555338}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.75, z: 0}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 10787300235750822}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7459542183088705548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3267198319897555338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &5644495412250506036
 GameObject:
   m_ObjectHideFlags: 0
@@ -557,7 +698,7 @@ Transform:
   m_GameObject: {fileID: 5644495412250506036}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -679,6 +820,53 @@ LineRenderer:
   m_UseWorldSpace: 0
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!1 &6156603199347263798
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3124706934023502607}
+  - component: {fileID: 9053567903557350321}
+  m_Layer: 7
+  m_Name: MelodyA (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3124706934023502607
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6156603199347263798}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 10787300235750822}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9053567903557350321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6156603199347263798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &6789985671468746626
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,7 +893,7 @@ Transform:
   m_GameObject: {fileID: 6789985671468746626}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -862,6 +1050,10 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1585767927926003295}
+  - {fileID: 3124706934023502607}
+  - {fileID: 6494410173910128824}
+  - {fileID: 8691069264831403357}
+  - {fileID: 4019975271504697909}
   - {fileID: 7308119460042896028}
   - {fileID: 4750460416970289969}
   - {fileID: 5188943285550322879}
@@ -1021,19 +1213,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 50
   contactDamage: 10
-  lifetime: 2
+  lifetime: 4.8
   movementPreset: {fileID: 0}
   movementSteps:
   - rid: 454447997575757826
-  bulletPool: {fileID: 5655913858464009431}
+  bulletPools:
+  - {fileID: 5655913858464009431}
+  - {fileID: 9053567903557350321}
+  - {fileID: 7459542183088705548}
+  - {fileID: 3136275006982705995}
+  - {fileID: 7624241062384489895}
   bulletDamage: 10
   enemySpawnPrefabs: []
   attackPreset: {fileID: 0}
   attackTimeline:
-    loop: 0
-    loopStart: 0
+    loop: 1
+    loopStart: 2
     loopEnd: 20
-    cycleDuration: 2
+    cycleDuration: 1.5
     entries:
     - time: 0
       signal:
@@ -1042,9 +1239,64 @@ MonoBehaviour:
         rid: 454447997575757915
       sourceIndex: 0
       seType: 3
+    - time: 0.1
+      signal:
+        rid: 454448093581279431
+      directionProvider:
+        rid: 454448093581279355
+      sourceIndex: 1
+      seType: 3
+    - time: 0.2
+      signal:
+        rid: 454448093581279357
+      directionProvider:
+        rid: 454448093581279358
+      sourceIndex: 2
+      seType: 3
+    - time: 0.3
+      signal:
+        rid: 454448093581279424
+      directionProvider:
+        rid: 454448093581279425
+      sourceIndex: 3
+      seType: 3
+    - time: 0.4
+      signal:
+        rid: 454448093581279427
+      directionProvider:
+        rid: 454448093581279428
+      sourceIndex: 4
+      seType: 3
+    - time: 0.5
+      signal:
+        rid: 454448093581279442
+      directionProvider:
+        rid: 454448093581279443
+      sourceIndex: 3
+      seType: 3
+    - time: 0.6
+      signal:
+        rid: 454448093581279447
+      directionProvider:
+        rid: 454448093581279448
+      sourceIndex: 2
+      seType: 3
+    - time: 0.7
+      signal:
+        rid: 454448093581279451
+      directionProvider:
+        rid: 454448093581279452
+      sourceIndex: 1
+      seType: 3
+    - time: 0.8
+      signal:
+        rid: 454448093581279455
+      directionProvider:
+        rid: 454448093581279456
+      sourceIndex: 0
+      seType: 3
   view: {fileID: -5052378354668323182}
   spriteRenderer: {fileID: 6160948689302496514}
-  enemyTracker: {fileID: 0}
   references:
     version: 2
     RefIds:
@@ -1056,6 +1308,62 @@ MonoBehaviour:
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
     - rid: 454447997575757915
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279355
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279357
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279358
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279424
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279425
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279427
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279428
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279431
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279442
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279443
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279447
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279448
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279451
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279452
+      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        baseDirection: {x: -1, y: 0}
+    - rid: 454448093581279455
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448093581279456
       type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         baseDirection: {x: -1, y: 0}
@@ -1085,7 +1393,7 @@ Transform:
   m_GameObject: {fileID: 8609815365286746352}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 13, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.75, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
