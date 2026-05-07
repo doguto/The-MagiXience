@@ -14,13 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   steps:
   - rid: 8577112454036455573
+  - rid: 454448117209104648
   references:
     version: 2
     RefIds:
+    - rid: 454448117209104648
+      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        duration: 0
     - rid: 8577112454036455573
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: 10, y: 0, z: 0}
+        targetOffset: {x: 5, y: 0, z: 0}
         duration: 1.5
         easeValue: 3
         customCurve:

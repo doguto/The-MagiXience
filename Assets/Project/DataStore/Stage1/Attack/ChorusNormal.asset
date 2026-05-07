@@ -23,11 +23,21 @@ MonoBehaviour:
         rid: 8577112747257626779
       directionProvider:
         rid: 8577112747257626778
-      sourceIndex: 3
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
       seType: 0
   references:
     version: 2
     RefIds:
+    - rid: 454448117209104620
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448117209104621
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 1
     - rid: 8577112747257626778
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 

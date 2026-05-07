@@ -162,14 +162,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementSteps:
-  - rid: 8577112795563163771
+  - rid: 454448117209104641
   view: {fileID: 8877745320614750256}
   spriteRenderer: {fileID: 1851957906713825068}
   lifetime: 10
   references:
     version: 2
     RefIds:
-    - rid: 8577112795563163771
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 454448117209104641
+      type: {class: ReflectMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        velocity: {x: -2, y: 0, z: 0}
+        speed: 2
+        maxReflections: 1
+        reflectTop: 1
+        reflectBottom: 1
+        reflectLeft: 0
+        reflectRight: 0
