@@ -11,7 +11,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] public float time;
         [SerializeReference, SubclassSelector] public IAttackSignal signal;
         [SerializeReference, SubclassSelector] public IDirectionProvider directionProvider = new FixedDirectionConfig();
-        [SerializeField] public int sourceIndex;
+        [SerializeReference, SubclassSelector] public ISourceIndexProvider sourceIndexProvider = new ConstantSourceIndex();
         [SerializeField] public SeType seType = SeType.None;
 
         public AttackTimelineEntry DeepCopy()
@@ -21,7 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 time = time,
                 signal = signal?.Clone(),
                 directionProvider = directionProvider?.Clone(),
-                sourceIndex = sourceIndex,
+                sourceIndexProvider = sourceIndexProvider?.Clone(),
                 seType = seType
             };
         }

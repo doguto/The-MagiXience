@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 97200579802229265}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
+  m_LocalPosition: {x: -25, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -79,7 +79,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -1.5, y: 0.75, z: 0}
-  - {x: 12, y: 0.75, z: 0}
+  - {x: 24, y: 0.75, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -174,7 +174,7 @@ Transform:
   m_GameObject: {fileID: 287649131809705193}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
+  m_LocalPosition: {x: -25, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -227,7 +227,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -1.5, y: 0, z: 0}
-  - {x: 12, y: 0, z: 0}
+  - {x: 24, y: 0, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -369,7 +369,7 @@ Transform:
   m_GameObject: {fileID: 913846329265887603}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
+  m_LocalPosition: {x: -25, y: 0, z: 0}
   m_LocalScale: {x: 0.9, y: 1.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -503,7 +503,7 @@ Transform:
   m_GameObject: {fileID: 2798522301261492832}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
+  m_LocalPosition: {x: -25, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -556,7 +556,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -1.5, y: -0.75, z: 0}
-  - {x: 12, y: -0.75, z: 0}
+  - {x: 24, y: -0.75, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -698,7 +698,7 @@ Transform:
   m_GameObject: {fileID: 5644495412250506036}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
+  m_LocalPosition: {x: -25, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -751,7 +751,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -1.5, y: 1.5, z: 0}
-  - {x: 12, y: 1.5, z: 0}
+  - {x: 24, y: 1.5, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -893,7 +893,7 @@ Transform:
   m_GameObject: {fileID: 6789985671468746626}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
+  m_LocalPosition: {x: -25, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -946,7 +946,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -1.5, y: -1.5, z: 0}
-  - {x: 12, y: -1.5, z: 0}
+  - {x: 24, y: -1.5, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1213,7 +1213,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 50
   contactDamage: 10
-  lifetime: 4.8
+  lifetime: 7
   movementPreset: {fileID: 0}
   movementSteps:
   - rid: 454447997575757826
@@ -1230,70 +1230,39 @@ MonoBehaviour:
     loop: 1
     loopStart: 2
     loopEnd: 20
-    cycleDuration: 1.5
+    cycleDuration: 0.7
     entries:
     - time: 0
       signal:
         rid: 454447997575757908
       directionProvider:
         rid: 454447997575757915
-      sourceIndex: 0
+      sourceIndexProvider:
+        rid: 454448117209104486
       seType: 3
     - time: 0.1
       signal:
         rid: 454448093581279431
       directionProvider:
         rid: 454448093581279355
-      sourceIndex: 1
+      sourceIndexProvider:
+        rid: 454448117209104489
       seType: 3
     - time: 0.2
       signal:
         rid: 454448093581279357
       directionProvider:
         rid: 454448093581279358
-      sourceIndex: 2
+      sourceIndexProvider:
+        rid: 454448117209104496
       seType: 3
     - time: 0.3
       signal:
         rid: 454448093581279424
       directionProvider:
         rid: 454448093581279425
-      sourceIndex: 3
-      seType: 3
-    - time: 0.4
-      signal:
-        rid: 454448093581279427
-      directionProvider:
-        rid: 454448093581279428
-      sourceIndex: 4
-      seType: 3
-    - time: 0.5
-      signal:
-        rid: 454448093581279442
-      directionProvider:
-        rid: 454448093581279443
-      sourceIndex: 3
-      seType: 3
-    - time: 0.6
-      signal:
-        rid: 454448093581279447
-      directionProvider:
-        rid: 454448093581279448
-      sourceIndex: 2
-      seType: 3
-    - time: 0.7
-      signal:
-        rid: 454448093581279451
-      directionProvider:
-        rid: 454448093581279452
-      sourceIndex: 1
-      seType: 3
-    - time: 0.8
-      signal:
-        rid: 454448093581279455
-      directionProvider:
-        rid: 454448093581279456
-      sourceIndex: 0
+      sourceIndexProvider:
+        rid: 454448117209104498
       seType: 3
   view: {fileID: -5052378354668323182}
   spriteRenderer: {fileID: 6160948689302496514}
@@ -1329,44 +1298,29 @@ MonoBehaviour:
       type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         baseDirection: {x: -1, y: 0}
-    - rid: 454448093581279427
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 454448093581279428
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        baseDirection: {x: -1, y: 0}
     - rid: 454448093581279431
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 454448093581279442
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 454448093581279443
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+    - rid: 454448117209104486
+      type: {class: RandomSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        baseDirection: {x: -1, y: 0}
-    - rid: 454448093581279447
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 454448093581279448
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+        min: 0
+        max: 4
+    - rid: 454448117209104489
+      type: {class: RandomSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        baseDirection: {x: -1, y: 0}
-    - rid: 454448093581279451
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 454448093581279452
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+        min: 0
+        max: 4
+    - rid: 454448117209104496
+      type: {class: RandomSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        baseDirection: {x: -1, y: 0}
-    - rid: 454448093581279455
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 454448093581279456
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+        min: 0
+        max: 4
+    - rid: 454448117209104498
+      type: {class: RandomSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        baseDirection: {x: -1, y: 0}
+        min: 0
+        max: 4
 --- !u!1 &8609815365286746352
 GameObject:
   m_ObjectHideFlags: 0
