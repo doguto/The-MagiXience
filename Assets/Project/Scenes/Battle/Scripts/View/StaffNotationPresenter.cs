@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -21,9 +24,8 @@ namespace Project.Scenes.Battle.Scripts.View
         [Header("Fade Out")]
         [SerializeField] float fadeOutDuration = 0.5f;
 
-        [Header("Random Rotation")]
-        [SerializeField] float rotationZMin = 0f;
-        [SerializeField] float rotationZMax = 0f;
+        [Header("GClef")]
+        [SerializeField] float gClefShowDelay = 0.5f;
 
         // 各LineRendererの元の右端X座標
         float[] originalEndX;
@@ -34,6 +36,7 @@ namespace Project.Scenes.Battle.Scripts.View
         float trebleClefOriginalAlpha;
 
         Tween currentTween;
+        CancellationTokenSource gClefDelayCts;
 
         void Awake()
         {
@@ -42,15 +45,7 @@ namespace Project.Scenes.Battle.Scripts.View
 
         void OnEnable()
         {
-            ApplyRandomRotation();
             PlayReveal();
-        }
-
-        void ApplyRandomRotation()
-        {
-            var z = Random.Range(rotationZMin, rotationZMax);
-            var euler = transform.rotation.eulerAngles;
-            transform.rotation = Quaternion.Euler(euler.x, euler.y, z);
         }
 
         void OnDisable()
@@ -83,11 +78,11 @@ namespace Project.Scenes.Battle.Scripts.View
 
         void SetRevealProgress(float t)
         {
-            // 各線の右端Xを lineLeftX → originalEndX[i] で補間
+            // 各線の左端Xを originalEndX[i] → lineLeftX で補間（右から左に伸びる）
             for (var i = 0; i < lineRenderers.Length; i++)
             {
-                var currentEndX = Mathf.Lerp(lineLeftX, originalEndX[i], t);
-                lineRenderers[i].SetPosition(1, new Vector3(currentEndX, lineY[i], 0f));
+                var currentStartX = Mathf.Lerp(originalEndX[i], lineLeftX, t);
+                lineRenderers[i].SetPosition(0, new Vector3(currentStartX, lineY[i], 0f));
             }
         }
 
@@ -108,19 +103,39 @@ namespace Project.Scenes.Battle.Scripts.View
         void PlayReveal()
         {
             currentTween?.Kill();
+            CancelGClefDelay();
 
-            // 初期状態: 全て非表示
+            // 初期状態: 線は非表示、GClefも非表示
             SetRevealProgress(0f);
+            if (gClefRenderer != null) gClefRenderer.enabled = false;
 
             currentTween = DOVirtual.Float(0f, 1f, revealDuration, SetRevealProgress)
                 .SetEase(revealEase);
+
+            gClefDelayCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            ShowGClefAfterDelayAsync(gClefDelayCts.Token).Forget();
+        }
+
+        async UniTaskVoid ShowGClefAfterDelayAsync(CancellationToken ct)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(gClefShowDelay), cancellationToken: ct);
+            if (gClefRenderer != null) gClefRenderer.enabled = true;
         }
 
         void PlayFadeOut()
         {
             currentTween?.Kill();
+            CancelGClefDelay();
 
             currentTween = DOVirtual.Float(1f, 0f, fadeOutDuration, SetFadeAlpha);
+        }
+
+        void CancelGClefDelay()
+        {
+            if (gClefDelayCts == null) return;
+            gClefDelayCts.Cancel();
+            gClefDelayCts.Dispose();
+            gClefDelayCts = null;
         }
 
         static void SetLineAlpha(LineRenderer lr, float alpha)
@@ -136,6 +151,7 @@ namespace Project.Scenes.Battle.Scripts.View
         void OnDestroy()
         {
             currentTween?.Kill();
+            CancelGClefDelay();
         }
     }
 }
