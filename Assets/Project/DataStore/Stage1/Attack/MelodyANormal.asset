@@ -23,7 +23,10 @@ MonoBehaviour:
         rid: 454448093581279334
       directionProvider:
         rid: 454448117209104458
-      sourceIndex: 0
+      rotationProvider:
+        rid: 454448117209104583
+      sourceIndexProvider:
+        rid: 454448117209104568
       seType: 0
   references:
     version: 2
@@ -34,4 +37,11 @@ MonoBehaviour:
         offset: {x: 0, y: 0}
     - rid: 454448117209104458
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448117209104568
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 454448117209104583
+      type: {class: AimRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 

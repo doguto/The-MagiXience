@@ -322,7 +322,7 @@ Transform:
   m_GameObject: {fileID: 453369389197206567}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -340,7 +340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  bulletPrefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &913846329265887603
@@ -456,7 +456,7 @@ Transform:
   m_GameObject: {fileID: 1279864267793286052}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.25, z: 0}
+  m_LocalPosition: {x: 0, y: 1.25, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -474,7 +474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  bulletPrefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &2798522301261492832
@@ -651,7 +651,7 @@ Transform:
   m_GameObject: {fileID: 3267198319897555338}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.75, z: 0}
+  m_LocalPosition: {x: 0, y: -0.25, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -669,7 +669,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+  bulletPrefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &5644495412250506036
@@ -1084,8 +1084,8 @@ MonoBehaviour:
   revealDuration: 2
   revealEase: 3
   fadeOutDuration: 0.5
-  rotationZMin: -30
-  rotationZMax: 30
+  rotationZMin: 0
+  rotationZMax: 0
 --- !u!61 &7111847805382234627
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1230,37 +1230,45 @@ MonoBehaviour:
     loop: 1
     loopStart: 2
     loopEnd: 20
-    cycleDuration: 0.7
+    cycleDuration: 0.9
     entries:
     - time: 0
       signal:
         rid: 454447997575757908
       directionProvider:
-        rid: 454447997575757915
+        rid: 454448117209104624
+      rotationProvider:
+        rid: 1000
       sourceIndexProvider:
         rid: 454448117209104486
       seType: 3
-    - time: 0.1
+    - time: 0.15
       signal:
         rid: 454448093581279431
       directionProvider:
-        rid: 454448093581279355
+        rid: 454448117209104626
+      rotationProvider:
+        rid: 1001
       sourceIndexProvider:
         rid: 454448117209104489
       seType: 3
-    - time: 0.2
+    - time: 0.3
       signal:
         rid: 454448093581279357
       directionProvider:
-        rid: 454448093581279358
+        rid: 454448117209104628
+      rotationProvider:
+        rid: 1002
       sourceIndexProvider:
         rid: 454448117209104496
       seType: 3
-    - time: 0.3
+    - time: 0.45
       signal:
         rid: 454448093581279424
       directionProvider:
-        rid: 454448093581279425
+        rid: 454448117209104630
+      rotationProvider:
+        rid: 1003
       sourceIndexProvider:
         rid: 454448117209104498
       seType: 3
@@ -1269,6 +1277,18 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: 1000
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1001
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1002
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1003
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
     - rid: 454447997575757826
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -1276,28 +1296,12 @@ MonoBehaviour:
     - rid: 454447997575757908
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 454447997575757915
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        baseDirection: {x: -1, y: 0}
-    - rid: 454448093581279355
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        baseDirection: {x: -1, y: 0}
     - rid: 454448093581279357
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 454448093581279358
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        baseDirection: {x: -1, y: 0}
     - rid: 454448093581279424
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 454448093581279425
-      type: {class: SelfRotationDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        baseDirection: {x: -1, y: 0}
     - rid: 454448093581279431
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -1321,6 +1325,18 @@ MonoBehaviour:
       data:
         min: 0
         max: 4
+    - rid: 454448117209104624
+      type: {class: ForwardDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448117209104626
+      type: {class: ForwardDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448117209104628
+      type: {class: ForwardDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448117209104630
+      type: {class: ForwardDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
 --- !u!1 &8609815365286746352
 GameObject:
   m_ObjectHideFlags: 0

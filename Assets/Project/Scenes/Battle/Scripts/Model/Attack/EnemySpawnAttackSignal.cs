@@ -11,9 +11,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         public IAttackSignal Clone() => new EnemySpawnAttackSignal { offset = offset };
 
-        public AttackEvent CreateEvent(IDirectionProvider directionProvider, int sourceIndex = 0, SeType seType = SeType.None)
+        public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
-            return AttackEvent.Spawn(directionProvider.GetDirection(), sourceIndex, offset, seType);
+            return AttackEvent.Spawn(directionProvider.GetDirection(), rotationProvider.GetRotation(), sourceIndex, offset, seType);
         }
     }
 }

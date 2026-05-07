@@ -3,10 +3,11 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Model.Attack
 {
+    // 敵の正面（左向き）を親の回転に従って回した方向を返す
     [Serializable]
-    public class SelfRotationDirectionConfig : IDirectionProvider
+    public class ForwardDirectionConfig : IDirectionProvider
     {
-        [SerializeField] Vector2 baseDirection = Vector2.left;
+        static readonly Vector2 Forward = Vector2.left;
 
         Func<Quaternion> getEnemyRotation;
 
@@ -18,10 +19,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public Vector2 GetDirection()
         {
             var rotation = getEnemyRotation != null ? getEnemyRotation() : Quaternion.identity;
-            var rotated = (Vector2)(rotation * baseDirection);
-            return rotated == Vector2.zero ? Vector2.left : rotated.normalized;
+            return ((Vector2)(rotation * Forward)).normalized;
         }
 
-        public IDirectionProvider Clone() => new SelfRotationDirectionConfig { baseDirection = baseDirection };
+        public IDirectionProvider Clone() => new ForwardDirectionConfig();
     }
 }

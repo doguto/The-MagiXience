@@ -32,8 +32,14 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
             foreach (var entry in entries)
             {
-                entry.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
+                InitializeEntryProviders(entry);
             }
+        }
+
+        void InitializeEntryProviders(AttackTimelineEntry entry)
+        {
+            entry.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
+            entry.rotationProvider.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
         }
 
         public void Initialize()
@@ -100,7 +106,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                     if (entry.signal != null)
                     {
                         var sourceIndex = entry.sourceIndexProvider?.Get() ?? 0;
-                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider, sourceIndex, entry.seType));
+                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider, entry.rotationProvider, sourceIndex, entry.seType));
                     }
                 })
                 .AddTo(disposables);
@@ -111,10 +117,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             var timeline = signal.Preset.CreateTimeline();
             if (timeline == null || timeline.entries.Count == 0) return;
 
-            // 展開したエントリのDirectionProviderを初期化
+            // 展開したエントリのProviderを初期化
             foreach (var inner in timeline.entries)
             {
-                inner.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
+                InitializeEntryProviders(inner);
                 // 内側がNoneなら外側のseTypeを引き継ぐ
                 if (inner.seType == SeType.None && parentSeType != SeType.None)
                 {

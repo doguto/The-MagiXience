@@ -11,6 +11,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] public float time;
         [SerializeReference, SubclassSelector] public IAttackSignal signal;
         [SerializeReference, SubclassSelector] public IDirectionProvider directionProvider = new FixedDirectionConfig();
+        [SerializeReference, SubclassSelector] public IRotationProvider rotationProvider = new InheritParentRotationConfig();
         [SerializeReference, SubclassSelector] public ISourceIndexProvider sourceIndexProvider = new ConstantSourceIndex();
         [SerializeField] public SeType seType = SeType.None;
 
@@ -21,6 +22,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 time = time,
                 signal = signal?.Clone(),
                 directionProvider = directionProvider?.Clone(),
+                rotationProvider = rotationProvider?.Clone(),
                 sourceIndexProvider = sourceIndexProvider?.Clone(),
                 seType = seType
             };

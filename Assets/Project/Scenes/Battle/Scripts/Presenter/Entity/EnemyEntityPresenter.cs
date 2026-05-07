@@ -237,8 +237,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 soundManager?.PlaySE(ev.SeType);
             }
-
-            foreach (var dir in ev.Directions) pool.SpawnBullet(bulletDamage, pool.transform.position, dir, rotation: transform.rotation);
+            foreach (var dir in ev.Directions) pool.SpawnBullet(bulletDamage, pool.transform.position, dir, rotation: ev.Rotation);
         }
 
         BulletPool GetBulletPool(int index)
@@ -258,8 +257,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 soundManager?.PlaySE(ev.SeType);
             }
 
-            var spawnPos = transform.position + (Vector3)ev.SpawnOffset;
-            var instance = Instantiate(prefab, spawnPos, Quaternion.identity);
+            // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
+            var instance = Instantiate(prefab);
+            instance.transform.SetPositionAndRotation(transform.position + (Vector3)ev.SpawnOffset, ev.Rotation);
 
             if (enemyTracker != null && instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
             {
