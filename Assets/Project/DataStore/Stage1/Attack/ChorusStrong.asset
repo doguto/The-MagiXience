@@ -14,25 +14,131 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackTimeline:
     loop: 1
-    loopStart: 0
+    loopStart: 0.6
     loopEnd: 100
-    cycleDuration: 2
+    cycleDuration: 2.4
     entries:
     - time: 0
       signal:
         rid: 8577112747257626779
       directionProvider:
-        rid: 8577112747257626778
-      sourceIndex: 3
+        rid: 454448157880483960
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
+      seType: 0
+    - time: 0.3
+      signal:
+        rid: 454448157880483958
+      directionProvider:
+        rid: 454448157880483961
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
+      seType: 0
+    - time: 0.6
+      signal:
+        rid: 454448157880483966
+      directionProvider:
+        rid: 454448157880483967
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
+      seType: 0
+    - time: 1.2
+      signal:
+        rid: 454448157880483968
+      directionProvider:
+        rid: 454448157880483969
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
+      seType: 0
+    - time: 1.5
+      signal:
+        rid: 454448157880483970
+      directionProvider:
+        rid: 454448157880483971
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
+      seType: 0
+    - time: 1.8
+      signal:
+        rid: 454448157880483972
+      directionProvider:
+        rid: 454448157880483973
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
       seType: 0
   references:
     version: 2
     RefIds:
-    - rid: 8577112747257626778
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+    - rid: 454448117209104620
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
+    - rid: 454448117209104621
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 1
+    - rid: 454448157880483958
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 6
+        spreadAngle: 60
+    - rid: 454448157880483960
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 454448157880483961
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0.5}
+    - rid: 454448157880483966
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 6
+        spreadAngle: 60
+    - rid: 454448157880483967
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 454448157880483968
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 6
+        spreadAngle: 60
+    - rid: 454448157880483969
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0.5}
+    - rid: 454448157880483970
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 6
+        spreadAngle: 60
+    - rid: 454448157880483971
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 454448157880483972
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 6
+        spreadAngle: 60
+    - rid: 454448157880483973
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0.5}
     - rid: 8577112747257626779
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 20
+        wayCount: 6
         spreadAngle: 60

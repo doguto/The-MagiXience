@@ -14,25 +14,166 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackTimeline:
     loop: 1
-    loopStart: 0
-    loopEnd: 10
-    cycleDuration: 0.25
+    loopStart: 1
+    loopEnd: 100
+    cycleDuration: 4
     entries:
     - time: 0
       signal:
         rid: 8577112429281935435
       directionProvider:
-        rid: 8577112429281935437
-      sourceIndex: 2
+        rid: 8577112795563163801
+      rotationProvider:
+        rid: 454448157880483988
+      sourceIndexProvider:
+        rid: 454448117209104472
+      seType: 0
+    - time: 0.5
+      signal:
+        rid: 8577112795563163793
+      directionProvider:
+        rid: 8577112795563163802
+      rotationProvider:
+        rid: 454448157880483989
+      sourceIndexProvider:
+        rid: 454448117209104473
+      seType: 0
+    - time: 1
+      signal:
+        rid: 8577112795563163795
+      directionProvider:
+        rid: 8577112795563163803
+      rotationProvider:
+        rid: 454448157880483990
+      sourceIndexProvider:
+        rid: 454448117209104474
+      seType: 0
+    - time: 2
+      signal:
+        rid: 8577112795563163797
+      directionProvider:
+        rid: 8577112795563163804
+      rotationProvider:
+        rid: 454448157880483991
+      sourceIndexProvider:
+        rid: 454448117209104475
+      seType: 0
+    - time: 2.25
+      signal:
+        rid: 8577112795563163799
+      directionProvider:
+        rid: 8577112795563163805
+      rotationProvider:
+        rid: 454448157880483992
+      sourceIndexProvider:
+        rid: 454448117209104476
+      seType: 0
+    - time: 2.5
+      signal:
+        rid: 8577112795563163806
+      directionProvider:
+        rid: 8577112795563163807
+      rotationProvider:
+        rid: 454448157880483993
+      sourceIndexProvider:
+        rid: 454448117209104477
       seType: 0
   references:
     version: 2
     RefIds:
+    - rid: 454448117209104472
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 2
+    - rid: 454448117209104473
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 2
+    - rid: 454448117209104474
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 2
+    - rid: 454448117209104475
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 3
+    - rid: 454448117209104476
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 3
+    - rid: 454448117209104477
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 3
+    - rid: 454448157880483988
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448157880483989
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448157880483990
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448157880483991
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448157880483992
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448157880483993
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
     - rid: 8577112429281935435
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 10
-        spreadAngle: 15
-    - rid: 8577112429281935437
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+        wayCount: 5
+        spreadAngle: 30
+    - rid: 8577112795563163793
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 5
+        spreadAngle: 30
+    - rid: 8577112795563163795
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 5
+        spreadAngle: 30
+    - rid: 8577112795563163797
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 4
+        spreadAngle: 30
+    - rid: 8577112795563163799
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 4
+        spreadAngle: 30
+    - rid: 8577112795563163801
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112795563163802
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112795563163803
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112795563163804
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112795563163805
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8577112795563163806
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 4
+        spreadAngle: 30
+    - rid: 8577112795563163807
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}

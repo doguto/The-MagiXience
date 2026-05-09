@@ -14,15 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackTimeline:
     loop: 1
-    loopStart: 0
+    loopStart: 0.6
     loopEnd: 100
-    cycleDuration: 2
+    cycleDuration: 1.2
     entries:
     - time: 0
       signal:
         rid: 8577112747257626779
       directionProvider:
-        rid: 8577112747257626778
+        rid: 454448157880483960
+      rotationProvider:
+        rid: 454448117209104620
+      sourceIndexProvider:
+        rid: 454448117209104621
+      seType: 0
+    - time: 0.6
+      signal:
+        rid: 454448157880483966
+      directionProvider:
+        rid: 454448157880483967
       rotationProvider:
         rid: 454448117209104620
       sourceIndexProvider:
@@ -38,11 +48,21 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 1
-    - rid: 8577112747257626778
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+    - rid: 454448157880483960
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 454448157880483966
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 6
+        spreadAngle: 60
+    - rid: 454448157880483967
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0.5}
     - rid: 8577112747257626779
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 20
+        wayCount: 6
         spreadAngle: 60
