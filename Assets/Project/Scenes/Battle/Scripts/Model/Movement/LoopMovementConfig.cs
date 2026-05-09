@@ -28,15 +28,38 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         [SerializeField]
         List<LoopMovementEntry> entries = new();
 
+        // ScriptableObjectで同一インスタンスが共有されるケースで、
+        // controlTween.OnKill経由のキャンセルが効かないことがあるため、
+        // 外部から明示的に停止できるよう直近のCTSを保持する。
+        CancellationTokenSource lastCts;
+
         public Tween Play(Transform target, Vector2 direction, Animator animator)
         {
             var cts = new CancellationTokenSource();
+            lastCts = cts;
 
             var controlTween = DOVirtual.Float(0f, 1f, 999999f, _ => { });
-            controlTween.OnKill(() => cts.Cancel());
+            controlTween.OnKill(() =>
+            {
+                if (!cts.IsCancellationRequested) cts.Cancel();
+            });
 
             RunLoop(controlTween, cts.Token, target, direction, animator).Forget();
             return controlTween;
+        }
+
+        /// <summary>
+        /// Playで起動したRunLoopを外部から強制停止する。
+        /// </summary>
+        public void ForceStop()
+        {
+            // Cancel()がDOTweenのコールバック→RunLoop末尾を同期実行することがあり、
+            // その流れでlastCtsが書き換えられた場合のNREを避けるためローカルに退避する。
+            var ctsToCancel = lastCts;
+            if (ctsToCancel == null) return;
+            lastCts = null;
+            ctsToCancel.Cancel();
+            ctsToCancel.Dispose();
         }
 
         async UniTaskVoid RunLoop(

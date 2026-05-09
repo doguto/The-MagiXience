@@ -72,7 +72,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         EnemyEntityModel model;
         PlayerEntityPresenter playerPresenter;
         SoundManagerPresenter soundManager;
-        Tween currentTween;
+        readonly List<IMovementStep> activeMovementSteps = new();
         Tween entranceTween;
         CancellationTokenSource movementCts;
         readonly CompositeDisposable disposables = new();
@@ -168,8 +168,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 if (step == null) continue;
                 ct.ThrowIfCancellationRequested();
-                currentTween = step.Play(transform, Vector2.zero, animator);
-                await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
+
+                activeMovementSteps.Add(step);
+                var tween = step.Play(transform, Vector2.zero, animator);
+                if (tween == null)
+                {
+                    activeMovementSteps.Remove(step);
+                    continue;
+                }
+
+                try
+                {
+                    await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
+                }
+                finally
+                {
+                    activeMovementSteps.Remove(step);
+                }
             }
         }
 
@@ -181,11 +196,27 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
             entranceTween = null;
 
+            // ScriptableObject由来でTween.OnKill経由のキャンセルが効かないケースに備え、
+            // movementCts.Cancel()より先に、裏で非同期ループを抱える可能性があるLoopMovementのStepに
+            // 明示的な停止を依頼する。先にCancelすると、RunMovementStepsAsyncのfinallyで
+            // activeMovementSteps.Remove()が走ってしまい、ここでForceStopできなくなる。
+            //
+            // ListのスナップショットをとってからForceStopする。ForceStop経由でawaitが解決し
+            // RunMovementStepsAsyncのfinallyが同期実行されてリストが変動する可能性があるため。
+            var stepsSnapshot = activeMovementSteps.ToArray();
+            for (int i = 0; i < stepsSnapshot.Length; i++)
+            {
+                if (stepsSnapshot[i] is LoopMovementConfig loop)
+                {
+                    loop.ForceStop();
+                }
+            }
+
             movementCts?.Cancel();
             movementCts?.Dispose();
             movementCts = null;
-            currentTween?.Kill();
-            currentTween = null;
+
+            activeMovementSteps.Clear();
         }
 
         void Update()
