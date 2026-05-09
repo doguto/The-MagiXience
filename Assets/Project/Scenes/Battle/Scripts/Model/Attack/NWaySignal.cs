@@ -46,7 +46,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 }
             }
 
-            return new AttackEvent(AttackEventType.Bullet, directions, sourceIndex, seType: seType, rotation: rotationProvider.GetRotation());
+            return new AttackEvent(AttackEventType.Bullet, directions, sourceIndex, seType: seType, rotations: new[] { rotationProvider.GetRotation() });
         }
     }
 }

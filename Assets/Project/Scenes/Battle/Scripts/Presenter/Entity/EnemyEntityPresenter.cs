@@ -237,7 +237,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 soundManager?.PlaySE(ev.SeType);
             }
-            foreach (var dir in ev.Directions) pool.SpawnBullet(bulletDamage, pool.transform.position, dir, rotation: ev.Rotation);
+            for (int i = 0; i < ev.Directions.Count; i++)
+            {
+                pool.SpawnBullet(bulletDamage, pool.transform.position, ev.Directions[i], rotation: GetRotationAt(ev, i));
+            }
         }
 
         BulletPool GetBulletPool(int index)
@@ -257,14 +260,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 soundManager?.PlaySE(ev.SeType);
             }
 
-            // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
-            var instance = Instantiate(prefab);
-            instance.transform.SetPositionAndRotation(transform.position + (Vector3)ev.SpawnOffset, ev.Rotation);
-
-            if (enemyTracker != null && instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
+            if (ev.SpawnOffsets == null) return;
+            for (int i = 0; i < ev.SpawnOffsets.Count; i++)
             {
-                enemyTracker.RegisterEnemy(enemyPresenter);
+                // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
+                var instance = Instantiate(prefab);
+                instance.transform.SetPositionAndRotation(transform.position + (Vector3)ev.SpawnOffsets[i], GetRotationAt(ev, i));
+
+                if (enemyTracker != null && instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
+                {
+                    enemyTracker.RegisterEnemy(enemyPresenter);
+                }
             }
+        }
+
+        Quaternion GetRotationAt(AttackEvent ev, int index)
+        {
+            if (ev.Rotations == null || ev.Rotations.Count == 0) return Quaternion.identity;
+            return index < ev.Rotations.Count ? ev.Rotations[index] : ev.Rotations[ev.Rotations.Count - 1];
         }
 
         GameObject GetEnemySpawnPrefab(int index)
