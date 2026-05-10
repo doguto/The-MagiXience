@@ -34,6 +34,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Damage Flash")]
         [SerializeField] float damageFlashInterval = 0.1f;
 
+        [Header("Charge Flash")]
+        [SerializeField] float chargeFlashInterval = 0.08f;
+
         [Header("component references")] [SerializeField]
         PlayerEntityView view;
 
@@ -52,6 +55,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
         IDisposable damageFlashSubscription;
+        IDisposable chargeFlashSubscription;
 
         IDisposable sceneNavigationSubscription;
 
@@ -99,6 +103,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             model.IsInvincible
                  .Subscribe(OnInvincibleChanged)
                  .AddTo(disposables);
+
+            model.IsChargeCompleteChanged
+                 .Subscribe(OnChargeCompleteChanged)
+                 .AddTo(disposables);
         }
 
         void OnInvincibleChanged(bool invincible)
@@ -109,8 +117,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (!invincible)
             {
                 view.ResetDamageFlash();
+                // 無敵が解けた瞬間にチャージ完了が継続していれば点滅を再開
+                if (model.IsChargeComplete)
+                {
+                    StartChargeFlash();
+                }
                 return;
             }
+
+            // ダメージフラッシュ優先のため、進行中のチャージ点滅を一旦止める
+            StopChargeFlash();
 
             // 即時に1回フラッシュを開始してから周期トグル
             view.SetDamageFlashActive(true);
@@ -122,6 +138,41 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     flashOn = !flashOn;
                     view.SetDamageFlashActive(flashOn);
                 });
+        }
+
+        void OnChargeCompleteChanged(bool complete)
+        {
+            if (complete)
+            {
+                // 無敵中はダメージフラッシュ優先のため、チャージ点滅は始めない
+                if (model.IsInvincible.Value) return;
+                StartChargeFlash();
+            }
+            else
+            {
+                StopChargeFlash();
+            }
+        }
+
+        void StartChargeFlash()
+        {
+            chargeFlashSubscription?.Dispose();
+            view.SetChargeFlashActive(true);
+            bool flashOn = true;
+            chargeFlashSubscription = Observable
+                .Interval(TimeSpan.FromSeconds(chargeFlashInterval))
+                .Subscribe(_ =>
+                {
+                    flashOn = !flashOn;
+                    view.SetChargeFlashActive(flashOn);
+                });
+        }
+
+        void StopChargeFlash()
+        {
+            chargeFlashSubscription?.Dispose();
+            chargeFlashSubscription = null;
+            view.ResetChargeFlash();
         }
 
         void SubscribeToMoveInput()
@@ -284,6 +335,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             damageFlashSubscription?.Dispose();
+            chargeFlashSubscription?.Dispose();
             disposables.Dispose();
             model?.Dispose();
         }

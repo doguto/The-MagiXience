@@ -9,6 +9,12 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         [SerializeField] SpriteRenderer bodySpriteRenderer;
         [SerializeField] Color flashColor = Color.black;
 
+        
+        // memo: 白光りさせたかったが、SpriteRendererはデフォルトが白だから意味ないので黄色っぽくしている
+        // 綺麗にやるなら別途スプライトを用意する必要あり？
+        [Header("Charge Flash")]
+        [SerializeField] Color chargeFlashColor = Color.white;
+
         // memo: HpBarを大量に場に出すことになったら、Canvasを使わない設計にしたい
         // Claudeの提案；SpriteRenderer + Material Property （カスタムシェーダー）、9-Sliced Sprite + Size 直接操作、Quad Mesh自作 (最軽量だがやや手間)
         [Header("Hp Bar")]
@@ -272,6 +278,18 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         }
 
         public void ResetDamageFlash()
+        {
+            if (bodySpriteRenderer == null) return;
+            bodySpriteRenderer.color = originalBodyColor;
+        }
+
+        public void SetChargeFlashActive(bool active)
+        {
+            if (bodySpriteRenderer == null) return;
+            bodySpriteRenderer.color = active ? chargeFlashColor : originalBodyColor;
+        }
+
+        public void ResetChargeFlash()
         {
             if (bodySpriteRenderer == null) return;
             bodySpriteRenderer.color = originalBodyColor;
