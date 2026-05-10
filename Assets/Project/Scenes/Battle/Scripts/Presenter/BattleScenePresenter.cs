@@ -37,6 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
         bool isBattleStarted;
+        bool hasResumedPlayerAnimationOnBoss;
 
         void Awake()
         {
@@ -264,6 +265,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            playerPresenter?.FreezeRunAnimation();
+            hasResumedPlayerAnimationOnBoss = false;
+
             phaseStateMachine.SetTimelineResolver(phase =>
             {
                 if (ShouldUseStrongAttack(phase))
@@ -275,6 +279,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             phaseStateMachine.OnPhaseStarted
                              .Subscribe(phase =>
                              {
+                                 if (!hasResumedPlayerAnimationOnBoss)
+                                 {
+                                     hasResumedPlayerAnimationOnBoss = true;
+                                     playerPresenter?.UnfreezeRunAnimation();
+                                 }
+
                                  var builder = ShouldUseStrongAttack(phase)
                                      ? phase.BuilderStrong
                                      : phase.Builder;

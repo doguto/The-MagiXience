@@ -163,16 +163,25 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                              if (msg.isPressed)
                              {
                                  model.SetSneaking(true);
+                                 view.EnterCharge();
                              }
                              else
                              {
-                                 if (model.IsChargeComplete)
+                                 bool chargeSucceeded = model.IsChargeComplete;
+                                 if (chargeSucceeded)
                                  {
                                      FireChargedShot();
                                      model.ResetCharge();
                                  }
 
                                  model.SetSneaking(false);
+
+                                 // 成功時: FireChargedShot 内の EnterAttack に任せる
+                                 // 失敗時: Run に戻す
+                                 if (!chargeSucceeded)
+                                 {
+                                     view.EnterRun();
+                                 }
                              }
                          })
                          .AddTo(inputDisposables);
@@ -182,6 +191,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             inputDisposables?.Dispose();
             inputDisposables = new CompositeDisposable();
+        }
+
+        public void FreezeRunAnimation()
+        {
+            // 走りのフレーム間隔を徐々に伸ばしてやがてStayに切り替える
+            view.BeginSlowToStay();
+        }
+
+        public void UnfreezeRunAnimation()
+        {
+            view.EnterRun();
         }
 
         void Update()
@@ -200,6 +220,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 model.UpdateCharge(Time.deltaTime);
             }
+
+            view.UpdateAnimation();
         }
 
         Vector3 HandleMovement()
@@ -228,12 +250,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             normalBulletPool.SpawnBullet(normalShotDamage, transform.position);
             lastShootTime = Time.time;
+            view.EnterAttack();
         }
 
         void FireChargedShot()
         {
             chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + chargeShotOffset, isPlayerBullet: true);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
+            view.EnterAttack();
         }
 
         void HandleDeath()
