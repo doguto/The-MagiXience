@@ -119,41 +119,91 @@ MonoBehaviour:
         rid: 8577112587349262556
       directionProvider:
         rid: 8577112587349262557
-      sourceIndex: 0
+      rotationProvider:
+        rid: 1000
+      sourceIndexProvider:
+        rid: 1001
       seType: 0
     - time: 0.75
       signal:
         rid: 8577112587349262559
       directionProvider:
         rid: 8577112587349262560
-      sourceIndex: 0
+      rotationProvider:
+        rid: 1002
+      sourceIndexProvider:
+        rid: 1003
       seType: 0
     - time: 1.5
       signal:
         rid: 8577112587349262561
       directionProvider:
         rid: 8577112587349262562
-      sourceIndex: 0
+      rotationProvider:
+        rid: 1004
+      sourceIndexProvider:
+        rid: 1005
       seType: 0
     - time: 2.25
       signal:
         rid: 8577112587349262563
       directionProvider:
         rid: 8577112587349262564
-      sourceIndex: 0
+      rotationProvider:
+        rid: 1006
+      sourceIndexProvider:
+        rid: 1007
       seType: 0
     - time: 3
       signal:
         rid: 8577112587349262565
       directionProvider:
         rid: 8577112587349262566
-      sourceIndex: 0
+      rotationProvider:
+        rid: 1008
+      sourceIndexProvider:
+        rid: 1009
       seType: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
     version: 2
     RefIds:
+    - rid: 1000
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1001
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1002
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1003
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1004
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1005
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1006
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1007
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1008
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1009
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
     - rid: 8577112587349262553
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -288,8 +338,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 254900173
+  m_SortingLayer: -2
   m_SortingOrder: 0
   m_Sprite: {fileID: 4653426274120862573, guid: 996bf70840f953a439ef3739175da099, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

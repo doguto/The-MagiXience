@@ -120,20 +120,40 @@ MonoBehaviour:
         rid: 8577112587349262617
       directionProvider:
         rid: 8577112587349262582
-      sourceIndex: 0
+      rotationProvider:
+        rid: 1000
+      sourceIndexProvider:
+        rid: 1001
       seType: 0
     - time: 3
       signal:
         rid: 8577112587349262618
       directionProvider:
         rid: 8577112587349262592
-      sourceIndex: 0
+      rotationProvider:
+        rid: 1002
+      sourceIndexProvider:
+        rid: 1003
       seType: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
     version: 2
     RefIds:
+    - rid: 1000
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1001
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1002
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1003
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
     - rid: 8577112580335075430
       type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -277,8 +297,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 254900173
+  m_SortingLayer: -2
   m_SortingOrder: 0
   m_Sprite: {fileID: 7450309199561605471, guid: ea0bc0a409639854a9a0b61d18f12f0e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
