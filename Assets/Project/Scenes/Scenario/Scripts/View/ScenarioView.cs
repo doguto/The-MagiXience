@@ -8,8 +8,8 @@ namespace Project.Scenes.Scenario.Scripts.View
     {
         [SerializeField] TextMeshProUGUI characterNameText;
         [SerializeField] TextMeshProUGUI contentsText;
-        [SerializeField] SpriteRenderer playerSpriteRenderer;
-        [SerializeField] SpriteRenderer enemySpriteRenderer;
+        [SerializeField] Image playerImage;
+        [SerializeField] Image enemyImage;
         [SerializeField] Image faceImage;
 
         public void ShowCastMessage(string characterName, string message)
@@ -38,14 +38,16 @@ namespace Project.Scenes.Scenario.Scripts.View
             if (position == "LL")
             {
                 // 左側 = プレイヤー
-                playerSpriteRenderer.sprite = playerSprite;
-                playerSpriteRenderer.gameObject.SetActive(true);
+                playerImage.sprite = playerSprite;
+                playerImage.SetNativeSize();
+                playerImage.gameObject.SetActive(true);
             }
             else if (position == "RR")
             {
                 // 右側 = 敵キャラ
-                enemySpriteRenderer.sprite = enemySprite;
-                enemySpriteRenderer.gameObject.SetActive(true);
+                enemyImage.sprite = enemySprite;
+                enemyImage.SetNativeSize();
+                enemyImage.gameObject.SetActive(true);
             }
         }
 
