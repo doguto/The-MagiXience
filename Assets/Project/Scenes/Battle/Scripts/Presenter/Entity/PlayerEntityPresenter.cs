@@ -31,6 +31,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] int chargedShotDamage = 30;
         [SerializeField] float shootCooldown = 0.2f;
 
+        [Header("Damage Flash")]
+        [SerializeField] float damageFlashInterval = 0.1f;
+
         [Header("component references")] [SerializeField]
         PlayerEntityView view;
 
@@ -48,6 +51,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Vector2 pendingPush;
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
+        IDisposable damageFlashSubscription;
 
         IDisposable sceneNavigationSubscription;
 
@@ -87,6 +91,37 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             model.OnDeath
                  .Subscribe(_ => HandleDeath())
                  .AddTo(disposables);
+
+            model.CurrentHp
+                 .Subscribe(hp => view.SetHpRatio((float)hp / model.MaxHp))
+                 .AddTo(disposables);
+
+            model.IsInvincible
+                 .Subscribe(OnInvincibleChanged)
+                 .AddTo(disposables);
+        }
+
+        void OnInvincibleChanged(bool invincible)
+        {
+            damageFlashSubscription?.Dispose();
+            damageFlashSubscription = null;
+
+            if (!invincible)
+            {
+                view.ResetDamageFlash();
+                return;
+            }
+
+            // 即時に1回フラッシュを開始してから周期トグル
+            view.SetDamageFlashActive(true);
+            bool flashOn = true;
+            damageFlashSubscription = Observable
+                .Interval(TimeSpan.FromSeconds(damageFlashInterval))
+                .Subscribe(_ =>
+                {
+                    flashOn = !flashOn;
+                    view.SetDamageFlashActive(flashOn);
+                });
         }
 
         void SubscribeToMoveInput()
@@ -224,6 +259,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 PlayerPositionReference.Transform = null;
             }
 
+            damageFlashSubscription?.Dispose();
             disposables.Dispose();
             model?.Dispose();
         }
