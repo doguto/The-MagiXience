@@ -18,6 +18,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField] EnemyTracker enemyTracker;
+        [SerializeField] BackgroundPresenter backgroundPresenter;
 
         BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
@@ -98,6 +99,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 SpawnBoss();
                 PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
+                backgroundPresenter?.ResetScroll();
             }
             else if (waySequence != null)
             {
@@ -292,6 +294,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);
 
+            backgroundPresenter?.StartDeceleration();
+
             Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
         }
 
@@ -348,6 +352,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 Debug.Log($"[BattleScenePresenter] Starting next stage {stageModel.StageNumber}", this);
                 PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
+                backgroundPresenter?.ResetScroll();
             }
             else
             {
