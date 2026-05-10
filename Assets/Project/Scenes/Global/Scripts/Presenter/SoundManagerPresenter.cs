@@ -11,6 +11,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
     {
         [SerializeField] AudioSource bgmAudioSource;
         [SerializeField] AudioSource seAudioSource;
+        [SerializeField] AudioSource loopSeAudioSource;
 
         public AudioSource BgmAudioSource => bgmAudioSource;
 
@@ -18,6 +19,8 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         int bgmLoopStartSamples;
         int bgmLoopEndSamples;
+        int loopSeLoopStartSamples;
+        int loopSeLoopEndSamples;
 
         void Awake()
         {
@@ -30,11 +33,16 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         void Update()
         {
-            if (!bgmAudioSource.isPlaying || bgmLoopEndSamples <= 0) return;
-
-            if (bgmAudioSource.timeSamples >= bgmLoopEndSamples)
+            if (bgmAudioSource.isPlaying && bgmLoopEndSamples > 0
+                && bgmAudioSource.timeSamples >= bgmLoopEndSamples)
             {
                 bgmAudioSource.timeSamples = bgmLoopStartSamples;
+            }
+
+            if (loopSeAudioSource.isPlaying && loopSeLoopEndSamples > 0
+                && loopSeAudioSource.timeSamples >= loopSeLoopEndSamples)
+            {
+                loopSeAudioSource.timeSamples = loopSeLoopStartSamples;
             }
         }
 
@@ -68,6 +76,35 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
             seAudioSource.PlayOneShot(seClip);
         }
+        
+        public void PlayLoopSE(SeType seType)
+        {
+            if (loopSeAudioSource == null)
+            {
+                Debug.LogWarning("[SoundManagerPresenter] loopSeAudioSource is not assigned.");
+                return;
+            }
+
+            var seModel = soundModelRepository.GetSeModel(seType);
+            var seClip = seModel.AudioClip;
+
+            loopSeLoopStartSamples = seModel.LoopStartSamples;
+            loopSeLoopEndSamples = seModel.LoopEndSamples > 0
+                ? seModel.LoopEndSamples
+                : seClip.samples;
+
+            loopSeAudioSource.clip = seClip;
+            loopSeAudioSource.loop = false; // Update内で手動ループ
+            loopSeAudioSource.timeSamples = 0;
+            loopSeAudioSource.Play();
+        }
+
+        public void StopLoopSE()
+        {
+            if (loopSeAudioSource == null) return;
+            loopSeAudioSource.Stop();
+            loopSeLoopEndSamples = 0;
+        }
 
         public async UniTask PlaySEAsync(SeType seType)
         {
@@ -84,7 +121,9 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         public void SetSEVolume(int volume)
         {
-            seAudioSource.volume = Mathf.Clamp01(volume / 100.0f);
+            float v = Mathf.Clamp01(volume / 100.0f);
+            seAudioSource.volume = v;
+            if (loopSeAudioSource != null) loopSeAudioSource.volume = v;
         }
     }
 }

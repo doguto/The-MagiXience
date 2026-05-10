@@ -5,14 +5,16 @@ using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Movement;
+using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Model;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(PlayerEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class PlayerEntityPresenter : MonoBehaviour, IEntityPresenter
+    public class PlayerEntityPresenter : MonoPresenter, IEntityPresenter
     {
         [Header("Entity Settings")] [SerializeField]
         int maxHp = 100;
@@ -73,8 +75,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             PlayerPositionReference.Transform = transform;
         }
 
-        void Start()
+        protected override void Start()
         {
+            base.Start();
             BindModelToView();
             SubscribeToMoveInput();
             SubscribeToAttackInput();
@@ -127,6 +130,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // ダメージフラッシュ優先のため、進行中のチャージ点滅を一旦止める
             StopChargeFlash();
+
+            // 被弾SE
+            soundManager?.PlaySE(SeType.Damage);
 
             // 即時に1回フラッシュを開始してから周期トグル
             view.SetDamageFlashActive(true);
@@ -215,9 +221,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                              {
                                  model.SetSneaking(true);
                                  view.EnterCharge();
+                                 soundManager?.PlayLoopSE(SeType.Charge);
                              }
                              else
                              {
+                                 soundManager?.StopLoopSE();
+
                                  bool chargeSucceeded = model.IsChargeComplete;
                                  if (chargeSucceeded)
                                  {
@@ -302,6 +311,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             normalBulletPool.SpawnBullet(normalShotDamage, transform.position);
             lastShootTime = Time.time;
             view.EnterAttack();
+            soundManager?.PlaySE(SeType.Attack);
         }
 
         void FireChargedShot()
@@ -309,6 +319,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + chargeShotOffset, isPlayerBullet: true);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
             view.EnterAttack();
+            soundManager?.PlaySE(SeType.ChargeRelease);
         }
 
         void HandleDeath()

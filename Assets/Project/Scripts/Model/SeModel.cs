@@ -12,6 +12,8 @@ namespace Project.Scripts.Model
         public AudioClip AudioClip => audioClip ?? LoadAudioClip();
         public SeData SeData { get; }
         public string Name => SeData.name;
+        public int LoopStartSamples => SeData.loopStartSamples;
+        public int LoopEndSamples => SeData.loopEndSamples;
 
         public SeModel(SeData seData)
         {

@@ -10,14 +10,14 @@ using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.Model.Attack;
-using Project.Scenes.Global.Scripts.Presenter;
 using Project.Scripts.Extensions;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(EnemyEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter
+    public class EnemyEntityPresenter : MonoPresenter, IEntityPresenter
     {
         // NOTE: 新規プロパティを追加したらEnemyEntityPresenterEditor.csも編集すること
         [Header("Entity Settings")] [SerializeField]
@@ -84,7 +84,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         EnemyEntityModel model;
         PlayerEntityPresenter playerPresenter;
-        SoundManagerPresenter soundManager;
         Tween currentTween;
         CancellationTokenSource movementCts;
         CancellationTokenSource lifetimeCts;
@@ -98,7 +97,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[EnemyEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
-            soundManager = FindFirstObjectByType<SoundManagerPresenter>();
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
             Initialize(transform.position);
         }

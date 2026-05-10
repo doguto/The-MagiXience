@@ -6,6 +6,10 @@
         Click,
         Cancel,
         EnemyShotShort,
-        EnemyShotLong
+        EnemyShotLong,
+        Attack,
+        Charge,
+        ChargeRelease,
+        Damage,
     }
 }
