@@ -99,7 +99,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 SpawnBoss();
                 PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
-                backgroundPresenter?.ResetScroll();
             }
             else if (waySequence != null)
             {
