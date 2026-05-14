@@ -69,6 +69,9 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         bool slowingToStay;
         float slowElapsed;
 
+        // Attack終了後にChargeへ遷移する予約
+        bool chargeQueuedAfterAttack;
+
         void Reset()
         {
             bodySpriteRenderer = GetComponent<SpriteRenderer>();
@@ -151,7 +154,17 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
 
             if (attackSeqIndex >= attackSequence.Length)
             {
-                EnterRun();
+                if (chargeQueuedAfterAttack)
+                {
+                    chargeQueuedAfterAttack = false;
+                    // 直接Charge状態に遷移（EnterChargeはAttack中だと予約してしまうため）
+                    currentState = AnimationState.Charge;
+                    EnterCharge();
+                }
+                else
+                {
+                    EnterRun();
+                }
                 return;
             }
 
@@ -177,6 +190,7 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
             attackSeqIndex = 0;
             slowingToStay = false;
             slowElapsed = 0f;
+            chargeQueuedAfterAttack = false;
             ApplyRunFrame(0);
         }
 
@@ -209,9 +223,15 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
 
         public void EnterCharge()
         {
-            if (currentState == AnimationState.Attack) return; // 攻撃モーション中は割り込まない
+            if (currentState == AnimationState.Attack)
+            {
+                // 攻撃モーション中は割り込まず、終了後にChargeへ遷移するよう予約
+                chargeQueuedAfterAttack = true;
+                return;
+            }
             currentState = AnimationState.Charge;
             frameTimer = 0f;
+            chargeQueuedAfterAttack = false;
             if (chargeSprite != null && bodySpriteRenderer != null)
             {
                 bodySpriteRenderer.sprite = chargeSprite;
