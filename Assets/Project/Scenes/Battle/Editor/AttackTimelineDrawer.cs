@@ -11,7 +11,7 @@ namespace Project.Scenes.Battle.Editor
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializeReferenceDeduplicator.DeduplicateField(
-                property.FindPropertyRelative("entries"), "signal", "directionProvider");
+                property.FindPropertyRelative("entries"), "signal", "directionProvider", "rotationProvider", "sourceIndexProvider");
 
             EditorGUI.PropertyField(position, property, label, true);
         }
