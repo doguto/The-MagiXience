@@ -77,7 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -2124711813
-  m_SortingLayer: -1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 6397573364387592255, guid: d3e78990a7ba5424782fba33300a351a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -162,14 +162,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementSteps:
-  - rid: 454448117209104646
+  - rid: 454448276944191579
   view: {fileID: 8877745320614750256}
   spriteRenderer: {fileID: 1851957906713825068}
   lifetime: 10
   references:
     version: 2
     RefIds:
-    - rid: 454448117209104646
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 454448276944191579
+      type: {class: ReflectMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        velocity: {x: -1, y: 0, z: 0}
+        speed: 1
+        maxReflections: 1
+        reflectTop: 1
+        reflectBottom: 1
+        reflectLeft: 0
+        reflectRight: 0

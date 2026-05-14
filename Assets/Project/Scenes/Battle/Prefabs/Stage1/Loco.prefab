@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: -507459254486725446, guid: 099d18aed3025f0469211fce96764a06, type: 3}
+  bulletPrefab: {fileID: 0}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &3799260870064876274
@@ -271,7 +271,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 254900173
-  m_SortingLayer: -2
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 0d5d8fea5d030814d9a994f6381c93b6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -296,7 +296,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e03ed9e7a71bb104da997bf4950beaec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 600
+  maxHp: 1000
   contactDamage: 20
   bulletPools:
   - {fileID: 329598891345423902}
@@ -307,6 +307,7 @@ MonoBehaviour:
   bulletDamage: 10
   enemySpawnPrefabs:
   - {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
+  - {fileID: 2191354779743736906, guid: 33482601f496c5d4488d3c72cfe3cc21, type: 3}
   view: {fileID: 1827464944305382855}
 --- !u!114 &1827464944305382855
 MonoBehaviour:

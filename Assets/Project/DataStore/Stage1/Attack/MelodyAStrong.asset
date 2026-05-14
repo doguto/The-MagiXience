@@ -16,7 +16,7 @@ MonoBehaviour:
     loop: 1
     loopStart: 1.2
     loopEnd: 30
-    cycleDuration: 7
+    cycleDuration: 3.5
     entries:
     - time: 0
       signal:
@@ -34,9 +34,9 @@ MonoBehaviour:
       directionProvider:
         rid: 454448157880483957
       rotationProvider:
-        rid: 454448117209104583
+        rid: 454448276944191590
       sourceIndexProvider:
-        rid: 454448117209104568
+        rid: 454448276944191591
       seType: 0
   references:
     version: 2
@@ -62,3 +62,10 @@ MonoBehaviour:
     - rid: 454448157880483957
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
+    - rid: 454448276944191590
+      type: {class: AimRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448276944191591
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 1
