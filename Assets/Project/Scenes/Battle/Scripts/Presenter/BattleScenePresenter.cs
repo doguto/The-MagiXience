@@ -1,6 +1,5 @@
 using System;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +18,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     {
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField] EnemyTracker enemyTracker;
+        [SerializeField] BackgroundPresenter backgroundPresenter;
 
         BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
@@ -36,12 +36,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
+        bool isBattleStarted;
+        bool hasResumedPlayerAnimationOnBoss;
+
         void Awake()
         {
             sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
             sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
             sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
+            ScreenBoundsCache.Initialize(gameObject.scene);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
             {
@@ -56,6 +60,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void StartBattle()
         {
+            base.Start();
+
             if (!phaseStateMachine)
             {
                 Debug.LogError("BattlePhaseStateMachine is not assigned.", this);
@@ -259,26 +265,55 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            playerPresenter?.FreezeRunAnimation();
+            hasResumedPlayerAnimationOnBoss = false;
+
+            phaseStateMachine.SetTimelineResolver(phase =>
+            {
+                if (ShouldUseStrongAttack(phase))
+                {
+                    return phase.ResolveTimelineStrong();
+                }
+                return phase.ResolveTimeline();
+            });
             phaseStateMachine.OnPhaseStarted
-                             .Subscribe(phase => bossPresenter.OnPhaseStarted(phase))
+                             .Subscribe(phase =>
+                             {
+                                 if (!hasResumedPlayerAnimationOnBoss)
+                                 {
+                                     hasResumedPlayerAnimationOnBoss = true;
+                                     playerPresenter?.UnfreezeRunAnimation();
+                                 }
+
+                                 var builder = ShouldUseStrongAttack(phase)
+                                     ? phase.BuilderStrong
+                                     : phase.Builder;
+                                 bossPresenter.OnPhaseStarted(phase, builder);
+                             })
                              .AddTo(disposables);
 
-            PlayEntranceMovement(instance.transform);
+            bossPresenter.OnDeath
+                         .Take(1)
+                         .Subscribe(_ =>
+                         {
+                             phaseStateMachine.Stop();
+                             HandleSequenceCompleted(BattleSituation.Boss);
+                         })
+                         .AddTo(disposables);
+
+            bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);
+
+            backgroundPresenter?.StartDeceleration();
 
             Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
         }
 
-        void PlayEntranceMovement(Transform bossTransform)
+        bool ShouldUseStrongAttack(BattlePhaseModelBase phase)
         {
-            var steps = bossSequence.BossEntranceMovement;
-            if (steps == null || steps.Count == 0) return;
-
-            var sequence = DOTween.Sequence();
-            foreach (var step in steps)
-            {
-                if (step == null) continue;
-                sequence.Append(step.Play(bossTransform, Vector2.zero, bossTransform.GetComponent<Animator>()));
-            }
+            if (phase.BuilderStrong == null || bossPresenter?.Model == null) return false;
+            var bossModel = bossPresenter.Model;
+            var hpPercent = (float)bossModel.CurrentHp.Value / bossModel.MaxHp * 100f;
+            return hpPercent <= phase.StrongAttackHpThresholdPercent;
         }
 
         void StartBossSequence()
@@ -326,6 +361,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 Debug.Log($"[BattleScenePresenter] Starting next stage {stageModel.StageNumber}", this);
                 PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
+                backgroundPresenter?.ResetScroll();
             }
             else
             {

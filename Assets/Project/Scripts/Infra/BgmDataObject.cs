@@ -19,5 +19,11 @@ namespace Project.Scripts.Infra
 
         public SceneType sceneType;
         public BgmType bgmType;
+
+        [Tooltip("ループ開始位置（サンプル数）。イントロ終了地点。")]
+        public int loopStartSamples;
+
+        [Tooltip("ループ終了位置（サンプル数）。0の場合はクリップ全体の長さを使用。")]
+        public int loopEndSamples;
     }
 }

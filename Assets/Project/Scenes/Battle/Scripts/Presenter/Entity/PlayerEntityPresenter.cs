@@ -3,15 +3,18 @@ using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
+using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Movement;
+using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Model;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(PlayerEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class PlayerEntityPresenter : MonoBehaviour, IEntityPresenter
+    public class PlayerEntityPresenter : MonoPresenter, IEntityPresenter
     {
         [Header("Entity Settings")] [SerializeField]
         int maxHp = 100;
@@ -26,8 +29,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         [SerializeField] BulletPool chargeBulletPool;
         [SerializeField] int normalShotDamage = 10;
+        [SerializeField] Vector3 chargeShotOffset = new(0, 0, 0);
         [SerializeField] int chargedShotDamage = 30;
         [SerializeField] float shootCooldown = 0.2f;
+
+        [Header("Damage Flash")]
+        [SerializeField] float damageFlashInterval = 0.1f;
+
+        [Header("Charge Flash")]
+        [SerializeField] float chargeFlashInterval = 0.08f;
 
         [Header("component references")] [SerializeField]
         PlayerEntityView view;
@@ -41,13 +51,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         PlayerEntityModel model;
-        Camera mainCamera;
-        Camera MainCamera => mainCamera != null ? mainCamera : mainCamera = Camera.main;
         float lastShootTime;
         Vector2 currentMoveInput;
         Vector2 pendingPush;
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
+        IDisposable damageFlashSubscription;
+        IDisposable chargeFlashSubscription;
 
         IDisposable sceneNavigationSubscription;
 
@@ -65,8 +75,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             PlayerPositionReference.Transform = transform;
         }
 
-        void Start()
+        protected override void Start()
         {
+            base.Start();
             BindModelToView();
             SubscribeToMoveInput();
             SubscribeToAttackInput();
@@ -79,8 +90,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (message.State != SceneNavigationState.Completed) return;
 
             sceneNavigationSubscription?.Dispose();
-            mainCamera = Camera.main;
-            Debug.Log($"[PlayerEntityPresenter] MainCamera Set {mainCamera.name}", mainCamera.gameObject);
+            Debug.Log($"[PlayerEntityPresenter] ScreenBounds initialized: ({ScreenBoundsCache.MinX}, {ScreenBoundsCache.MinY}) - ({ScreenBoundsCache.MaxX}, {ScreenBoundsCache.MaxY})");
         }
 
         void BindModelToView()
@@ -88,6 +98,87 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             model.OnDeath
                  .Subscribe(_ => HandleDeath())
                  .AddTo(disposables);
+
+            model.CurrentHp
+                 .Subscribe(hp => view.SetHpRatio((float)hp / model.MaxHp))
+                 .AddTo(disposables);
+
+            model.IsInvincible
+                 .Subscribe(OnInvincibleChanged)
+                 .AddTo(disposables);
+
+            model.IsChargeCompleteChanged
+                 .Subscribe(OnChargeCompleteChanged)
+                 .AddTo(disposables);
+        }
+
+        void OnInvincibleChanged(bool invincible)
+        {
+            damageFlashSubscription?.Dispose();
+            damageFlashSubscription = null;
+
+            if (!invincible)
+            {
+                view.ResetDamageFlash();
+                // 無敵が解けた瞬間にチャージ完了が継続していれば点滅を再開
+                if (model.IsChargeComplete)
+                {
+                    StartChargeFlash();
+                }
+                return;
+            }
+
+            // ダメージフラッシュ優先のため、進行中のチャージ点滅を一旦止める
+            StopChargeFlash();
+
+            // 被弾SE
+            soundManager?.PlaySE(SeType.Damage);
+
+            // 即時に1回フラッシュを開始してから周期トグル
+            view.SetDamageFlashActive(true);
+            bool flashOn = true;
+            damageFlashSubscription = Observable
+                .Interval(TimeSpan.FromSeconds(damageFlashInterval))
+                .Subscribe(_ =>
+                {
+                    flashOn = !flashOn;
+                    view.SetDamageFlashActive(flashOn);
+                });
+        }
+
+        void OnChargeCompleteChanged(bool complete)
+        {
+            if (complete)
+            {
+                // 無敵中はダメージフラッシュ優先のため、チャージ点滅は始めない
+                if (model.IsInvincible.Value) return;
+                StartChargeFlash();
+            }
+            else
+            {
+                StopChargeFlash();
+            }
+        }
+
+        void StartChargeFlash()
+        {
+            chargeFlashSubscription?.Dispose();
+            view.SetChargeFlashActive(true);
+            bool flashOn = true;
+            chargeFlashSubscription = Observable
+                .Interval(TimeSpan.FromSeconds(chargeFlashInterval))
+                .Subscribe(_ =>
+                {
+                    flashOn = !flashOn;
+                    view.SetChargeFlashActive(flashOn);
+                });
+        }
+
+        void StopChargeFlash()
+        {
+            chargeFlashSubscription?.Dispose();
+            chargeFlashSubscription = null;
+            view.ResetChargeFlash();
         }
 
         void SubscribeToMoveInput()
@@ -129,16 +220,28 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                              if (msg.isPressed)
                              {
                                  model.SetSneaking(true);
+                                 view.EnterCharge();
+                                 soundManager?.PlayLoopSE(SeType.Charge);
                              }
                              else
                              {
-                                 if (model.IsChargeComplete)
+                                 soundManager?.StopLoopSE();
+
+                                 bool chargeSucceeded = model.IsChargeComplete;
+                                 if (chargeSucceeded)
                                  {
                                      FireChargedShot();
                                      model.ResetCharge();
                                  }
 
                                  model.SetSneaking(false);
+
+                                 // 成功時: FireChargedShot 内の EnterAttack に任せる
+                                 // 失敗時: Run に戻す
+                                 if (!chargeSucceeded)
+                                 {
+                                     view.EnterRun();
+                                 }
                              }
                          })
                          .AddTo(inputDisposables);
@@ -148,6 +251,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             inputDisposables?.Dispose();
             inputDisposables = new CompositeDisposable();
+        }
+
+        public void FreezeRunAnimation()
+        {
+            // 走りのフレーム間隔を徐々に伸ばしてやがてStayに切り替える
+            view.BeginSlowToStay();
+        }
+
+        public void UnfreezeRunAnimation()
+        {
+            view.EnterRun();
         }
 
         void Update()
@@ -166,6 +280,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 model.UpdateCharge(Time.deltaTime);
             }
+
+            view.UpdateAnimation();
         }
 
         Vector3 HandleMovement()
@@ -181,9 +297,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             var extents = spriteRenderer.bounds.extents;
 
-            // Spriteの端がビューポート(0,0)〜(1,1)に収まるようにクランプ
-            var minWorld = MainCamera.ViewportToWorldPoint(Vector3.zero);
-            var maxWorld = MainCamera.ViewportToWorldPoint(Vector3.one);
+            var minWorld = new Vector3(ScreenBoundsCache.MinX, ScreenBoundsCache.MinY);
+            var maxWorld = new Vector3(ScreenBoundsCache.MaxX, ScreenBoundsCache.MaxY);
 
             position.x = Mathf.Clamp(position.x, minWorld.x + extents.x, maxWorld.x - extents.x);
             position.y = Mathf.Clamp(position.y, minWorld.y + extents.y - 0.2f, maxWorld.y - extents.y - 2.1f);
@@ -195,12 +310,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             normalBulletPool.SpawnBullet(normalShotDamage, transform.position);
             lastShootTime = Time.time;
+            view.EnterAttack();
+            soundManager?.PlaySE(SeType.Attack);
         }
 
         void FireChargedShot()
         {
-            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + Vector3.right * 2f, isPlayerBullet: true);
+            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + chargeShotOffset, isPlayerBullet: true);
             Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
+            view.EnterAttack();
+            soundManager?.PlaySE(SeType.ChargeRelease);
         }
 
         void HandleDeath()
@@ -226,6 +345,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 PlayerPositionReference.Transform = null;
             }
 
+            damageFlashSubscription?.Dispose();
+            chargeFlashSubscription?.Dispose();
             disposables.Dispose();
             model?.Dispose();
         }

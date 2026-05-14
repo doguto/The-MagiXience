@@ -10,13 +10,13 @@ using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Model.Attack;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.View.Entity;
-using Project.Scenes.Global.Scripts.Presenter;
 using Project.Scripts.Extensions;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(EnemyEntityView))]
-    public class BossEntityPresenter : MonoBehaviour, IEntityPresenter
+    public class BossEntityPresenter : MonoPresenter, IEntityPresenter
     {
         [Header("Entity Settings")]
         [SerializeField] int maxHp = 200;
@@ -25,19 +25,54 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Attack")]
         [SerializeField] BulletPool[] bulletPools;
         [SerializeField] int bulletDamage = 10;
+        [SerializeField] GameObject[] enemySpawnPrefabs;
 
         [Header("Component References")]
         [SerializeField] EnemyEntityView view;
+        EnemyTracker enemyTracker;
 
         void Reset()
         {
             view = GetComponent<EnemyEntityView>();
         }
 
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+            if (Application.isPlaying) return;
+            UnityEditor.EditorApplication.delayCall += AppendChildBulletPools;
+        }
+
+        void AppendChildBulletPools()
+        {
+            if (this == null) return;
+
+            var children = GetComponentsInChildren<BulletPool>(true);
+            if (children == null || children.Length == 0) return;
+
+            var current = bulletPools ?? Array.Empty<BulletPool>();
+            var appended = new List<BulletPool>(current);
+            bool changed = false;
+
+            foreach (var child in children)
+            {
+                if (child == null) continue;
+                if (Array.IndexOf(current, child) >= 0) continue;
+                appended.Add(child);
+                changed = true;
+            }
+
+            if (!changed) return;
+
+            bulletPools = appended.ToArray();
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+#endif
+
         EnemyEntityModel model;
         PlayerEntityPresenter playerPresenter;
-        SoundManagerPresenter soundManager;
-        Tween currentTween;
+        readonly List<IMovementStep> activeMovementSteps = new();
+        Tween entranceTween;
         CancellationTokenSource movementCts;
         readonly CompositeDisposable disposables = new();
 
@@ -48,7 +83,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
-            soundManager = FindFirstObjectByType<SoundManagerPresenter>();
+            enemyTracker = FindFirstObjectByType<EnemyTracker>();
 
             model = new EnemyEntityModel(maxHp, contactDamage);
 
@@ -59,13 +94,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdatePosition(transform.position);
         }
 
-        public void OnPhaseStarted(BattlePhaseModelBase phase)
+        public void OnPhaseStarted(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder)
         {
-            var builder = phase.Builder;
-            if (builder == null) return;
+            if (builder == null)
+            {
+                ApplyAttackTimeline(null);
+                StartMovementSequence(null);
+                return;
+            }
 
-            var attackTimeline = builder.BossAttackPreset != null
-                ? builder.BossAttackPreset.CreateTimeline()
+            var attackPreset = builder.BossAttackPreset;
+            var attackTimeline = attackPreset != null
+                ? attackPreset.CreateTimeline()
                 : null;
             ApplyAttackTimeline(attackTimeline);
 
@@ -86,12 +126,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
-            attackTimeline.InitializeProviders(getPlayerPos, () => transform.position);
+            attackTimeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation);
             model.SetAttackStrategy(attackTimeline);
 
             model.AttackStrategy.OnAttackTiming
                 .TakeUntil(model.OnDeath)
-                .Subscribe(ev => FireBullet(ev))
+                .Subscribe(ev => HandleAttackEvent(ev))
                 .AddTo(disposables);
         }
 
@@ -106,24 +146,75 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             RunMovementStepsAsync(steps, animator, movementCts.Token).Forget();
         }
 
+        public void PlayEntranceMovement(IReadOnlyList<IMovementStep> steps)
+        {
+            if (steps == null || steps.Count == 0) return;
+
+            var animator = GetComponent<Animator>();
+            var sequence = DOTween.Sequence();
+            foreach (var step in steps)
+            {
+                if (step == null) continue;
+                sequence.Append(step.Play(transform, Vector2.zero, animator));
+            }
+            entranceTween = sequence;
+        }
+
         async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Animator animator, CancellationToken ct)
         {
             foreach (var step in steps)
             {
                 if (step == null) continue;
                 ct.ThrowIfCancellationRequested();
-                currentTween = step.Play(transform, Vector2.zero, animator);
-                await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
+
+                activeMovementSteps.Add(step);
+                var tween = step.Play(transform, Vector2.zero, animator);
+                if (tween == null)
+                {
+                    activeMovementSteps.Remove(step);
+                    continue;
+                }
+
+                try
+                {
+                    await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
+                }
+                finally
+                {
+                    activeMovementSteps.Remove(step);
+                }
             }
         }
 
         void StopMovement()
         {
+            if (entranceTween != null && entranceTween.IsActive())
+            {
+                entranceTween.Complete();
+            }
+            entranceTween = null;
+
+            // ScriptableObject由来でTween.OnKill経由のキャンセルが効かないケースに備え、
+            // movementCts.Cancel()より先に、裏で非同期ループを抱える可能性があるLoopMovementのStepに
+            // 明示的な停止を依頼する。先にCancelすると、RunMovementStepsAsyncのfinallyで
+            // activeMovementSteps.Remove()が走ってしまい、ここでForceStopできなくなる。
+            //
+            // ListのスナップショットをとってからForceStopする。ForceStop経由でawaitが解決し
+            // RunMovementStepsAsyncのfinallyが同期実行されてリストが変動する可能性があるため。
+            var stepsSnapshot = activeMovementSteps.ToArray();
+            for (int i = 0; i < stepsSnapshot.Length; i++)
+            {
+                if (stepsSnapshot[i] is LoopMovementConfig loop)
+                {
+                    loop.ForceStop();
+                }
+            }
+
             movementCts?.Cancel();
             movementCts?.Dispose();
             movementCts = null;
-            currentTween?.Kill();
-            currentTween = null;
+
+            activeMovementSteps.Clear();
         }
 
         void Update()
@@ -134,9 +225,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdatePosition(transform.position);
         }
 
+        void HandleAttackEvent(AttackEvent ev)
+        {
+            switch (ev.Type)
+            {
+                case AttackEventType.Bullet:
+                    FireBullet(ev);
+                    break;
+                case AttackEventType.EnemySpawn:
+                    SpawnEnemy(ev);
+                    break;
+            }
+        }
+
         void FireBullet(AttackEvent ev)
         {
-            var pool = GetBulletPool(ev.BulletPoolIndex);
+            var pool = GetBulletPool(ev.SourceIndex);
             if (pool == null) return;
 
             if (ev.SeType != SeType.None)
@@ -144,10 +248,40 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 soundManager?.PlaySE(ev.SeType);
             }
 
-            foreach (var dir in ev.Directions)
+            for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, pool.transform.position, dir);
+                pool.SpawnBullet(bulletDamage, pool.transform.position, ev.Directions[i], rotation: GetRotationAt(ev, i));
             }
+        }
+
+        void SpawnEnemy(AttackEvent ev)
+        {
+            var prefab = GetEnemySpawnPrefab(ev.SourceIndex);
+            if (prefab == null) return;
+
+            if (ev.SeType != SeType.None)
+            {
+                soundManager?.PlaySE(ev.SeType);
+            }
+
+            if (ev.SpawnOffsets == null) return;
+            for (int i = 0; i < ev.SpawnOffsets.Count; i++)
+            {
+                // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
+                var instance = Instantiate(prefab);
+                instance.transform.SetPositionAndRotation(transform.position + (Vector3)ev.SpawnOffsets[i], GetRotationAt(ev, i));
+
+                if (enemyTracker != null && instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
+                {
+                    enemyTracker.RegisterEnemy(enemyPresenter);
+                }
+            }
+        }
+
+        static Quaternion GetRotationAt(AttackEvent ev, int index)
+        {
+            if (ev.Rotations == null || ev.Rotations.Count == 0) return Quaternion.identity;
+            return index < ev.Rotations.Count ? ev.Rotations[index] : ev.Rotations[ev.Rotations.Count - 1];
         }
 
         BulletPool GetBulletPool(int index)
@@ -155,6 +289,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (bulletPools == null || bulletPools.Length == 0) return null;
             if (index < 0 || index >= bulletPools.Length) return bulletPools[0];
             return bulletPools[index];
+        }
+
+        GameObject GetEnemySpawnPrefab(int index)
+        {
+            if (enemySpawnPrefabs == null || enemySpawnPrefabs.Length == 0) return null;
+            if (index < 0 || index >= enemySpawnPrefabs.Length) return enemySpawnPrefabs[0];
+            return enemySpawnPrefabs[index];
         }
 
         void HandleDeath()

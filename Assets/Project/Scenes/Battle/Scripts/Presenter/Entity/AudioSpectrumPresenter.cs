@@ -1,13 +1,10 @@
 using UnityEngine;
+using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
-    /// <summary>
-    /// BGMのオーディオスペクトラムを32本のバーとして画面下部に表示する。
-    /// ActivationTrackで最終フェーズ中だけGameObjectを有効化して使う。
-    /// </summary>
     public class AudioSpectrumPresenter : MonoBehaviour
     {
         [Header("Spectrum Settings")] [SerializeField]
@@ -32,11 +29,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         SpectrumBarView[] barViews;
         float[] spectrumData;
         float[] smoothedHeights;
-        Camera mainCamera;
 
         void Awake()
         {
-            mainCamera = Camera.main;
             sharedModel = new SpectrumBarEntityModel(contactDamage);
             spectrumData = new float[FftSize];
             smoothedHeights = new float[barCount];
@@ -53,8 +48,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             barViews = new SpectrumBarView[barCount];
 
-            var screenLeft = mainCamera.ViewportToWorldPoint(Vector3.zero).x;
-            var screenRight = mainCamera.ViewportToWorldPoint(Vector3.one).x;
+            var screenLeft = ScreenBoundsCache.MinX;
+            var screenRight = ScreenBoundsCache.MaxX;
             var totalWidth = screenRight - screenLeft;
             var barWidth = totalWidth / barCount;
 
@@ -86,7 +81,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
 
             
-            var screenBottomY = mainCamera.ViewportToWorldPoint(Vector3.zero).y;
+            var screenBottomY = ScreenBoundsCache.MinY;
 
             // 元の32分割対数マッピングからspectrumRangeStart~spectrumRangeEndの帯域を切り出し
             var rangeBinStart = LogarithmicBinIndex(spectrumRangeStart, barCount, FftSize);
@@ -109,8 +104,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 }
                 var avg = sum / (binEnd - binStart);
 
-                // 感度を適用してターゲット高さを算出
-                var targetHeight = Mathf.Clamp(avg * sensitivity, 0f, maxBarHeight);
+                // 音量で正規化してから感度を適用してターゲット高さを算出
+                var normalizedAvg = avg / Mathf.Max(audioSource.volume, 0.01f);
+                var targetHeight = Mathf.Clamp(normalizedAvg * sensitivity, 0f, maxBarHeight);
 
                 // Lerpで滑らかに
                 smoothedHeights[i] = Mathf.Lerp(smoothedHeights[i], targetHeight, Time.deltaTime * lerpSpeed);

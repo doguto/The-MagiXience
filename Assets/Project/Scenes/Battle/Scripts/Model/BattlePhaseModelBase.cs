@@ -12,6 +12,8 @@ namespace Project.Scenes.Battle.Scripts.Model
 
         TimelineAsset resolvedTimeline;
         bool isTimelineResolved;
+        TimelineAsset resolvedTimelineStrong;
+        bool isTimelineStrongResolved;
 
         protected BattlePhaseModelBase(BattlePhaseDefinition definition)
         {
@@ -24,6 +26,8 @@ namespace Project.Scenes.Battle.Scripts.Model
 
         public string PhaseId => Definition.PhaseId;
         public BattleTimelineBuilderAsset Builder => Definition.TimelineBuilder;
+        public BattleTimelineBuilderAsset BuilderStrong => Definition.TimelineBuilderStrong;
+        public float StrongAttackHpThresholdPercent => Definition.StrongAttackHpThresholdPercent;
         public TimelineAsset TimelineAsset => ResolveTimeline();
         public IObservable<Unit> OnExitPhase => exitSubject;
 
@@ -36,16 +40,23 @@ namespace Project.Scenes.Battle.Scripts.Model
 
             isTimelineResolved = true;
             var asset = Definition.CreateTimeline();
-            if (asset)
-            {
-                resolvedTimeline = asset;
-            }
-            else
-            {
-                resolvedTimeline = null;
-            }
+            resolvedTimeline = asset ? asset : null;
 
             return resolvedTimeline;
+        }
+
+        public TimelineAsset ResolveTimelineStrong()
+        {
+            if (isTimelineStrongResolved)
+            {
+                return resolvedTimelineStrong;
+            }
+
+            isTimelineStrongResolved = true;
+            var asset = Definition.CreateTimelineStrong();
+            resolvedTimelineStrong = asset ? asset : null;
+
+            return resolvedTimelineStrong;
         }
 
         public void Enter(PlayableDirector director)
@@ -75,6 +86,10 @@ namespace Project.Scenes.Battle.Scripts.Model
             if (resolvedTimeline)
             {
                 UnityEngine.Object.Destroy(resolvedTimeline);
+            }
+            if (resolvedTimelineStrong)
+            {
+                UnityEngine.Object.Destroy(resolvedTimelineStrong);
             }
         }
     }

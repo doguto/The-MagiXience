@@ -78,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8334555279690838701}
@@ -98,13 +98,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 20
   contactDamage: 5
+  lifetime: 0
   movementPreset: {fileID: 11400000, guid: 3a5838bae51477c4a833ec24fc6f9e4e, type: 2}
   movementSteps:
   - rid: 8577112580335075430
   - rid: 8577112580335075461
   - rid: 8577112580335075476
-  bulletPool: {fileID: 7996329089749057052}
+  bulletPools:
+  - {fileID: 7996329089749057052}
   bulletDamage: 10
+  enemySpawnPrefabs: []
   attackPreset: {fileID: 0}
   attackTimeline:
     loop: 0
@@ -117,18 +120,40 @@ MonoBehaviour:
         rid: 8577112587349262617
       directionProvider:
         rid: 8577112587349262582
-      bulletPoolIndex: 0
+      rotationProvider:
+        rid: 1000
+      sourceIndexProvider:
+        rid: 1001
+      seType: 0
     - time: 3
       signal:
         rid: 8577112587349262618
       directionProvider:
         rid: 8577112587349262592
-      bulletPoolIndex: 0
+      rotationProvider:
+        rid: 1002
+      sourceIndexProvider:
+        rid: 1003
+      seType: 0
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
     version: 2
     RefIds:
+    - rid: 1000
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1001
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1002
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1003
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
     - rid: 8577112580335075430
       type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -272,10 +297,10 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 254900173
+  m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7450309199561605471, guid: ea0bc0a409639854a9a0b61d18f12f0e, type: 3}
+  m_Sprite: {fileID: -6886211784984959920, guid: b7b0dc7bcb8544247b12309ab0d9e33a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -324,7 +349,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.78, y: 3.16}
+    oldSize: {x: 4.5, y: 5.12}
     newSize: {x: 3.84, y: 3.84}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

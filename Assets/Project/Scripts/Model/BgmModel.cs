@@ -13,6 +13,8 @@ namespace Project.Scripts.Model
 
         public BgmData BgmData { get; }
         public string Name => BgmData.name;
+        public int LoopStartSamples => BgmData.loopStartSamples;
+        public int LoopEndSamples => BgmData.loopEndSamples;
 
         public BgmModel(BgmData bgmData)
         {

@@ -9,9 +9,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     {
         public IAttackSignal Clone() => new SingleBulletSignal();
 
-        public AttackEvent CreateEvent(IDirectionProvider directionProvider, int bulletPoolIndex = 0, SeType seType = SeType.None)
+        public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
-            return AttackEvent.Single(directionProvider.GetDirection(), bulletPoolIndex, seType);
+            return AttackEvent.Single(directionProvider.GetDirection(), rotationProvider.GetRotation(), sourceIndex, seType);
         }
     }
 }

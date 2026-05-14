@@ -4,6 +4,12 @@
     {
         None,
         Click,
-        Cancel
+        Cancel,
+        EnemyShotShort,
+        EnemyShotLong,
+        Attack,
+        Charge,
+        ChargeRelease,
+        Damage,
     }
 }

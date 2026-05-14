@@ -18,6 +18,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             // Entity Settings
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxHp"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("contactDamage"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("lifetime"));
 
             // Movement
             EditorGUILayout.Space();
@@ -36,8 +37,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             // Attack
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Attack", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletPool"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletPools"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletDamage"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enemySpawnPrefabs"));
             EditorGUILayout.PropertyField(attackPresetProp);
             if (attackPresetProp.objectReferenceValue == null)
             {

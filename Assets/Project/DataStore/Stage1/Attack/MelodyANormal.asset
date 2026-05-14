@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: MelodyANormal
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    loop: 1
+    loopStart: 1.2
+    loopEnd: 30
+    cycleDuration: 2.5
+    entries:
+    - time: 0
+      signal:
+        rid: 454448093581279334
+      directionProvider:
+        rid: 454448117209104458
+      rotationProvider:
+        rid: 454448117209104583
+      sourceIndexProvider:
+        rid: 454448117209104568
+      seType: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 454448093581279334
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 454448117209104458
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 454448117209104568
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 454448117209104583
+      type: {class: AimRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 

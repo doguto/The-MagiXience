@@ -1,4 +1,5 @@
 using UnityEngine;
+using Project.Scenes.Battle.Scripts.Model;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -17,35 +18,34 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void CreateWalls()
         {
-            var cam = Camera.main;
-            if (cam == null) return;
+            var minX = ScreenBoundsCache.MinX;
+            var maxX = ScreenBoundsCache.MaxX;
+            var minY = ScreenBoundsCache.MinY;
+            var maxY = ScreenBoundsCache.MaxY;
 
-            var bottomLeft = cam.ViewportToWorldPoint(Vector3.zero);
-            var topRight = cam.ViewportToWorldPoint(Vector3.one);
-
-            var width = topRight.x - bottomLeft.x;
-            var height = topRight.y - bottomLeft.y;
-            var centerX = (bottomLeft.x + topRight.x) * 0.5f;
-            var centerY = (bottomLeft.y + topRight.y) * 0.5f;
+            var width = maxX - minX;
+            var height = maxY - minY;
+            var centerX = (minX + maxX) * 0.5f;
+            var centerY = (minY + maxY) * 0.5f;
 
             // 上
             CreateWall("Wall_Top",
-                new Vector3(centerX, topRight.y + wallThickness * 0.5f, 0f),
+                new Vector3(centerX, maxY + wallThickness * 0.5f, 0f),
                 new Vector2(width + wallThickness * 2f, wallThickness));
 
             // 下
             CreateWall("Wall_Bottom",
-                new Vector3(centerX, bottomLeft.y - wallThickness * 0.5f, 0f),
+                new Vector3(centerX, minY - wallThickness * 0.5f, 0f),
                 new Vector2(width + wallThickness * 2f, wallThickness));
 
             // 左
             CreateWall("Wall_Left",
-                new Vector3(bottomLeft.x - wallThickness * 0.5f, centerY, 0f),
+                new Vector3(minX - wallThickness * 0.5f, centerY, 0f),
                 new Vector2(wallThickness, height + wallThickness * 2f));
 
             // 右
             CreateWall("Wall_Right",
-                new Vector3(topRight.x + wallThickness * 0.5f, centerY, 0f),
+                new Vector3(maxX + wallThickness * 0.5f, centerY, 0f),
                 new Vector2(wallThickness, height + wallThickness * 2f));
         }
 

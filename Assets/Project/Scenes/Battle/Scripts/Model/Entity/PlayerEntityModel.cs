@@ -27,6 +27,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         public float InvincibilityDuration { get; }
         public IReadOnlyReactiveProperty<bool> IsSneaking => isSneaking;
         public bool IsChargeComplete => chargeTime.Value >= ChargeThreshold;
+        public IObservable<bool> IsChargeCompleteChanged =>
+            chargeTime.Select(t => t >= ChargeThreshold).DistinctUntilChanged();
         public IReadOnlyReactiveProperty<bool> IsInvincible => isInvincible;
 
         public void SetSneaking(bool sneaking)

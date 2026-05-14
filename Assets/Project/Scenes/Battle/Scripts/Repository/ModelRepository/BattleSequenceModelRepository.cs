@@ -43,13 +43,21 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
                 cache[address] = asset;
             }
 
-            var models = new List<BattlePhaseModelBase>(asset.Phases.Count);
-            foreach (var definition in asset.Phases)
-            {
-                models.Add(CreatePhaseModel(definition));
-            }
+            var groups = BuildGroups(asset);
 
-            return new BattleSequenceModel(asset.Situation, models, asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement);
+            return new BattleSequenceModel(
+                asset.Situation, groups, CreatePhaseModel,
+                asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement);
+        }
+
+        List<SequenceGroupRuntime> BuildGroups(BattleSequenceAsset asset)
+        {
+            var groups = new List<SequenceGroupRuntime>(asset.SequenceGroups.Count);
+            foreach (var sg in asset.SequenceGroups)
+            {
+                groups.Add(new SequenceGroupRuntime(sg.Loop, sg.LoopCount, sg.Phases));
+            }
+            return groups;
         }
 
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)

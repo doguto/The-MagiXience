@@ -12,7 +12,7 @@ namespace Project.Scenes.Battle.Scripts.Model
     public class BattleSequenceAsset : ScriptableObject
     {
         [SerializeField] BattleSituation situation = BattleSituation.Way;
-        [SerializeField] List<BattlePhaseDefinition> phases = new();
+        [SerializeField] List<SequenceGroup> sequenceGroups = new();
 
         [Header("Boss Prefab")]
         [SerializeField] GameObject bossPrefab;
@@ -21,7 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         List<IMovementStep> bossEntranceMovement = new();
 
         public BattleSituation Situation => situation;
-        public IReadOnlyList<BattlePhaseDefinition> Phases => phases;
+        public IReadOnlyList<SequenceGroup> SequenceGroups => sequenceGroups;
         public GameObject BossPrefab => bossPrefab;
         public Vector3 BossSpawnPosition => bossSpawnPosition;
         public IReadOnlyList<IMovementStep> BossEntranceMovement => bossEntranceMovement;
@@ -54,16 +54,37 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] string phaseId;
         [Header("Timeline")]
         [SerializeField] BattleTimelineBuilderAsset timelineBuilder;
+        [SerializeField] BattleTimelineBuilderAsset timelineBuilderStrong;
+        [SerializeField, Range(0f, 100f)] float strongAttackHpThresholdPercent = 50f;
         [SerializeReference, SubclassSelector]
         IExitConditionConfig exitConditionConfig = new TimeLimitExitConditionConfig();
 
         public string PhaseId => phaseId;
         public BattleTimelineBuilderAsset TimelineBuilder => timelineBuilder;
+        public BattleTimelineBuilderAsset TimelineBuilderStrong => timelineBuilderStrong;
+        public float StrongAttackHpThresholdPercent => strongAttackHpThresholdPercent;
         public IExitConditionConfig ExitConditionConfig => exitConditionConfig;
 
         public TimelineAsset CreateTimeline()
         {
             return timelineBuilder ? timelineBuilder.BuildTimeline() : null;
         }
+
+        public TimelineAsset CreateTimelineStrong()
+        {
+            return timelineBuilderStrong ? timelineBuilderStrong.BuildTimeline() : null;
+        }
+    }
+
+    [Serializable]
+    public class SequenceGroup
+    {
+        [SerializeField] bool loop;
+        [SerializeField] int loopCount; // 0 = infinite
+        [SerializeField] List<BattlePhaseDefinition> phases = new();
+
+        public bool Loop => loop;
+        public int LoopCount => loopCount;
+        public IReadOnlyList<BattlePhaseDefinition> Phases => phases;
     }
 }

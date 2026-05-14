@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scripts.Extensions;
 using UniRx;
 using UnityEngine;
 
@@ -16,16 +17,29 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         Subject<AttackEvent> onAttackTiming;
         CompositeDisposable disposables;
+        Func<Vector3> getPlayerPosition;
+        Func<Vector3> getEnemyPosition;
+        Func<Quaternion> getEnemyRotation;
 
         public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
         public bool IsCompleted { get; private set; }
 
-        public void InitializeProviders(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition)
+        public void InitializeProviders(Func<Vector3> getPlayerPosition, Func<Vector3> getEnemyPosition, Func<Quaternion> getEnemyRotation)
         {
+            this.getPlayerPosition = getPlayerPosition;
+            this.getEnemyPosition = getEnemyPosition;
+            this.getEnemyRotation = getEnemyRotation;
+
             foreach (var entry in entries)
             {
-                entry.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition);
+                InitializeEntryProviders(entry);
             }
+        }
+
+        void InitializeEntryProviders(AttackTimelineEntry entry)
+        {
+            entry.directionProvider?.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
+            entry.rotationProvider.Initialize(getPlayerPosition, getEnemyPosition, getEnemyRotation);
         }
 
         public void Initialize()
@@ -70,17 +84,59 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             }
         }
 
-        void ScheduleEntry(AttackTimelineEntry entry, float fireTime)
+        const int MaxPresetDepth = 8;
+
+        void ScheduleEntry(AttackTimelineEntry entry, float fireTime, int depth = 0)
         {
+            if (entry.signal is PresetAttackSignal presetSignal)
+            {
+                if (presetSignal.Preset == null) return;
+                if (depth >= MaxPresetDepth)
+                {
+                    Debug.LogError("[AttackTimeline] Preset nesting depth limit reached. Circular reference?");
+                    return;
+                }
+                ExpandPreset(presetSignal, entry.seType, fireTime, depth + 1);
+                return;
+            }
+
             Observable.Timer(TimeSpan.FromSeconds(fireTime))
                 .Subscribe(_ =>
                 {
                     if (entry.signal != null)
                     {
-                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider, entry.bulletPoolIndex, entry.seType));
+                        var sourceIndex = entry.sourceIndexProvider?.Get() ?? 0;
+                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider, entry.rotationProvider, sourceIndex, entry.seType));
                     }
                 })
                 .AddTo(disposables);
+        }
+
+        void ExpandPreset(PresetAttackSignal signal, SeType parentSeType, float baseTime, int depth)
+        {
+            var timeline = signal.Preset.CreateTimeline();
+            if (timeline == null || timeline.entries.Count == 0) return;
+
+            // 展開したエントリのProviderを初期化
+            foreach (var inner in timeline.entries)
+            {
+                InitializeEntryProviders(inner);
+                // 内側がNoneなら外側のseTypeを引き継ぐ
+                if (inner.seType == SeType.None && parentSeType != SeType.None)
+                {
+                    inner.seType = parentSeType;
+                }
+            }
+
+            var totalCycles = signal.Loop && signal.LoopCount > 0 ? signal.LoopCount : 1;
+            for (var cycle = 0; cycle < totalCycles; cycle++)
+            {
+                foreach (var inner in timeline.entries)
+                {
+                    var innerTime = baseTime + cycle * signal.CycleDuration + inner.time;
+                    ScheduleEntry(inner, innerTime, depth);
+                }
+            }
         }
 
         public AttackTimeline DeepCopy()

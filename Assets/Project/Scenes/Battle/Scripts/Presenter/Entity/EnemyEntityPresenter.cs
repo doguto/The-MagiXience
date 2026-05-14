@@ -5,29 +5,35 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UniRx;
 using UnityEngine;
+using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.Model.Attack;
+using Project.Scripts.Extensions;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     [RequireComponent(typeof(EnemyEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class EnemyEntityPresenter : MonoBehaviour, IEntityPresenter
+    public class EnemyEntityPresenter : MonoPresenter, IEntityPresenter
     {
+        // NOTE: 新規プロパティを追加したらEnemyEntityPresenterEditor.csも編集すること
         [Header("Entity Settings")] [SerializeField]
         int maxHp = 50;
 
         [SerializeField] int contactDamage = 10;
+        [SerializeField] float lifetime = 0f;
 
         [Header("Movement")] [SerializeField] MovementPreset movementPreset;
 
         [SerializeReference] [SubclassSelector]
         List<IMovementStep> movementSteps = new() { new InfiniteMovementConfig() };
 
-        [Header("Attack")] [SerializeField] BulletPool bulletPool;
+        [Header("Attack")] [SerializeField] BulletPool[] bulletPools;
         [SerializeField] int bulletDamage = 10;
+        [SerializeField] GameObject[] enemySpawnPrefabs;
         [SerializeField] AttackPreset attackPreset;
         [SerializeField] AttackTimeline attackTimeline;
 
@@ -35,6 +41,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         EnemyEntityView view;
 
         [SerializeField] SpriteRenderer spriteRenderer;
+        EnemyTracker enemyTracker;
 
         void Reset()
         {
@@ -42,12 +49,44 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+            if (Application.isPlaying) return;
+            UnityEditor.EditorApplication.delayCall += AppendChildBulletPools;
+        }
+
+        void AppendChildBulletPools()
+        {
+            if (this == null) return;
+
+            var children = GetComponentsInChildren<BulletPool>(true);
+            if (children == null || children.Length == 0) return;
+
+            var current = bulletPools ?? Array.Empty<BulletPool>();
+            var appended = new List<BulletPool>(current);
+            bool changed = false;
+
+            foreach (var child in children)
+            {
+                if (child == null) continue;
+                if (Array.IndexOf(current, child) >= 0) continue;
+                appended.Add(child);
+                changed = true;
+            }
+
+            if (!changed) return;
+
+            bulletPools = appended.ToArray();
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+#endif
+
         EnemyEntityModel model;
-        Camera mainCamera;
-        Camera MainCamera => mainCamera != null ? mainCamera : mainCamera = Camera.main;
         PlayerEntityPresenter playerPresenter;
         Tween currentTween;
         CancellationTokenSource movementCts;
+        CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
         bool isEnteredScreen = false;
 
@@ -56,8 +95,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
-            if (bulletPool == null) Debug.LogError("[EnemyEntityPresenter] BulletPool is not assigned!");
+            if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[EnemyEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            enemyTracker = FindFirstObjectByType<EnemyTracker>();
             Initialize(transform.position);
         }
 
@@ -82,14 +122,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (timeline != null)
             {
                 Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
-                timeline.InitializeProviders(getPlayerPos, () => transform.position);
+                timeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation);
             }
 
             model.SetAttackStrategy(timeline);
 
             model.AttackStrategy?.OnAttackTiming
                  .TakeUntil(model.OnDeath)
-                 .Subscribe(ev => FireBullet(ev))
+                 .Subscribe(ev => HandleAttackEvent(ev))
                  .AddTo(disposables);
 
             model.OnDeath
@@ -97,6 +137,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                  .AddTo(disposables);
 
             view.UpdatePosition(transform.position);
+
+            StartLifetimeCountdown();
+        }
+
+        void StartLifetimeCountdown()
+        {
+            if (lifetime <= 0f) return;
+
+            lifetimeCts = new CancellationTokenSource();
+            WaitLifetimeAsync(lifetimeCts.Token).Forget();
+        }
+
+        async UniTaskVoid WaitLifetimeAsync(CancellationToken ct)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(lifetime), cancellationToken: ct);
+            Destroy(gameObject);
         }
 
         void StartMovementSequence(IReadOnlyList<IMovementStep> steps, Animator animator)
@@ -146,24 +202,87 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         bool IsOutOfScreen()
         {
             var position = transform.position;
-            var viewportPoint = MainCamera.WorldToViewportPoint(position);
-
             var extents = spriteRenderer.bounds.extents;
-            var viewportExtents = MainCamera.WorldToViewportPoint(position + extents)
-                                  - MainCamera.WorldToViewportPoint(position);
-            var margin = Mathf.Max(Mathf.Abs(viewportExtents.x), Mathf.Abs(viewportExtents.y)) + 0.1f;
+            var margin = Mathf.Max(extents.x, extents.y) + 0.1f;
 
-            var outOfScreen = viewportPoint.x < -margin || viewportPoint.x > 1f + margin ||
-                              viewportPoint.y < -margin || viewportPoint.y > 1f + margin;
+            var outOfScreen = position.x < ScreenBoundsCache.MinX - margin || position.x > ScreenBoundsCache.MaxX + margin ||
+                              position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
 
             if (!outOfScreen) isEnteredScreen = true;
 
             return isEnteredScreen && outOfScreen;
         }
 
+        void HandleAttackEvent(AttackEvent ev)
+        {
+            switch (ev.Type)
+            {
+                case AttackEventType.Bullet:
+                    FireBullet(ev);
+                    break;
+                case AttackEventType.EnemySpawn:
+                    SpawnEnemy(ev);
+                    break;
+            }
+        }
+
         void FireBullet(AttackEvent ev)
         {
-            foreach (var dir in ev.Directions) bulletPool.SpawnBullet(bulletDamage, bulletPool.transform.position, dir);
+            var pool = GetBulletPool(ev.SourceIndex);
+            if (pool == null) return;
+
+            if (ev.SeType != SeType.None)
+            {
+                soundManager?.PlaySE(ev.SeType);
+            }
+            for (int i = 0; i < ev.Directions.Count; i++)
+            {
+                pool.SpawnBullet(bulletDamage, pool.transform.position, ev.Directions[i], rotation: GetRotationAt(ev, i));
+            }
+        }
+
+        BulletPool GetBulletPool(int index)
+        {
+            if (bulletPools == null || bulletPools.Length == 0) return null;
+            if (index < 0 || index >= bulletPools.Length) return bulletPools[0];
+            return bulletPools[index];
+        }
+
+        void SpawnEnemy(AttackEvent ev)
+        {
+            var prefab = GetEnemySpawnPrefab(ev.SourceIndex);
+            if (prefab == null) return;
+
+            if (ev.SeType != SeType.None)
+            {
+                soundManager?.PlaySE(ev.SeType);
+            }
+
+            if (ev.SpawnOffsets == null) return;
+            for (int i = 0; i < ev.SpawnOffsets.Count; i++)
+            {
+                // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
+                var instance = Instantiate(prefab);
+                instance.transform.SetPositionAndRotation(transform.position + (Vector3)ev.SpawnOffsets[i], GetRotationAt(ev, i));
+
+                if (enemyTracker != null && instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
+                {
+                    enemyTracker.RegisterEnemy(enemyPresenter);
+                }
+            }
+        }
+
+        Quaternion GetRotationAt(AttackEvent ev, int index)
+        {
+            if (ev.Rotations == null || ev.Rotations.Count == 0) return Quaternion.identity;
+            return index < ev.Rotations.Count ? ev.Rotations[index] : ev.Rotations[ev.Rotations.Count - 1];
+        }
+
+        GameObject GetEnemySpawnPrefab(int index)
+        {
+            if (enemySpawnPrefabs == null || enemySpawnPrefabs.Length == 0) return null;
+            if (index < 0 || index >= enemySpawnPrefabs.Length) return enemySpawnPrefabs[0];
+            return enemySpawnPrefabs[index];
         }
 
         void HandleDeath()
@@ -185,6 +304,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             StopMovement();
+            lifetimeCts?.Cancel();
+            lifetimeCts?.Dispose();
+            lifetimeCts = null;
             disposables.Dispose();
             model?.Dispose();
             model?.AttackStrategy?.Dispose();
