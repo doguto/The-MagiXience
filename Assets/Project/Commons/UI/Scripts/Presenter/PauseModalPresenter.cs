@@ -51,7 +51,10 @@ namespace Project.Commons.UI.Scripts.Presenter
             pauseModalView.OnPressedExit.Subscribe(x => LoadTitle(x).Forget()).AddTo(this);
 
             // Globalシーンで起動された時点では非表示にしておく
-            gameObject.SetActive(false);
+            if (!IsOpen)
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         public void Open()
@@ -80,11 +83,8 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         async UniTask LoadTitle(Unit _)
         {
-            // タイトルへ遷移する際は通常時間/音に戻す
-            IsOpen = false;
-            Time.timeScale = 1f;
-            AudioListener.pause = false;
-
+            Close();
+            
             var sceneName = SceneManager.GetActiveScene().name;
 
             await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();

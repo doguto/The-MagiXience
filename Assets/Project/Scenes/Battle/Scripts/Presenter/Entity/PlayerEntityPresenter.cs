@@ -208,6 +208,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // 攻撃ボタンをイベントで処理
             MessageBroker.Default.Receive<PlayerAttackMessage>()
+                         .Where(_ => !IsPaused())
                          .Where(_ => !model.IsSneaking.Value)
                          .Where(_ => Time.time >= lastShootTime + shootCooldown)
                          .Subscribe(_ => FireNormalShot())
@@ -215,6 +216,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // スニークボタンの押下/解除
             MessageBroker.Default.Receive<PlayerChargeMessage>()
+                         .Where(_ => !IsPaused())
                          .Subscribe(msg =>
                          {
                              if (msg.isPressed)
@@ -251,6 +253,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             inputDisposables?.Dispose();
             inputDisposables = new CompositeDisposable();
+        }
+
+        bool IsPaused()
+        {
+            return globalScenePresenter != null
+                && globalScenePresenter.PauseModalPresenter != null
+                && globalScenePresenter.PauseModalPresenter.IsOpen;
         }
 
         public void FreezeRunAnimation()
