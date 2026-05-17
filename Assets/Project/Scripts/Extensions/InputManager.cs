@@ -97,6 +97,9 @@ namespace Project.Scripts.Extensions
             // Next
             var nextAction = playerMap.FindAction("Next");
             RegisterAction(nextAction, OnPlayerNext, InputActionPhase.Started);
+            
+            var pauseAction = playerMap.FindAction("Pause");
+            RegisterAction(pauseAction, OnPause, InputActionPhase.Started);
 
             // UI ActionMap
             var uiMap = inputActionAsset.FindActionMap("UI");
@@ -223,6 +226,11 @@ namespace Project.Scripts.Extensions
         public void OnPlayerNext(InputAction.CallbackContext context)
         {
             MessageBroker.Default.Publish(new PlayerNextMessage());
+        }
+
+        public void OnPause(InputAction.CallbackContext context)
+        {
+            MessageBroker.Default.Publish(new PlayerPauseMessage());
         }
 
         public void OnUINavigate(InputAction.CallbackContext context)

@@ -73,7 +73,31 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                              .Subscribe(HandleSequenceCompleted)
                              .AddTo(disposables);
 
+            SubscribeToPauseInput();
+
             InitializeAndStart();
+        }
+
+        void SubscribeToPauseInput()
+        {
+            MessageBroker.Default.Receive<PlayerPauseMessage>()
+                         .Subscribe(_ => TogglePause())
+                         .AddTo(disposables);
+        }
+
+        void TogglePause()
+        {
+            var pauseModal = globalScenePresenter?.PauseModalPresenter;
+            if (pauseModal == null) return;
+
+            if (pauseModal.IsOpen)
+            {
+                pauseModal.Close();
+            }
+            else
+            {
+                pauseModal.Open();
+            }
         }
 
         public void InitializeAndStart()
