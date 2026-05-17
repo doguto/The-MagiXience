@@ -16,7 +16,9 @@ namespace Project.Commons.UI.Scripts.Presenter
         IDisposable pauseEvent;
 
         readonly Subject<Unit> onClosed = new();
+        readonly Subject<Unit> onRetryRequested = new();
         public IObservable<Unit> OnClosed => onClosed;
+        public IObservable<Unit> OnRetryRequested => onRetryRequested;
         public bool IsOpen { get; private set; }
 
         RuntimeModel runtimeModel;
@@ -35,6 +37,14 @@ namespace Project.Commons.UI.Scripts.Presenter
             pauseModalView.OnPressedCancel.Subscribe(_ =>
             {
                 Close();
+            });
+            pauseModalView.OnPressedRetry.Subscribe(_ =>
+            {
+                IsOpen = false;
+                Time.timeScale = 1f;
+                AudioListener.pause = false;
+                gameObject.SetActive(false);
+                onRetryRequested.OnNext(Unit.Default);
             });
             pauseModalView.OnPressedOption.Subscribe(_ =>
             {

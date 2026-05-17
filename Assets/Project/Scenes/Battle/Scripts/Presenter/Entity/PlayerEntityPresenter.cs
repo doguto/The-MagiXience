@@ -280,6 +280,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 && globalScenePresenter.PauseModalPresenter.IsOpen;
         }
 
+        public void SetColliderActive(bool active)
+        {
+            var col = GetComponent<Collider2D>();
+            if (col != null) col.enabled = active;
+        }
+
         public void FreezeRunAnimation()
         {
             // 走りのフレーム間隔を徐々に伸ばしてやがてStayに切り替える

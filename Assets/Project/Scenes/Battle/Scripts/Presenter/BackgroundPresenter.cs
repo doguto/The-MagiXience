@@ -40,6 +40,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             isDecelerating = false;
             currentSpeed = scrollSpeed;
+            offset = Vector2.zero;
+            view?.ApplyOffset(offset);
         }
 
         void FixedUpdate()

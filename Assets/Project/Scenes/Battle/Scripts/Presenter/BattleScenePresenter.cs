@@ -8,6 +8,7 @@ using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Presenter;
@@ -31,6 +32,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
         BossEntityPresenter bossPresenter;
+        CompositeDisposable bossDisposables = new();
         bool isSceneLoadedHandlerRegistered = false;
 
         IDisposable sceneNavigationSubscription;
@@ -124,11 +126,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                                      .Subscribe(_ => Retry())
                                      .AddTo(disposables);
             }
+
+            var pauseModalForRetry = globalScenePresenter?.PauseModalPresenter;
+            if (pauseModalForRetry != null)
+            {
+                pauseModalForRetry.OnRetryRequested
+                                  .Subscribe(_ => Retry())
+                                  .AddTo(disposables);
+            }
         }
 
         void Retry()
         {
             phaseStateMachine.Stop();
+
+
+            bossDisposables.Dispose();
+            bossDisposables = new CompositeDisposable();
+            phaseStateMachine.SetTimelineResolver(null);
 
             if (bossPresenter != null)
             {
@@ -142,8 +157,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 bulletClearReceiver.ClearAllEnemies();
             }
 
+            var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
+            if (scenarioScene.IsValid() && scenarioScene.isLoaded)
+            {
+                SceneManager.UnloadSceneAsync(scenarioScene);
+            }
+            ScenarioModelRepository.Instance.Refresh();
+
+            pendingScenarioCallback = null;
+
             playerPresenter?.Retry();
+            playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
+
+            backgroundPresenter?.ResetScroll();
 
             hasResumedPlayerAnimationOnBoss = false;
 
@@ -273,8 +300,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // ScenarioIdは不要、ScenarioModelRepositoryがRuntimeModelから自動決定
             Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);
 
-            // シナリオ中は攻撃を禁止
+            // シナリオ中は攻撃を禁止 + プレイヤーの当たり判定を無効化（被弾でゲームオーバー誤発火を防ぐ）
             playerPresenter?.UnsubscribeFromAttackInput();
+            playerPresenter?.SetColliderActive(false);
 
             // シナリオ完了後のコールバックを保存
             pendingScenarioCallback = onCompleteOrSkip;
@@ -321,7 +349,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
 
-            // シナリオ完了後は攻撃を再開
+            // シナリオ完了後は攻撃と当たり判定を再開
+            playerPresenter?.SetColliderActive(true);
             // temp: デモ版ではボス戦終了後に攻撃できない
             if (RuntimeModelRepository.Instance.Get().CurrentSituation == BattleSituation.Boss)
             {
@@ -383,7 +412,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                                  var builder = useStrong ? phase.BuilderStrong : phase.Builder;
                                  bossPresenter.OnPhaseStarted(phase, builder);
                              })
-                             .AddTo(disposables);
+                             .AddTo(bossDisposables);
 
             bossPresenter.OnDeath
                          .Take(1)
@@ -397,7 +426,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                              }
                              HandleSequenceCompleted(BattleSituation.Boss);
                          })
-                         .AddTo(disposables);
+                         .AddTo(bossDisposables);
 
             bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);
 
@@ -476,6 +505,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             disposables.Dispose();
+            bossDisposables.Dispose();
             battleCompleted.Dispose();
             phaseStateMachine?.Stop();
         }
