@@ -27,7 +27,6 @@ namespace Project.Scenes.Battle.Scripts.Model
         public string PhaseId => Definition.PhaseId;
         public BattleTimelineBuilderAsset Builder => Definition.TimelineBuilder;
         public BattleTimelineBuilderAsset BuilderStrong => Definition.TimelineBuilderStrong;
-        public float StrongAttackHpThresholdPercent => Definition.StrongAttackHpThresholdPercent;
         public TimelineAsset TimelineAsset => ResolveTimeline();
         public IObservable<Unit> OnExitPhase => exitSubject;
 

@@ -21,6 +21,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Entity Settings")]
         [SerializeField] int maxHp = 200;
         [SerializeField] int contactDamage = 20;
+        [SerializeField, Range(0f, 1f)] float strongHpRatio = 0.5f;
+        [SerializeField, Range(0f, 1f)] float overflowDamageMultiplier = 0f;
 
         [Header("Attack")]
         [SerializeField] BulletPool[] bulletPools;
@@ -73,7 +75,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 #endif
 
-        EnemyEntityModel model;
+        BossEntityModel model;
         PlayerEntityPresenter playerPresenter;
         readonly List<IMovementStep> activeMovementSteps = new();
         Tween entranceTween;
@@ -81,7 +83,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
 
-        public EnemyEntityModel Model => model;
+        public BossEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
 
         void Awake()
@@ -90,7 +92,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
 
-            model = new EnemyEntityModel(maxHp, contactDamage);
+            model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
 
             model.OnDeath
                 .Subscribe(_ => HandleDeath())

@@ -285,9 +285,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                                      playerPresenter?.UnfreezeRunAnimation();
                                  }
 
-                                 var builder = ShouldUseStrongAttack(phase)
-                                     ? phase.BuilderStrong
-                                     : phase.Builder;
+                                 bool useStrong = ShouldUseStrongAttack(phase);
+                                 if (useStrong)
+                                 {
+                                     bossPresenter.Model.EnterStrongMode();
+                                 }
+                                 var builder = useStrong ? phase.BuilderStrong : phase.Builder;
                                  bossPresenter.OnPhaseStarted(phase, builder);
                              })
                              .AddTo(disposables);
@@ -311,9 +314,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         bool ShouldUseStrongAttack(BattlePhaseModelBase phase)
         {
             if (phase.BuilderStrong == null || bossPresenter?.Model == null) return false;
-            var bossModel = bossPresenter.Model;
-            var hpPercent = (float)bossModel.CurrentHp.Value / bossModel.MaxHp * 100f;
-            return hpPercent <= phase.StrongAttackHpThresholdPercent;
+            return bossPresenter.Model.ShouldUseStrongAttack;
         }
 
         void StartBossSequence()
