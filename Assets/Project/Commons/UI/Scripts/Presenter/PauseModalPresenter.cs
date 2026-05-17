@@ -28,6 +28,8 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         protected override void Start()
         {
+            base.Start();
+            
             pauseModalView.InitStart();
 
             pauseModalView.OnPressedCancel.Subscribe(_ =>
