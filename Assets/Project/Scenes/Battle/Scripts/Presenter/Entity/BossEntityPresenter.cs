@@ -15,7 +15,7 @@ using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
-    [RequireComponent(typeof(EnemyEntityView))]
+    [RequireComponent(typeof(BossEntityView))]
     public class BossEntityPresenter : MonoPresenter, IEntityPresenter
     {
         [Header("Entity Settings")]
@@ -34,12 +34,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] float damageFlashDuration = 0.2f;
 
         [Header("Component References")]
-        [SerializeField] EnemyEntityView view;
+        [SerializeField] BossEntityView view;
         EnemyTracker enemyTracker;
 
         void Reset()
         {
-            view = GetComponent<EnemyEntityView>();
+            view = GetComponent<BossEntityView>();
         }
 
 #if UNITY_EDITOR
@@ -99,8 +99,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 .AddTo(disposables);
 
             SubscribeToDamageFlash();
+            SubscribeToHpBar();
 
             view.UpdatePosition(transform.position);
+        }
+
+        void SubscribeToHpBar()
+        {
+            float normalDenom = model.NormalMaxHp > 0 ? model.NormalMaxHp : 1f;
+            float strongDenom = model.StrongMaxHp > 0 ? model.StrongMaxHp : 1f;
+
+            model.NormalHp
+                .Subscribe(hp => view.SetNormalHpRatio(hp / normalDenom))
+                .AddTo(disposables);
+
+            model.StrongHp
+                .Subscribe(hp => view.SetStrongHpRatio(hp / strongDenom))
+                .AddTo(disposables);
         }
 
         void SubscribeToDamageFlash()
