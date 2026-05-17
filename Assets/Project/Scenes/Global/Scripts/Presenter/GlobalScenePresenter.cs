@@ -14,6 +14,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
     {
         [SerializeField] OptionModalPresenter optionModalPresenter;
         [SerializeField] PauseModalPresenter pauseModalPresenter;
+        [SerializeField] GameOverModalPresenter gameOverModalPresenter;
         [SerializeField] SoundManagerPresenter soundManagerPresenter;
 
         public SoundManagerPresenter SoundManagerPresenter => soundManagerPresenter;
@@ -22,6 +23,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         public OptionModalPresenter OptionModalPresenter => optionModalPresenter;
         public PauseModalPresenter PauseModalPresenter => pauseModalPresenter;
+        public GameOverModalPresenter GameOverModalPresenter => gameOverModalPresenter;
         public KeyConfigModel KeyConfigModel => KeyConfigModelRepository.Instance.Get();
         public InputActionAsset InputActions => inputActions;
         public SceneNavigator SceneNavigator { get; } = new SceneNavigator();

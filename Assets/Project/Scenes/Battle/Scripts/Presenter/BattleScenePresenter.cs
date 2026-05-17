@@ -87,6 +87,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void TogglePause()
         {
+            // ゲームオーバー表示中はポーズ操作を無視
+            if (globalScenePresenter?.GameOverModalPresenter != null
+                && globalScenePresenter.GameOverModalPresenter.IsOpen)
+            {
+                return;
+            }
+
             var pauseModal = globalScenePresenter?.PauseModalPresenter;
             if (pauseModal == null) return;
 
@@ -97,6 +104,60 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             else
             {
                 pauseModal.Open();
+            }
+        }
+
+        void SubscribeToPlayerDeath()
+        {
+            playerPresenter.OnDeath
+                           .Subscribe(_ =>
+                           {
+                               var gameOverModal = globalScenePresenter?.GameOverModalPresenter;
+                               gameOverModal?.Open();
+                           })
+                           .AddTo(disposables);
+
+            var gameOverModalForRetry = globalScenePresenter?.GameOverModalPresenter;
+            if (gameOverModalForRetry != null)
+            {
+                gameOverModalForRetry.OnRetryRequested
+                                     .Subscribe(_ => Retry())
+                                     .AddTo(disposables);
+            }
+        }
+
+        void Retry()
+        {
+            phaseStateMachine.Stop();
+
+            if (bossPresenter != null)
+            {
+                Destroy(bossPresenter.gameObject);
+                bossPresenter = null;
+            }
+
+            if (bulletClearReceiver != null)
+            {
+                bulletClearReceiver.ClearAllBullets();
+                bulletClearReceiver.ClearAllEnemies();
+            }
+
+            playerPresenter?.Retry();
+            playerPresenter?.SubscribeToAttackInput();
+
+            hasResumedPlayerAnimationOnBoss = false;
+
+            var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
+            if (startSituation == BattleSituation.Boss && bossSequence != null)
+            {
+                SpawnBoss();
+                PlayBgmForSituation(BattleSituation.Boss);
+                phaseStateMachine.PlaySequence(bossSequence);
+            }
+            else if (waySequence != null)
+            {
+                PlayBgmForSituation(BattleSituation.Way);
+                phaseStateMachine.PlaySequence(waySequence);
             }
         }
 
@@ -114,6 +175,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (playerPresenter == null)
             {
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
+            }
+            else
+            {
+                SubscribeToPlayerDeath();
             }
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);

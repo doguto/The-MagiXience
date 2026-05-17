@@ -54,6 +54,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float lastShootTime;
         Vector2 currentMoveInput;
         Vector2 pendingPush;
+        Vector3 initialPosition;
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
         IDisposable damageFlashSubscription;
@@ -72,7 +73,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(OnEnteredScene).AddTo(this);
 
             model = new PlayerEntityModel(maxHp, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
+            initialPosition = transform.position;
             PlayerPositionReference.Transform = transform;
+        }
+
+        public void Retry()
+        {
+            damageFlashSubscription?.Dispose();
+            damageFlashSubscription = null;
+            chargeFlashSubscription?.Dispose();
+            chargeFlashSubscription = null;
+
+            model.Reset();
+            view.ResetDamageFlash();
+            view.ResetChargeFlash();
+            view.EnterRun();
+            view.UpdatePosition(initialPosition);
+            currentMoveInput = Vector2.zero;
+            pendingPush = Vector2.zero;
         }
 
         protected override void Start()
