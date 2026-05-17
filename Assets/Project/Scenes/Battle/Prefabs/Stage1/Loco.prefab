@@ -308,6 +308,8 @@ MonoBehaviour:
   enemySpawnPrefabs:
   - {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
   - {fileID: 2191354779743736906, guid: 33482601f496c5d4488d3c72cfe3cc21, type: 3}
+  damageFlashInterval: 0.05
+  damageFlashDuration: 0.2
   view: {fileID: 1827464944305382855}
 --- !u!114 &1827464944305382855
 MonoBehaviour:
@@ -321,6 +323,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5bba95d9a9ee704c8bed25cc85b89d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bodySpriteRenderer: {fileID: 0}
+  flashColor: {r: 0.23584908, g: 0.23584908, b: 0.23584908, a: 1}
 --- !u!70 &8148139622960645157
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
