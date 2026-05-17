@@ -20,7 +20,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             ClearAllEnemies();
         }
 
-        void ClearAllBullets()
+        public void ClearAllBullets()
         {
             var bullets = FindObjectsByType<BulletEntityPresenter>(FindObjectsSortMode.None);
             foreach (var bullet in bullets)
@@ -31,7 +31,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             Debug.Log($"[BulletClearReceiver] Cleared {bullets.Length} bullets.", this);
         }
 
-        void ClearAllEnemies()
+        public void ClearAllEnemies()
         {
             var enemies = FindObjectsByType<EnemyEntityPresenter>(FindObjectsSortMode.None);
             foreach (var enemy in enemies)

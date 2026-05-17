@@ -19,6 +19,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField] EnemyTracker enemyTracker;
         [SerializeField] BackgroundPresenter backgroundPresenter;
+        [SerializeField] BulletClearReceiver bulletClearReceiver;
 
         BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
@@ -300,6 +301,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                          .Subscribe(_ =>
                          {
                              phaseStateMachine.Stop();
+                             if (bulletClearReceiver != null)
+                             {
+                                 bulletClearReceiver.ClearAllBullets();
+                                 bulletClearReceiver.ClearAllEnemies();
+                             }
                              HandleSequenceCompleted(BattleSituation.Boss);
                          })
                          .AddTo(disposables);
