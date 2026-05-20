@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
@@ -41,6 +42,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         bool isBattleStarted;
         bool hasResumedPlayerAnimationOnBoss;
+        CancellationTokenSource sequenceTransitionCts;
+        IDisposable scenarioCompletedSubscription;
 
         void Awake()
         {
@@ -96,6 +99,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // DemoClear表示中はポーズ操作を無効化（リトライによる次ステージ誤発火防止）
+            var demoClearScene = SceneManager.GetSceneByName(SceneRouterModel.DemoClear);
+            if (demoClearScene.IsValid() && demoClearScene.isLoaded)
+            {
+                return;
+            }
+
             var pauseModal = globalScenePresenter?.PauseModalPresenter;
             if (pauseModal == null) return;
 
@@ -140,6 +150,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             phaseStateMachine.Stop();
 
+            // シナリオ遷移待ち中のDelayや、シーンロード待ちハンドラ・購読をすべて解除
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = null;
+
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
+
+            scenarioCompletedSubscription?.Dispose();
+            scenarioCompletedSubscription = null;
 
             bossDisposables.Dispose();
             bossDisposables = new CompositeDisposable();
@@ -284,7 +307,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         async void HandleSequenceCompleted(BattleSituation situation)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: destroyCancellationToken);
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            var token = sequenceTransitionCts.Token;
+
+            try
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (token.IsCancellationRequested) return;
 
             if (situation == BattleSituation.Way)
             {
@@ -335,10 +372,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var scenarioPresenter = FindFirstObjectByType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
             if (scenarioPresenter != null)
             {
-                scenarioPresenter.OnScenarioCompleted
+                // Retryで途中解除できるよう、購読を保持しておく
+                scenarioCompletedSubscription?.Dispose();
+                scenarioCompletedSubscription = scenarioPresenter.OnScenarioCompleted
                                  .Take(1) // 1回だけ実行
-                                 .Subscribe(_ => OnScenarioCompleted())
-                                 .AddTo(disposables);
+                                 .Subscribe(_ => OnScenarioCompleted());
             }
             else
             {
@@ -504,6 +542,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
                 isSceneLoadedHandlerRegistered = false;
             }
+
+            scenarioCompletedSubscription?.Dispose();
+            scenarioCompletedSubscription = null;
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = null;
 
             disposables.Dispose();
             bossDisposables.Dispose();
