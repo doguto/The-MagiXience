@@ -170,19 +170,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
 
-            backgroundPresenter?.ResetScroll();
 
             hasResumedPlayerAnimationOnBoss = false;
 
-            var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
+            var startSituation = RuntimeModelRepository.Get().CurrentSituation;
             if (startSituation == BattleSituation.Boss && bossSequence != null)
             {
+                backgroundPresenter?.ResetScroll(false);
                 SpawnBoss();
                 PlayBgmForSituation(BattleSituation.Boss);
                 phaseStateMachine.PlaySequence(bossSequence);
             }
             else if (waySequence != null)
             {
+                backgroundPresenter?.ResetScroll(true);
                 PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
             }
