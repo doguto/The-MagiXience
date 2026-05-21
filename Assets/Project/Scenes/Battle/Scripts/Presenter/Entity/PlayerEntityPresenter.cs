@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
@@ -43,6 +45,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         PlayerEntityView view;
 
         [SerializeField] SpriteRenderer spriteRenderer;
+        [SerializeField] PlayerDeathDirector deathDirector;
 
         void Reset()
         {
@@ -61,9 +64,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         IDisposable chargeFlashSubscription;
 
         IDisposable sceneNavigationSubscription;
+        CancellationTokenSource deathCts;
+        readonly Subject<Unit> deathSequenceCompleted = new();
 
         public PlayerEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
+        public IObservable<Unit> OnDeathSequenceCompleted => deathSequenceCompleted;
 
         void Awake()
         {
@@ -83,6 +89,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             damageFlashSubscription = null;
             chargeFlashSubscription?.Dispose();
             chargeFlashSubscription = null;
+
+            // 演出途中でRetryされた場合に備えて中断
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = null;
+            deathDirector?.ResetVisuals();
 
             model.Reset();
             view.ResetDamageFlash();
@@ -358,6 +370,30 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void HandleDeath()
         {
             Debug.Log("[PlayerEntityPresenter] Player died");
+            UnsubscribeFromAttackInput();
+            SetColliderActive(false);
+
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            PlayDeathSequenceAsync(deathCts.Token).Forget();
+        }
+
+        async UniTaskVoid PlayDeathSequenceAsync(CancellationToken ct)
+        {
+            try
+            {
+                if (deathDirector != null)
+                {
+                    await deathDirector.PlayAsync(ct);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            deathSequenceCompleted.OnNext(Unit.Default);
         }
 
         void OnTriggerEnter2D(Collider2D other)
@@ -378,9 +414,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 PlayerPositionReference.Transform = null;
             }
 
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = null;
+
             damageFlashSubscription?.Dispose();
             chargeFlashSubscription?.Dispose();
             disposables.Dispose();
+            deathSequenceCompleted.Dispose();
             model?.Dispose();
         }
 

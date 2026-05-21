@@ -121,7 +121,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void SubscribeToPlayerDeath()
         {
-            playerPresenter.OnDeath
+            playerPresenter.OnDeathSequenceCompleted
                            .Subscribe(_ =>
                            {
                                var gameOverModal = globalScenePresenter?.GameOverModalPresenter;
@@ -455,16 +455,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             bossPresenter.OnDeath
                          .Take(1)
-                         .Subscribe(_ =>
-                         {
-                             phaseStateMachine.Stop();
-                             if (bulletClearReceiver != null)
-                             {
-                                 bulletClearReceiver.ClearAllBullets();
-                                 bulletClearReceiver.ClearAllEnemies();
-                             }
-                             HandleSequenceCompleted(BattleSituation.Boss);
-                         })
+                         .Subscribe(_ => phaseStateMachine.Stop())
+                         .AddTo(bossDisposables);
+
+            bossPresenter.OnDeathSequenceCompleted
+                         .Take(1)
+                         .Subscribe(_ => HandleSequenceCompleted(BattleSituation.Boss))
                          .AddTo(bossDisposables);
 
             bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);

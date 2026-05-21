@@ -35,6 +35,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         [Header("Component References")]
         [SerializeField] BossEntityView view;
+        [SerializeField] BossDeathDirector deathDirector;
         EnemyTracker enemyTracker;
 
         void Reset()
@@ -80,11 +81,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         readonly List<IMovementStep> activeMovementSteps = new();
         Tween entranceTween;
         CancellationTokenSource movementCts;
+        CancellationTokenSource deathCts;
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
+        readonly Subject<Unit> deathSequenceCompleted = new();
 
         public BossEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
+        public IObservable<Unit> OnDeathSequenceCompleted => deathSequenceCompleted;
 
         void Awake()
         {
@@ -366,7 +370,34 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void HandleDeath()
         {
             StopMovement();
+            model.AttackStrategy?.Dispose();
+            var col = GetComponent<Collider2D>();
+            if (col != null) col.enabled = false;
+
             Debug.Log("[BossEntityPresenter] Boss died.");
+
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            PlayDeathSequenceAsync(deathCts.Token).Forget();
+        }
+
+        async UniTaskVoid PlayDeathSequenceAsync(CancellationToken ct)
+        {
+            try
+            {
+                if (deathDirector != null)
+                {
+                    await deathDirector.PlayAsync(ct);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Retry等で中断: そのまま終わる
+                return;
+            }
+
+            deathSequenceCompleted.OnNext(Unit.Default);
             Destroy(gameObject);
         }
 
@@ -382,8 +413,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             StopMovement();
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = null;
             damageFlashSubscription?.Dispose();
             disposables.Dispose();
+            deathSequenceCompleted.Dispose();
             model?.AttackStrategy?.Dispose();
             model?.Dispose();
         }

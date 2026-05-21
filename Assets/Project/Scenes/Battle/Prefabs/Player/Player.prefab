@@ -108,6 +108,7 @@ GameObject:
   - component: {fileID: 6485566128135933366}
   - component: {fileID: 3599598203441597353}
   - component: {fileID: 5401124325088212384}
+  - component: {fileID: 6983154642658904229}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -291,6 +292,7 @@ MonoBehaviour:
   chargeFlashInterval: 0.08
   view: {fileID: 6485566128135933366}
   spriteRenderer: {fileID: 5033849629377129012}
+  deathDirector: {fileID: 6983154642658904229}
 --- !u!50 &5401124325088212384
 Rigidbody2D:
   serializedVersion: 5
@@ -318,6 +320,26 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &6983154642658904229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4571057217745528099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e44b1f0c72cb6b49ab1bdbbe6984920, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitStopDuration: 0
+  shakeDuration: 0.1
+  shakeStrength: 0.6
+  shakeVibrato: 30
+  shakeRandomness: 45
+  fadeDuration: 0.6
+  targetSpriteRenderer: {fileID: 5033849629377129012}
+  deathSeType: 7
 --- !u!1 &7710001000000000000
 GameObject:
   m_ObjectHideFlags: 0
