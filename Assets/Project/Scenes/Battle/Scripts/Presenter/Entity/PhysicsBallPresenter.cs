@@ -79,7 +79,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void HandleDeath()
         {
-            Debug.Log($"[PhysicsBallPresenter] Ball destroyed at {transform.position}");
             Destroy(gameObject);
         }
 

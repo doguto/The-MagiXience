@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
@@ -8,6 +9,7 @@ using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Presenter;
@@ -19,6 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField] EnemyTracker enemyTracker;
         [SerializeField] BackgroundPresenter backgroundPresenter;
+        [SerializeField] BulletClearReceiver bulletClearReceiver;
 
         BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
@@ -30,6 +33,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
         BossEntityPresenter bossPresenter;
+        CompositeDisposable bossDisposables = new();
         bool isSceneLoadedHandlerRegistered = false;
 
         IDisposable sceneNavigationSubscription;
@@ -38,6 +42,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         bool isBattleStarted;
         bool hasResumedPlayerAnimationOnBoss;
+        CancellationTokenSource sequenceTransitionCts;
+        IDisposable scenarioCompletedSubscription;
 
         void Awake()
         {
@@ -72,7 +78,138 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                              .Subscribe(HandleSequenceCompleted)
                              .AddTo(disposables);
 
+            SubscribeToPauseInput();
+
             InitializeAndStart();
+        }
+
+        void SubscribeToPauseInput()
+        {
+            MessageBroker.Default.Receive<PlayerPauseMessage>()
+                         .Subscribe(_ => TogglePause())
+                         .AddTo(disposables);
+        }
+
+        void TogglePause()
+        {
+            // ゲームオーバー表示中はポーズ操作を無視
+            if (globalScenePresenter?.GameOverModalPresenter != null
+                && globalScenePresenter.GameOverModalPresenter.IsOpen)
+            {
+                return;
+            }
+
+            // DemoClear表示中はポーズ操作を無効化（リトライによる次ステージ誤発火防止）
+            var demoClearScene = SceneManager.GetSceneByName(SceneRouterModel.DemoClear);
+            if (demoClearScene.IsValid() && demoClearScene.isLoaded)
+            {
+                return;
+            }
+
+            var pauseModal = globalScenePresenter?.PauseModalPresenter;
+            if (pauseModal == null) return;
+
+            if (pauseModal.IsOpen)
+            {
+                pauseModal.Close();
+            }
+            else
+            {
+                pauseModal.Open();
+            }
+        }
+
+        void SubscribeToPlayerDeath()
+        {
+            playerPresenter.OnDeathSequenceCompleted
+                           .Subscribe(_ =>
+                           {
+                               var gameOverModal = globalScenePresenter?.GameOverModalPresenter;
+                               gameOverModal?.Open();
+                           })
+                           .AddTo(disposables);
+
+            var gameOverModalForRetry = globalScenePresenter?.GameOverModalPresenter;
+            if (gameOverModalForRetry != null)
+            {
+                gameOverModalForRetry.OnRetryRequested
+                                     .Subscribe(_ => Retry())
+                                     .AddTo(disposables);
+            }
+
+            var pauseModalForRetry = globalScenePresenter?.PauseModalPresenter;
+            if (pauseModalForRetry != null)
+            {
+                pauseModalForRetry.OnRetryRequested
+                                  .Subscribe(_ => Retry())
+                                  .AddTo(disposables);
+            }
+        }
+
+        void Retry()
+        {
+            phaseStateMachine.Stop();
+
+            // シナリオ遷移待ち中のDelayや、シーンロード待ちハンドラ・購読をすべて解除
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = null;
+
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
+
+            scenarioCompletedSubscription?.Dispose();
+            scenarioCompletedSubscription = null;
+
+            bossDisposables.Dispose();
+            bossDisposables = new CompositeDisposable();
+            phaseStateMachine.SetTimelineResolver(null);
+
+            if (bossPresenter != null)
+            {
+                Destroy(bossPresenter.gameObject);
+                bossPresenter = null;
+            }
+
+            if (bulletClearReceiver != null)
+            {
+                bulletClearReceiver.ClearAllBullets();
+                bulletClearReceiver.ClearAllEnemies();
+            }
+
+            var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
+            if (scenarioScene.IsValid() && scenarioScene.isLoaded)
+            {
+                SceneManager.UnloadSceneAsync(scenarioScene);
+            }
+            ScenarioModelRepository.Instance.Refresh();
+
+            pendingScenarioCallback = null;
+
+            playerPresenter?.Retry();
+            playerPresenter?.SetColliderActive(true);
+            playerPresenter?.SubscribeToAttackInput();
+
+
+            hasResumedPlayerAnimationOnBoss = false;
+
+            var startSituation = RuntimeModelRepository.Get().CurrentSituation;
+            if (startSituation == BattleSituation.Boss && bossSequence != null)
+            {
+                backgroundPresenter?.ResetScroll(false);
+                SpawnBoss();
+                PlayBgmForSituation(BattleSituation.Boss);
+                phaseStateMachine.PlaySequence(bossSequence);
+            }
+            else if (waySequence != null)
+            {
+                backgroundPresenter?.ResetScroll(true);
+                PlayBgmForSituation(BattleSituation.Way);
+                phaseStateMachine.PlaySequence(waySequence);
+            }
         }
 
         public void InitializeAndStart()
@@ -89,6 +226,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (playerPresenter == null)
             {
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
+            }
+            else
+            {
+                SubscribeToPlayerDeath();
             }
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
@@ -166,7 +307,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         async void HandleSequenceCompleted(BattleSituation situation)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: destroyCancellationToken);
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            var token = sequenceTransitionCts.Token;
+
+            try
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (token.IsCancellationRequested) return;
 
             if (situation == BattleSituation.Way)
             {
@@ -183,8 +338,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // ScenarioIdは不要、ScenarioModelRepositoryがRuntimeModelから自動決定
             Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);
 
-            // シナリオ中は攻撃を禁止
+            // シナリオ中は攻撃を禁止 + プレイヤーの当たり判定を無効化（被弾でゲームオーバー誤発火を防ぐ）
             playerPresenter?.UnsubscribeFromAttackInput();
+            playerPresenter?.SetColliderActive(false);
 
             // シナリオ完了後のコールバックを保存
             pendingScenarioCallback = onCompleteOrSkip;
@@ -216,10 +372,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var scenarioPresenter = FindFirstObjectByType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
             if (scenarioPresenter != null)
             {
-                scenarioPresenter.OnScenarioCompleted
+                // Retryで途中解除できるよう、購読を保持しておく
+                scenarioCompletedSubscription?.Dispose();
+                scenarioCompletedSubscription = scenarioPresenter.OnScenarioCompleted
                                  .Take(1) // 1回だけ実行
-                                 .Subscribe(_ => OnScenarioCompleted())
-                                 .AddTo(disposables);
+                                 .Subscribe(_ => OnScenarioCompleted());
             }
             else
             {
@@ -231,7 +388,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
 
-            // シナリオ完了後は攻撃を再開
+            // シナリオ完了後は攻撃と当たり判定を再開
+            playerPresenter?.SetColliderActive(true);
             // temp: デモ版ではボス戦終了後に攻撃できない
             if (RuntimeModelRepository.Instance.Get().CurrentSituation == BattleSituation.Boss)
             {
@@ -285,21 +443,25 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                                      playerPresenter?.UnfreezeRunAnimation();
                                  }
 
-                                 var builder = ShouldUseStrongAttack(phase)
-                                     ? phase.BuilderStrong
-                                     : phase.Builder;
+                                 bool useStrong = ShouldUseStrongAttack(phase);
+                                 if (useStrong)
+                                 {
+                                     bossPresenter.Model.EnterStrongMode();
+                                 }
+                                 var builder = useStrong ? phase.BuilderStrong : phase.Builder;
                                  bossPresenter.OnPhaseStarted(phase, builder);
                              })
-                             .AddTo(disposables);
+                             .AddTo(bossDisposables);
 
             bossPresenter.OnDeath
                          .Take(1)
-                         .Subscribe(_ =>
-                         {
-                             phaseStateMachine.Stop();
-                             HandleSequenceCompleted(BattleSituation.Boss);
-                         })
-                         .AddTo(disposables);
+                         .Subscribe(_ => phaseStateMachine.Stop())
+                         .AddTo(bossDisposables);
+
+            bossPresenter.OnDeathSequenceCompleted
+                         .Take(1)
+                         .Subscribe(_ => HandleSequenceCompleted(BattleSituation.Boss))
+                         .AddTo(bossDisposables);
 
             bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);
 
@@ -311,9 +473,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         bool ShouldUseStrongAttack(BattlePhaseModelBase phase)
         {
             if (phase.BuilderStrong == null || bossPresenter?.Model == null) return false;
-            var bossModel = bossPresenter.Model;
-            var hpPercent = (float)bossModel.CurrentHp.Value / bossModel.MaxHp * 100f;
-            return hpPercent <= phase.StrongAttackHpThresholdPercent;
+            return bossPresenter.Model.ShouldUseStrongAttack;
         }
 
         void StartBossSequence()
@@ -379,7 +539,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 isSceneLoadedHandlerRegistered = false;
             }
 
+            scenarioCompletedSubscription?.Dispose();
+            scenarioCompletedSubscription = null;
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = null;
+
             disposables.Dispose();
+            bossDisposables.Dispose();
             battleCompleted.Dispose();
             phaseStateMachine?.Stop();
         }

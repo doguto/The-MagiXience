@@ -10,9 +10,9 @@ using UnityEngine.SceneManagement;
 
 namespace Project.Commons.UI.Scripts.Presenter
 {
-    public class PauseModalPresenter: MonoPresenter
+    public class GameOverModalPresenter : MonoPresenter
     {
-        [SerializeField] PauseModalView pauseModalView;
+        [SerializeField] GameOverModalView gameOverModalView;
         IDisposable pauseEvent;
 
         readonly Subject<Unit> onClosed = new();
@@ -31,22 +31,9 @@ namespace Project.Commons.UI.Scripts.Presenter
         protected override void Start()
         {
             base.Start();
-            
-            pauseModalView.InitStart();
 
-            pauseModalView.OnPressedCancel.Subscribe(_ =>
-            {
-                Close();
-            });
-            pauseModalView.OnPressedRetry.Subscribe(_ =>
-            {
-                IsOpen = false;
-                Time.timeScale = 1f;
-                AudioListener.pause = false;
-                gameObject.SetActive(false);
-                onRetryRequested.OnNext(Unit.Default);
-            });
-            pauseModalView.OnPressedOption.Subscribe(_ =>
+            gameOverModalView.OnPressedRetry.Subscribe(_ => Retry()).AddTo(this);
+            gameOverModalView.OnPressedOption.Subscribe(_ =>
             {
                 globalScenePresenter.OptionModalPresenter.Open();
                 gameObject.SetActive(false);
@@ -55,14 +42,13 @@ namespace Project.Commons.UI.Scripts.Presenter
                 pauseEvent = globalScenePresenter.OptionModalPresenter.OnClosed.Subscribe(_ =>
                 {
                     gameObject.SetActive(true);
-                    pauseModalView.InitStart();
+                    gameOverModalView.InitStart();
                     pauseEvent?.Dispose();
                     pauseEvent = null;
                 });
-            });
-            pauseModalView.OnPressedExit.Subscribe(x => LoadTitle(x).Forget()).AddTo(this);
+            }).AddTo(this);
+            gameOverModalView.OnPressedTitle.Subscribe(_ => LoadTitle().Forget()).AddTo(this);
 
-            // Globalシーンで起動された時点では非表示にしておく
             if (!IsOpen)
             {
                 gameObject.SetActive(false);
@@ -78,29 +64,29 @@ namespace Project.Commons.UI.Scripts.Presenter
             AudioListener.pause = true;
 
             gameObject.SetActive(true);
-            pauseModalView.InitStart();
+            gameOverModalView.InitStart();
         }
 
-        public void Close()
+        void Retry()
         {
-            if (!IsOpen) return;
+            // 時間/音を戻してモーダルを閉じる。実際の再初期化はOnRetryRequestedを購読する側（BattleScenePresenter）が行う。
             IsOpen = false;
-
             Time.timeScale = 1f;
             AudioListener.pause = false;
-
             gameObject.SetActive(false);
-            onClosed.OnNext(Unit.Default);
+
+            onRetryRequested.OnNext(Unit.Default);
         }
 
-        async UniTask LoadTitle(Unit _)
+        async UniTaskVoid LoadTitle()
         {
-            Close();
-            
+            IsOpen = false;
+            Time.timeScale = 1f;
+            AudioListener.pause = false;
+            gameObject.SetActive(false);
+
             var sceneName = SceneManager.GetActiveScene().name;
-
             await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
-
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
             SceneManager.UnloadSceneAsync(sceneName).ToUniTask().Forget();
         }

@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.View;
+using Project.Scripts.Model;
+using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -8,7 +10,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     /// 背景のUVスクロールを駆動する。BattleScenePresenterから減速開始やリセットを指示される。
     /// </summary>
     [RequireComponent(typeof(BackgroundView))]
-    public class BackgroundPresenter : MonoBehaviour
+    public class BackgroundPresenter : MonoPresenter
     {
         const float LoopLength = 1f;
 
@@ -26,9 +28,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             view = GetComponent<BackgroundView>();
         }
 
-        void Awake()
+        protected override void Start()
         {
-            currentSpeed = scrollSpeed;
+            base.Start();
+            if (RuntimeModelRepository.Get().CurrentSituation == BattleSituation.Way) currentSpeed = scrollSpeed;
         }
 
         public void StartDeceleration()
@@ -36,10 +39,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             isDecelerating = true;
         }
 
-        public void ResetScroll()
+        public void ResetScroll(bool isMoving = true)
         {
             isDecelerating = false;
-            currentSpeed = scrollSpeed;
+            currentSpeed = isMoving ? scrollSpeed : Vector2.zero;
+            offset = Vector2.zero;
+            view?.ApplyOffset(offset);
         }
 
         void FixedUpdate()

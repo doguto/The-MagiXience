@@ -18,8 +18,6 @@ namespace Project.Commons.UI.Scripts.View
 
         void Start()
         {
-            pointer.SetActive(false);
-
             button.OnFocusedEvent
                 .Subscribe(_ => OnButtonFocused())
                 .AddTo(this);

@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
@@ -43,6 +45,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         PlayerEntityView view;
 
         [SerializeField] SpriteRenderer spriteRenderer;
+        [SerializeField] PlayerDeathDirector deathDirector;
 
         void Reset()
         {
@@ -54,15 +57,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float lastShootTime;
         Vector2 currentMoveInput;
         Vector2 pendingPush;
+        Vector3 initialPosition;
         readonly CompositeDisposable disposables = new();
         CompositeDisposable inputDisposables;
         IDisposable damageFlashSubscription;
         IDisposable chargeFlashSubscription;
 
         IDisposable sceneNavigationSubscription;
+        CancellationTokenSource deathCts;
+        readonly Subject<Unit> deathSequenceCompleted = new();
 
         public PlayerEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
+        public IObservable<Unit> OnDeathSequenceCompleted => deathSequenceCompleted;
 
         void Awake()
         {
@@ -72,7 +79,30 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(OnEnteredScene).AddTo(this);
 
             model = new PlayerEntityModel(maxHp, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
+            initialPosition = transform.position;
             PlayerPositionReference.Transform = transform;
+        }
+
+        public void Retry()
+        {
+            damageFlashSubscription?.Dispose();
+            damageFlashSubscription = null;
+            chargeFlashSubscription?.Dispose();
+            chargeFlashSubscription = null;
+
+            // 演出途中でRetryされた場合に備えて中断
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = null;
+            deathDirector?.ResetVisuals();
+
+            model.Reset();
+            view.ResetDamageFlash();
+            view.ResetChargeFlash();
+            view.EnterRun();
+            view.UpdatePosition(initialPosition);
+            currentMoveInput = Vector2.zero;
+            pendingPush = Vector2.zero;
         }
 
         protected override void Start()
@@ -208,6 +238,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // 攻撃ボタンをイベントで処理
             MessageBroker.Default.Receive<PlayerAttackMessage>()
+                         .Where(_ => !IsPaused())
                          .Where(_ => !model.IsSneaking.Value)
                          .Where(_ => Time.time >= lastShootTime + shootCooldown)
                          .Subscribe(_ => FireNormalShot())
@@ -215,6 +246,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             // スニークボタンの押下/解除
             MessageBroker.Default.Receive<PlayerChargeMessage>()
+                         .Where(_ => !IsPaused())
                          .Subscribe(msg =>
                          {
                              if (msg.isPressed)
@@ -251,6 +283,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             inputDisposables?.Dispose();
             inputDisposables = new CompositeDisposable();
+        }
+
+        bool IsPaused()
+        {
+            return globalScenePresenter != null
+                && globalScenePresenter.PauseModalPresenter != null
+                && globalScenePresenter.PauseModalPresenter.IsOpen;
+        }
+
+        public void SetColliderActive(bool active)
+        {
+            var col = GetComponent<Collider2D>();
+            if (col != null) col.enabled = active;
         }
 
         public void FreezeRunAnimation()
@@ -317,24 +362,44 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void FireChargedShot()
         {
             chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + chargeShotOffset, isPlayerBullet: true);
-            Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
             view.EnterAttack();
             soundManager?.PlaySE(SeType.ChargeRelease);
         }
 
         void HandleDeath()
         {
-            Debug.Log("[PlayerEntityPresenter] Player died");
+            UnsubscribeFromAttackInput();
+            SetColliderActive(false);
+
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            PlayDeathSequenceAsync(deathCts.Token).Forget();
+        }
+
+        async UniTaskVoid PlayDeathSequenceAsync(CancellationToken ct)
+        {
+            try
+            {
+                if (deathDirector != null)
+                {
+                    await deathDirector.PlayAsync(ct);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            deathSequenceCompleted.OnNext(Unit.Default);
         }
 
         void OnTriggerEnter2D(Collider2D other)
         {
             var otherPresenter = other.GetComponent<IEntityPresenter>();
-            Debug.Log($"[PlayerEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name}");
             if (otherPresenter != null)
             {
                 model.OnCollision(otherPresenter.GetModel());
-                Debug.Log($"[PlayerEntityPresenter] Hp: {model.CurrentHp.Value}");
             }
         }
 
@@ -345,9 +410,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 PlayerPositionReference.Transform = null;
             }
 
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = null;
+
             damageFlashSubscription?.Dispose();
             chargeFlashSubscription?.Dispose();
             disposables.Dispose();
+            deathSequenceCompleted.Dispose();
             model?.Dispose();
         }
 

@@ -46,6 +46,10 @@ namespace Project.Scripts.Extensions.Message
     public struct PlayerNextMessage
     {
     }
+    
+    public struct PlayerPauseMessage
+    {
+    }
 
     // UI Messages
     public struct UINavigateMessage

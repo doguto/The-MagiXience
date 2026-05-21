@@ -1,9 +1,11 @@
 using System;
 using UniRx;
 using Project.Scenes.Battle.Scripts.Presenter;
+using Project.Scenes.Global.Scripts.Presenter;
 using Project.Scenes.Scenario.Scripts.Model;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scenes.Scenario.Scripts.View;
+using Project.Scripts.Extensions.Message;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using UnityEngine;
@@ -16,27 +18,32 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         [SerializeField] ScenarioView scenarioView;
 
         ScenarioModel scenarioModel;
+        GlobalScenePresenter globalScenePresenter;
         readonly Subject<Unit> scenarioCompleted = new();
+        readonly CompositeDisposable disposables = new();
 
         public IObservable<Unit> OnScenarioCompleted => scenarioCompleted;
 
         void Start()
         {
             Debug.Log("[ScenarioScenePresenter] Start called");
-            // RepositoryからModelを取得
             scenarioModel = ScenarioModelRepository.Instance.Get();
+            globalScenePresenter = FindFirstObjectByType<GlobalScenePresenter>();
+
+            MessageBroker.Default.Receive<UISubmitMessage>()
+                         .Where(_ => !IsPaused())
+                         .Subscribe(_ => OnPressNext())
+                         .AddTo(disposables);
 
             // 初回実行
             ExecuteSteps();
         }
 
-        void Update()
+        bool IsPaused()
         {
-            // TODO: 新InputManagerのものに置き換え予定
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Z))
-            {
-                OnPressNext();
-            }
+            return globalScenePresenter != null
+                && globalScenePresenter.PauseModalPresenter != null
+                && globalScenePresenter.PauseModalPresenter.IsOpen;
         }
 
         void OnPressNext()
@@ -182,6 +189,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
         void OnDestroy()
         {
+            disposables.Dispose();
             scenarioCompleted.Dispose();
         }
     }

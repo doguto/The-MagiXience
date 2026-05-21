@@ -26,7 +26,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         public IReadOnlyReactiveProperty<int> CurrentHp => currentHp;
         public bool IsAlive => currentHp.Value > 0;
 
-        public void TakeDamage(int damage)
+        public virtual void TakeDamage(int damage)
         {
             if (!IsAlive) return;
             if (damage < 0)
@@ -35,7 +35,12 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
                 return;
             }
 
-            currentHp.Value = Mathf.Max(0, currentHp.Value - damage);
+            SetCurrentHp(currentHp.Value - damage);
+        }
+
+        protected void SetCurrentHp(int value)
+        {
+            currentHp.Value = Mathf.Max(0, value);
 
             if (currentHp.Value <= 0)
             {

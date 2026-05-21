@@ -15,25 +15,32 @@ using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
-    [RequireComponent(typeof(EnemyEntityView))]
+    [RequireComponent(typeof(BossEntityView))]
     public class BossEntityPresenter : MonoPresenter, IEntityPresenter
     {
         [Header("Entity Settings")]
         [SerializeField] int maxHp = 200;
         [SerializeField] int contactDamage = 20;
+        [SerializeField, Range(0f, 1f)] float strongHpRatio = 0.5f;
+        [SerializeField, Range(0f, 1f)] float overflowDamageMultiplier = 0f;
 
         [Header("Attack")]
         [SerializeField] BulletPool[] bulletPools;
         [SerializeField] int bulletDamage = 10;
         [SerializeField] GameObject[] enemySpawnPrefabs;
 
+        [Header("Damage Flash")]
+        [SerializeField] float damageFlashInterval = 0.05f;
+        [SerializeField] float damageFlashDuration = 0.2f;
+
         [Header("Component References")]
-        [SerializeField] EnemyEntityView view;
+        [SerializeField] BossEntityView view;
+        [SerializeField] BossDeathDirector deathDirector;
         EnemyTracker enemyTracker;
 
         void Reset()
         {
-            view = GetComponent<EnemyEntityView>();
+            view = GetComponent<BossEntityView>();
         }
 
 #if UNITY_EDITOR
@@ -69,15 +76,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 #endif
 
-        EnemyEntityModel model;
+        BossEntityModel model;
         PlayerEntityPresenter playerPresenter;
         readonly List<IMovementStep> activeMovementSteps = new();
         Tween entranceTween;
         CancellationTokenSource movementCts;
+        CancellationTokenSource deathCts;
         readonly CompositeDisposable disposables = new();
+        IDisposable damageFlashSubscription;
+        readonly Subject<Unit> deathSequenceCompleted = new();
 
-        public EnemyEntityModel Model => model;
+        public BossEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
+        public IObservable<Unit> OnDeathSequenceCompleted => deathSequenceCompleted;
 
         void Awake()
         {
@@ -85,13 +96,71 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
 
-            model = new EnemyEntityModel(maxHp, contactDamage);
+            model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
 
             model.OnDeath
                 .Subscribe(_ => HandleDeath())
                 .AddTo(disposables);
 
+            SubscribeToDamageFlash();
+            SubscribeToHpBar();
+
             view.UpdatePosition(transform.position);
+        }
+
+        void SubscribeToHpBar()
+        {
+            float normalDenom = model.NormalMaxHp > 0 ? model.NormalMaxHp : 1f;
+            float strongDenom = model.StrongMaxHp > 0 ? model.StrongMaxHp : 1f;
+
+            model.NormalHp
+                .Subscribe(hp => view.SetNormalHpRatio(hp / normalDenom))
+                .AddTo(disposables);
+
+            model.StrongHp
+                .Subscribe(hp => view.SetStrongHpRatio(hp / strongDenom))
+                .AddTo(disposables);
+        }
+
+        void SubscribeToDamageFlash()
+        {
+            int previousHp = model.CurrentHp.Value;
+            model.CurrentHp
+                .Skip(1)
+                .Subscribe(hp =>
+                {
+                    if (hp < previousHp)
+                    {
+                        PlayDamageFlash();
+                    }
+                    previousHp = hp;
+                })
+                .AddTo(disposables);
+        }
+
+        void PlayDamageFlash()
+        {
+            damageFlashSubscription?.Dispose();
+
+            view.SetDamageFlashActive(true);
+            bool flashOn = true;
+            float elapsed = 0f;
+
+            damageFlashSubscription = Observable
+                .Interval(TimeSpan.FromSeconds(damageFlashInterval))
+                .Subscribe(_ =>
+                {
+                    elapsed += damageFlashInterval;
+                    if (elapsed >= damageFlashDuration)
+                    {
+                        view.ResetDamageFlash();
+                        damageFlashSubscription?.Dispose();
+                        damageFlashSubscription = null;
+                        return;
+                    }
+                    flashOn = !flashOn;
+                    view.SetDamageFlashActive(flashOn);
+                });
         }
 
         public void OnPhaseStarted(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder)
@@ -301,7 +370,34 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void HandleDeath()
         {
             StopMovement();
+            model.AttackStrategy?.Dispose();
+            var col = GetComponent<Collider2D>();
+            if (col != null) col.enabled = false;
+
             Debug.Log("[BossEntityPresenter] Boss died.");
+
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            PlayDeathSequenceAsync(deathCts.Token).Forget();
+        }
+
+        async UniTaskVoid PlayDeathSequenceAsync(CancellationToken ct)
+        {
+            try
+            {
+                if (deathDirector != null)
+                {
+                    await deathDirector.PlayAsync(ct);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Retry等で中断: そのまま終わる
+                return;
+            }
+
+            deathSequenceCompleted.OnNext(Unit.Default);
             Destroy(gameObject);
         }
 
@@ -317,7 +413,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             StopMovement();
+            deathCts?.Cancel();
+            deathCts?.Dispose();
+            deathCts = null;
+            damageFlashSubscription?.Dispose();
             disposables.Dispose();
+            deathSequenceCompleted.Dispose();
             model?.AttackStrategy?.Dispose();
             model?.Dispose();
         }

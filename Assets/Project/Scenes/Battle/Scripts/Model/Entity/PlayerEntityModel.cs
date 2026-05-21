@@ -63,6 +63,15 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             chargeTime.Value = 0f;
         }
 
+        public void Reset()
+        {
+            ResetHp();
+            isSneaking.Value = false;
+            chargeTime.Value = 0f;
+            isInvincible.Value = false;
+            invincibilityDisposables.Clear();
+        }
+
         public void TakeDamageWithInvincibility(int damage)
         {
             if (isInvincible.Value) return;
