@@ -18,7 +18,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] Image fillImage;
 
         [Tooltip("各フェーズの終了予定 BGM サンプル位置（絶対値）を、フェーズが開始される順に並べる。"
-                 + "区間 [前のthreshold, このthreshold) でゲージが0→1に進む。最初のフェーズは [0, threshold[0])。")]
+                 + "区間 [前のthreshold, このthreshold) でゲージが1→0に進む。最初のフェーズは [0, threshold[0])。")]
         [SerializeField] int[] phaseThresholdSamples;
 
         [Tooltip("配列の末尾まで使い切った後、ここで指定したインデックスに戻ってループする。"
@@ -107,7 +107,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Update()
         {
-            if (!isActive) return;
+            if (!isActive || !fillImage) return;
 
             var audioSource = soundManager?.BgmAudioSource;
             if (audioSource == null || audioSource.clip == null) return;
