@@ -362,14 +362,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void FireChargedShot()
         {
             chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + chargeShotOffset, isPlayerBullet: true);
-            Debug.Log("[PlayerEntityPresenter] Charged shot fired!");
             view.EnterAttack();
             soundManager?.PlaySE(SeType.ChargeRelease);
         }
 
         void HandleDeath()
         {
-            Debug.Log("[PlayerEntityPresenter] Player died");
             UnsubscribeFromAttackInput();
             SetColliderActive(false);
 
@@ -399,11 +397,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerEnter2D(Collider2D other)
         {
             var otherPresenter = other.GetComponent<IEntityPresenter>();
-            Debug.Log($"[PlayerEntityPresenter] Collision with {otherPresenter?.GetModel()?.GetType().Name}");
             if (otherPresenter != null)
             {
                 model.OnCollision(otherPresenter.GetModel());
-                Debug.Log($"[PlayerEntityPresenter] Hp: {model.CurrentHp.Value}");
             }
         }
 

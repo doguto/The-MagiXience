@@ -65,7 +65,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
                 strongHp.Value = Mathf.Max(0, strongHp.Value - damage);
             }
 
-            Debug.Log($"[BossEntityModel] CurrentNormalHp: {normalHp.Value}, strongHp: {strongHp.Value}");
             SetCurrentHp(normalHp.Value + strongHp.Value);
         }
 

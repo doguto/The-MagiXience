@@ -288,7 +288,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void HandleDeath()
         {
             StopMovement();
-            Debug.Log($"[EnemyEntityPresenter] Enemy died at {transform.position}");
             Destroy(gameObject);
         }
 

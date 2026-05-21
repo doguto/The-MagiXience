@@ -33,7 +33,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         protected override void OnDeathCore()
         {
-            Debug.Log($"[BulletEntityModel] Bullet destroyed.");
         }
     }
 }
