@@ -17,7 +17,6 @@ namespace Project.Scripts.Model
 #if UNITY_EDITOR
             saveDirectoryPath = Path.Combine("Assets", "Project", "DataStore");
 #endif
-            Debug.Log(saveDirectoryPath);
             saveFilePath = Path.Combine(saveDirectoryPath, "UserData.json");
             UserData = Load();
         }
@@ -47,8 +46,11 @@ namespace Project.Scripts.Model
             if (!File.Exists(saveFilePath))
             {
                 UserData = new UserData();
+                if (!Directory.Exists(saveDirectoryPath))
+                {
+                    Directory.CreateDirectory(saveDirectoryPath);
+                }
                 var json = JsonUtility.ToJson(UserData, true);
-                Debug.Log(json);
                 File.WriteAllText(saveFilePath, json);
                 return new UserData();
             }
