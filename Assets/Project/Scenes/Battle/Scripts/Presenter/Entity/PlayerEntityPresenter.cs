@@ -285,6 +285,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             inputDisposables = new CompositeDisposable();
         }
 
+        public void CancelCharge()
+        {
+            // チャージ中のループSEを停止
+            if (model.IsSneaking.Value)
+            {
+                soundManager?.StopLoopSE();
+            }
+
+            // モデル側のチャージ・スニーク状態をリセット
+            model.ResetCharge();
+            model.SetSneaking(false);
+
+            // チャージ点滅を止め、見た目をRunに戻す
+            StopChargeFlash();
+            view.EnterRun();
+        }
+
         bool IsPaused()
         {
             return globalScenePresenter != null

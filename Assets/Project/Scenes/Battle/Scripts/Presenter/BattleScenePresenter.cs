@@ -341,6 +341,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // シナリオ中は攻撃を禁止 + プレイヤーの当たり判定を無効化（被弾でゲームオーバー誤発火を防ぐ）
             playerPresenter?.UnsubscribeFromAttackInput();
             playerPresenter?.SetColliderActive(false);
+            // チャージ中のままシナリオへ突入した場合に備えてチャージ状態をリセット
+            playerPresenter?.CancelCharge();
 
             // シナリオ完了後のコールバックを保存
             pendingScenarioCallback = onCompleteOrSkip;
