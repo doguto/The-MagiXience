@@ -417,6 +417,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             damageFlashSubscription?.Dispose();
             chargeFlashSubscription?.Dispose();
             disposables.Dispose();
+            inputDisposables?.Dispose();
             deathSequenceCompleted.Dispose();
             model?.Dispose();
         }
