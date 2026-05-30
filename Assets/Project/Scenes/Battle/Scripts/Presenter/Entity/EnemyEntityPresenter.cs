@@ -37,6 +37,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] AttackPreset attackPreset;
         [SerializeField] AttackTimeline attackTimeline;
 
+        [Header("Damage Flash")]
+        [SerializeField] float damageFlashInterval = 0.05f;
+        [SerializeField] float damageFlashDuration = 0.2f;
+
         [Header("component references")] [SerializeField]
         EnemyEntityView view;
 
@@ -88,6 +92,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         CancellationTokenSource movementCts;
         CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
+        IDisposable damageFlashSubscription;
         bool isEnteredScreen = false;
 
         public EnemyEntityModel Model => model;
@@ -136,9 +141,52 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                  .Subscribe(_ => HandleDeath())
                  .AddTo(disposables);
 
+            SubscribeToDamageFlash();
+
             view.UpdatePosition(transform.position);
 
             StartLifetimeCountdown();
+        }
+
+        void SubscribeToDamageFlash()
+        {
+            int previousHp = model.CurrentHp.Value;
+            model.CurrentHp
+                 .Skip(1)
+                 .Subscribe(hp =>
+                 {
+                     if (hp < previousHp)
+                     {
+                         PlayDamageFlash();
+                     }
+                     previousHp = hp;
+                 })
+                 .AddTo(disposables);
+        }
+
+        void PlayDamageFlash()
+        {
+            damageFlashSubscription?.Dispose();
+
+            view.SetDamageFlashActive(true);
+            bool flashOn = true;
+            float elapsed = 0f;
+
+            damageFlashSubscription = Observable
+                .Interval(TimeSpan.FromSeconds(damageFlashInterval))
+                .Subscribe(_ =>
+                {
+                    elapsed += damageFlashInterval;
+                    if (elapsed >= damageFlashDuration)
+                    {
+                        view.ResetDamageFlash();
+                        damageFlashSubscription?.Dispose();
+                        damageFlashSubscription = null;
+                        return;
+                    }
+                    flashOn = !flashOn;
+                    view.SetDamageFlashActive(flashOn);
+                });
         }
 
         void StartLifetimeCountdown()
@@ -306,6 +354,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             lifetimeCts?.Cancel();
             lifetimeCts?.Dispose();
             lifetimeCts = null;
+            damageFlashSubscription?.Dispose();
+            damageFlashSubscription = null;
             disposables.Dispose();
             model?.Dispose();
             model?.AttackStrategy?.Dispose();
