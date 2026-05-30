@@ -85,7 +85,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             movementCts?.Cancel();
             movementCts?.Dispose();
             movementCts = null;
-            currentTween?.Kill();
             currentTween = null;
         }
 
