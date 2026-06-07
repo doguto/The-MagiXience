@@ -15,6 +15,7 @@ namespace Project.Commons.UI.Scripts.Presenter
         [SerializeField] OptionModalView optionModalView;
         readonly Subject<Unit> onClosed = new();
         public IObservable<Unit> OnClosed => onClosed;
+        public bool IsOpen => gameObject.activeSelf;
         RuntimeModel runtimeModel;
 
         void Awake()
@@ -28,9 +29,7 @@ namespace Project.Commons.UI.Scripts.Presenter
 
             optionModalView.OnPressedCancel.Subscribe(_ =>
             {
-                soundManager.PlaySEAsync(SeType.Cancel).Forget();
-                gameObject.SetActive(false);
-                onClosed.OnNext(Unit.Default);
+                Close();
             }).AddTo(this);
             optionModalView.OnPressedSave.Subscribe(_ =>
             {
@@ -48,6 +47,13 @@ namespace Project.Commons.UI.Scripts.Presenter
 
             gameObject.SetActive(true);
             optionModalView.InitStart();
+        }
+
+        public void Close()
+        {
+            soundManager.PlaySEAsync(SeType.Cancel).Forget();
+            gameObject.SetActive(false);
+            onClosed.OnNext(Unit.Default);
         }
     }
 }

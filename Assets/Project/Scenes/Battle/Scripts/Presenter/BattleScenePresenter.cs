@@ -109,6 +109,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var pauseModal = globalScenePresenter?.PauseModalPresenter;
             if (pauseModal == null) return;
 
+            // オプション画面が開いている場合はオプションだけ閉じる
+            var optionModal = globalScenePresenter?.OptionModalPresenter;
+            if (optionModal != null && optionModal.IsOpen)
+            {
+                optionModal.Close();
+                return;
+            }
+
             if (pauseModal.IsOpen)
             {
                 pauseModal.Close();
