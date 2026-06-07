@@ -29,7 +29,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             stageCardListView.Init(isOpenedList);
             for (var i = 0; i < stageModels.Count; i++)
             {
-                stageCardListView.stageCardViews[i].Setup(stageModels[i].GetIdAndTitle());
+                stageCardListView.stageCardViews[i].Setup(stageModels[i].GetIdAndTitle(), stageModels[i].IsOpened);
             }
 
             ShowCharaImage(0);
@@ -40,7 +40,8 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         void ShowCharaImage(int buttonIndex)
         {
             var charaImage = stageModels[buttonIndex].CharaImage;
-            stageCardListView.SetCharaImage(charaImage);
+            var isCleared = stageModels[buttonIndex].IsCleared;
+            stageCardListView.SetCharaImage(charaImage, isCleared);
         }
 
         async UniTask LoadBattleScene(int buttonIndex)

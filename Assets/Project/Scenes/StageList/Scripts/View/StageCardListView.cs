@@ -34,11 +34,12 @@ namespace Project.Scenes.StageList.Scripts.View
             }
         }
 
-        public void SetCharaImage(Sprite charaSprite)
+        public void SetCharaImage(Sprite charaSprite, bool isCleared)
         {
             // TODO: マジックナンバー修正
             charaImage.DOFade(0f, 0f);
             charaImage.sprite = charaSprite;
+            charaImage.color = isCleared ? Color.white : Color.black;
             charaImage.DOFade(1f, 0.25f).SetDelay(0.1f);
         }
 
