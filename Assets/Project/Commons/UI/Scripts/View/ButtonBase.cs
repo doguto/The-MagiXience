@@ -46,6 +46,8 @@ namespace Project.Commons.UI.Scripts.View
         public void Init(bool isOpened = true, bool isFocused = false)
         {
             IsOpened = isOpened;
+            // Selectableの変数 isOpened=falseならInputからの処理を一律受け付けないようにする
+            interactable = isOpened;
             IsFocused = isFocused;
             if (IsFocused)
             {

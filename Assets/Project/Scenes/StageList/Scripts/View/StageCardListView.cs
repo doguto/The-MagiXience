@@ -25,13 +25,16 @@ namespace Project.Scenes.StageList.Scripts.View
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
 
+            var maxScrollIndex = 0;
             for (var i = 0; i < simpleButtons.Count; i++)
             {
                 var isOpened = i < isOpenedList.Count && isOpenedList[i];
+                if (isOpened) maxScrollIndex = i;
                 simpleButtons[i].Init(isOpened, i == 0 && isOpened);
                 simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
                 simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
             }
+            scrollableButtonList.SetMaxScrollIndex(maxScrollIndex);
         }
 
         public void SetCharaImage(Sprite charaSprite, bool isCleared)
