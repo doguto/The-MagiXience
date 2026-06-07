@@ -25,6 +25,7 @@ namespace Project.Scripts.Model
         public UserData UserData { get; set; }
 
         public int ClearedStageNumber => UserData.clearedStageNumber;
+        public int OpenedStageNumber => UserData.clearedStageNumber - 1;
 
         public void StageClear(int stageNumber)
         {

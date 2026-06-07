@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Project.Scenes.StageList.Scripts.Model;
+using Project.Scenes.StageList.Scripts.Repository.ModelRepository;
 using Project.Scripts.Model;
 using Project.Scenes.StageList.Scripts.View;
 using Project.Scripts.Extensions;
@@ -13,12 +15,18 @@ namespace Project.Scenes.StageList.Scripts.Presenter
     public class StageListScenePresenter : MonoPresenter
     {
         [SerializeField] StageCardListView stageCardListView;
+        [SerializeField] StageListSceneView stageListSceneView;
 
         List<StageModel> stageModels;
+        StageListModel stageListModel;
+        StageListModelRepository stageListModelRepository;
 
         void Awake()
         {
             stageModels = StageModelRepository.GetAll();
+            stageListModelRepository = StageListModelRepository.Instance;
+            stageListModel = stageListModelRepository.Get();
+            stageListSceneView.SetBackGround(stageListModel.GetBackGroundSprite());
         }
 
         protected override void Start()

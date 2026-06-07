@@ -368,6 +368,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stageCardListView: {fileID: 1115367387}
+  stageListSceneView: {fileID: 1115367388}
 --- !u!1 &425771786
 GameObject:
   m_ObjectHideFlags: 0
@@ -748,6 +749,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1115367386}
   - component: {fileID: 1115367387}
+  - component: {fileID: 1115367388}
   m_Layer: 5
   m_Name: StageList View
   m_TagString: Untagged
@@ -796,6 +798,7 @@ MonoBehaviour:
   - {fileID: 1882939296}
   - {fileID: 1942563875}
   charaImage: {fileID: 162804027}
+  backGroundRenderer: {fileID: 0}
   stageCardViews:
   - {fileID: 9123836011632477928}
   - {fileID: 937085319}
@@ -804,6 +807,19 @@ MonoBehaviour:
   - {fileID: 186945564}
   - {fileID: 1629620376}
   - {fileID: 1803771600}
+--- !u!114 &1115367388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1115367385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ad0b12ca9041239035a5a03987349a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  backGroundRenderer: {fileID: 1478906519}
 --- !u!1 &1330062205
 GameObject:
   m_ObjectHideFlags: 0
@@ -1121,9 +1137,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 5581373
-  m_SortingLayer: -1
+  m_SortingLayer: -2
   m_SortingOrder: 0
-  m_Sprite: {fileID: -4170110241613817524, guid: f8eafc710a99e514a93bd5bddf6f0da2, type: 3}
+  m_Sprite: {fileID: -3498336094683241577, guid: a48c5a13033bbde48a2476df84c68735, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
