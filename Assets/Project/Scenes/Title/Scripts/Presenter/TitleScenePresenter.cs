@@ -55,7 +55,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
                 ExitGame();
             });
 
-            soundManager!.PlayBGMAsync(SceneType.Title).Forget();
+            soundManager!.PlayBGMAsync(SceneType.Title, skipIfSamePlaying: true).Forget();
         }
 
         async UniTask StartMain(Unit _)

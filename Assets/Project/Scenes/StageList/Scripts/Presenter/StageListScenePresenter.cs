@@ -6,6 +6,7 @@ using Project.Scenes.StageList.Scripts.Repository.ModelRepository;
 using Project.Scripts.Model;
 using Project.Scenes.StageList.Scripts.View;
 using Project.Scripts.Extensions;
+using Project.Scripts.Extensions.Message;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
@@ -43,6 +44,9 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             ShowCharaImage(0);
             stageCardListView.OnButtonChanged.Subscribe(ShowCharaImage);
             stageCardListView.OnButtonPressed.Subscribe(i => LoadBattleScene(i).Forget());
+            MessageBroker.Default.Receive<UICancelMessage>()
+                .Subscribe(_ => BackToTitle().Forget())
+                .AddTo(this);
         }
 
         void ShowCharaImage(int buttonIndex)
@@ -50,6 +54,12 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             var charaImage = stageModels[buttonIndex].CharaImage;
             var isCleared = stageModels[buttonIndex].IsCleared;
             stageCardListView.SetCharaImage(charaImage, isCleared);
+        }
+
+        async UniTask BackToTitle()
+        {
+            soundManager.PlaySEAsync(SeType.Cancel).Forget();
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Title, SceneRouterModel.StageList);
         }
 
         async UniTask LoadBattleScene(int buttonIndex)

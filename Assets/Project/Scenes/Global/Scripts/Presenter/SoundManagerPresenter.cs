@@ -46,7 +46,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
             }
         }
 
-        public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default)
+        public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default, bool skipIfSamePlaying = false)
         {
             var bgmModel = soundModelRepository.GetBgmModel(sceneType, bgmType);
             var bgmClip = bgmModel.AudioClip;
@@ -56,9 +56,13 @@ namespace Project.Scenes.Global.Scripts.Presenter
                 ? bgmModel.LoopEndSamples
                 : bgmClip.samples;
 
+            var shouldSkip = skipIfSamePlaying && bgmAudioSource.isPlaying && bgmAudioSource.clip == bgmClip;
             bgmAudioSource.clip = bgmClip;
             bgmAudioSource.loop = false;
-            bgmAudioSource.Play();
+            if (!shouldSkip)
+            {
+                bgmAudioSource.Play();
+            }
 
             await UniTask.CompletedTask;
         }
