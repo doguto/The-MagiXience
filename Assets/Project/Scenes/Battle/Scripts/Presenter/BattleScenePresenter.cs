@@ -42,8 +42,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         bool isBattleStarted;
         bool hasResumedPlayerAnimationOnBoss;
+        bool hasShownTutorial;
         CancellationTokenSource sequenceTransitionCts;
         IDisposable scenarioCompletedSubscription;
+        IDisposable tutorialClosedSubscription;
 
         void Awake()
         {
@@ -80,7 +82,41 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             SubscribeToPauseInput();
 
-            InitializeAndStart();
+            // 1面道中の初回開始時はチュートリアルモーダルを表示し、閉じてからシーケンスを開始する
+            if (ShouldShowTutorial())
+            {
+                ShowTutorialThenStart();
+            }
+            else
+            {
+                InitializeAndStart();
+            }
+        }
+
+        bool ShouldShowTutorial()
+        {
+            if (hasShownTutorial) return false;
+
+            var runtimeModel = RuntimeModelRepository.Get();
+            var isStage1 = runtimeModel.CurrentStageType.AsInt() == 1;
+            var isWay = runtimeModel.CurrentSituation == BattleSituation.Way;
+            if (!isStage1 || !isWay) return false;
+
+            return globalScenePresenter?.TutorialModalPresenter != null;
+        }
+
+        void ShowTutorialThenStart()
+        {
+            hasShownTutorial = true;
+
+            var tutorialModal = globalScenePresenter.TutorialModalPresenter;
+
+            tutorialClosedSubscription?.Dispose();
+            tutorialClosedSubscription = tutorialModal.OnClosed
+                                                      .Take(1)
+                                                      .Subscribe(_ => InitializeAndStart());
+
+            tutorialModal.Open();
         }
 
         void SubscribeToPauseInput()
@@ -554,6 +590,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             sequenceTransitionCts?.Cancel();
             sequenceTransitionCts?.Dispose();
             sequenceTransitionCts = null;
+
+            // チュートリアルモーダルを閉じる前にシーンが破棄された場合に備えて後始末する
+            tutorialClosedSubscription?.Dispose();
+            tutorialClosedSubscription = null;
+            var tutorialModal = globalScenePresenter?.TutorialModalPresenter;
+            if (tutorialModal != null && tutorialModal.IsOpen)
+            {
+                tutorialModal.Close();
+            }
 
             disposables.Dispose();
             bossDisposables.Dispose();
