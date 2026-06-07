@@ -26,9 +26,9 @@ namespace Project.Scenes.Global.Scripts.Presenter
         {
             soundModelRepository = SoundModelRepository.Instance;
 
-            // TODO: UserDataから音量設定を取得して設定する
-            SetBGMVolume(15);
-            SetSEVolume(15);
+            var userModel = UserModelRepository.Instance.Get();
+            SetBGMVolume(userModel.BgmVolume);
+            SetSEVolume(userModel.SeVolume);
         }
 
         void Update()
