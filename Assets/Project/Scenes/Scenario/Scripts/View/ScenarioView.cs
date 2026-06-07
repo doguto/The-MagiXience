@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,17 +7,21 @@ namespace Project.Scenes.Scenario.Scripts.View
 {
     public class ScenarioView : MonoBehaviour
     {
+        [SerializeField] Color grayedColor = new (0.5f, 0.5f, 0.5f, 1f);
+
         [SerializeField] TextMeshProUGUI characterNameText;
         [SerializeField] TextMeshProUGUI contentsText;
         [SerializeField] Image playerImage;
         [SerializeField] Image enemyImage;
         [SerializeField] Image faceImage;
 
+        // キャラ名 → 位置(LL/RR) のマッピング
+        readonly Dictionary<string, string> castPositions = new();
+
         public void ShowCastMessage(string characterName, string message)
         {
-            // TODO: まだ関数の中身は未実装
-            // ChangeCastLayer(characterName, 1);
-            // StopGrayingCast(characterName);
+            // ChangeCastLayer();
+            StopGrayingCast(characterName);
             ShowMessage(characterName, message);
         }
 
@@ -32,21 +37,21 @@ namespace Project.Scenes.Scenario.Scripts.View
         {
             // TODO: displayTime, unknownArgsの処理は後で実装
 
-            // 位置に応じてSpriteを表示
-            // TODO: 位置は定数で定義
+            castPositions[characterName] = position;
+
             ChangeFaceExpression(faceSprite);
             if (position == "LL")
             {
-                // 左側 = プレイヤー
                 playerImage.sprite = playerSprite;
                 playerImage.SetNativeSize();
+                playerImage.color = grayedColor;
                 playerImage.gameObject.SetActive(true);
             }
             else if (position == "RR")
             {
-                // 右側 = 敵キャラ
                 enemyImage.sprite = enemySprite;
                 enemyImage.SetNativeSize();
+                enemyImage.color = grayedColor;
                 enemyImage.gameObject.SetActive(true);
             }
         }
@@ -67,14 +72,24 @@ namespace Project.Scenes.Scenario.Scripts.View
 
         public void StopGrayingCast(string characterName)
         {
-            // TODO
+            if (!castPositions.TryGetValue(characterName, out var position)) return;
+
+            if (position == "LL")
+            {
+                playerImage.color = Color.white;
+                if (enemyImage.gameObject.activeSelf) enemyImage.color = grayedColor;
+            }
+            else if (position == "RR")
+            {
+                enemyImage.color = Color.white;
+                if (playerImage.gameObject.activeSelf) playerImage.color = grayedColor;
+            }
         }
 
         public void LogCommand(string function, string[] args)
         {
             Debug.Log($"[ScenarioView] Execute: {function}, Args: {string.Join(", ", args)}");
         }
-        // TODO?: 喋ってないほうのStillを暗くする
         // TODO?: アニメーションをつける
     }
 }
