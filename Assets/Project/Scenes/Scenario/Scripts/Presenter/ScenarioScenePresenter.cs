@@ -144,6 +144,15 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     continue;
                 }
 
+                if (step.function == "HideCast")
+                {
+                    var characterName = step.args.Length > 0 ? step.args[0] : "";
+                    scenarioView.HideCast(characterName);
+
+                    scenarioModel.Next();
+                    continue;
+                }
+
                 if (step.function == "ChangeCastAnimation")
                 {
                     var characterName = step.args.Length > 0 ? step.args[0] : "";

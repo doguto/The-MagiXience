@@ -70,6 +70,22 @@ namespace Project.Scenes.Scenario.Scripts.View
             }
         }
 
+        public void HideCast(string characterName)
+        {
+            if (!castPositions.TryGetValue(characterName, out var position)) return;
+
+            if (position == "LL")
+            {
+                playerImage.gameObject.SetActive(false);
+            }
+            else if (position == "RR")
+            {
+                enemyImage.gameObject.SetActive(false);
+            }
+
+            castPositions.Remove(characterName);
+        }
+
         public void StopGrayingCast(string characterName)
         {
             if (!castPositions.TryGetValue(characterName, out var position)) return;
