@@ -1,24 +1,18 @@
 ------------------------------------------------------
 ・1面ボス後
 ------------------------------------------------------
-// 追加
 @ShowCast,ロコ,1,Default,0.1,RR,1
 @ShowCast,テン,1,Default,0.1,LL,1
 @ChangeCastAnimation,ロコ,Angry
-// 追加終わり
 @ShowCastMessage,ロコ
 あいたたた……。こんなに手荒に
 斬りつけられるなんて聞いてないわよ……。
 
-// 追加
 @ChangeCastAnimation,テン,Default
-// 追加終わり
 @ShowCastMessage,テン
 ……それはすまない。
 
-// 追加
 @ChangeCastAnimation,ロコ,Default
-// 追加終わり
 @ShowCastMessage,ロコ
 まあいいわ。この先、こんなに穏やかに
 会話していられないこともあるでしょう。
@@ -26,32 +20,24 @@
 @ShowCastMessage,ロコ
 ほら、雲一つない空に雷が。
 
-// 追加
 @ChangeCastAnimation,テン,Default
-// 追加終わり
 @ShowCastMessage,テン
 ……思ったより時間はなさそうだな。
 
 @ShowCastMessage,テン
 夜明けには戻る。無事を祈っていてくれ。
 
-// 追加
 @ChangeCastAnimation,ロコ,Default
-// 追加終わり
-@HideCast,テン
+@HideCast,テン,0.5
 @ShowCastMessage,ロコ
 あ、ちょっと……。
 
-// 追加
 @ChangeCastAnimation,ロコ,Angry
-// 追加終わり
 @ShowCastMessage,ロコ
 ……行ってしまったわ。
 残される側ってこんなに呆気ないのね。
 
-// 追加
 @ChangeCastAnimation,ロコ,Default
-// 追加終わり
 @ShowCastMessage,ロコ
 ……別れはいつも不意に訪れるもの。
 これが彼との最後にならないといいけど。

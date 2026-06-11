@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -70,17 +71,23 @@ namespace Project.Scenes.Scenario.Scripts.View
             }
         }
 
-        public void HideCast(string characterName)
+        public void HideCast(string characterName, float fadeDuration)
         {
             if (!castPositions.TryGetValue(characterName, out var position)) return;
 
-            if (position == "LL")
+            Image targetImage = position switch
             {
-                playerImage.gameObject.SetActive(false);
-            }
-            else if (position == "RR")
+                "LL" => playerImage,
+                "RR" => enemyImage,
+                _ => null
+            };
+
+            if (targetImage != null)
             {
-                enemyImage.gameObject.SetActive(false);
+                // 再表示時の競合を避けるため、進行中のTweenをkillしてからフェードアウト
+                targetImage.DOKill();
+                targetImage.DOFade(0f, fadeDuration)
+                           .OnComplete(() => targetImage.gameObject.SetActive(false));
             }
 
             castPositions.Remove(characterName);
