@@ -278,6 +278,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 SubscribeToPlayerDeath();
             }
 
+            backgroundPresenter?.Initialize();
+            playerPresenter?.Initialize();
+
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 

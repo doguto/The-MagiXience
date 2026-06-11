@@ -309,6 +309,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 && globalScenePresenter.PauseModalPresenter.IsOpen;
         }
 
+        public void Initialize()
+        {
+            view.Initialize();
+        }
+
         public void SetColliderActive(bool active)
         {
             var col = GetComponent<Collider2D>();

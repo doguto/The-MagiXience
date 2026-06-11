@@ -87,7 +87,12 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
             {
                 originalBodyColor = bodySpriteRenderer.color;
             }
-            ApplyRunFrame(0);
+            EnterStay();
+        }
+
+        public void Initialize()
+        {
+            EnterRun();
         }
 
         public void UpdateAnimation()
