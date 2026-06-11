@@ -15,6 +15,7 @@ namespace Project.Commons.UI.Scripts.Presenter
     public class TutorialModalPresenter : MonoPresenter
     {
         [SerializeField] TutorialModalView tutorialModalView;
+        [SerializeField] float skipLockDuration = 3f;
 
         readonly Subject<Unit> onClosed = new();
         public IObservable<Unit> OnClosed => onClosed;
@@ -40,11 +41,13 @@ namespace Project.Commons.UI.Scripts.Presenter
 
             tutorialModalView.Show();
 
-            // UISubmit または PlayerAttack のどちらかで閉じる
+            // UISubmit または PlayerAttack のどちらかで閉じる（開いてから skipLockDuration 秒間はスキップ不可）
             closeInputSubscription?.Dispose();
-            closeInputSubscription = Observable.Merge(
+            closeInputSubscription = Observable.Timer(TimeSpan.FromSeconds(skipLockDuration))
+                .SelectMany(_ => Observable.Merge(
                     MessageBroker.Default.Receive<UISubmitMessage>().AsUnitObservable(),
-                    MessageBroker.Default.Receive<PlayerAttackMessage>().AsUnitObservable())
+                    MessageBroker.Default.Receive<PlayerAttackMessage>().AsUnitObservable()))
+                .Take(1)
                 .Subscribe(_ => Close());
         }
 

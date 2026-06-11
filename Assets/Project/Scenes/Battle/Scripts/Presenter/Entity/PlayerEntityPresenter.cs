@@ -110,7 +110,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             base.Start();
             BindModelToView();
             SubscribeToMoveInput();
-            SubscribeToAttackInput();
             SubscribeToSpectrumBarPush();
         }
 

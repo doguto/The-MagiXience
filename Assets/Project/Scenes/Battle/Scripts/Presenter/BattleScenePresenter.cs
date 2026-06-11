@@ -109,15 +109,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             hasShownTutorial = true;
 
+            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            playerPresenter?.UnsubscribeFromAttackInput();
+
             var tutorialModal = globalScenePresenter.TutorialModalPresenter;
 
             tutorialClosedSubscription?.Dispose();
             tutorialClosedSubscription = tutorialModal.OnClosed
                                                       .Take(1)
                                                       .Subscribe(_ => InitializeAndStart());
-            
+
             tutorialModal.Open();
-            
+
             soundManager?.PlayBGMAsync(SceneType.Global, BgmType.Tutorial).Forget();
         }
 
@@ -300,8 +303,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            // PlayerEntityPresenterを取得
-            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            // PlayerEntityPresenterを取得（チュートリアル経由の場合は取得済み）
+            if (playerPresenter == null) playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             if (playerPresenter == null)
             {
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
@@ -313,6 +316,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             backgroundPresenter?.Initialize();
             playerPresenter?.Initialize();
+            playerPresenter?.SubscribeToAttackInput();
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
