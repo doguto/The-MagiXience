@@ -18,7 +18,7 @@ namespace Project.Scenes.Title.Scripts.View
         [SerializeField] SpriteRenderer memberStillRenderer;
         [SerializeField] SpriteRenderer backGroundRenderer;
 
-        public IObservable<Unit> OnPressedStartMain => startMainButton.OnPressed;
+        // public IObservable<Unit> OnPressedStartMain => startMainButton.OnPressed;
         public IObservable<Unit> OnPressedStart => stageSelectButton.OnPressed;
         public IObservable<Unit> OnPressedOption => configButton.OnPressed;
         public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
@@ -31,8 +31,8 @@ namespace Project.Scenes.Title.Scripts.View
 
         public void InitStart()
         {
-            startMainButton.Init(isFocused: true);
-            stageSelectButton.Init();
+            // startMainButton.Init(isFocused: true);
+            stageSelectButton.Init(isFocused: true);
             configButton.Init();
             exitButton.Init();
         }

@@ -31,7 +31,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
             base.Start();
             titleMenuView.InitStart();
 
-            titleMenuView.OnPressedStartMain.Subscribe(_ => { StartMain(_).Forget(); });
+            // titleMenuView.OnPressedStartMain.Subscribe(_ => { StartMain(_).Forget(); });
             titleMenuView.OnPressedStart.Subscribe(x =>
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
