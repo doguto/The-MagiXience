@@ -9,6 +9,8 @@
         public KeyConfigData keyConfigData;
         public int bgmVolume;
         public int seVolume;
+        // 1面に一度でも入ったことがあるか（初回チュートリアルのスキップ待ち判定に使用）
+        public bool hasEnteredStage1;
 
         public UserData()
         {
@@ -16,6 +18,7 @@
             keyConfigData = new KeyConfigData();
             bgmVolume = DefaultVolume;
             seVolume = DefaultVolume;
+            hasEnteredStage1 = false;
         }
     }
 }

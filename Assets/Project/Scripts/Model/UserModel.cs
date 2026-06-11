@@ -43,6 +43,15 @@ namespace Project.Scripts.Model
             Save();
         }
 
+        public bool HasEnteredStage1 => UserData.hasEnteredStage1;
+
+        public void MarkEnteredStage1()
+        {
+            if (UserData.hasEnteredStage1) return;
+            UserData.hasEnteredStage1 = true;
+            Save();
+        }
+
         public bool IsClearedStage(int stageNumber)
         {
             return UserData.clearedStageNumber >= stageNumber;

@@ -119,7 +119,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                                                       .Take(1)
                                                       .Subscribe(_ => InitializeAndStart());
 
-            tutorialModal.Open();
+            // 初めて1面に入ったときのみスキップ待ちを有効にする
+            var userModel = UserModelRepository.Instance.Get();
+            var isFirstEntry = !userModel.HasEnteredStage1;
+            userModel.MarkEnteredStage1();
+
+            tutorialModal.Open(isFirstEntry);
 
             soundManager?.PlayBGMAsync(SceneType.Global, BgmType.Tutorial).Forget();
         }

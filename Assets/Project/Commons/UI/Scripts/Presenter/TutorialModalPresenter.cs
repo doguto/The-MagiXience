@@ -34,16 +34,18 @@ namespace Project.Commons.UI.Scripts.Presenter
             }
         }
 
-        public void Open()
+        public void Open(bool isFirstEntry)
         {
             if (IsOpen) return;
             IsOpen = true;
 
             tutorialModalView.Show();
 
-            // UISubmit または PlayerAttack のどちらかで閉じる（開いてから skipLockDuration 秒間はスキップ不可）
+            var lockDuration = isFirstEntry ? skipLockDuration : 0f;
+
+            // UISubmit または PlayerAttack のどちらかで閉じる（開いてから lockDuration 秒間はスキップ不可）
             closeInputSubscription?.Dispose();
-            closeInputSubscription = Observable.Timer(TimeSpan.FromSeconds(skipLockDuration))
+            closeInputSubscription = Observable.Timer(TimeSpan.FromSeconds(lockDuration))
                 .SelectMany(_ => Observable.Merge(
                     MessageBroker.Default.Receive<UISubmitMessage>().AsUnitObservable(),
                     MessageBroker.Default.Receive<PlayerAttackMessage>().AsUnitObservable()))
