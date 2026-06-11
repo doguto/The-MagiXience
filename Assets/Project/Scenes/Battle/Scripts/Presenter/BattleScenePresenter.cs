@@ -115,8 +115,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             tutorialClosedSubscription = tutorialModal.OnClosed
                                                       .Take(1)
                                                       .Subscribe(_ => InitializeAndStart());
-
+            
             tutorialModal.Open();
+            
+            soundManager?.PlayBGMAsync(SceneType.Global, BgmType.Tutorial).Forget();
         }
 
         void SubscribeToPauseInput()
