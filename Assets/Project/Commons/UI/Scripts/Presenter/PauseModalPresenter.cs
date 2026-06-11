@@ -17,8 +17,10 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         readonly Subject<Unit> onClosed = new();
         readonly Subject<Unit> onRetryRequested = new();
+        readonly Subject<Unit> onTitleRequested = new();
         public IObservable<Unit> OnClosed => onClosed;
         public IObservable<Unit> OnRetryRequested => onRetryRequested;
+        public IObservable<Unit> OnTitleRequested => onTitleRequested;
         public bool IsOpen { get; private set; }
 
         RuntimeModel runtimeModel;
@@ -60,7 +62,7 @@ namespace Project.Commons.UI.Scripts.Presenter
                     pauseEvent = null;
                 });
             });
-            pauseModalView.OnPressedExit.Subscribe(x => LoadTitle(x).Forget()).AddTo(this);
+            pauseModalView.OnPressedExit.Subscribe(x => LoadTitle(x)).AddTo(this);
 
             // Globalシーンで起動された時点では非表示にしておく
             if (!IsOpen)
@@ -93,16 +95,13 @@ namespace Project.Commons.UI.Scripts.Presenter
             onClosed.OnNext(Unit.Default);
         }
 
-        async UniTask LoadTitle(Unit _)
+        void LoadTitle(Unit _)
         {
-            Close();
-            
-            var sceneName = SceneManager.GetActiveScene().name;
-
-            await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
-
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
-            SceneManager.UnloadSceneAsync(sceneName).ToUniTask().Forget();
+            IsOpen = false;
+            Time.timeScale = 1f;
+            AudioListener.pause = false;
+            gameObject.SetActive(false);
+            onTitleRequested.OnNext(Unit.Default);
         }
     }
 }

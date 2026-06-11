@@ -189,6 +189,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 pauseModalForRetry.OnRetryRequested
                                   .Subscribe(_ => Retry())
                                   .AddTo(disposables);
+                pauseModalForRetry.OnTitleRequested
+                                  .Subscribe(_ => ReturnToTitle())
+                                  .AddTo(disposables);
             }
         }
 
@@ -256,6 +259,36 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 PlayBgmForSituation(BattleSituation.Way);
                 phaseStateMachine.PlaySequence(waySequence);
             }
+        }
+
+        async void ReturnToTitle()
+        {
+            phaseStateMachine.Stop();
+
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = null;
+
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
+
+            scenarioCompletedSubscription?.Dispose();
+            scenarioCompletedSubscription = null;
+
+            var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
+            if (scenarioScene.IsValid() && scenarioScene.isLoaded)
+            {
+                await SceneManager.UnloadSceneAsync(scenarioScene).ToUniTask();
+            }
+            ScenarioModelRepository.Instance.Refresh();
+
+            var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
+            await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
+            SceneManager.UnloadSceneAsync(battleSceneName).ToUniTask().Forget();
         }
 
         public void InitializeAndStart()
