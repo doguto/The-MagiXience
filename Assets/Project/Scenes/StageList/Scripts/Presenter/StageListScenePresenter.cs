@@ -64,6 +64,8 @@ namespace Project.Scenes.StageList.Scripts.Presenter
 
         async UniTask LoadBattleScene(int buttonIndex)
         {
+            // DEMO: 1面以外のバトルシーンをロードできないようにする
+            if (buttonIndex != 0) return;
             soundManager.PlaySEAsync(SeType.Click).Forget();
 
             var runtimeModel = RuntimeModelRepository.Get();
