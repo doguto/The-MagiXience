@@ -43,9 +43,9 @@ namespace Project.Scenes.StageList.Scripts.Presenter
 
             ShowCharaImage(0);
             stageCardListView.OnButtonChanged.Subscribe(ShowCharaImage);
-            stageCardListView.OnButtonPressed.Subscribe(i => LoadBattleScene(i).Forget());
+            stageCardListView.OnButtonPressed.SubscribeBlocking(LoadBattleScene).AddTo(this);
             MessageBroker.Default.Receive<UICancelMessage>()
-                .Subscribe(_ => BackToTitle().Forget())
+                .SubscribeBlocking(_ => BackToTitle())
                 .AddTo(this);
         }
 

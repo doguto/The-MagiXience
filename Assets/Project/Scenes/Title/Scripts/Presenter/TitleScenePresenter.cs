@@ -32,11 +32,11 @@ namespace Project.Scenes.Title.Scripts.Presenter
             titleMenuView.InitStart();
 
             // titleMenuView.OnPressedStartMain.Subscribe(_ => { StartMain(_).Forget(); });
-            titleMenuView.OnPressedStart.Subscribe(x =>
+            titleMenuView.OnPressedStart.SubscribeBlocking(async x =>
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
-                StartGame(x).Forget();
-            });
+                await StartGame(x);
+            }).AddTo(this);
             titleMenuView.OnPressedOption.Subscribe(async _ =>
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();

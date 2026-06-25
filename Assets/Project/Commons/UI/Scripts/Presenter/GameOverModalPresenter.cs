@@ -1,5 +1,7 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Project.Commons.UI.Scripts.View;
+using Project.Scripts.Extensions;
 using Project.Scripts.Model;
 using Project.Scripts.Presenter;
 using Project.Scripts.Repository.ModelRepository;
@@ -47,7 +49,7 @@ namespace Project.Commons.UI.Scripts.Presenter
                     pauseEvent = null;
                 });
             }).AddTo(this);
-            gameOverModalView.OnPressedTitle.Subscribe(_ => RequestTitle()).AddTo(this);
+            gameOverModalView.OnPressedTitle.SubscribeBlocking(_ => RequestTitle()).AddTo(this);
 
             if (!IsOpen)
             {
@@ -78,7 +80,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             onRetryRequested.OnNext(Unit.Default);
         }
 
-        void RequestTitle()
+        async UniTask RequestTitle()
         {
             IsOpen = false;
             Time.timeScale = 1f;
