@@ -118,16 +118,32 @@ namespace Project.Scenes.Global.Scripts.Presenter
             await UniTask.CompletedTask;
         }
 
+        const float MaxAudioVolume = 0.5f;
+        const float MinVolumeDb = -40f;
+
         public void SetBGMVolume(int volume)
         {
-            bgmAudioSource.volume = Mathf.Clamp01(volume / 100.0f);
+            bgmAudioSource.volume = ConvertToAudioVolume(volume);
         }
 
         public void SetSEVolume(int volume)
         {
-            float v = Mathf.Clamp01(volume / 100.0f);
+            float v = ConvertToAudioVolume(volume);
             seAudioSource.volume = v;
             if (loopSeAudioSource != null) loopSeAudioSource.volume = v;
+        }
+
+        // 設定値(0-100)をAudioSourceの音量(0-MaxAudioVolume)へ変換する。
+        // 人間の聴覚に合わせて、線形ではなく対数(dB)カーブで補間する。
+        static float ConvertToAudioVolume(int volume)
+        {
+            float t = Mathf.Clamp01(volume / 100.0f);
+            if (t <= 0f) return 0f; // 無音
+
+            // tを MinVolumeDb 〜 0dB の範囲へ線形にマッピングし、dB→振幅へ変換する。
+            float db = Mathf.Lerp(MinVolumeDb, 0f, t);
+            float amplitude = Mathf.Pow(10f, db / 20f);
+            return amplitude * MaxAudioVolume;
         }
     }
 }
