@@ -189,6 +189,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 gameOverModalForRetry.OnRetryRequested
                                      .Subscribe(_ => Retry())
                                      .AddTo(disposables);
+                gameOverModalForRetry.OnTitleRequested
+                                     .Subscribe(_ => ReturnToTitle())
+                                     .AddTo(disposables);
             }
 
             var pauseModalForRetry = globalScenePresenter?.PauseModalPresenter;
@@ -206,6 +209,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void Retry()
         {
             phaseStateMachine.Stop();
+            playerPresenter?.CancelCharge();
 
             // シナリオ遷移待ち中のDelayや、シーンロード待ちハンドラ・購読をすべて解除
             sequenceTransitionCts?.Cancel();
@@ -272,6 +276,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         async void ReturnToTitle()
         {
             phaseStateMachine.Stop();
+            playerPresenter?.CancelCharge();
 
             sequenceTransitionCts?.Cancel();
             sequenceTransitionCts?.Dispose();
