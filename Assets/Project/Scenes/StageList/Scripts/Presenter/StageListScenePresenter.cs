@@ -66,6 +66,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         {
             // DEMO: 1面以外のバトルシーンをロードできないようにする
             if (buttonIndex != 0) return;
+            
             soundManager.PlaySEAsync(SeType.Click).Forget();
 
             var runtimeModel = RuntimeModelRepository.Get();
