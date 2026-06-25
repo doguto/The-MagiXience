@@ -82,6 +82,7 @@ namespace Project.Scripts.Model
                 // 既定値で初期化したインスタンスへ上書きして欠損フィールドを補完する。
                 var data = new UserData();
                 JsonUtility.FromJsonOverwrite(json, data);
+                data.Validate();
                 return data;
             }
             catch (Exception e)
