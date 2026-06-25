@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Project.Commons.UI.Scripts.View;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Presenter;
@@ -21,7 +23,7 @@ namespace Project.Commons.UI.Scripts.Presenter
         public IObservable<Unit> OnClosed => onClosed;
         public bool IsOpen { get; private set; }
 
-        IDisposable closeInputSubscription;
+        CancellationTokenSource closeCts;
 
         protected override void Start()
         {
@@ -41,16 +43,25 @@ namespace Project.Commons.UI.Scripts.Presenter
 
             tutorialModalView.Show();
 
-            var lockDuration = isFirstEntry ? skipLockDuration : 0f;
+            closeCts = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
+            WaitForCloseAsync(isFirstEntry, closeCts.Token).Forget();
+        }
 
-            // UISubmit または PlayerAttack のどちらかで閉じる（開いてから lockDuration 秒間はスキップ不可）
-            closeInputSubscription?.Dispose();
-            closeInputSubscription = Observable.Timer(TimeSpan.FromSeconds(lockDuration))
-                .SelectMany(_ => Observable.Merge(
-                    MessageBroker.Default.Receive<UISubmitMessage>().AsUnitObservable(),
-                    MessageBroker.Default.Receive<PlayerAttackMessage>().AsUnitObservable()))
-                .Take(1)
-                .Subscribe(_ => Close());
+        async UniTaskVoid WaitForCloseAsync(bool isFirstEntry, CancellationToken token)
+        {
+            // 開いてから lockDuration 秒間はスキップ不可
+            var lockDuration = isFirstEntry ? skipLockDuration : 0f;
+            await UniTask.Delay(TimeSpan.FromSeconds(lockDuration), cancellationToken: token);
+
+            // 待機時間が過ぎたら「Push Z to start」テキストを表示する
+            tutorialModalView.SetPushZToStartActive(true);
+
+            // UISubmit または PlayerAttack のどちらかが来たら閉じる
+            await UniTask.WhenAny(
+                MessageBroker.Default.Receive<UISubmitMessage>().ToUniTask(useFirstValue: true, cancellationToken: token),
+                MessageBroker.Default.Receive<PlayerAttackMessage>().ToUniTask(useFirstValue: true, cancellationToken: token));
+
+            Close();
         }
 
         public void Close()
@@ -58,8 +69,9 @@ namespace Project.Commons.UI.Scripts.Presenter
             if (!IsOpen) return;
             IsOpen = false;
 
-            closeInputSubscription?.Dispose();
-            closeInputSubscription = null;
+            closeCts?.Cancel();
+            closeCts?.Dispose();
+            closeCts = null;
 
             tutorialModalView.Hide();
             onClosed.OnNext(Unit.Default);
@@ -67,8 +79,9 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         void OnDestroy()
         {
-            closeInputSubscription?.Dispose();
-            closeInputSubscription = null;
+            closeCts?.Cancel();
+            closeCts?.Dispose();
+            closeCts = null;
             onClosed.Dispose();
         }
     }
