@@ -13,6 +13,7 @@
         Stage6,
         StageEx,
         Scenario,
+        Entry,
     }
 
     public static class SceneTypeExtension
@@ -26,6 +27,7 @@
                 SceneType.Title => "Title",
                 SceneType.StageList => "StageList",
                 SceneType.Scenario => "Scenario",
+                SceneType.Entry => "Entry",
                 _ => "Battle"
             };
         }

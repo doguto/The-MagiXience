@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -29,6 +30,12 @@ namespace Project.Commons.UI.Scripts.View
         // スライダー操作・キー操作いずれでも値が変化したら発火する(0-100)。
         public IObservable<int> OnBgmValueChanged => onBgmValueChanged;
         public IObservable<int> OnSeValueChanged => onSeValueChanged;
+
+        // SeスライダーがEventSystemで選択された/選択解除されたタイミングで発火する。
+        public IObservable<BaseEventData> OnSeSliderSelected =>
+            seSlider.OnSelectAsObservable();
+        public IObservable<BaseEventData> OnSeSliderDeselected =>
+            seSlider.OnDeselectAsObservable();
         
         public IObservable<Unit> OnPressedKeyConfig(int i)
         {

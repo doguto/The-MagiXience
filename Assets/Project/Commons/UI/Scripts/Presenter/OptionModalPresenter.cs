@@ -52,6 +52,15 @@ namespace Project.Commons.UI.Scripts.Presenter
                 soundManager.SetSEVolume(volume);
                 userModel.SetVolume(userModel.BgmVolume, volume);
             }).AddTo(this);
+            
+            optionModalView.OnSeSliderSelected.Subscribe(_ =>
+            {
+                soundManager.PlayLoopSE(SeType.Charge);
+            }).AddTo(this);
+            optionModalView.OnSeSliderDeselected.Subscribe(_ =>
+            {
+                soundManager.StopLoopSE();
+            }).AddTo(this);
         }
 
         public void Open()
@@ -71,6 +80,7 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         public void Close()
         {
+            soundManager.StopLoopSE();
             soundManager.PlaySEAsync(SeType.Cancel).Forget();
             gameObject.SetActive(false);
 
