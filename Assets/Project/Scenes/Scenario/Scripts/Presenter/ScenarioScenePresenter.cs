@@ -22,11 +22,15 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         readonly Subject<Unit> scenarioCompleted = new();
         readonly CompositeDisposable disposables = new();
 
+        // シナリオ完了処理の多重実行を防ぐガード。
+        // 完了時の決定入力を連打すると ExecuteSteps の完了ブロックが再入し、
+        // AdvanceToNextSequence が複数回走ってステージ状態が暴走するため。
+        bool isCompleted;
+
         public IObservable<Unit> OnScenarioCompleted => scenarioCompleted;
 
         void Start()
         {
-            Debug.Log("[ScenarioScenePresenter] Start called");
             scenarioModel = ScenarioModelRepository.Instance.Get();
             globalScenePresenter = FindFirstObjectByType<GlobalScenePresenter>();
 
@@ -48,6 +52,8 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
         void OnPressNext()
         {
+            if (isCompleted) return;
+
             scenarioModel.Next();
             ExecuteSteps();
         }
@@ -192,6 +198,9 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
             if (scenarioModel.IsEnd)
             {
+                if (isCompleted) return;
+                isCompleted = true;
+
                 Debug.Log("[ScenarioScenePresenter] Scenario End. Advance to Next Sequence");
 
                 // シナリオ完了時にSituationを変更
