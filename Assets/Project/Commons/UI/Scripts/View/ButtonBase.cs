@@ -46,6 +46,8 @@ namespace Project.Commons.UI.Scripts.View
         public void Init(bool isOpened = true, bool isFocused = false)
         {
             IsOpened = isOpened;
+            // Selectableの変数 isOpened=falseならInputからの処理を一律受け付けないようにする
+            interactable = isOpened;
             IsFocused = isFocused;
             if (IsFocused)
             {
@@ -80,12 +82,15 @@ namespace Project.Commons.UI.Scripts.View
 
         public virtual void OnPointerClick(PointerEventData eventData)
         {
+            // 未解放ステージはクリックできないようにする
+            if (!IsOpened) return;
             IsFocused = true;
             PressButton();
         }
 
         public override void OnPointerEnter(PointerEventData eventData)
         {
+            if (!IsOpened) return;
             base.OnPointerEnter(eventData);
             EventSystem.current.SetSelectedGameObject(gameObject);
             IsFocused = true;

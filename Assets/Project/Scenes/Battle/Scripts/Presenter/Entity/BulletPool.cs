@@ -51,6 +51,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroyBullet(BulletEntityPresenter bullet)
         {
+            if (bullet == null) return;
             Destroy(bullet.gameObject);
         }
 

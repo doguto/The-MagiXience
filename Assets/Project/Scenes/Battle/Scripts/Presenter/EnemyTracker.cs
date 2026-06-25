@@ -11,6 +11,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
     {
         readonly Subject<Unit> enemySpawned = new();
         readonly Subject<Unit> enemyRemoved = new();
+        readonly CompositeDisposable disposables = new();
         int activeCount;
 
         public IObservable<Unit> OnEnemySpawned => enemySpawned;
@@ -28,11 +29,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 {
                     activeCount--;
                     enemyRemoved.OnNext(Unit.Default);
-                });
+                })
+                .AddTo(disposables);
         }
 
         void OnDestroy()
         {
+            disposables.Dispose();
             enemySpawned.Dispose();
             enemyRemoved.Dispose();
         }

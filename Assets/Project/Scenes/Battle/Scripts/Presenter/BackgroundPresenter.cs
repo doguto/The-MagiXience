@@ -28,9 +28,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             view = GetComponent<BackgroundView>();
         }
 
-        protected override void Start()
+        public void Initialize()
         {
-            base.Start();
             if (RuntimeModelRepository.Get().CurrentSituation == BattleSituation.Way) currentSpeed = scrollSpeed;
         }
 

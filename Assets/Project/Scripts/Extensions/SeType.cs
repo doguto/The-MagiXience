@@ -11,5 +11,7 @@
         Charge,
         ChargeRelease,
         Damage,
+	LocoAttack1,
+	LocoAttack2
     }
 }

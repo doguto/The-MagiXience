@@ -42,8 +42,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         bool isBattleStarted;
         bool hasResumedPlayerAnimationOnBoss;
+        bool hasShownTutorial;
         CancellationTokenSource sequenceTransitionCts;
         IDisposable scenarioCompletedSubscription;
+        IDisposable tutorialClosedSubscription;
 
         void Awake()
         {
@@ -80,7 +82,51 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             SubscribeToPauseInput();
 
-            InitializeAndStart();
+            // 1面道中の初回開始時はチュートリアルモーダルを表示し、閉じてからシーケンスを開始する
+            if (ShouldShowTutorial())
+            {
+                ShowTutorialThenStart();
+            }
+            else
+            {
+                InitializeAndStart();
+            }
+        }
+
+        bool ShouldShowTutorial()
+        {
+            if (hasShownTutorial) return false;
+
+            var runtimeModel = RuntimeModelRepository.Get();
+            var isStage1 = runtimeModel.CurrentStageType.AsInt() == 1;
+            var isWay = runtimeModel.CurrentSituation == BattleSituation.Way;
+            if (!isStage1 || !isWay) return false;
+
+            return globalScenePresenter?.TutorialModalPresenter != null;
+        }
+
+        void ShowTutorialThenStart()
+        {
+            hasShownTutorial = true;
+
+            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            playerPresenter?.UnsubscribeFromAttackInput();
+
+            var tutorialModal = globalScenePresenter.TutorialModalPresenter;
+
+            tutorialClosedSubscription?.Dispose();
+            tutorialClosedSubscription = tutorialModal.OnClosed
+                                                      .Take(1)
+                                                      .Subscribe(_ => InitializeAndStart());
+
+            // 初めて1面に入ったときのみスキップ待ちを有効にする
+            var userModel = UserModelRepository.Instance.Get();
+            var isFirstEntry = !userModel.HasEnteredStage1;
+            userModel.MarkEnteredStage1();
+
+            tutorialModal.Open(isFirstEntry);
+
+            soundManager?.PlayBGMAsync(SceneType.Global, BgmType.Tutorial).Forget();
         }
 
         void SubscribeToPauseInput()
@@ -108,6 +154,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             var pauseModal = globalScenePresenter?.PauseModalPresenter;
             if (pauseModal == null) return;
+
+            // オプション画面が開いている場合はオプションだけ閉じる
+            var optionModal = globalScenePresenter?.OptionModalPresenter;
+            if (optionModal != null && optionModal.IsOpen)
+            {
+                optionModal.Close();
+                return;
+            }
 
             if (pauseModal.IsOpen)
             {
@@ -142,6 +196,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 pauseModalForRetry.OnRetryRequested
                                   .Subscribe(_ => Retry())
+                                  .AddTo(disposables);
+                pauseModalForRetry.OnTitleRequested
+                                  .Subscribe(_ => ReturnToTitle())
                                   .AddTo(disposables);
             }
         }
@@ -212,6 +269,36 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
+        async void ReturnToTitle()
+        {
+            phaseStateMachine.Stop();
+
+            sequenceTransitionCts?.Cancel();
+            sequenceTransitionCts?.Dispose();
+            sequenceTransitionCts = null;
+
+            if (isSceneLoadedHandlerRegistered)
+            {
+                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+                isSceneLoadedHandlerRegistered = false;
+            }
+
+            scenarioCompletedSubscription?.Dispose();
+            scenarioCompletedSubscription = null;
+
+            var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
+            if (scenarioScene.IsValid() && scenarioScene.isLoaded)
+            {
+                await SceneManager.UnloadSceneAsync(scenarioScene).ToUniTask();
+            }
+            ScenarioModelRepository.Instance.Refresh();
+
+            var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
+            await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
+            SceneManager.UnloadSceneAsync(battleSceneName).ToUniTask().Forget();
+        }
+
         public void InitializeAndStart()
         {
             stageModel = ResolveStageModel();
@@ -221,8 +308,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            // PlayerEntityPresenterを取得
-            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            // PlayerEntityPresenterを取得（チュートリアル経由の場合は取得済み）
+            if (playerPresenter == null) playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             if (playerPresenter == null)
             {
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
@@ -231,6 +318,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 SubscribeToPlayerDeath();
             }
+
+            backgroundPresenter?.Initialize();
+            playerPresenter?.Initialize();
+            playerPresenter?.SubscribeToAttackInput();
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
@@ -341,6 +432,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // シナリオ中は攻撃を禁止 + プレイヤーの当たり判定を無効化（被弾でゲームオーバー誤発火を防ぐ）
             playerPresenter?.UnsubscribeFromAttackInput();
             playerPresenter?.SetColliderActive(false);
+            // チャージ中のままシナリオへ突入した場合に備えてチャージ状態をリセット
+            playerPresenter?.CancelCharge();
 
             // シナリオ完了後のコールバックを保存
             pendingScenarioCallback = onCompleteOrSkip;
@@ -544,6 +637,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             sequenceTransitionCts?.Cancel();
             sequenceTransitionCts?.Dispose();
             sequenceTransitionCts = null;
+
+            // チュートリアルモーダルを閉じる前にシーンが破棄された場合に備えて後始末する
+            tutorialClosedSubscription?.Dispose();
+            tutorialClosedSubscription = null;
+            var tutorialModal = globalScenePresenter?.TutorialModalPresenter;
+            if (tutorialModal != null && tutorialModal.IsOpen)
+            {
+                tutorialModal.Close();
+            }
 
             disposables.Dispose();
             bossDisposables.Dispose();

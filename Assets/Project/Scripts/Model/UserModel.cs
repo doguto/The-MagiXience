@@ -24,10 +24,30 @@ namespace Project.Scripts.Model
         public UserData UserData { get; set; }
 
         public int ClearedStageNumber => UserData.clearedStageNumber;
+        public int OpenedStageNumber => UserData.clearedStageNumber - 1;
+
+        public int BgmVolume => UserData.bgmVolume;
+        public int SeVolume => UserData.seVolume;
+
+        // 音量をメモリ上に反映する。永続化はSave()を別途呼ぶ(Optionモーダルを閉じたタイミング等)。
+        public void SetVolume(int bgmVolume, int seVolume)
+        {
+            UserData.bgmVolume = Mathf.Clamp(bgmVolume, 0, 100);
+            UserData.seVolume = Mathf.Clamp(seVolume, 0, 100);
+        }
 
         public void StageClear(int stageNumber)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);
+            Save();
+        }
+
+        public bool HasEnteredStage1 => UserData.hasEnteredStage1;
+
+        public void MarkEnteredStage1()
+        {
+            if (UserData.hasEnteredStage1) return;
+            UserData.hasEnteredStage1 = true;
             Save();
         }
 
@@ -58,7 +78,10 @@ namespace Project.Scripts.Model
             try
             {
                 var json = File.ReadAllText(saveFilePath);
-                var data = JsonUtility.FromJson<UserData>(json);
+                // 音量フィールドが無い旧データを読み込むと0になるため、
+                // 既定値で初期化したインスタンスへ上書きして欠損フィールドを補完する。
+                var data = new UserData();
+                JsonUtility.FromJsonOverwrite(json, data);
                 return data;
             }
             catch (Exception e)

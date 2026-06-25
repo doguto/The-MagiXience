@@ -26,9 +26,9 @@ namespace Project.Scenes.Global.Scripts.Presenter
         {
             soundModelRepository = SoundModelRepository.Instance;
 
-            // TODO: UserDataから音量設定を取得して設定する
-            SetBGMVolume(15);
-            SetSEVolume(15);
+            var userModel = UserModelRepository.Instance.Get();
+            SetBGMVolume(userModel.BgmVolume);
+            SetSEVolume(userModel.SeVolume);
         }
 
         void Update()
@@ -46,7 +46,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
             }
         }
 
-        public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default)
+        public async UniTask PlayBGMAsync(SceneType sceneType, BgmType bgmType = BgmType.Default, bool skipIfSamePlaying = false)
         {
             var bgmModel = soundModelRepository.GetBgmModel(sceneType, bgmType);
             var bgmClip = bgmModel.AudioClip;
@@ -56,9 +56,13 @@ namespace Project.Scenes.Global.Scripts.Presenter
                 ? bgmModel.LoopEndSamples
                 : bgmClip.samples;
 
+            var shouldSkip = skipIfSamePlaying && bgmAudioSource.isPlaying && bgmAudioSource.clip == bgmClip;
             bgmAudioSource.clip = bgmClip;
             bgmAudioSource.loop = false;
-            bgmAudioSource.Play();
+            if (!shouldSkip)
+            {
+                bgmAudioSource.Play();
+            }
 
             await UniTask.CompletedTask;
         }

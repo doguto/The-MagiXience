@@ -144,6 +144,24 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     continue;
                 }
 
+                if (step.function == "HideCast")
+                {
+                    var characterName = step.args.Length > 0 ? step.args[0] : "";
+
+                    float fadeDuration;
+                    if (!float.TryParse(step.args[1], out fadeDuration))
+                    {
+                        Debug.LogWarning($"[ScenarioScenePresenter] HideCast: fadeDuration '{step.args[1]}' をパースできません。");
+                        fadeDuration = 0.5f;
+                    }
+
+                    // フェードアウト演出は待たずに進行する
+                    scenarioView.HideCast(characterName, fadeDuration);
+
+                    scenarioModel.Next();
+                    continue;
+                }
+
                 if (step.function == "ChangeCastAnimation")
                 {
                     var characterName = step.args.Length > 0 ? step.args[0] : "";

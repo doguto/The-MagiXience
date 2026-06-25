@@ -110,7 +110,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             base.Start();
             BindModelToView();
             SubscribeToMoveInput();
-            SubscribeToAttackInput();
             SubscribeToSpectrumBarPush();
         }
 
@@ -285,11 +284,33 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             inputDisposables = new CompositeDisposable();
         }
 
+        public void CancelCharge()
+        {
+            // チャージ中のループSEを停止
+            if (model.IsSneaking.Value)
+            {
+                soundManager?.StopLoopSE();
+            }
+
+            // モデル側のチャージ・スニーク状態をリセット
+            model.ResetCharge();
+            model.SetSneaking(false);
+
+            // チャージ点滅を止め、見た目をRunに戻す
+            StopChargeFlash();
+            view.EnterRun();
+        }
+
         bool IsPaused()
         {
             return globalScenePresenter != null
                 && globalScenePresenter.PauseModalPresenter != null
                 && globalScenePresenter.PauseModalPresenter.IsOpen;
+        }
+
+        public void Initialize()
+        {
+            view.Initialize();
         }
 
         public void SetColliderActive(bool active)
@@ -417,6 +438,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             damageFlashSubscription?.Dispose();
             chargeFlashSubscription?.Dispose();
             disposables.Dispose();
+            inputDisposables?.Dispose();
             deathSequenceCompleted.Dispose();
             model?.Dispose();
         }
