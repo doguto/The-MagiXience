@@ -1,12 +1,10 @@
 using System;
-using Cysharp.Threading.Tasks;
 using Project.Commons.UI.Scripts.View;
 using Project.Scripts.Model;
 using Project.Scripts.Presenter;
 using Project.Scripts.Repository.ModelRepository;
 using UniRx;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Project.Commons.UI.Scripts.Presenter
 {
@@ -17,8 +15,10 @@ namespace Project.Commons.UI.Scripts.Presenter
 
         readonly Subject<Unit> onClosed = new();
         readonly Subject<Unit> onRetryRequested = new();
+        readonly Subject<Unit> onTitleRequested = new();
         public IObservable<Unit> OnClosed => onClosed;
         public IObservable<Unit> OnRetryRequested => onRetryRequested;
+        public IObservable<Unit> OnTitleRequested => onTitleRequested;
         public bool IsOpen { get; private set; }
 
         RuntimeModel runtimeModel;
@@ -47,7 +47,7 @@ namespace Project.Commons.UI.Scripts.Presenter
                     pauseEvent = null;
                 });
             }).AddTo(this);
-            gameOverModalView.OnPressedTitle.Subscribe(_ => LoadTitle().Forget()).AddTo(this);
+            gameOverModalView.OnPressedTitle.Subscribe(_ => RequestTitle()).AddTo(this);
 
             if (!IsOpen)
             {
@@ -78,17 +78,14 @@ namespace Project.Commons.UI.Scripts.Presenter
             onRetryRequested.OnNext(Unit.Default);
         }
 
-        async UniTaskVoid LoadTitle()
+        void RequestTitle()
         {
             IsOpen = false;
             Time.timeScale = 1f;
             AudioListener.pause = false;
             gameObject.SetActive(false);
 
-            var sceneName = SceneManager.GetActiveScene().name;
-            await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
-            SceneManager.UnloadSceneAsync(sceneName).ToUniTask().Forget();
+            onTitleRequested.OnNext(Unit.Default);
         }
     }
 }
