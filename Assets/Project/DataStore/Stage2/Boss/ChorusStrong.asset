@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e9eb2c7bf1b4174a965e674148ccd2f, type: 3}
+  m_Name: ChorusStrong
+  m_EditorClassIdentifier: 
+  signalTracks: []
+  animationTracks: []
+  activationTracks: []
+  audioTracks: []
+  controlTracks:
+  - trackName: Control
+    clips:
+    - start: 0
+      duration: 100
+      sourceObject: {fileID: 1977963355892906192, guid: cdf933742d91a0746adff18f200df62b, type: 3}
+    - start: 0
+      duration: 100
+      sourceObject: {fileID: 6419230781858351674, guid: decdf4532a2052945890766a2313fb06, type: 3}
+  enemySpawnTracks:
+  - trackName: EnemySpawn
+    clips:
+    - time: 2
+      spawnPosition: {x: 4.6, y: 0, z: 0}
+      prefab: {fileID: 496091470483533460, guid: 47a3612d709263f4a943147e3a15c08b, type: 3}
+    - time: 5
+      spawnPosition: {x: 4.6, y: 0, z: 0}
+      prefab: {fileID: 496091470483533460, guid: 47a3612d709263f4a943147e3a15c08b, type: 3}
+    - time: 8
+      spawnPosition: {x: 4.6, y: 0, z: 0}
+      prefab: {fileID: 496091470483533460, guid: 47a3612d709263f4a943147e3a15c08b, type: 3}
+  bulletClearTracks:
+  - trackName: BulletClear
+    clips:
+    - time: 0
+  bossAttackPreset: {fileID: 11400000, guid: 81e156617500d144dae0759f0d8703b3, type: 2}
+  bossMovementPreset: {fileID: 11400000, guid: 965228bbd40d10b49959ccda53d6873b, type: 2}
