@@ -1,5 +1,6 @@
 using Project.Scripts.Extensions.Message;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Project.Commons.UI.Scripts.View
 {
@@ -24,6 +25,15 @@ namespace Project.Commons.UI.Scripts.View
         public override void Move(UINavigateMessage message)
         {
             if (!IsActive) return;
+
+            // 非Openなカードのクリック等でEventSystemの選択が外れていると、
+            // 標準ナビが起点を失いフォーカス(拡大演出)が更新されなくなる。
+            // 選択が現在のButtonIndexのカードとズレていたら選び直してから移動を続行する。
+            var currentButton = buttons[ButtonIndex].gameObject;
+            if (EventSystem.current.currentSelectedGameObject != currentButton)
+            {
+                EventSystem.current.SetSelectedGameObject(currentButton);
+            }
 
             var isVertical = buttonListType == ButtonListType.Vertical;
             bool isUp;
