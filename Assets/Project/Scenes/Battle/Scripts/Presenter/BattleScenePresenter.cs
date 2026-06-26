@@ -588,15 +588,33 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         async void DemoClear()
         {
             stageModel?.Clear();
+            OpenNextStage(stageModel);
 
             await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
         }
 
+        // クリアしたステージの次のステージを開放する。
+        void OpenNextStage(StageModel clearedStage)
+        {
+            if (clearedStage == null) return;
+
+            var nextStageNumber = clearedStage.StageNumber + 1;
+            try
+            {
+                StageModelRepository.Instance.GetByStageNumber(nextStageNumber).Open();
+            }
+            catch (Exception)
+            {
+                // 次のステージが存在しない（最終ステージクリア）場合は何もしない
+            }
+        }
+
         void CompleteStage()
         {
             stageModel?.Clear();
+            OpenNextStage(stageModel);
 
             // 次のステージをロード
             var nextStageModel = ResolveStageModel();

@@ -26,6 +26,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         {
             stageModels = StageModelRepository.GetAll();
             stageListModelRepository = StageListModelRepository.Instance;
+            stageListModelRepository.Refresh();
             stageListModel = stageListModelRepository.Get();
             stageListSceneView.SetBackGround(stageListModel.GetBackGroundSprite());
         }
@@ -59,6 +60,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         async UniTask BackToTitle()
         {
             soundManager.PlaySEAsync(SeType.Cancel).Forget();
+            stageListModelRepository.Refresh();
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Title, SceneRouterModel.StageList);
         }
 
@@ -73,6 +75,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             runtimeModel.CurrentStageType = stageModels[buttonIndex].BattleStageType;
             runtimeModel.CurrentSituation = BattleSituation.Way;
 
+            stageListModelRepository.Refresh();
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);
         }
     }
