@@ -8,14 +8,25 @@ namespace Project.Commons.UI.Scripts.View
     /// </summary>
     public class TutorialModalView : MonoBehaviour
     {
+        [SerializeField] GameObject pressZToStartText;
+
         public void Show()
         {
             gameObject.SetActive(true);
+            SetPushZToStartActive(false);
         }
 
         public void Hide()
         {
             gameObject.SetActive(false);
+        }
+
+        public void SetPushZToStartActive(bool isActive)
+        {
+            if (pressZToStartText != null)
+            {
+                pressZToStartText.SetActive(isActive);
+            }
         }
     }
 }

@@ -189,6 +189,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 gameOverModalForRetry.OnRetryRequested
                                      .Subscribe(_ => Retry())
                                      .AddTo(disposables);
+                gameOverModalForRetry.OnTitleRequested
+                                     .Subscribe(_ => ReturnToTitle())
+                                     .AddTo(disposables);
             }
 
             var pauseModalForRetry = globalScenePresenter?.PauseModalPresenter;
@@ -206,6 +209,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void Retry()
         {
             phaseStateMachine.Stop();
+            playerPresenter?.CancelCharge();
 
             // シナリオ遷移待ち中のDelayや、シーンロード待ちハンドラ・購読をすべて解除
             sequenceTransitionCts?.Cancel();
@@ -272,6 +276,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         async void ReturnToTitle()
         {
             phaseStateMachine.Stop();
+            playerPresenter?.CancelCharge();
 
             sequenceTransitionCts?.Cancel();
             sequenceTransitionCts?.Dispose();
@@ -583,15 +588,33 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         async void DemoClear()
         {
             stageModel?.Clear();
+            OpenNextStage(stageModel);
 
             await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
         }
 
+        // クリアしたステージの次のステージを開放する。
+        void OpenNextStage(StageModel clearedStage)
+        {
+            if (clearedStage == null) return;
+
+            var nextStageNumber = clearedStage.StageNumber + 1;
+            try
+            {
+                StageModelRepository.Instance.GetByStageNumber(nextStageNumber).Open();
+            }
+            catch (Exception)
+            {
+                // 次のステージが存在しない（最終ステージクリア）場合は何もしない
+            }
+        }
+
         void CompleteStage()
         {
             stageModel?.Clear();
+            OpenNextStage(stageModel);
 
             // 次のステージをロード
             var nextStageModel = ResolveStageModel();

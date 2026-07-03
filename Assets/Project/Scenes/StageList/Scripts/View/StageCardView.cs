@@ -13,7 +13,7 @@ namespace Project.Scenes.StageList.Scripts.View
         public void Setup((string id, string title) stage, bool isOpened)
         {
             stageIndexText.text = $"Stage.{stage.id}";
-            stageTitle.text = isOpened ? stage.title : "???????????";
+            stageTitle.text = isOpened ? stage.title : "？？？？？？？？";
         }
     }
 }

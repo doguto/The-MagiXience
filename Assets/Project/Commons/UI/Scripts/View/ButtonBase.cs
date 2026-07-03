@@ -82,12 +82,15 @@ namespace Project.Commons.UI.Scripts.View
 
         public virtual void OnPointerClick(PointerEventData eventData)
         {
+            // 未解放ステージはクリックできないようにする
+            if (!IsOpened) return;
             IsFocused = true;
             PressButton();
         }
 
         public override void OnPointerEnter(PointerEventData eventData)
         {
+            if (!IsOpened) return;
             base.OnPointerEnter(eventData);
             EventSystem.current.SetSelectedGameObject(gameObject);
             IsFocused = true;

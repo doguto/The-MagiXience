@@ -26,6 +26,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         {
             stageModels = StageModelRepository.GetAll();
             stageListModelRepository = StageListModelRepository.Instance;
+            stageListModelRepository.Refresh();
             stageListModel = stageListModelRepository.Get();
             stageListSceneView.SetBackGround(stageListModel.GetBackGroundSprite());
         }
@@ -43,9 +44,9 @@ namespace Project.Scenes.StageList.Scripts.Presenter
 
             ShowCharaImage(0);
             stageCardListView.OnButtonChanged.Subscribe(ShowCharaImage);
-            stageCardListView.OnButtonPressed.Subscribe(i => LoadBattleScene(i).Forget());
+            stageCardListView.OnButtonPressed.SubscribeBlocking(LoadBattleScene).AddTo(this);
             MessageBroker.Default.Receive<UICancelMessage>()
-                .Subscribe(_ => BackToTitle().Forget())
+                .SubscribeBlocking(_ => BackToTitle())
                 .AddTo(this);
         }
 
@@ -59,6 +60,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         async UniTask BackToTitle()
         {
             soundManager.PlaySEAsync(SeType.Cancel).Forget();
+            stageListModelRepository.Refresh();
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Title, SceneRouterModel.StageList);
         }
 
@@ -66,12 +68,14 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         {
             // DEMO: 1面以外のバトルシーンをロードできないようにする
             if (buttonIndex != 0) return;
+            
             soundManager.PlaySEAsync(SeType.Click).Forget();
 
             var runtimeModel = RuntimeModelRepository.Get();
             runtimeModel.CurrentStageType = stageModels[buttonIndex].BattleStageType;
             runtimeModel.CurrentSituation = BattleSituation.Way;
 
+            stageListModelRepository.Refresh();
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);
         }
     }
