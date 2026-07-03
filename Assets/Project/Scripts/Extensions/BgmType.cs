@@ -5,5 +5,8 @@
         Default,
         BattleWay,
         BattleBoss,
+        Tutorial,
+        Phase1,
+        Phase2
     }
 }

@@ -14,8 +14,11 @@ namespace Project.Scripts.Infra
     public class StageData
     {
         public string id;
-        public int stageNumber;  // 文字だと扱いずらいので、int型のステージ番号も持つ
+        public int stageNumber;  // 文字だと扱いづらいので、int型のステージ番号も持つ
         public string charaStillAddress;
         public string title;
+        [Header("Battle Flow")]
+        public string waySequenceAddress;
+        public string bossSequenceAddress;
     }
 }

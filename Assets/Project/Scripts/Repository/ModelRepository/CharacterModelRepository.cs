@@ -7,9 +7,9 @@ namespace Project.Scripts.Repository.ModelRepository
 {
     public class CharacterModelRepository : ModelRepositoryBase
     {
-        public static CharacterModelRepository instance = new();
-        
-        readonly List<CharacterData> characterData = new();
+        public static CharacterModelRepository Instance { get; } = new();
+
+        readonly List<CharacterData> characterData;
         readonly List<CharacterModel> characterModels = new();
 
         public CharacterModelRepository()

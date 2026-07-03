@@ -10,10 +10,10 @@ namespace Project.Scenes.StageList.Scripts.View
         [SerializeField] TextMeshProUGUI stageTitle;
         [SerializeField] TextMeshProUGUI stageIndexText;
  
-        public void Setup((string id, string title)stage)
+        public void Setup((string id, string title) stage, bool isOpened)
         {
             stageIndexText.text = $"Stage.{stage.id}";
-            stageTitle.text = stage.title;
+            stageTitle.text = isOpened ? stage.title : "？？？？？？？？";
         }
     }
 }

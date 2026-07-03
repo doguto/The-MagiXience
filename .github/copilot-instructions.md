@@ -14,6 +14,12 @@ GitHub Copilotによるコードレビューは日本語で実施してくださ
 - パフォーマンスの最適化
 - コードの可読性と保守性
 
+## Unity固有のコーディング規約
+### SerializeFieldについて
+- `[SerializeField]` 属性が付いたフィールドに対して、`readonly` 修飾子を追加するよう提案しないでください
+- 理由: `[SerializeField]` フィールドはUnityエディタ側から実行時に値が設定されるため、`readonly` を付けると正常に動作しません
+- 例: `[SerializeField] Button startButton;` は `readonly` なしで正しい実装です
+
 レビューコメントは建設的で分かりやすい日本語で提供してください。
 
 ## コミットメッセージ規約

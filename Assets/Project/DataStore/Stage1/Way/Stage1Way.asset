@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea724a92a126f174c82eefb1b61cba64, type: 3}
+  m_Name: Stage1Way
+  m_EditorClassIdentifier: 
+  situation: 0
+  sequenceGroups:
+  - loop: 0
+    loopCount: 0
+    phases:
+    - phaseId: 1
+      timelineBuilder: {fileID: 11400000, guid: a2d92ad9485aca340acac4740eb49e1e, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      strongAttackHpThresholdPercent: 50
+      exitConditionConfig:
+        rid: 7905056689295196395
+    - phaseId: 2
+      timelineBuilder: {fileID: 11400000, guid: 9f6a7d7f77209964b90cfb185e3624b1, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      strongAttackHpThresholdPercent: 50
+      exitConditionConfig:
+        rid: 8577112747257626768
+    - phaseId: 3
+      timelineBuilder: {fileID: 11400000, guid: 2bc5520eb1d024043a2aa90755a14ce2, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      strongAttackHpThresholdPercent: 50
+      exitConditionConfig:
+        rid: 8577112747257626769
+    - phaseId: 4
+      timelineBuilder: {fileID: 11400000, guid: 2df1ee6c46a5d524187c588d9fead278, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      strongAttackHpThresholdPercent: 50
+      exitConditionConfig:
+        rid: 7905056689295196389
+    - phaseId: 5
+      timelineBuilder: {fileID: 11400000, guid: 19afc332fec875646882ad367b4d3164, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      strongAttackHpThresholdPercent: 50
+      exitConditionConfig:
+        rid: 7905056689295196390
+    - phaseId: 6
+      timelineBuilder: {fileID: 11400000, guid: 8bfbf91fb18fc1f4785edd763a746428, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      strongAttackHpThresholdPercent: 50
+      exitConditionConfig:
+        rid: 7905056689295196391
+  bossPrefab: {fileID: 0}
+  bossSpawnPosition: {x: 0, y: 0, z: 0}
+  bossEntranceMovement: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 7905056689295196389
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 7905056689295196390
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 7905056689295196391
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 7905056689295196395
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 8577112747257626768
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 8577112747257626769
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 

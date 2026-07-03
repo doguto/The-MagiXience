@@ -1,55 +1,47 @@
-using System.Linq;
+﻿using System.Collections.Generic;
+using Project.Scripts.Model;
+using Project.Scripts.Repository.AssetRepository;
+using UnityEngine;
 
 namespace Project.Scenes.Scenario.Scripts.Model
 {
-    public class ScenarioModel
+    public class ScenarioModel : ModelBase
     {
-        private ScenarioLine[] _lines;
-        private int _index = -1;
+        readonly StillAssetRepository stillAssetRepository = new();
+        readonly FaceAssetRepository faceAssetRepository = new();
 
-        public ScenarioModel(ScenarioLine[] lines)
+        public Sprite PlayerStillSprite { get; private set; }
+        public Sprite EnemyStillSprite { get; private set; }
+        public Dictionary<string, Sprite> PlayerFaceSprites { get; private set; }
+        public Dictionary<string, Sprite> EnemyFaceSprites { get; private set; }
+
+
+        public ScenarioStep CurrentStep => steps[currentIndex];
+        public bool IsEnd => currentIndex >= steps.Count;
+
+        List<ScenarioStep> steps;
+        int currentIndex;
+
+        public void LoadData(List<ScenarioStep> steps)
         {
-            _lines = lines;
+            this.steps = steps;
+            currentIndex = 0;
         }
 
-        public bool HasNext => _index + 1 < _lines.Length;
-        public bool HasPrevious => _index > 0;
-
-        public ScenarioLine Next()
+        public void Next()
         {
-            _index++;
-            return _lines[_index];
-        }
-        public ScenarioLine UndoDev()
-        {
-            if (_index <= 0)
-            {
-                return _lines[0];
-            }
-            _index--;
-            return _lines[_index];
-        }
-        public ScenarioLine GetCurrentLine()
-        {
-            return _lines[_index];
+            currentIndex++;
         }
 
-        public string GetSpeakingCharacterKey()
+        public void LoadCharacterSprites(string enemyCharaName)
         {
-            return ScenarioDataSO.CharacterJaNameToKey[_lines[_index].character];
-        }
+            PlayerStillSprite = stillAssetRepository.Load("Ten", false);
+            EnemyStillSprite = stillAssetRepository.Load(enemyCharaName, false);
 
-        public string GetEnemyCharacterKey()
-        {
-            // string enemyName = _lines.Select(line => line.character).Distinct().Where(character => character != MainCharacter.Me).ToArray()[0];
-            // return ScenarioDataSO.CharacterJaNameToKey[enemyName];
-            return "";
-        }
+            // 表情SpriteをListで取得してDictionaryに変換
+            PlayerFaceSprites = faceAssetRepository.LoadAll("Ten");
 
-        public string GetMainCharacterKey()
-        {
-            return "";
-            // return ScenarioDataSO.CharacterJaNameToKey[MainCharacter.Me];
+            EnemyFaceSprites = faceAssetRepository.LoadAll(enemyCharaName);
         }
     }
 }

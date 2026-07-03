@@ -1,0 +1,71 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Timeline;
+using Project.Scenes.Battle.Scripts.Model.Attack;
+using Project.Scenes.Battle.Scripts.Model.Movement;
+
+namespace Project.Scenes.Battle.Scripts.Model
+{
+    [CreateAssetMenu(fileName = "BattleTimelineBuilder", menuName = "Battle/Timeline Builder")]
+    public class BattleTimelineBuilderAsset : ScriptableObject
+    {
+        [SerializeField] List<SignalTrackDefinition> signalTracks = new();
+        [SerializeField] List<AnimationTrackDefinition> animationTracks = new();
+        [SerializeField] List<ActivationTrackDefinition> activationTracks = new();
+        [SerializeField] List<AudioTrackDefinition> audioTracks = new();
+        [SerializeField] List<ControlTrackDefinition> controlTracks = new();
+        [SerializeField] List<EnemySpawnTrackDefinition> enemySpawnTracks = new();
+        [SerializeField] List<BulletClearTrackDefinition> bulletClearTracks = new();
+
+        [Header("Boss")]
+        [SerializeField] AttackPreset bossAttackPreset;
+        [SerializeField] MovementPreset bossMovementPreset;
+
+        public AttackPreset BossAttackPreset => bossAttackPreset;
+        public MovementPreset BossMovementPreset => bossMovementPreset;
+ 
+        public int TotalEnemySpawnCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (var track in enemySpawnTracks)
+                {
+                    count += track.Clips.Count;
+                }
+                return count;
+            }
+        }
+
+        public TimelineAsset BuildTimeline()
+        {
+            var timeline = ScriptableObject.CreateInstance<TimelineAsset>();
+            timeline.name = $"{name}_Runtime";
+            timeline.hideFlags = HideFlags.DontSave;
+
+            BuildTracks<SignalTrack, SignalEmitterDefinition, SignalTrackDefinition>(timeline, signalTracks);
+            BuildTracks<AnimationTrack, AnimationClipDefinition, AnimationTrackDefinition>(timeline, animationTracks);
+            BuildTracks<ActivationTrack, ActivationClipDefinition, ActivationTrackDefinition>(timeline, activationTracks);
+            BuildTracks<AudioTrack, AudioClipDefinition, AudioTrackDefinition>(timeline, audioTracks);
+            BuildTracks<ControlTrack, ControlClipDefinition, ControlTrackDefinition>(timeline, controlTracks);
+            BuildTracks<SignalTrack, EnemySpawnDefinition, EnemySpawnTrackDefinition>(timeline, enemySpawnTracks);
+            BuildTracks<SignalTrack, BulletClearDefinition, BulletClearTrackDefinition>(timeline, bulletClearTracks);
+
+            return timeline;
+        }
+
+        private void BuildTracks<TTrack, TClipDefinition, TDefinition>(TimelineAsset timeline, List<TDefinition> trackDefinitions)
+            where TTrack : TrackAsset, new()
+            where TClipDefinition : IClipDefinition<TTrack>
+            where TDefinition : TrackDefinitionBase<TTrack, TClipDefinition>
+        {
+            foreach (var trackDef in trackDefinitions)
+            {
+                if (string.IsNullOrEmpty(trackDef.TrackName)) continue;
+                var track = timeline.CreateTrack<TTrack>(null, trackDef.TrackName);
+                trackDef.Build(track);
+            }
+        }
+    }
+}

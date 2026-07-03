@@ -1,58 +1,91 @@
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Model;
 using Project.Scenes.Title.Scripts.Model;
+using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scenes.Title.Scripts.View;
+using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
 using UniRx;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Project.Scenes.Title.Scripts.Presenter
 {
     public class TitleScenePresenter : MonoPresenter
     {
         [SerializeField] TitleMenuView titleMenuView;
-        [SerializeField] TitleSettingModalView titleSettingModalView;
-        
-        TitleBackgroundModel titleBackgroundModel;
-        TitleGameStartModel titleGameStartModel;
 
-        void Start()
+        TitleModelRepository titleModelRepository;
+        TitleModel titleModel;
+
+
+        void Awake()
         {
-            titleBackgroundModel = new TitleBackgroundModel();
-            titleGameStartModel = new TitleGameStartModel();
+            titleModelRepository = TitleModelRepository.Instance;
+            titleModel = titleModelRepository.Get();
 
-            titleMenuView.OnPressedStart.Subscribe(x => StartGame(x).Forget());
-            titleMenuView.OnPressedExit.Subscribe(ExitGame);
+            titleMenuView.Init(titleModel.GetBackGroundSprites());
+        }
 
-            titleMenuView.Init();
+        protected override void Start()
+        {
+            base.Start();
+            titleMenuView.InitStart();
 
-            SetTitleBackGround();
+            // titleMenuView.OnPressedStartMain.Subscribe(_ => { StartMain(_).Forget(); });
+            titleMenuView.OnPressedStart.SubscribeBlocking(async x =>
+            {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
+                await StartGame(x);
+            }).AddTo(this);
+            titleMenuView.OnPressedOption.Subscribe(async _ =>
+            {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
+                titleMenuView.SetInteractable(false);
+                globalScenePresenter.OptionModalPresenter.Open();
+
+                await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
+
+                titleMenuView.SetInteractable(true);
+                titleMenuView.InitStart();
+            });
+
+            titleMenuView.OnPressedExit.Subscribe(_ =>
+            {
+                soundManager.PlaySE(SeType.Cancel);
+                ExitGame();
+            });
+
+            soundManager!.PlayBGMAsync(SceneType.Title, skipIfSamePlaying: true).Forget();
+        }
+
+        async UniTask StartMain(Unit _)
+        {
+            soundManager.PlaySEAsync(SeType.Click).Forget();
+
+            titleModelRepository.Refresh();
+
+            var runtimeModel = RuntimeModelRepository.Get();
+            runtimeModel.CurrentStageType = BattleStageType.Stage1;
+            runtimeModel.CurrentSituation = BattleSituation.Way;
+
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, gameObject.scene.name);
         }
 
         async UniTask StartGame(Unit _)
         {
-            titleGameStartModel.StartGame();
-            await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
+            // TitleScene 以外で TitleModel は使用しないのでクリアする
+            titleModelRepository.Refresh();
 
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.StageList));
-            SceneManager.UnloadSceneAsync(gameObject.scene.name);
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.StageList, gameObject.scene.name);
         }
 
-        void ExitGame(Unit _)
+        void ExitGame()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();//ゲームプレイ終了
+            Application.Quit(); //ゲームプレイ終了
 #endif
-        }
-
-        void SetTitleBackGround()
-        {
-            var clearedStageAmount = titleBackgroundModel.ClearedStageAmount;
-            titleMenuView.SetBackGround(clearedStageAmount);
         }
     }
 }

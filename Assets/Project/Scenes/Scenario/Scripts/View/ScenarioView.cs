@@ -1,68 +1,118 @@
+using System.Collections.Generic;
+using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 namespace Project.Scenes.Scenario.Scripts.View
 {
     public class ScenarioView : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI characterNameText;
-        [SerializeField] private TextMeshProUGUI contentText;
-        [SerializeField] private Image faceImage;
-        [SerializeField] private Image StillImageMe;
-        [SerializeField] private Image StillImageEnemy;
+        [SerializeField] Color grayedColor = new (0.5f, 0.5f, 0.5f, 1f);
 
-        public void InitStillImage(string characterKeyMe, string characterKeyEnemy, string stillImageType)
+        [SerializeField] TextMeshProUGUI characterNameText;
+        [SerializeField] TextMeshProUGUI contentsText;
+        [SerializeField] Image playerImage;
+        [SerializeField] Image enemyImage;
+        [SerializeField] Image faceImage;
+
+        // キャラ名 → 位置(LL/RR) のマッピング
+        readonly Dictionary<string, string> castPositions = new();
+
+        public void ShowCastMessage(string characterName, string message)
         {
-            SetStillImage(StillImageMe, characterKeyMe, "Default");
-            SetStillImage(StillImageEnemy, characterKeyEnemy, stillImageType);
-        }
-        
-        public class DisplayData
-        {
-            public string character { get; set; }
-            public string content { get; set; }
-            public string faceType { get; set; }
-            public string characterKey { get; set; }
-        }
-        public void Display(DisplayData data)
-        {
-            characterNameText.text = data.character;
-            contentText.text = data.content;
-            UpdateFaceImage(data.characterKey, data.faceType);
+            // ChangeCastLayer();
+            StopGrayingCast(characterName);
+            ShowMessage(characterName, message);
         }
 
-        private void UpdateFaceImage(string characterKey, string faceType)
+        public void ShowMessage(string characterName, string message)
         {
-            string facePath = $"CharaImage/Face/{characterKey}/{faceType}";
-            Sprite faceSprite = Resources.Load<Sprite>(facePath);
-            if (faceSprite == null)
-            {
-                Debug.LogWarning($"faceSprite is null. Check the path: {facePath}");
-                facePath = $"CharaImage/Face/{characterKey}/Default";
-                faceSprite = Resources.Load<Sprite>(facePath);
-            }
-            faceImage.sprite = faceSprite;
+            characterNameText.text = characterName ?? "";
+            contentsText.text = message ?? "";
         }
 
-        private void SetStillImage(Image image, string characterKey, string stillImageType)
+        public void ShowCast(string characterName, string unknownArg1, string faceExpression,
+            string displayTime, string position, string unknownArg2,
+            Sprite playerSprite, Sprite enemySprite, Sprite faceSprite)
         {
-            string fileName;
-            if (stillImageType.Contains("Crazy"))
+            // TODO: displayTime, unknownArgsの処理は後で実装
+
+            castPositions[characterName] = position;
+
+            ChangeFaceExpression(faceSprite);
+            if (position == "LL")
             {
-                fileName = characterKey + "_Crazy";
+                playerImage.sprite = playerSprite;
+                playerImage.SetNativeSize();
+                playerImage.color = grayedColor;
+                playerImage.gameObject.SetActive(true);
             }
-            else
+            else if (position == "RR")
             {
-                fileName = characterKey;
+                enemyImage.sprite = enemySprite;
+                enemyImage.SetNativeSize();
+                enemyImage.color = grayedColor;
+                enemyImage.gameObject.SetActive(true);
             }
-            string stillPath = $"CharaImage/Still/{fileName}";
-            Sprite stillSprite = Resources.Load<Sprite>(stillPath);
-            if (stillSprite == null)
-            {
-                Debug.LogWarning($"stillSprite is null. Check the path: {stillPath}");
-            }
-            image.sprite = stillSprite;
         }
+
+        public void ChangeCastLayer(string characterName, int layer)
+        {
+            // TODO
+        }
+
+        public void ChangeFaceExpression(Sprite faceSprite)
+        {
+            if (faceSprite != null)
+            {
+                faceImage.sprite = faceSprite;
+                faceImage.gameObject.SetActive(true);
+            }
+        }
+
+        public void HideCast(string characterName, float fadeDuration)
+        {
+            if (!castPositions.TryGetValue(characterName, out var position)) return;
+
+            Image targetImage = position switch
+            {
+                "LL" => playerImage,
+                "RR" => enemyImage,
+                _ => null
+            };
+
+            if (targetImage != null)
+            {
+                // 再表示時の競合を避けるため、進行中のTweenをkillしてからフェードアウト
+                targetImage.DOKill();
+                targetImage.DOFade(0f, fadeDuration)
+                           .OnComplete(() => targetImage.gameObject.SetActive(false));
+            }
+
+            castPositions.Remove(characterName);
+        }
+
+        public void StopGrayingCast(string characterName)
+        {
+            if (!castPositions.TryGetValue(characterName, out var position)) return;
+
+            if (position == "LL")
+            {
+                playerImage.color = Color.white;
+                if (enemyImage.gameObject.activeSelf) enemyImage.color = grayedColor;
+            }
+            else if (position == "RR")
+            {
+                enemyImage.color = Color.white;
+                if (playerImage.gameObject.activeSelf) playerImage.color = grayedColor;
+            }
+        }
+
+        public void LogCommand(string function, string[] args)
+        {
+            Debug.Log($"[ScenarioView] Execute: {function}, Args: {string.Join(", ", args)}");
+        }
+        // TODO?: アニメーションをつける
     }
 }
