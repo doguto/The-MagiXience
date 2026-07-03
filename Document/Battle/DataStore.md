@@ -8,7 +8,7 @@
 - **バトル演出系**（`BattleSequenceAsset` を頂点とする Way / Boss / Attack / Movement / Ease 群）: `SerializeReference + SubclassSelector` によるポリモーフィックな構成が多用されており、1つのフェーズに対して「移動」「攻撃」「敵の出現」などの部品を組み合わせて表現する。
 - **シナリオ系**（`ScenarioData`）: 会話・演出イベントを `function` / `args` という汎用コマンド列で表現する簡易スクリプト形式。
 
-これに加えて `UserData.json` というセーブデータ（ScriptableObjectではない素のJSON）と、開発用の `Test` フォルダが存在する。
+これに加えて、開発用の `Test` フォルダが存在する。
 
 ## 全体の参照関係
 
@@ -137,15 +137,119 @@ public class BattlePhaseDefinition
 
 ### フェーズ終了条件（`IExitConditionConfig`）
 
-`Assets/Project/Scenes/Battle/Scripts/Model/ExitCondition/` 配下。
+`Assets/Project/Scenes/Battle/Scripts/Model/ExitCondition/` 配下。すべて `[Serializable]` なPOCOで、`SerializeReference + SubclassSelector` により `BattlePhaseDefinition.exitConditionConfig` にインスペクタ上でポリモーフィックに差し込める。共通インターフェースは以下の1メソッドのみを持つ。
 
-| クラス | フィールド | 用途 |
-|---|---|---|
-| `TimeLimitExitConditionConfig` | `float timeLimitSeconds` | 制限時間経過で終了 |
-| `AllEnemiesDefeatedExitConditionConfig` | なし | 敵を全滅させたら終了 |
-| `BgmPositionExitConditionConfig` | `int thresholdSamples` | BGMが指定サンプル位置に達したら終了 |
-| `BossHpThresholdExitConditionConfig` | `float hpThresholdPercent`（0-100） | ボスHPが閾値を下回ったら終了 |
-| `CompositeExitConditionConfig` | `CompositeMode mode`(And/Or), `List<IExitConditionConfig> conditions` | 複数条件の合成（入れ子可） |
+```csharp
+public interface IExitConditionConfig
+{
+    // フェーズ終了判定を行う実行用モデルを生成する
+    BattlePhaseModelBase CreatePhaseModel(
+        BattlePhaseDefinition definition,
+        IEnemyTracker enemyTracker,
+        Func<EntityBase> getBossModel = null);
+}
+```
+
+`CreatePhaseModel()` はアセット（設計図）から実行時の判定モデル（`XxxBattlePhaseModel`）を組み立てるファクトリメソッドで、各実装クラスはこれを実装するだけの薄いラッパーになっている。
+
+#### `TimeLimitExitConditionConfig` — 制限時間経過で終了
+
+```csharp
+[Serializable]
+public class TimeLimitExitConditionConfig : IExitConditionConfig
+{
+    [SerializeField, Min(0.1f)] float timeLimitSeconds = 10f;
+
+    public BattlePhaseModelBase CreatePhaseModel(
+        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
+    {
+        return new TimeLimitBattlePhaseModel(definition, timeLimitSeconds);
+    }
+}
+```
+
+`timeLimitSeconds` は `[Min(0.1f)]` によりインスペクタ上で0以下を入力できないよう制約されている（既定値10秒）。
+
+#### `AllEnemiesDefeatedExitConditionConfig` — 敵を全滅させたら終了
+
+```csharp
+[Serializable]
+public class AllEnemiesDefeatedExitConditionConfig : IExitConditionConfig
+{
+    public BattlePhaseModelBase CreatePhaseModel(
+        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
+    {
+        return new AllEnemiesDefeatedBattlePhaseModel(definition, enemyTracker);
+    }
+}
+```
+
+固有フィールドを持たない最もシンプルな実装。判定に必要な敵の生存数は引数の `enemyTracker`（＝呼び出し側が管理する共有インスタンス）から取得するため、このクラス自身は状態を持つ必要がない。Way側の全フェーズで使われている（[実データ: Way](#実データ-waystage1waystage1wayasset)を参照）。
+
+#### `BgmPositionExitConditionConfig` — BGMが指定サンプル位置に達したら終了
+
+```csharp
+[Serializable]
+public class BgmPositionExitConditionConfig : IExitConditionConfig
+{
+    [SerializeField] int thresholdSamples;
+
+    public Func<AudioSource> GetBgmAudioSource { get; set; }
+
+    public BattlePhaseModelBase CreatePhaseModel(
+        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
+    {
+        return new BgmPositionBattlePhaseModel(definition, thresholdSamples, GetBgmAudioSource);
+    }
+}
+```
+
+`GetBgmAudioSource`（`Func<AudioSource>`）はアセットにシリアライズされないランタイム専用プロパティで、`CreatePhaseModel()` を呼ぶ側（Presenter層）が実行時に注入する。Boss戦のフェーズ進行で使われ、`thresholdSamples` は `BgmData.asset` の `loopStartSamples`/`loopEndSamples` と一致させる必要がある（詳細は[実データ: Boss](#実データ-bossstage1bossstage1bossasset)を参照）。
+
+#### `BossHpThresholdExitConditionConfig` — ボスHPが閾値を下回ったら終了
+
+```csharp
+[Serializable]
+public class BossHpThresholdExitConditionConfig : IExitConditionConfig
+{
+    [SerializeField, Range(0f, 100f)] float hpThresholdPercent = 50f;
+
+    public BattlePhaseModelBase CreatePhaseModel(
+        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
+    {
+        return new BossHpThresholdBattlePhaseModel(definition, hpThresholdPercent / 100f, getBossModel);
+    }
+}
+```
+
+`hpThresholdPercent` はインスペクタ上 `[Range(0f, 100f)]` のスライダーで0〜100（%）として入力するが、`CreatePhaseModel()` 内で `/ 100f` して0〜1の比率に変換してから渡している。ボスの現在HPは第3引数 `getBossModel`（`Func<EntityBase>`）経由で遅延取得する設計で、これは終了条件アセットが生成される時点ではまだボスがシーンに存在しない場合があるため（Boss登場前にフェーズ定義だけ先に構築されるケースへの対応）。
+
+#### `CompositeExitConditionConfig` — 複数条件の合成（入れ子可）
+
+```csharp
+public enum CompositeMode { And, Or }
+
+[Serializable]
+public class CompositeExitConditionConfig : IExitConditionConfig
+{
+    [SerializeField] CompositeMode mode = CompositeMode.And;
+
+    [SerializeReference, SubclassSelector]
+    List<IExitConditionConfig> conditions = new();
+
+    public BattlePhaseModelBase CreatePhaseModel(
+        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
+    {
+        var innerModels = new List<BattlePhaseModelBase>(conditions.Count);
+        foreach (var condition in conditions)
+            innerModels.Add(condition.CreatePhaseModel(definition, enemyTracker, getBossModel));
+
+        return new CompositeBattlePhaseModel(definition, mode, innerModels);
+    }
+}
+```
+
+`conditions` フィールド自身が `List<IExitConditionConfig>` であるため、`CompositeExitConditionConfig` の中にさらに `CompositeExitConditionConfig` を入れる入れ子構成も型上は可能（例:「制限時間 OR (敵全滅 AND ボスHP50%以下)」のような複合条件）。`CreatePhaseModel()` は自分の子条件全てに対して再帰的に `CreatePhaseModel()` を呼び出し、生成された `BattlePhaseModelBase` のリストを `CompositeBattlePhaseModel` にまとめて渡す、Compositeパターンそのものの実装になっている。
 
 ### 実データ: Way（`Stage1/Way/Stage1Way.asset`）
 
@@ -159,21 +263,39 @@ public class BattlePhaseDefinition
 
 ### 実データ: Boss（`Stage1/Boss/Stage1Boss.asset`）
 
-```
+```yaml
 situation: Boss
 sequenceGroups:
-  - loop: false, loopCount: 1          # イントロ専用グループ（1回のみ）
+  # イントロ専用グループ（1回のみ）
+  - loop: false
+    loopCount: 1
     phases:
-      - phaseId: 1, timelineBuilder: Intro.asset
-        exitConditionConfig: BgmPositionExitConditionConfig(thresholdSamples: 422391)
-  - loop: true, loopCount: 0            # 無限ループグループ
-    phases:                             # MelodyA → MelodyB → Chorus
-      - timelineBuilder/timelineBuilderStrong 両方設定（発狂版あり）
-        exitConditionConfig: BgmPositionExitConditionConfig(thresholdSamples: 2976121 / 3897391 / 1263874)
+      - timelineBuilder: Intro
+        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 422391 }
+  # 無限ループグループ：MelodyA → MelodyB → Chorus
+  - loop: true
+    loopCount: 0
+    phases:
+      - timelineBuilder: MelodyA
+        timelineBuilderStrong: MelodyAStrong  # 発狂版あり
+        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 1263874 }
+      - timelineBuilder: MelodyB
+        timelineBuilderStrong: MelodyBStrong
+        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 2976121 }
+      - timelineBuilder: Chorus
+        timelineBuilderStrong: ChorusStrong
+        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 3897391 }
 bossPrefab: <ボスPrefab>
-bossSpawnPosition: {x: 10, y: 0, z: 0}
-bossEntranceMovement: [TweenMovementConfig(targetOffset:{3.7,0,0}, duration:2, ease:InOutQuad系, isRelative:false)]
+bossSpawnPosition: { x: 10, y: 0, z: 0 }
+bossEntranceMovement:
+  - type: TweenMovementConfig
+    targetOffset: { x: 3.7, y: 0, z: 0 }
+    duration: 2
+    easeValue: 6  # DG.Tweening.Ease の数値（下記参照）
+    isRelative: false
 ```
+
+> **補足（Ease値について）**: `easeValue` はDOTweenの `DG.Tweening.Ease` enumを `int` にキャストした値（`0=Linear, 1=InSine, 2=OutSine, 3=InOutSine, 4=InQuad, 5=OutQuad, 6=InOutQuad, ...`）。以降の実データ例でも同様にenum名ではなく生の数値で表記する。
 
 ボス戦は「BGMの再生サンプル位置」でフェーズを進行させる設計になっている。`thresholdSamples` の値は `BgmData.asset` 内の対応曲（Stage1のBattleBoss曲、`loopStartSamples: 422391` / `loopEndSamples: 3897391`）と一致しており、イントロ→ループ境界→曲終端のタイミングに合わせてフェーズが切り替わる。無限ループグループが `MelodyA → MelodyB → Chorus` の3フェーズを繰り返すのも、BGM自体のループ構造をそのままフェーズ構造に対応させたものである。
 
@@ -231,11 +353,18 @@ class AttackTimelineEntry
 
 ### 実データ: `Stage1/Attack/IntroNormal.asset`
 
-```
-attackTimeline: loop:true, loopStart:1, loopEnd:10, cycleDuration:1
-  entries[0]: time:0
-    signal: NWaySignal(wayCount:3, spreadAngle:30)
-    directionProvider: AimDirectionConfig（自機狙い）
+```yaml
+attackTimeline:
+  loop: true
+  loopStart: 1
+  loopEnd: 10
+  cycleDuration: 1
+  entries:
+    - time: 0
+      signal: { type: NWaySignal, wayCount: 3, spreadAngle: 30 }
+      directionProvider: { type: AimDirectionConfig }  # 自機狙い
+      sourceIndex: 0
+      seType: 0  # SeType.None
 ```
 
 1〜10秒の間、1秒おきに自機狙いの3-way弾（拡散30度）を撃ち続ける設定。
@@ -288,22 +417,52 @@ class LoopMovementEntry
 
 ### 実データ: `Stage1/Movement/Straight1.asset`
 
-```
-1. TweenMovementConfig(targetOffset:{-5,0,0}, duration:1, ease:Linear, isRelative:true)
-2. WaitMovementConfig(duration:6)
-3. TweenMovementConfig(targetOffset:{5,0,0}, duration:1, ease:Linear, isRelative:true)
+```yaml
+steps:
+  - type: TweenMovementConfig
+    targetOffset: { x: -5, y: 0, z: 0 }
+    duration: 1
+    easeValue: 1  # InSine
+    isRelative: true
+  - type: WaitMovementConfig
+    duration: 6
+  - type: TweenMovementConfig
+    targetOffset: { x: 5, y: 0, z: 0 }
+    duration: 1
+    easeValue: 1  # InSine
+    isRelative: true
 ```
 
 左へ5進む → 6秒待機 → 右へ5戻る、という往復移動。
 
 ### 実データ: `Stage1/Movement/DriftSample.asset`
 
-```
-1. TweenMovementConfig(targetOffset:{6,0,0}, duration:1.5, ease:InQuad系, isRelative:false)   # (6,0,0)へ入場
-2. WaitMovementConfig(duration:1.5)
-3. DriftMovementConfig(anchor:{6,0,0}, pullStrength:10, moveDistance:3, moveBounds:{2,5},
-                        moveDuration:2, pauseDuration:10, moveEase:OutQuad系, duration:40)   # 40秒間ドリフト
-4. TweenMovementConfig(targetOffset:{12,0,0}, duration:3, ease:InOutQuad系, isRelative:false) # (12,0,0)へ退場
+```yaml
+steps:
+  # (6,0,0)へ入場
+  - type: TweenMovementConfig
+    targetOffset: { x: 6, y: 0, z: 0 }
+    duration: 1.5
+    easeValue: 3  # InOutSine
+    isRelative: false
+  - type: WaitMovementConfig
+    duration: 1.5
+  # 40秒間ドリフト
+  - type: DriftMovementConfig
+    anchor: { x: 6, y: 0, z: 0 }
+    pullStrength: 10
+    moveDistance: 3
+    moveBounds: { x: 2, y: 5 }
+    moveDuration: 2
+    pauseDuration: 10
+    moveEase: 4  # InQuad
+    duration: 40
+  # (12,0,0)へ退場
+  - type: TweenMovementConfig
+    targetOffset: { x: 12, y: 0, z: 0 }
+    duration: 3
+    easeValue: 2  # OutSine
+    isRelative: false
 ```
 
 「入場 → 居座り → 退場」という、ボス敵の典型的な移動パターンの実例。
@@ -371,29 +530,7 @@ public class ScenarioStep
 
 ---
 
-## 7. UserData.json（セーブデータ）
-
-- 定義: `Assets/Project/Scripts/Infra/UserData.cs`（`JsonUtility`でシリアライズする素のC#クラス。ScriptableObjectではない）
-
-| フィールド | 型 | 説明 |
-|---|---|---|
-| `clearedStageNumber` | `int` | クリア済みステージ番号（`Validate()`で0〜1にClampされる） |
-| `keyConfigData` | `KeyConfigData` | キーコンフィグ。`bindingOverrides: List<BindingOverride>`（`actionPath`, `bindingId`, `overridePath`）としてInput Systemのバインディング上書き情報を保持 |
-| `bgmVolume` / `seVolume` | `int` | 音量（0〜100、既定70） |
-| `hasEnteredStage1` | `bool` | チュートリアルスキップ判定用フラグ |
-
-管理クラスは `Assets/Project/Scripts/Model/UserModel.cs`。
-
-- 保存先: Editorでは `Assets/Project/DataStore/UserData.json`、実機では `Application.persistentDataPath/DataStore/UserData.json`。
-- `Load()`: ファイルが無ければ既定値で新規作成・保存。あれば`FromJsonOverwrite`で既定値インスタンスに上書きロードする（欠損フィールドを既定値で補完できる）。
-- `Save()`: `JsonUtility.ToJson(userData, true)` で保存。
-- `StageClear(stageNumber)` / `MarkEnteredStage1()` / `SetVolume(...)` などのゲームロジック側APIを提供する。
-
-`KeyConfigModel`（`Assets/Project/Scripts/Model/KeyConfigModel.cs`）が `keyConfigData` を使い、Input Systemの `InputActionAsset` とのバインディングオーバーライド同期を行う。
-
----
-
-## 8. Test配下（テスト用データ）
+## 7. Test配下（テスト用データ）
 
 開発時の動作確認用に用意された最小構成のデータ。
 
@@ -402,7 +539,7 @@ public class ScenarioStep
 
 ---
 
-## 9. BattleTimelineBuilderAsset とトラック定義（Way/Boss共通の中核）
+## 8. BattleTimelineBuilderAsset とトラック定義（Way/Boss共通の中核）
 
 ```csharp
 // Assets/Project/Scenes/Battle/Scripts/Model/BattleTimelineBuilderAsset.cs

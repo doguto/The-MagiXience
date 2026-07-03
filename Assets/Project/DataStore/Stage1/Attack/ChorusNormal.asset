@@ -34,9 +34,9 @@ MonoBehaviour:
       directionProvider:
         rid: 454448157880483967
       rotationProvider:
-        rid: 454448117209104620
+        rid: 3310599898489421824
       sourceIndexProvider:
-        rid: 454448117209104621
+        rid: 3310599898489421825
       seType: 0
   references:
     version: 2
@@ -61,6 +61,13 @@ MonoBehaviour:
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         direction: {x: -1, y: 0.5}
+    - rid: 3310599898489421824
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 3310599898489421825
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 1
     - rid: 8577112747257626779
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
