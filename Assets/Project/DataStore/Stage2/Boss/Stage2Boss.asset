@@ -11,14 +11,87 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea724a92a126f174c82eefb1b61cba64, type: 3}
   m_Name: Stage2Boss
-  m_EditorClassIdentifier: 
-  sequenceType: 1
-  phases:
-  - phaseId: 1
-    timeLimitSeconds: 6
-    timelineBuilder: {fileID: 11400000, guid: 8b2777b81e77cf8428ce16f32dc0f27b, type: 2}
-    exitCondition: 0
-  - phaseId: 2
-    timeLimitSeconds: 6
-    timelineBuilder: {fileID: 11400000, guid: 77560f74d2394ff4698187ed781a1be0, type: 2}
-    exitCondition: 0
+  m_EditorClassIdentifier:
+  situation: 1
+  sequenceGroups:
+  - loop: 0
+    loopCount: 1
+    phases:
+    - phaseId: 1
+      timelineBuilder: {fileID: 11400000, guid: 87ea8837b6bf7e44d9411ae89d3b99db, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 8577112795563163648
+  - loop: 1
+    loopCount: 0
+    phases:
+    - phaseId: 1
+      timelineBuilder: {fileID: 11400000, guid: f97c8e5a40a1faf47b948b75dcd78fc0, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: 4b5c63c259a24c54482f9680a20b3a43, type: 2}
+      exitConditionConfig:
+        rid: 8577112795563163722
+    - phaseId: 1
+      timelineBuilder: {fileID: 11400000, guid: 279ba217c9b260b4badada69d1fecea0, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: bc5721303ccd51144b6df94fdb0988c0, type: 2}
+      exitConditionConfig:
+        rid: 8577112795563163720
+    - phaseId: 1
+      timelineBuilder: {fileID: 11400000, guid: 08b97a6859922b742a7e7634e6093010, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: 0efb637620453b344b3a4d8e659c6e61, type: 2}
+      exitConditionConfig:
+        rid: 8577112795563163721
+  bossPrefab: {fileID: 5806677969891141097, guid: 845a0264a2d732742b871d0d66cb34da, type: 3}
+  bossSpawnPosition: {x: 10, y: 0, z: 0}
+  bossEntranceMovement:
+  - rid: 8577112454036455607
+  references:
+    version: 2
+    RefIds:
+    - rid: 8577112454036455607
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 3.7, y: 0, z: 0}
+        duration: 2
+        easeValue: 6
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8577112795563163648
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 422391
+    - rid: 8577112795563163720
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 2976121
+    - rid: 8577112795563163721
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 3897391
+    - rid: 8577112795563163722
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 1263874
