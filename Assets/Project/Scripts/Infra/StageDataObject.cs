@@ -16,6 +16,7 @@ namespace Project.Scripts.Infra
         public string id;
         public int stageNumber;  // 文字だと扱いづらいので、int型のステージ番号も持つ
         public string charaStillAddress;
+        public string backgroundAddress;
         public string title;
         [Header("Battle Flow")]
         public string waySequenceAddress;

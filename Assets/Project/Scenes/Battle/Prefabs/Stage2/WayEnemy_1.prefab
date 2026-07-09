@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 630620121836037546}
   - component: {fileID: 9019268799263188701}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BulletPool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61,7 +61,7 @@ GameObject:
   - component: {fileID: 3840863880170113326}
   - component: {fileID: -9097120415176207849}
   - component: {fileID: -6218252827413775343}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: WayEnemy_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 630620121836037546}
@@ -102,6 +102,8 @@ MonoBehaviour:
   movementPreset: {fileID: 0}
   movementSteps:
   - rid: 3310600040644083814
+  - rid: 3310600040644083866
+  - rid: 3310600040644083869
   bulletPools:
   - {fileID: 9019268799263188701}
   bulletDamage: 10
@@ -135,9 +137,10 @@ MonoBehaviour:
       data:
         waypoints:
         - {x: -3, y: 0, z: 0}
-        duration: 1
+        - {x: -3, y: 0, z: 0}
+        duration: 2
         pathType: 1
-        easeValue: 1
+        easeValue: 3
         customCurve:
           serializedVersion: 2
           m_Curve:
@@ -179,6 +182,42 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
+    - rid: 3310600040644083866
+      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        duration: 1
+    - rid: 3310600040644083869
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: -3, y: 0, z: 0}
+        duration: 1
+        easeValue: 3
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 1
 --- !u!114 &9001089155439849903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -282,7 +321,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.5, y: -0.4}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -292,7 +331,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.78, y: 3.16}
+  m_Size: {x: 1.2, y: 1.2}
   m_EdgeRadius: 0
 --- !u!50 &-6218252827413775343
 Rigidbody2D:
@@ -302,7 +341,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8647684210669646231}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0

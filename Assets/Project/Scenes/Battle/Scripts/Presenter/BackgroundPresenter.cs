@@ -1,5 +1,7 @@
 using System;
+using UniRx;
 using UnityEngine;
+using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.View;
 using Project.Scripts.Model;
 using Project.Scripts.Presenter;
@@ -19,6 +21,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [Tooltip("減速開始時に1秒あたり減らす速度量。値が大きいほど早く停止する。")]
         [SerializeField] float decelerationPerSecond = 0.1f;
 
+        readonly CompositeDisposable disposables = new();
+
         Vector2 currentSpeed;
         Vector2 offset;
         bool isDecelerating;
@@ -28,9 +32,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             view = GetComponent<BackgroundView>();
         }
 
-        public void Initialize()
+        public void Initialize(BattleBackgroundModel backgroundModel)
         {
             if (RuntimeModelRepository.Get().CurrentSituation == BattleSituation.Way) currentSpeed = scrollSpeed;
+
+            backgroundModel.CurrentBackground
+                           .Subscribe(texture => view?.SetTexture(texture))
+                           .AddTo(disposables);
+        }
+
+        void OnDestroy()
+        {
+            disposables.Dispose();
         }
 
         public void StartDeceleration()

@@ -26,6 +26,12 @@ namespace Project.Scenes.Battle.Scripts.View
             material.SetTextureOffset(TexturePropertyName, offset);
         }
 
+        public void SetTexture(Texture texture)
+        {
+            if (material == null || texture == null) return;
+            material.SetTexture(TexturePropertyName, texture);
+        }
+
         void OnDestroy()
         {
             if (material != null)
