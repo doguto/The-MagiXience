@@ -30,6 +30,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         StageModel stageModel;
         BattleSequenceModel waySequence;
         BattleSequenceModel bossSequence;
+        readonly BattleBackgroundModel backgroundModel = new();
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
         BossEntityPresenter bossPresenter;
@@ -324,7 +325,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 SubscribeToPlayerDeath();
             }
 
-            backgroundPresenter?.Initialize();
+            backgroundModel.SetStage(stageModel.BackgroundAddress);
+            backgroundPresenter?.Initialize(backgroundModel);
             playerPresenter?.Initialize();
             playerPresenter?.SubscribeToAttackInput();
 
@@ -630,6 +632,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             stageModel = nextStageModel;
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
+            backgroundModel.SetStage(stageModel.BackgroundAddress);
 
             // 道中シーケンスを開始
             if (waySequence != null)
@@ -673,6 +676,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             disposables.Dispose();
             bossDisposables.Dispose();
             battleCompleted.Dispose();
+            backgroundModel.Dispose();
             phaseStateMachine?.Stop();
         }
     }

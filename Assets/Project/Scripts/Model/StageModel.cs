@@ -14,6 +14,7 @@ namespace Project.Scripts.Model
         public BattleStageType BattleStageType => BattleStageTypeExtensions.FromInt(StageData.stageNumber);
         public string WaySequenceAddress => StageData.waySequenceAddress;
         public string BossSequenceAddress => StageData.bossSequenceAddress;
+        public string BackgroundAddress => StageData.backgroundAddress;
 
         public Sprite CharaImage { get; }
         public bool IsOpened { get; private set; }
