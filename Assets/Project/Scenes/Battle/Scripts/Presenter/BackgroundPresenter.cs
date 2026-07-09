@@ -37,7 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (RuntimeModelRepository.Get().CurrentSituation == BattleSituation.Way) currentSpeed = scrollSpeed;
 
             backgroundModel.CurrentBackground
-                           .Subscribe(texture => view?.SetTexture(texture))
+                           .Subscribe(sprite => view?.SetSprite(sprite))
                            .AddTo(disposables);
         }
 

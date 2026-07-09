@@ -12,11 +12,12 @@ namespace Project.Scenes.Battle.Scripts.View
     {
         const string TexturePropertyName = "_MainTex";
 
+        Image image;
         Material material;
 
         void Awake()
         {
-            var image = GetComponent<Image>();
+            image = GetComponent<Image>();
             material = image.material;
         }
 
@@ -26,10 +27,10 @@ namespace Project.Scenes.Battle.Scripts.View
             material.SetTextureOffset(TexturePropertyName, offset);
         }
 
-        public void SetTexture(Texture texture)
+        public void SetSprite(Sprite sprite)
         {
-            if (material == null || texture == null) return;
-            material.SetTexture(TexturePropertyName, texture);
+            if (image == null || sprite == null) return;
+            image.sprite = sprite;
         }
 
         void OnDestroy()

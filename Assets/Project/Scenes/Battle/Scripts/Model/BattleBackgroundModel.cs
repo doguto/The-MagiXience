@@ -6,9 +6,9 @@ namespace Project.Scenes.Battle.Scripts.Model
 {
     public class BattleBackgroundModel
     {
-        readonly ReactiveProperty<Texture> currentBackground = new();
+        readonly ReactiveProperty<Sprite> currentBackground = new();
 
-        public IReadOnlyReactiveProperty<Texture> CurrentBackground => currentBackground;
+        public IReadOnlyReactiveProperty<Sprite> CurrentBackground => currentBackground;
 
         public void SetStage(string backgroundAddress)
         {
@@ -18,7 +18,7 @@ namespace Project.Scenes.Battle.Scripts.Model
                 return;
             }
 
-            currentBackground.Value = Addressables.LoadAssetAsync<Texture2D>(backgroundAddress).WaitForCompletion();
+            currentBackground.Value = Addressables.LoadAssetAsync<Sprite>(backgroundAddress).WaitForCompletion();
         }
 
         public void Dispose()
