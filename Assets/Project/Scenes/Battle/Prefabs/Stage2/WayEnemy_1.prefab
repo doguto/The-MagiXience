@@ -123,6 +123,17 @@ MonoBehaviour:
       sourceIndexProvider:
         rid: 3310600040644083836
       seType: 0
+  deathAttackEntry:
+    time: 0
+    signal:
+      rid: 3310600359757742266
+    directionProvider:
+      rid: 1000
+    rotationProvider:
+      rid: 1001
+    sourceIndexProvider:
+      rid: 1002
+    seType: 0
   damageFlashInterval: 0.05
   damageFlashDuration: 0.2
   view: {fileID: 9001089155439849903}
@@ -130,6 +141,17 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: 1000
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1001
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1002
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
     - rid: 3310600040644083830
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -151,6 +173,11 @@ MonoBehaviour:
         speed: 1
         turnSpeed: 150
         duration: 0
+    - rid: 3310600359757742266
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 12
+        spreadAngle: 30
 --- !u!114 &9001089155439849903
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -51,6 +51,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
                 }
             }
 
+            // Death Attack
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Death Attack", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("deathAttackEntry"));
+
             // Component References
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Component References", EditorStyles.boldLabel);
