@@ -1,5 +1,52 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3473081359663967166
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3373547090656816974}
+  - component: {fileID: 2727554368135854049}
+  m_Layer: 7
+  m_Name: Death BulletPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3373547090656816974
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3473081359663967166}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8336679572688203221}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2727554368135854049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3473081359663967166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: -4487681364143076941, guid: e2ad805985555774684271fd2bfa9439, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &5319860119842332611
 GameObject:
   m_ObjectHideFlags: 0
@@ -44,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: -4487681364143076941, guid: 2f84b37d6bc0e69478aaeead72a2ca4f, type: 3}
+  bulletPrefab: {fileID: -4487681364143076941, guid: 1de299d9017feda4ab36246b834d27a7, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &8647684210669646231
@@ -82,6 +129,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 630620121836037546}
+  - {fileID: 3373547090656816974}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-1398847312205411817
@@ -96,35 +144,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 50
+  maxHp: 20
   contactDamage: 10
   lifetime: 0
   movementPreset: {fileID: 0}
   movementSteps:
-  - rid: 3310600040644083814
-  - rid: 3310600040644083866
-  - rid: 3310600040644083869
+  - rid: 3310600359757742296
   bulletPools:
   - {fileID: 9019268799263188701}
+  - {fileID: 2727554368135854049}
   bulletDamage: 10
   enemySpawnPrefabs: []
   attackPreset: {fileID: 0}
   attackTimeline:
-    loop: 0
+    loop: 1
     loopStart: 0
-    loopEnd: 5
-    cycleDuration: 2
-    entries:
-    - time: 0
-      signal:
-        rid: 3310600040644083830
-      directionProvider:
-        rid: 3310600040644083832
-      rotationProvider:
-        rid: 3310600040644083834
-      sourceIndexProvider:
-        rid: 3310600040644083836
-      seType: 0
+    loopEnd: 3
+    cycleDuration: 0.5
+    entries: []
+  deathAttackEntry:
+    time: 0
+    signal:
+      rid: 3310600359757742266
+    directionProvider:
+      rid: 1000
+    rotationProvider:
+      rid: 1001
+    sourceIndexProvider:
+      rid: 1002
+    seType: 0
   damageFlashInterval: 0.05
   damageFlashDuration: 0.2
   view: {fileID: 9001089155439849903}
@@ -132,92 +180,29 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 3310600040644083814
-      type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 1000
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        waypoints:
-        - {x: -3, y: 0, z: 0}
-        - {x: -3, y: 0, z: 0}
-        duration: 2
-        pathType: 1
-        easeValue: 3
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 1
-    - rid: 3310600040644083830
-      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        wayCount: 3
-        spreadAngle: 60
-    - rid: 3310600040644083832
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 3310600040644083834
+        direction: {x: -1, y: 0}
+    - rid: 1001
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 3310600040644083836
+    - rid: 1002
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
-    - rid: 3310600040644083866
-      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+        index: 1
+    - rid: 3310600359757742266
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        duration: 1
-    - rid: 3310600040644083869
-      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+        wayCount: 12
+        spreadAngle: 30
+        radius: 0.01
+    - rid: 3310600359757742296
+      type: {class: StraightWithHomingMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: -3, y: 0, z: 0}
-        duration: 1
-        easeValue: 3
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 1
+        speed: 1
+        verticalTrackingSpeed: 0.6
+        duration: 0
 --- !u!114 &9001089155439849903
 MonoBehaviour:
   m_ObjectHideFlags: 0

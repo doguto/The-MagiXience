@@ -10,8 +10,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     {
         [SerializeField] int wayCount = 3;
         [SerializeField] float spreadAngle = 60f;
+        [SerializeField] float radius = 0f;
 
-        public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle };
+        public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle, radius = radius };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
@@ -46,7 +47,17 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 }
             }
 
-            return new AttackEvent(AttackEventType.Bullet, directions, sourceIndex, seType: seType, rotations: new[] { rotationProvider.GetRotation() });
+            List<Vector2> spawnOffsets = null;
+            if (radius != 0f)
+            {
+                spawnOffsets = new List<Vector2>(directions.Count);
+                foreach (var direction in directions)
+                {
+                    spawnOffsets.Add(direction * radius);
+                }
+            }
+
+            return new AttackEvent(AttackEventType.Bullet, directions, sourceIndex, spawnOffsets, seType, new[] { rotationProvider.GetRotation() });
         }
     }
 }

@@ -37,6 +37,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] AttackPreset attackPreset;
         [SerializeField] AttackTimeline attackTimeline;
 
+        [Header("Death Attack")]
+        [SerializeField] AttackTimelineEntry deathAttackEntry;
+
         [Header("Damage Flash")]
         [SerializeField] float damageFlashInterval = 0.05f;
         [SerializeField] float damageFlashDuration = 0.2f;
@@ -124,13 +127,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 ? attackPreset.CreateTimeline()
                 : attackTimeline;
 
+            Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
+
             if (timeline != null)
             {
-                Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
                 timeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation);
             }
 
             model.SetAttackStrategy(timeline);
+
+            InitializeDeathAttackEntry(getPlayerPos);
 
             model.AttackStrategy?.OnAttackTiming
                  .TakeUntil(model.OnDeath)
@@ -146,6 +152,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdatePosition(transform.position);
 
             StartLifetimeCountdown();
+        }
+
+        void InitializeDeathAttackEntry(Func<Vector3> getPlayerPos)
+        {
+            if (deathAttackEntry == null) return;
+
+            deathAttackEntry.directionProvider?.Initialize(getPlayerPos, () => transform.position, () => transform.rotation);
+            deathAttackEntry.rotationProvider?.Initialize(getPlayerPos, () => transform.position, () => transform.rotation);
         }
 
         void SubscribeToDamageFlash()
@@ -276,6 +290,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireBullet(AttackEvent ev)
         {
+            if (ev.Directions == null) return;
+
             var pool = GetBulletPool(ev.SourceIndex);
             if (pool == null) return;
 
@@ -285,8 +301,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, pool.transform.position, ev.Directions[i], rotation: GetRotationAt(ev, i));
+                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i));
             }
+        }
+
+        Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
+        {
+            if (ev.SpawnOffsets == null || index >= ev.SpawnOffsets.Count) return basePosition;
+            return basePosition + (Vector3)ev.SpawnOffsets[index];
         }
 
         BulletPool GetBulletPool(int index)
@@ -335,8 +357,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void HandleDeath()
         {
+            FireDeathAttack();
             StopMovement();
             Destroy(gameObject);
+        }
+
+        void FireDeathAttack()
+        {
+            if (deathAttackEntry?.signal == null) return;
+
+            var sourceIndex = deathAttackEntry.sourceIndexProvider?.Get() ?? 0;
+            var ev = deathAttackEntry.signal.CreateEvent(
+                deathAttackEntry.directionProvider,
+                deathAttackEntry.rotationProvider,
+                sourceIndex,
+                deathAttackEntry.seType);
+            HandleAttackEvent(ev);
         }
 
         void OnTriggerEnter2D(Collider2D other)

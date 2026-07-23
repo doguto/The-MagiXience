@@ -17,8 +17,14 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         public int Damage { get; private set; }
 
+        public bool IsInvincible { get; private set; }
+
+        public void SetInvincible(bool value) => IsInvincible = value;
+
         public override void OnCollision(EntityBase other)
         {
+            if (IsInvincible)
+                return;
             if (IsPlayerChargeBullet)
                 return;
             TakeDamage(1);
@@ -28,6 +34,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         {
             Damage = damage;
             IsPlayerChargeBullet = isPlayerBullet;
+            IsInvincible = false;
             ResetHp();
         }
 

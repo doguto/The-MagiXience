@@ -13,6 +13,14 @@ MonoBehaviour:
   m_Name: Stage2WayScenario
   m_EditorClassIdentifier: 
   steps:
+  - function: ShowCast
+    args:
+    - "\u30C6\u30F3"
+    - 1
+    - Default
+    - 0.1
+    - LL
+    - 1
   - function: ShowCastMessage
     args:
     - "\u30C6\u30F3"
@@ -25,6 +33,14 @@ MonoBehaviour:
     args:
     - "\u30C6\u30F3"
     - "\u4E00\u5E2F\u306E\u96F7\u306F\u541B\u306E\u4ED5\u696D\u304B\u3044\uFF1F"
+  - function: ShowCast
+    args:
+    - "\u30A2\u30BA\u30DE"
+    - 1
+    - Default
+    - 0.1
+    - RR
+    - 1
   - function: ShowCastMessage
     args:
     - "\u30A2\u30BA\u30DE"
@@ -61,3 +77,7 @@ MonoBehaviour:
     args:
     - "\u30C6\u30F3"
     - "\u52DD\u8CA0\u306B\u306A\u308B\u306E\u306F\u90FD\u5408\u304C\u3044\u3044\u3002\n\u5236\u5727\u3055\u305B\u3066\u3044\u305F\u3060\u304F\u3088\u3002"
+  - function: SpawnBoss
+    args: []
+  - function: PlayBossBgm
+    args: []

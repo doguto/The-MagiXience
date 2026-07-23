@@ -75,8 +75,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 if (step == null) continue;
                 ct.ThrowIfCancellationRequested();
-                currentTween = step.Play(transform, direction, null);
-                await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
+
+                bool grantsInvincibility = step is IInvincibilityGrantingStep;
+                if (grantsInvincibility) model.SetInvincible(true);
+
+                try
+                {
+                    currentTween = step.Play(transform, direction, null);
+                    await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
+                }
+                finally
+                {
+                    if (grantsInvincibility) model.SetInvincible(false);
+                }
             }
         }
 
