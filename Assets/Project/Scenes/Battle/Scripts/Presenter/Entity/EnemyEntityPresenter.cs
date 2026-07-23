@@ -301,8 +301,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, pool.transform.position, ev.Directions[i], rotation: GetRotationAt(ev, i));
+                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i));
             }
+        }
+
+        Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
+        {
+            if (ev.SpawnOffsets == null || index >= ev.SpawnOffsets.Count) return basePosition;
+            return basePosition + (Vector3)ev.SpawnOffsets[index];
         }
 
         BulletPool GetBulletPool(int index)
