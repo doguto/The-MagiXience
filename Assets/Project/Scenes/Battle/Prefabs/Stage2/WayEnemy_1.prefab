@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: -4487681364143076941, guid: 2f84b37d6bc0e69478aaeead72a2ca4f, type: 3}
+  bulletPrefab: {fileID: -4487681364143076941, guid: 1de299d9017feda4ab36246b834d27a7, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &8647684210669646231
@@ -96,12 +96,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 50
+  maxHp: 20
   contactDamage: 10
   lifetime: 0
   movementPreset: {fileID: 0}
   movementSteps:
-  - rid: 3310600359757742202
+  - rid: 3310600359757742296
   bulletPools:
   - {fileID: 9019268799263188701}
   bulletDamage: 10
@@ -111,18 +111,8 @@ MonoBehaviour:
     loop: 1
     loopStart: 0
     loopEnd: 3
-    cycleDuration: 0.8
-    entries:
-    - time: 0.8
-      signal:
-        rid: 3310600040644083830
-      directionProvider:
-        rid: 3310600040644083832
-      rotationProvider:
-        rid: 3310600040644083834
-      sourceIndexProvider:
-        rid: 3310600040644083836
-      seType: 0
+    cycleDuration: 1
+    entries: []
   deathAttackEntry:
     time: 0
     signal:
@@ -152,32 +142,17 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 3310600040644083830
-      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        wayCount: 4
-        spreadAngle: 25
-    - rid: 3310600040644083832
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 3310600040644083834
-      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 3310600040644083836
-      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        index: 0
-    - rid: 3310600359757742202
-      type: {class: HomingMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        speed: 1
-        turnSpeed: 150
-        duration: 0
     - rid: 3310600359757742266
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         wayCount: 12
         spreadAngle: 30
+    - rid: 3310600359757742296
+      type: {class: StraightWithHomingMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        speed: 1
+        verticalTrackingSpeed: 0.6
+        duration: 0
 --- !u!114 &9001089155439849903
 MonoBehaviour:
   m_ObjectHideFlags: 0
