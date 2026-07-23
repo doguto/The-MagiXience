@@ -27,8 +27,8 @@ namespace Project.Scripts.Infra
         // 既定値で初期化されたまま残るため、ここでは数値範囲の丸めのみを行う。
         public void Validate()
         {
-            // clearedStageNumberは0か1のみ有効。それ以外の数値は近い方へ丸める。
-            clearedStageNumber = Mathf.Clamp(clearedStageNumber, 0, 1);
+            // DEMO: Clampの値で公開情報を管理する。Clampのmaxの面まで情報を出す
+            clearedStageNumber = Mathf.Clamp(clearedStageNumber, 0, 4);
             bgmVolume = Mathf.Clamp(bgmVolume, 0, 100);
             seVolume = Mathf.Clamp(seVolume, 0, 100);
         }

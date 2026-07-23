@@ -427,7 +427,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
             else
             {
-                TransitionToScenario(DemoClear);
+                TransitionToScenario(CompleteStage);
             }
         }
 
@@ -613,40 +613,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void CompleteStage()
+        async void CompleteStage()
         {
             stageModel?.Clear();
             OpenNextStage(stageModel);
 
-            // 次のステージをロード
-            var nextStageModel = ResolveStageModel();
-            if (nextStageModel == null)
-            {
-                // 次のステージが存在しない（最終ステージクリア）
-                Debug.Log("[BattleScenePresenter] All stages cleared!", this);
-                battleCompleted.OnNext(Unit.Default);
-                return;
-            }
+            // 次のステージをロードせず、ステージ選択画面へ遷移する
+            phaseStateMachine.Stop();
 
-            // 次のステージのシーケンスをロード
-            stageModel = nextStageModel;
-            waySequence = LoadSequence(stageModel.WaySequenceAddress);
-            bossSequence = LoadSequence(stageModel.BossSequenceAddress);
-            backgroundModel.SetStage(stageModel.BackgroundAddress);
+            // BGMをタイトルのものに切り替える
+            soundManager?.PlayBGMAsync(SceneType.Title).Forget();
 
-            // 道中シーケンスを開始
-            if (waySequence != null)
-            {
-                Debug.Log($"[BattleScenePresenter] Starting next stage {stageModel.StageNumber}", this);
-                PlayBgmForSituation(BattleSituation.Way);
-                phaseStateMachine.PlaySequence(waySequence);
-                backgroundPresenter?.ResetScroll();
-            }
-            else
-            {
-                Debug.LogError("[BattleScenePresenter] Next stage way sequence is missing.", this);
-                battleCompleted.OnNext(Unit.Default);
-            }
+            var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
+            await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.StageList));
+            SceneManager.UnloadSceneAsync(battleSceneName).ToUniTask().Forget();
         }
 
         void OnDestroy()
