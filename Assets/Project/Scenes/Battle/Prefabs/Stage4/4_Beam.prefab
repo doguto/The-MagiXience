@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
+  bulletPrefab: {fileID: 366756060701291069, guid: 8eb5d6fbf01e5ed4287d3fcdbc162428, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &7074045735317373604
@@ -62,7 +62,7 @@ GameObject:
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
   m_Layer: 7
-  m_Name: Phase3-A
+  m_Name: 4_Beam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8334555279690838701}
@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 90
+  maxHp: 30
   contactDamage: 15
   onlyChargeDamageable: 1
   lifetime: 0
@@ -108,7 +108,7 @@ MonoBehaviour:
   - {fileID: 7996329089749057052}
   bulletDamage: 10
   enemySpawnPrefabs: []
-  attackPreset: {fileID: 0}
+  attackPreset: {fileID: 11400000, guid: 187ccf477e4827c49bd789f2129ae517, type: 2}
   attackTimeline:
     phases:
     - loop: 1
@@ -116,6 +116,8 @@ MonoBehaviour:
       loopEnd: 15
       cycleDuration: 0.75
       entries: []
+      nextPhaseTrigger:
+        rid: -2
   deathAttackEntry:
     time: 0
     signal:
@@ -242,7 +244,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 2198845017378358445, guid: ff685c9f173f16141b0dcf7b4cc7c674, type: 3}
-  m_Color: {r: 0.33333334, g: 0.8509804, b: 0.73333335, a: 1}
+  m_Color: {r: 0.61004084, g: 0.46742615, b: 0.9811321, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
