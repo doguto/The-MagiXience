@@ -107,15 +107,27 @@ MonoBehaviour:
   bulletPools:
   - {fileID: 7996329089749057052}
   bulletDamage: 10
-  enemySpawnPrefabs: []
-  attackPreset: {fileID: 11400000, guid: 187ccf477e4827c49bd789f2129ae517, type: 2}
+  enemySpawnPrefabs:
+  - {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
+  - {fileID: 8143873751805396341, guid: dd82e0b2e7e5ee24b9c22d7ebdab8a59, type: 3}
+  attackPreset: {fileID: 0}
   attackTimeline:
     phases:
     - loop: 1
-      loopStart: 2
-      loopEnd: 15
-      cycleDuration: 0.75
-      entries: []
+      loopStart: 1
+      loopEnd: 20
+      cycleDuration: 5
+      entries:
+      - time: 0
+        signal:
+          rid: 5211421472506774364
+        directionProvider:
+          rid: 5211421472506774029
+        rotationProvider:
+          rid: 5211421472506774048
+        sourceIndexProvider:
+          rid: 5211421472506774031
+        seType: 0
       nextPhaseTrigger:
         rid: -2
   deathAttackEntry:
@@ -185,6 +197,30 @@ MonoBehaviour:
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
         duration: 0
+    - rid: 5211421472506774029
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421472506774031
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421472506774048
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 5211421472506774364
+      type: {class: SpriteBeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        line:
+          start: {x: -1, y: 0}
+          end: {x: -100, y: 0}
+        isRelative: 1
+        bodySourceIndex: 1
+        bodyDuration: 2.5
+        showWarning: 1
+        warningDuration: 2
+        warningSourceIndex: 0
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
