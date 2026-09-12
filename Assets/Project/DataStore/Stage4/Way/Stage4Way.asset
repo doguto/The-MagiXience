@@ -17,11 +17,6 @@ MonoBehaviour:
   - loop: 0
     loopCount: 0
     phases:
-    - phaseId: 4
-      timelineBuilder: {fileID: 11400000, guid: 45c6b512e58eee947a7820e064195700, type: 2}
-      timelineBuilderStrong: {fileID: 0}
-      exitConditionConfig:
-        rid: 2259957373586637459
     - phaseId: 1
       timelineBuilder: {fileID: 11400000, guid: 5d7817eda7affd747b14ae4496260705, type: 2}
       timelineBuilderStrong: {fileID: 0}
@@ -37,11 +32,21 @@ MonoBehaviour:
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 2259957373586637297
+    - phaseId: 4
+      timelineBuilder: {fileID: 11400000, guid: 45c6b512e58eee947a7820e064195700, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 2259957373586637459
     - phaseId: 5
       timelineBuilder: {fileID: 11400000, guid: a61b1008d8dd7f0458808b9e0026bef5, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 2259957373586637330
+    - phaseId: 6
+      timelineBuilder: {fileID: 11400000, guid: 83c517e22424b2f4cb3d05798fb69674, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 5211421472506773619
   bossPrefab: {fileID: 0}
   bossSpawnPosition: {x: 0, y: 0, z: 0}
   bossEntranceMovement: []
@@ -58,6 +63,9 @@ MonoBehaviour:
       type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data: 
     - rid: 2259957373586637459
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 5211421472506773619
       type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data: 
     - rid: 7905056689295196395
