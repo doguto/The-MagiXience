@@ -19,7 +19,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
             {
                 velocity += acceleration * dt;
                 t.position += velocity * dt;
-            });
+            }, Ease.Linear);
         }
     }
 }
