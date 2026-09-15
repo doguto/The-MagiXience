@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 50
+  maxHp: 30
   contactDamage: 15
   onlyChargeDamageable: 0
   lifetime: 0
@@ -114,12 +114,12 @@ MonoBehaviour:
     phases:
     - loop: 1
       loopStart: 2
-      loopEnd: 15
-      cycleDuration: 0.75
+      loopEnd: 9
+      cycleDuration: 0.45
       entries:
       - time: 0
         signal:
-          rid: 2259957373586636932
+          rid: 5211421576021410102
         directionProvider:
           rid: 2259957373586636937
         rotationProvider:
@@ -224,9 +224,6 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 1
-    - rid: 2259957373586636932
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
     - rid: 2259957373586636937
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -234,10 +231,13 @@ MonoBehaviour:
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
+    - rid: 5211421576021410102
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
     - rid: 8577112580335075461
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        duration: 8
+        duration: 10.5
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
