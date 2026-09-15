@@ -30,7 +30,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
                 if (max > 0f && speed > max) velocity = velocity.normalized * max;
                 if (speed < min) velocity = speed > 0f ? velocity.normalized * min : dir * min;
                 t.position += velocity * dt;
-            });
+            }, Ease.Linear);
         }
     }
 }
