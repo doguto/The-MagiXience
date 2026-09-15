@@ -13,26 +13,66 @@ MonoBehaviour:
   m_Name: Stage4BossScenario
   m_EditorClassIdentifier: 
   steps:
+  - function: ShowCast
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - 1
+    - Default
+    - 0.1
+    - RR
+    - 1
+  - function: ShowCast
+    args:
+    - "\u30C6\u30F3"
+    - 1
+    - Default
+    - 0.1
+    - LL
+    - 1
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Smile
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
     - "\uFF3F\uFF3F\uFF3F\uFF3F\uFF3F\uFF3F\uFF3F\uFF3F\uFF3F\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Default
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
     - "\u2026\u2026\u3059\u307F\u307E\u305B\u3093\u3001\u53EA\u4ECA\u6B63\u5E38\u306A\u5224\u65AD\u80FD\u529B\u3092\n\u53D6\u308A\u623B\u3057\u305F\u3053\u3068\u304C\u78BA\u8A8D\u3067\u304D\u307E\u3057\u305F\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Additional
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
     - "\u3054\u5354\u529B\u611F\u8B1D\u3044\u305F\u3057\u307E\u3059\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Smile
   - function: ShowCastMessage
     args:
     - "\u30C6\u30F3"
     - "\u554F\u984C\u306A\u3044\u3002\u3053\u308C\u304C\u4FFA\u306E\u5F79\u76EE\u3060\u304B\u3089\u306A\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Additional
   - function: ShowCastMessage
     args:
     - "\u30C6\u30F3"
     - "\u3057\u304B\u3057\u3001\u30A2\u30BA\u30DE\u3068\u3044\u3044\u3001\u541B\u3068\u3044\u3044\u3001\n\u3053\u306E\u69D8\u5B50\u3060\u3068\u6708\u306E\u56FD\u306F\u8ED2\u4E26\u307F\u58CA\u6EC5\u304B\uFF1F"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Default
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
@@ -41,18 +81,34 @@ MonoBehaviour:
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
     - "\u2026\u2026\u3054\u5B58\u77E5\u304B\u3068\u601D\u3044\u307E\u3059\u304C\u3001\n\u6708\u306E\u56FD\u306E\"\u62C5\u3044\u624B\"\u306F\u56DB\u4EBA\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Smile
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
     - "\u3068\u3082\u3059\u308C\u3070\u3001\u4ED6\u4E8C\u4EBA\u3082\u2026\u2026\u3002\n\u4ED6\u306E\"\u62C5\u3044\u624B\"\u306B\u3082\u9023\u7D61\u3092\u3057\u3066\u307F\u307E\u3059\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Default
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
     - "\u2026\u2026\u2026\u2026\u2026\u3002\n\u2026\u2026\u3044\u3084\u3001\u3069\u3053\u3082\u5FDC\u7B54\u304C\u306A\u3044\u3067\u3059\u306D\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Default
   - function: ShowCastMessage
     args:
     - "\u30C6\u30F3"
     - "\u305D\u3046\u304B\u3001\u5206\u304B\u3063\u305F\u3002\n\u3084\u306F\u308A\u3001\u6025\u304C\u306D\u3070\u306A\u3089\u306C\u3088\u3046\u3060\u306A\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Default
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
@@ -65,6 +121,10 @@ MonoBehaviour:
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
     - "\u5224\u65AD\u80FD\u529B\u3092\u5931\u3063\u3066\u3044\u308B\u5F7C\u3089\u306F\u3001\n\u5927\u304D\u306A\u969C\u58C1\u3068\u306A\u308B\u3053\u3068\u3067\u3057\u3087\u3046\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30A6\u30B7\u30C8\u30E9"
+    - Smile
   - function: ShowCastMessage
     args:
     - "\u30A6\u30B7\u30C8\u30E9"
