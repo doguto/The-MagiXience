@@ -1,49 +1,60 @@
 ------------------------------------------------------
 ・4面ボス前
 ------------------------------------------------------
+@ShowCast,テン,Default,Default,0.1,LL,1
 @ShowCastMessage,テン
 ……驚いたな。これほどの大都市が
 静寂に包まれ、あるのは泥人形の隊列。
 
+@ChangeCastAnimation,テン,Additional
 @ShowCastMessage,テン
 辿って行った先に人影、とあれば、
-君がウシトラだな？
+ウシトラ。君だな？
 
+@SpawnBoss
+@ShowCast,ウシトラ,Crazy,Crazy_Default,0.1,RR,1
 @ShowCastMessage,ウシトラ
 ………。
 
+@ChangeCastAnimation,テン,Additional
 @ShowCastMessage,テン
-この小さな傭兵達を止めてもらおうか、
-この子たちは目下の異変解決には向かない。
+小さな傭兵達を止めてもらおうか、
+この子たちは当座の異変解決には向かない。
 
+@ChangeCastAnimation,ウシトラ,Crazy_Default
 @ShowCastMessage,ウシトラ
 ……原因不明ノ疾患ニヨリ、住人達ハ
 病床ニ伏しテいます。
 
 @ShowCastMessage,ウシトラ
-そのため、現在、都市ハ封鎖し、
+そのため、現在、都市ハ封鎖中。
 外部カラの侵入は許可しテいません。
 
 @ShowCastMessage,ウシトラ
-どうか、お引き取り下さい。
+どうカ、お引き取り下さイ。
 
+@ChangeCastAnimation,テン,Default
 @ShowCastMessage,テン
-聞いた話よりも悪化していそうだな……。
-対話は出来たと聞いていたが……。
+聞いた話よりも悪化しているな……。
+対話をしたと聞いていたのだが……。
 
+@ChangeCastAnimation,テン,Additional
 @ShowCastMessage,テン
 俺はエネルギーを打ち込んで、
-君のことを正常化させなければならない。
+君のことを正常に戻さなければならない。
 
+@ChangeCastAnimation,ウシトラ,Crazy_Additional
+@PlayBossBgm
 @ShowCastMessage,ウシトラ
 ！！！
-対象ガ敵対ノ意思ヲ持つことヲ確認＿＿。
+対象ノ敵対意思ヲ確認＿＿。
 
 @ShowCastMessage,ウシトラ
-都市システムノ管理者トして、
-危険因子ノ排除ヲ決行します＿＿。
+都市システム管理者トシテ、
+危険因子ノ排除ヲ決行シマス＿＿。
 
+@ChangeCastAnimation,テン,Additional
 @ShowCastMessage,テン
 約束は果たさせてもらおう。
-すぐに楽にしてやる。
+……すぐに楽にしてやる。
 
