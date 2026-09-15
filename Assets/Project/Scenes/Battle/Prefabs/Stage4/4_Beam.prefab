@@ -104,6 +104,7 @@ MonoBehaviour:
   movementSteps:
   - rid: 2259957373586636897
   - rid: 2259957373586637123
+  - rid: 5211421576021410627
   bulletPools:
   - {fileID: 7996329089749057052}
   bulletDamage: 10
@@ -196,7 +197,7 @@ MonoBehaviour:
     - rid: 2259957373586637123
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        duration: 0
+        duration: 23.967054
     - rid: 5211421472506774029
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -221,6 +222,38 @@ MonoBehaviour:
         showWarning: 1
         warningDuration: 2
         warningSourceIndex: 0
+    - rid: 5211421576021410627
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 3.5, y: 0, z: 0}
+        duration: 0.33
+        easeValue: 6
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 1
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0

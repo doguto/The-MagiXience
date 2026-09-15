@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: UshitoraBeamSecond
+  m_Name: UshitoraBeamThird
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
-    - loop: 1
-      loopStart: 0.13574661
-      loopEnd: 8.096746
-      cycleDuration: 2.171946
+    - loop: 0
+      loopStart: 0
+      loopEnd: 0
+      cycleDuration: 0.01
       entries:
-      - time: 0
+      - time: 25.42004
         signal:
           rid: 5211421576021410531
         directionProvider:
@@ -51,11 +51,11 @@ MonoBehaviour:
       type: {class: SpriteBeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         line:
-          start: {x: 0, y: -1}
-          end: {x: 0, y: -10}
+          start: {x: -0.5, y: -0.5}
+          end: {x: -32, y: -18}
         isRelative: 1
-        bodySourceIndex: 1
-        bodyDuration: 0.81447965
+        bodySourceIndex: 3
+        bodyDuration: 2.1719458
         showWarning: 1
-        warningDuration: 1.0859729
-        warningSourceIndex: 0
+        warningDuration: 1.6289593
+        warningSourceIndex: 2
