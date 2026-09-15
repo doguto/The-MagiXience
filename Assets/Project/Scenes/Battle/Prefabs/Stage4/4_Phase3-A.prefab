@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
+  bulletPrefab: {fileID: 366756060701291069, guid: c32e0c92eb4887a47b48b549b6537d86, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &7074045735317373604
@@ -78,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8334555279690838701}
@@ -96,28 +96,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 59
+  maxHp: 149
   contactDamage: 15
   onlyChargeDamageable: 1
   lifetime: 0
-  movementPreset: {fileID: 0}
+  movementPreset: {fileID: 11400000, guid: d8168ef4a50eb264aaa581904c09e144, type: 2}
   movementSteps:
   - rid: 2259957373586636897
   - rid: 2259957373586637123
+  - rid: 5211421576021410230
   bulletPools:
   - {fileID: 7996329089749057052}
   bulletDamage: 10
   enemySpawnPrefabs: []
   attackPreset: {fileID: 0}
   attackTimeline:
-    phases:
-    - loop: 1
-      loopStart: 2
-      loopEnd: 15
-      cycleDuration: 0.75
-      entries: []
-      nextPhaseTrigger:
-        rid: -2
+    phases: []
   deathAttackEntry:
     time: 0
     signal:
@@ -184,7 +178,39 @@ MonoBehaviour:
     - rid: 2259957373586637123
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        duration: 0
+        duration: 12
+    - rid: 5211421576021410230
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 5, y: 0, z: 0}
+        duration: 1.5
+        easeValue: 6
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 1
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
