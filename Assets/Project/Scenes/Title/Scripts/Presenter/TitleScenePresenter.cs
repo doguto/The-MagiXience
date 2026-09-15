@@ -5,6 +5,7 @@ using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scenes.Title.Scripts.View;
 using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
+using Project.Scripts.Repository.ModelRepository;
 using UniRx;
 using UnityEngine;
 
@@ -55,7 +56,8 @@ namespace Project.Scenes.Title.Scripts.Presenter
                 ExitGame();
             });
 
-            soundManager!.PlayBGMAsync(SceneType.Title, skipIfSamePlaying: true).Forget();
+            var bgmType = UserModelRepository.Instance.Get().TitleBgmType;
+            soundManager!.PlayBGMAsync(SceneType.Title, bgmType, skipIfSamePlaying: true).Forget();
         }
 
         async UniTask StartMain(Unit _)
