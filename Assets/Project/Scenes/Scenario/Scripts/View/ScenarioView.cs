@@ -32,7 +32,7 @@ namespace Project.Scenes.Scenario.Scripts.View
             contentsText.text = message ?? "";
         }
 
-        public void ShowCast(string characterName, string unknownArg1, string faceExpression,
+        public void ShowCast(string characterName, string stillType, string faceExpression,
             string displayTime, string position, string unknownArg2,
             Sprite playerSprite, Sprite enemySprite, Sprite faceSprite)
         {

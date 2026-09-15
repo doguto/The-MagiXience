@@ -89,14 +89,19 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
                 if (step.function == "ShowCast")
                 {
-                    // args[0]: キャラ名, args[1]: unknown, args[2]: 表情差分, 
+                    // args[0]: キャラ名, args[1]: 立ち絵種別(Crazyで発狂立ち絵), args[2]: 表情差分,
                     // args[3]: 表示時間, args[4]: 位置(LL/RR), args[5]: unknown
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
-                    var unknownArg1 = step.args.Length > 1 ? step.args[1] : "";
+                    var stillType = step.args.Length > 1 ? step.args[1] : "";
                     var faceExpression = step.args.Length > 2 ? step.args[2] : "";
                     var displayTime = step.args.Length > 3 ? step.args[3] : "";
                     var position = step.args.Length > 4 ? step.args[4] : "";
                     var unknownArg2 = step.args.Length > 5 ? step.args[5] : "";
+
+                    // args[1]がCrazyのときは発狂立ち絵、それ以外は通常立ち絵を使用
+                    var isCrazy = stillType == "Crazy";
+                    var playerStill = scenarioModel.PlayerStillSprite;
+                    var enemyStill = isCrazy ? scenarioModel.EnemyCrazyStillSprite : scenarioModel.EnemyStillSprite;
 
                     // 表情Spriteを取得
                     Sprite faceSprite = null;
@@ -109,9 +114,9 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                         scenarioModel.EnemyFaceSprites.TryGetValue(faceExpression, out faceSprite);
                     }
 
-                    scenarioView.ShowCast(characterName, unknownArg1, faceExpression,
+                    scenarioView.ShowCast(characterName, stillType, faceExpression,
                         displayTime, position, unknownArg2,
-                        scenarioModel.PlayerStillSprite, scenarioModel.EnemyStillSprite,
+                        playerStill, enemyStill,
                         faceSprite);
 
                     scenarioModel.Next();
