@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: UshitoraBeamSecond
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 0.753
+      loopEnd: 17.375568
+      cycleDuration: 8.687784
+      entries:
+      - time: 0
+        signal:
+          rid: 5211421576021410531
+        directionProvider:
+          rid: 5211421576021410450
+        rotationProvider:
+          rid: 5211421576021410452
+        sourceIndexProvider:
+          rid: 5211421576021410453
+        seType: 0
+      - time: 4.343892
+        signal:
+          rid: 5211421576021410534
+        directionProvider:
+          rid: 5211421576021410535
+        rotationProvider:
+          rid: 5211421576021410536
+        sourceIndexProvider:
+          rid: 5211421576021410537
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5211421576021410450
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421576021410452
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421576021410453
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421576021410531
+      type: {class: SpriteBeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        line:
+          start: {x: -1, y: 0}
+          end: {x: -20, y: 0}
+        isRelative: 1
+        bodySourceIndex: 1
+        bodyDuration: 1.9004525
+        showWarning: 1
+        warningDuration: 2.1719458
+        warningSourceIndex: 0
+    - rid: 5211421576021410534
+      type: {class: SpriteBeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        line:
+          start: {x: -1, y: 0}
+          end: {x: -20, y: -10}
+        isRelative: 1
+        bodySourceIndex: 1
+        bodyDuration: 1.9004525
+        showWarning: 1
+        warningDuration: 2.1719458
+        warningSourceIndex: 0
+    - rid: 5211421576021410535
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421576021410536
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421576021410537
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
