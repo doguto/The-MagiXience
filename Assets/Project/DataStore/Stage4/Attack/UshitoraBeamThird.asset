@@ -29,6 +29,26 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410453
         seType: 0
+      - time: 28.949451
+        signal:
+          rid: 5211421599096111309
+        directionProvider:
+          rid: 5211421599096111310
+        rotationProvider:
+          rid: 5211421599096111311
+        sourceIndexProvider:
+          rid: 5211421599096111312
+        seType: 0
+      - time: 28.949451
+        signal:
+          rid: 5211421599096111313
+        directionProvider:
+          rid: 5211421599096111314
+        rotationProvider:
+          rid: 5211421599096111315
+        sourceIndexProvider:
+          rid: 5211421599096111316
+        seType: 0
       nextPhaseTrigger:
         rid: -2
   references:
@@ -59,3 +79,49 @@ MonoBehaviour:
         showWarning: 1
         warningDuration: 1.6289593
         warningSourceIndex: 2
+    - rid: 5211421599096111309
+      type: {class: SpriteBeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        line:
+          start: {x: -1, y: -2.5}
+          end: {x: -32, y: -2.5}
+        isRelative: 1
+        bodySourceIndex: 1
+        bodyDuration: 0.5429864
+        showWarning: 1
+        warningDuration: 0.8144796
+        warningSourceIndex: 0
+    - rid: 5211421599096111310
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111311
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111312
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111313
+      type: {class: SpriteBeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        line:
+          start: {x: -2.5, y: -1}
+          end: {x: -2.5, y: -32}
+        isRelative: 1
+        bodySourceIndex: 1
+        bodyDuration: 0.5429864
+        showWarning: 1
+        warningDuration: 0.8144796
+        warningSourceIndex: 0
+    - rid: 5211421599096111314
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111315
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111316
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
