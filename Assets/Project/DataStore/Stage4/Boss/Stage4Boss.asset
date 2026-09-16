@@ -14,14 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   situation: 1
   sequenceGroups:
-  - loop: 0
-    loopCount: 1
+  - loop: 1
+    loopCount: 0
     phases:
     - phaseId: 1
-      timelineBuilder: {fileID: 11400000, guid: 87ea8837b6bf7e44d9411ae89d3b99db, type: 2}
+      timelineBuilder: {fileID: 11400000, guid: 19b552ca386a3284c93ee38e1967d7ca, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 3310600040644083838
+        rid: 5211421576021410527
+    - phaseId: 2
+      timelineBuilder: {fileID: 11400000, guid: 9eccd8a2c8df4fe428003a9226d6f896, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 5211421576021410528
   bossPrefab: {fileID: 5806677969891141097, guid: a693ccf3d97afef41bfe187c49dbc806, type: 3}
   bossSpawnPosition: {x: 10, y: 0, z: 0}
   bossEntranceMovement:
@@ -29,10 +34,14 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 3310600040644083838
-      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+    - rid: 5211421576021410527
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
-        hpThresholdPercent: 50
+        thresholdSamples: 3859982
+    - rid: 5211421576021410528
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 5269137
     - rid: 8577112454036455607
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:

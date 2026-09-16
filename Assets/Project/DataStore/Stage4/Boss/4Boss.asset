@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8e9eb2c7bf1b4174a965e674148ccd2f, type: 3}
-  m_Name: Phase1
+  m_Name: 4Boss
   m_EditorClassIdentifier: 
   signalTracks: []
   animationTracks: []
@@ -18,6 +18,9 @@ MonoBehaviour:
   audioTracks: []
   controlTracks: []
   enemySpawnTracks: []
-  bulletClearTracks: []
-  bossAttackPreset: {fileID: 11400000, guid: b623ede575f513c4ca0af91f29490a3c, type: 2}
+  bulletClearTracks:
+  - trackName: BulletClear
+    clips:
+    - time: 0
+  bossAttackPreset: {fileID: 11400000, guid: 25e780ee4f0e3184a8b03c61dbaba2ed, type: 2}
   bossMovementPreset: {fileID: 0}

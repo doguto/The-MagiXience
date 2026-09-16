@@ -62,7 +62,7 @@ GameObject:
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
   m_Layer: 7
-  m_Name: 4_Beam
+  m_Name: 4_UshitoraAimBeam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -100,18 +100,17 @@ MonoBehaviour:
   contactDamage: 15
   onlyChargeDamageable: 1
   lifetime: 0
-  movementPreset: {fileID: 0}
+  movementPreset: {fileID: 11400000, guid: 94fbe3121d91d1e4da70aef38b174e74, type: 2}
   movementSteps:
   - rid: 2259957373586636897
   - rid: 2259957373586637123
-  - rid: 5211421576021410627
   bulletPools:
   - {fileID: 7996329089749057052}
   bulletDamage: 10
   enemySpawnPrefabs:
-  - {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
-  - {fileID: 8143873751805396341, guid: dd82e0b2e7e5ee24b9c22d7ebdab8a59, type: 3}
-  attackPreset: {fileID: 11400000, guid: ef7247f3f90aecf43a22a4a4817059b6, type: 2}
+  - {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+  - {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
+  attackPreset: {fileID: 11400000, guid: b6df17e2dc608c540a704569a81442d9, type: 2}
   attackTimeline:
     phases:
     - loop: 1
@@ -197,7 +196,7 @@ MonoBehaviour:
     - rid: 2259957373586637123
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        duration: 23.967054
+        duration: 0
     - rid: 5211421472506774029
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -222,38 +221,6 @@ MonoBehaviour:
         showWarning: 1
         warningDuration: 2
         warningSourceIndex: 0
-    - rid: 5211421576021410627
-      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        targetOffset: {x: 3.5, y: 0, z: 0}
-        duration: 0.33
-        easeValue: 6
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 1
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -312,7 +279,7 @@ SpriteRenderer:
   m_SortingLayerID: 254900173
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 2198845017378358445, guid: ff685c9f173f16141b0dcf7b4cc7c674, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 0.61004084, g: 0.46742615, b: 0.9811321, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -320,7 +287,7 @@ SpriteRenderer:
   m_Size: {x: 3.84, y: 3.84}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &8344881561022020887
@@ -361,7 +328,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.06, y: 3.05}
+    oldSize: {x: 4.18, y: 2.58}
     newSize: {x: 3.84, y: 3.84}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

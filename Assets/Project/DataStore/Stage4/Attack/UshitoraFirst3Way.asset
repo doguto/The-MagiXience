@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: UshitoraFirst3Way
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 0
+      loopStart: 0
+      loopEnd: 0
+      cycleDuration: 0.01
+      entries:
+      - time: 0
+        signal:
+          rid: 3310600516686315667
+        directionProvider:
+          rid: 5211421599096111518
+        rotationProvider:
+          rid: 3310600516686315672
+        sourceIndexProvider:
+          rid: 5211421599096111525
+        seType: 0
+      - time: 0.5
+        signal:
+          rid: 5211421599096111519
+        directionProvider:
+          rid: 5211421599096111520
+        rotationProvider:
+          rid: 5211421599096111521
+        sourceIndexProvider:
+          rid: 5211421599096111526
+        seType: 0
+      - time: 1
+        signal:
+          rid: 5211421599096111522
+        directionProvider:
+          rid: 5211421599096111523
+        rotationProvider:
+          rid: 5211421599096111524
+        sourceIndexProvider:
+          rid: 5211421599096111527
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 3310600516686315667
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 4
+        spreadAngle: 30
+        radius: 0.3
+    - rid: 3310600516686315672
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 5211421599096111518
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111519
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 4
+        spreadAngle: 30
+        radius: 0.3
+    - rid: 5211421599096111520
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111521
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 5211421599096111522
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 4
+        spreadAngle: 30
+        radius: 0.3
+    - rid: 5211421599096111523
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111524
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 5211421599096111525
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111526
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111527
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
