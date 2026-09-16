@@ -1,0 +1,211 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: BossFirstSummon
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 0
+      loopEnd: 310
+      cycleDuration: 31
+      entries:
+      - time: 0
+        signal:
+          rid: 5211421599096111540
+        directionProvider:
+          rid: 5211421599096111541
+        rotationProvider:
+          rid: 5211421599096111542
+        sourceIndexProvider:
+          rid: 5211421599096111543
+        seType: 0
+      - time: 5
+        signal:
+          rid: 5211421599096111544
+        directionProvider:
+          rid: 5211421599096111545
+        rotationProvider:
+          rid: 5211421599096111546
+        sourceIndexProvider:
+          rid: 5211421599096111547
+        seType: 0
+      - time: 10
+        signal:
+          rid: 5211421599096111548
+        directionProvider:
+          rid: 5211421599096111549
+        rotationProvider:
+          rid: 5211421599096111550
+        sourceIndexProvider:
+          rid: 5211421599096111551
+        seType: 0
+      - time: 15
+        signal:
+          rid: 5211421599096111552
+        directionProvider:
+          rid: 5211421599096111553
+        rotationProvider:
+          rid: 5211421599096111554
+        sourceIndexProvider:
+          rid: 5211421599096111555
+        seType: 0
+      - time: 20
+        signal:
+          rid: 5211421599096111556
+        directionProvider:
+          rid: 5211421599096111557
+        rotationProvider:
+          rid: 5211421599096111558
+        sourceIndexProvider:
+          rid: 5211421599096111559
+        seType: 0
+      - time: 25
+        signal:
+          rid: 5211421599096111560
+        directionProvider:
+          rid: 5211421599096111561
+        rotationProvider:
+          rid: 5211421599096111562
+        sourceIndexProvider:
+          rid: 5211421599096111563
+        seType: 0
+      - time: 1
+        signal:
+          rid: 5211421599096111532
+        directionProvider:
+          rid: 5211421599096111533
+        rotationProvider:
+          rid: 5211421599096111530
+        sourceIndexProvider:
+          rid: 5211421599096111531
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5211421599096111530
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111531
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111532
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 1d5128659b3b7cc46bb6b8d2c2f506ee, type: 2}
+        loop: 1
+        loopCount: 15
+        cycleDuration: 2
+    - rid: 5211421599096111533
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111540
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: fab4e4418b31b9148ba4a898a12fc071, type: 2}
+    - rid: 5211421599096111541
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111542
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111543
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421599096111544
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: a59172b72d124484cb4a9e2cd775e577, type: 2}
+    - rid: 5211421599096111545
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111546
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111547
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421599096111548
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: ccc68233a8793454d85c9db8cfa876b6, type: 2}
+    - rid: 5211421599096111549
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111550
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111551
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421599096111552
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: e84510addaff61a419a9ac74e49a2ce7, type: 2}
+    - rid: 5211421599096111553
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111554
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111555
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421599096111556
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: a59172b72d124484cb4a9e2cd775e577, type: 2}
+    - rid: 5211421599096111557
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111558
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111559
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421599096111560
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: ccc68233a8793454d85c9db8cfa876b6, type: 2}
+    - rid: 5211421599096111561
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421599096111562
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111563
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
