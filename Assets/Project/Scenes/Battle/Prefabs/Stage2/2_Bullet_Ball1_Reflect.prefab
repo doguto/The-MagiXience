@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4330750818476369800}
   - component: {fileID: -4487681364143076941}
   m_Layer: 10
-  m_Name: 2_Bullet_Ball1
+  m_Name: 2_Bullet_Ball1_Reflect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -162,14 +162,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementSteps:
-  - rid: 8800764145469751472
+  - rid: 8800764145469751373
   view: {fileID: 4330750818476369800}
   spriteRenderer: {fileID: 5248511050965479480}
   lifetime: 8
   references:
     version: 2
     RefIds:
-    - rid: 8800764145469751472
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 8800764145469751373
+      type: {class: ReflectMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        velocity: {x: -3, y: 0, z: 0}
+        speed: 3
+        maxReflections: 3
+        reflectTop: 1
+        reflectBottom: 1
+        reflectLeft: 0
+        reflectRight: 1

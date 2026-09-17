@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: FanTrail
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 0
+      loopEnd: 80
+      cycleDuration: 8
+      entries:
+      - time: 0
+        signal:
+          rid: 8800764145469751486
+        directionProvider:
+          rid: 8800764145469751487
+        rotationProvider:
+          rid: 8800764145469751488
+        sourceIndexProvider:
+          rid: 8800764145469751489
+        seType: 0
+      - time: 4
+        signal:
+          rid: 8800764145469751490
+        directionProvider:
+          rid: 8800764145469751491
+        rotationProvider:
+          rid: 8800764145469751492
+        sourceIndexProvider:
+          rid: 8800764145469751493
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8800764145469751486
+      type: {class: SequentialFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 18
+        spreadAngle: 7.2
+        spawnInterval: 0.1
+        releaseDelay: 0.2
+    - rid: 8800764145469751487
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: 0, y: -1}
+    - rid: 8800764145469751488
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764145469751489
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751490
+      type: {class: SequentialFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 18
+        spreadAngle: 7.2
+        spawnInterval: 0.1
+        releaseDelay: 0.2
+    - rid: 8800764145469751491
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: 0, y: 1}
+    - rid: 8800764145469751492
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764145469751493
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4

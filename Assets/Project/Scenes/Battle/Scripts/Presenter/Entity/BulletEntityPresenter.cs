@@ -44,7 +44,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public BulletEntityModel Model => model;
 
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f)
+        /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f)
         {
             pool = objectPool;
             var resolvedRotation = rotation == default ? Quaternion.identity : rotation;
@@ -59,7 +60,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             else
                 model.Reinitialize(damage, isPlayerBullet);
 
-            StartMovementSequence(direction);
+            StartMovementSequence(direction, startDelay);
 
             view.ResetView();
             view.UpdatePosition(position);
@@ -67,18 +68,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             BindModelToView();
         }
 
-        void StartMovementSequence(Vector2 direction)
+        void StartMovementSequence(Vector2 direction, float startDelay = 0f)
         {
             StopMovement();
 
             if (movementSteps == null || movementSteps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
-            RunMovementStepsAsync(direction, movementCts.Token).Forget();
+            RunMovementStepsAsync(direction, startDelay, movementCts.Token).Forget();
         }
 
-        async UniTaskVoid RunMovementStepsAsync(Vector2 direction, CancellationToken ct)
+        async UniTaskVoid RunMovementStepsAsync(Vector2 direction, float startDelay, CancellationToken ct)
         {
+            if (startDelay > 0f)
+                await UniTask.Delay(TimeSpan.FromSeconds(startDelay), cancellationToken: ct);
+
             foreach (var step in movementSteps)
             {
                 if (step == null) continue;

@@ -197,6 +197,53 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &2346630000379306607
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4874211356999839437}
+  - component: {fileID: 6410389016492623775}
+  m_Layer: 0
+  m_Name: BulletPoolBall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4874211356999839437
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2346630000379306607}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7486072411720941906}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6410389016492623775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2346630000379306607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: -4487681364143076941, guid: fe060beb386601a49b461c37a927c69f, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &3192376444244765073
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,6 +416,8 @@ Transform:
   - {fileID: 8507351231651525180}
   - {fileID: 5268981241662770715}
   - {fileID: 8848714979993588391}
+  - {fileID: 4874211356999839437}
+  - {fileID: 1563634681088382991}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &94871712968117621
@@ -391,6 +440,8 @@ MonoBehaviour:
   - {fileID: 743844790675660966}
   - {fileID: 7795660870535667501}
   - {fileID: 1234444714283703794}
+  - {fileID: 6410389016492623775}
+  - {fileID: 703793410916534001}
   bulletDamage: 10
   enemySpawnPrefabs:
   - {fileID: 5888170941882211794, guid: 8f439dc00bd56d044b2c7618ab0167cf, type: 3}
@@ -837,3 +888,50 @@ MonoBehaviour:
   bulletPrefab: {fileID: -4487681364143076941, guid: 4ce7897fbed8238408a60313c2e27b3e, type: 3}
   defaultCapacity: 40
   maxSize: 200
+--- !u!1 &9063792461541944959
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1563634681088382991}
+  - component: {fileID: 703793410916534001}
+  m_Layer: 0
+  m_Name: BulletPoolBallStraight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1563634681088382991
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9063792461541944959}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7486072411720941906}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &703793410916534001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9063792461541944959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: -4487681364143076941, guid: d1b918877e4c9a84191c8ecacbd1c714, type: 3}
+  defaultCapacity: 20
+  maxSize: 100

@@ -42,7 +42,16 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         /// <summary>予告線の太さ(ワールド単位)。0以下で未指定、予告線Prefab側の設定を使う</summary>
         public readonly float Width;
 
-        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f)
+        /// <summary>弾を生成してから実際に移動を開始するまでの待機秒数。0で即座に移動開始(従来動作)。全弾共通の値。</summary>
+        public readonly float StartDelay;
+
+        /// <summary>弾ごとに異なる移動開始待機秒数。指定があれば StartDelay より優先される</summary>
+        public readonly IReadOnlyList<float> StartDelays;
+
+        /// <summary>弾ごとの生成(出現)自体の遅延秒数。null/未指定で全弾同時に出現(従来動作)</summary>
+        public readonly IReadOnlyList<float> SpawnDelays;
+
+        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f, float startDelay = 0f, IReadOnlyList<float> startDelays = null, IReadOnlyList<float> spawnDelays = null)
         {
             Type = type;
             SourceIndex = sourceIndex;
@@ -55,6 +64,23 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             Range = range;
             Duration = duration;
             Width = width;
+            StartDelay = startDelay;
+            StartDelays = startDelays;
+            SpawnDelays = spawnDelays;
+        }
+
+        /// <summary>index番目の弾に適用する移動開始待機秒数を解決する。StartDelays優先、無ければ全弾共通のStartDelay。</summary>
+        public float GetStartDelayAt(int index)
+        {
+            if (StartDelays != null && index < StartDelays.Count) return StartDelays[index];
+            return StartDelay;
+        }
+
+        /// <summary>index番目の弾の生成自体の遅延秒数を解決する。未指定なら0(即時出現)。</summary>
+        public float GetSpawnDelayAt(int index)
+        {
+            if (SpawnDelays != null && index < SpawnDelays.Count) return SpawnDelays[index];
+            return 0f;
         }
 
         public static AttackEvent Single(Vector2 direction, Quaternion rotation, int sourceIndex = 0, SeType seType = SeType.None) => new(AttackEventType.Bullet, new[] { direction }, sourceIndex, seType: seType, rotations: new[] { Normalize(rotation) });
@@ -81,7 +107,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 origins[i] = origin + offset;
             }
 
-            return new AttackEvent(Type, Directions, SourceIndex, origins, SeType, Rotations, MovementOverride, AttackSpawnSpace.World, range, Duration, Width);
+            return new AttackEvent(Type, Directions, SourceIndex, origins, SeType, Rotations, MovementOverride, AttackSpawnSpace.World, range, Duration, Width, StartDelay, StartDelays, SpawnDelays);
         }
 
         // default(Quaternion) は (0,0,0,0) で不正なので identity に補正

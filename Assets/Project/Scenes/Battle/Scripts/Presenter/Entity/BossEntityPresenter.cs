@@ -320,8 +320,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range);
+                var spawnDelay = ev.GetSpawnDelayAt(i);
+                if (spawnDelay > 0f)
+                {
+                    SpawnBulletDelayed(pool, ev, i, spawnDelay).Forget();
+                }
+                else
+                {
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i));
+                }
             }
+        }
+
+        async UniTaskVoid SpawnBulletDelayed(BulletPool pool, AttackEvent ev, int index, float spawnDelay)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
+            if (pool == null) return;
+
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index));
         }
 
         static Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
