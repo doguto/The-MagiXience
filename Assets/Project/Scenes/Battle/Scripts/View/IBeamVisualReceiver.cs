@@ -10,6 +10,7 @@ namespace Project.Scenes.Battle.Scripts.View
     {
         /// <param name="range">線分の長さ(ワールド単位)。0以下なら未指定としてPrefabの値を使う</param>
         /// <param name="duration">表示時間(秒)。0以下なら未指定としてPrefabの値を使う</param>
-        void ConfigureBeam(float range, float duration);
+        /// <param name="width">線の太さ(ワールド単位)。0以下なら未指定としてPrefabの値を使う</param>
+        void ConfigureBeam(float range, float duration, float width = 0f);
     }
 }

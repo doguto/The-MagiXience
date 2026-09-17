@@ -386,7 +386,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 // 予告線のように「線分の長さ」を生成後に教える必要があるViewへ、Startが走る前に流し込む
                 if (instance.TryGetComponent<IBeamVisualReceiver>(out var beamVisual))
                 {
-                    beamVisual.ConfigureBeam(ev.Range, ev.Duration);
+                    beamVisual.ConfigureBeam(ev.Range, ev.Duration, ev.Width);
                 }
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))

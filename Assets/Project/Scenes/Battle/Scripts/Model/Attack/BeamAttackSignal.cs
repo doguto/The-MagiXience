@@ -34,6 +34,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField, Min(0f), Tooltip("予告線を出してから発射を始めるまでの秒数。予告線Viewの表示時間にもそのまま使われる")]
         float warningDuration = 1f;
 
+        [SerializeField, Min(0f), Tooltip("予告線の太さ(ワールド単位)。0以下なら予告線Prefab側の設定を使う")]
+        float warningWidth;
+
         [SerializeField, Tooltip("予告線に使う enemySpawnPrefabs のindex")]
         int warningSourceIndex;
 
@@ -43,6 +46,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public float ShotInterval => shotInterval;
         public bool ShowWarning => showWarning;
         public float WarningDuration => warningDuration;
+        public float WarningWidth => warningWidth;
         public int WarningSourceIndex => warningSourceIndex;
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
@@ -60,6 +64,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             shotInterval = shotInterval,
             showWarning = showWarning,
             warningDuration = warningDuration,
+            warningWidth = warningWidth,
             warningSourceIndex = warningSourceIndex
         };
     }
