@@ -125,7 +125,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 630620121836037546}
@@ -146,6 +146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 20
   contactDamage: 10
+  onlyChargeDamageable: 0
   lifetime: 0
   movementPreset: {fileID: 11400000, guid: aabf1ef9ebf6db04bbdf76538bb0dd2a, type: 2}
   movementSteps:
@@ -163,6 +164,8 @@ MonoBehaviour:
       loopEnd: 3
       cycleDuration: 0.5
       entries: []
+      nextPhaseTrigger:
+        rid: -2
   deathAttackEntry:
     time: 0
     signal:
@@ -181,6 +184,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 1000
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -198,6 +203,7 @@ MonoBehaviour:
         wayCount: 12
         spreadAngle: 30
         radius: 0.01
+        startDelay: 0
     - rid: 3310600516686315651
       type: {class: SineMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -263,7 +269,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7450309199561605471, guid: ea0bc0a409639854a9a0b61d18f12f0e, type: 3}
+  m_Sprite: {fileID: 7865975294633295563, guid: 57586bc6e6a0f834387c47aac5146f51, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -312,7 +318,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.78, y: 3.16}
+    oldSize: {x: 0.9, y: 1.02}
     newSize: {x: 2.78, y: 3.16}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

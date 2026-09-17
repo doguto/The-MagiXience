@@ -22,6 +22,11 @@ MonoBehaviour:
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 3310600040644083838
+    - phaseId: 2
+      timelineBuilder: {fileID: 11400000, guid: 0ce9ca0fdcb6a6a4388a179ee76d5dba, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 8800764145469751494
     - phaseId: CrossBeam
       timelineBuilder: {fileID: 11400000, guid: 0a7fab46d82bc604aac8a5a8375ab26f, type: 2}
       timelineBuilderStrong: {fileID: 0}
@@ -75,6 +80,10 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 0
+    - rid: 8800764145469751494
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 40
     - rid: 9205483607032594528
       type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
