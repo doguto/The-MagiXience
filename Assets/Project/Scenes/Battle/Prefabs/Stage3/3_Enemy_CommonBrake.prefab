@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: 2d2c67c56b0e4ec68e6cc279217722a3, type: 3}
+  bulletPrefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &7074045735317373604
@@ -62,7 +62,7 @@ GameObject:
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
   m_Layer: 7
-  m_Name: 3_Phase1B
+  m_Name: 3_Enemy_CommonBrake
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -100,7 +100,7 @@ MonoBehaviour:
   contactDamage: 5
   onlyChargeDamageable: 0
   lifetime: 0
-  movementPreset: {fileID: 0}
+  movementPreset: {fileID: 11400000, guid: fa6a0cff9fb24a240a93ffeb366e8e64, type: 2}
   movementSteps:
   - rid: 8577112580335075430
   - rid: 8577112580335075461
@@ -119,9 +119,9 @@ MonoBehaviour:
       entries:
       - time: 0
         signal:
-          rid: 1781713752230461833
+          rid: 1781713752230461857
         directionProvider:
-          rid: 1781713752230461838
+          rid: 1781713752230461862
         rotationProvider:
           rid: 1781713752230461843
         sourceIndexProvider:
@@ -160,13 +160,6 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 1781713752230461833
-      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 1781713752230461838
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
     - rid: 1781713752230461843
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -174,6 +167,15 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
+    - rid: 1781713752230461857
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 3
+        spreadAngle: 60
+        radius: 0
+    - rid: 1781713752230461862
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
     - rid: 8577112580335075430
       type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:

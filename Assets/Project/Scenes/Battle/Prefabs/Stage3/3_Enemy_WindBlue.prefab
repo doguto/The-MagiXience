@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 2045916267942487860}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.5, y: 0, z: 0}
+  m_LocalPosition: {x: -1, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: 2d2c67c56b0e4ec68e6cc279217722a3, type: 3}
+  bulletPrefab: {fileID: 366756060701291069, guid: 64bc1284fb934964c8a90c89e7cf55b8, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &7074045735317373604
@@ -62,7 +62,7 @@ GameObject:
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
   m_Layer: 7
-  m_Name: 3_Phase1B
+  m_Name: 3_Enemy_WindBlue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8334555279690838701}
@@ -96,15 +96,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 1
+  maxHp: 10
   contactDamage: 5
   onlyChargeDamageable: 0
   lifetime: 0
   movementPreset: {fileID: 0}
   movementSteps:
-  - rid: 8577112580335075430
-  - rid: 8577112580335075461
-  - rid: 8577112580335075476
+  - rid: 8577112408172003548
+  - rid: 8577112587349262344
+  - rid: 8577112587349262349
+  - rid: 8577112587349262364
   bulletPools:
   - {fileID: 7996329089749057052}
   bulletDamage: 10
@@ -119,13 +120,13 @@ MonoBehaviour:
       entries:
       - time: 0
         signal:
-          rid: 1781713752230461833
+          rid: 1781713752230461705
         directionProvider:
-          rid: 1781713752230461838
+          rid: 1781713752230461723
         rotationProvider:
-          rid: 1781713752230461843
+          rid: 1781713752230461762
         sourceIndexProvider:
-          rid: 1781713752230461848
+          rid: 1781713752230461772
         seType: 0
       nextPhaseTrigger:
         rid: -2
@@ -134,11 +135,11 @@ MonoBehaviour:
     signal:
       rid: -2
     directionProvider:
-      rid: 1781713752230461654
+      rid: 5807925268026490896
     rotationProvider:
-      rid: 1781713752230461655
+      rid: 5807925268026490897
     sourceIndexProvider:
-      rid: 1781713752230461656
+      rid: 5807925268026490898
     seType: 0
   damageFlashInterval: 0.05
   damageFlashDuration: 0.2
@@ -149,37 +150,39 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 1781713752230461654
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
-    - rid: 1781713752230461655
-      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 1781713752230461656
-      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        index: 0
-    - rid: 1781713752230461833
+    - rid: 1781713752230461705
       type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 1781713752230461838
+    - rid: 1781713752230461723
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -1, y: 0}
-    - rid: 1781713752230461843
-      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 1781713752230461848
+        direction: {x: -1, y: -1}
+    - rid: 1781713752230461762
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1781713752230461772
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 8577112580335075430
+    - rid: 5807925268026490896
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5807925268026490897
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5807925268026490898
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8577112408172003548
       type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
         waypoints:
-        - {x: 2.56, y: -1.5, z: 0}
-        duration: 2.5
+        - {x: -3, y: 1, z: 0}
+        - {x: -3.5, y: 2, z: 0}
+        duration: 5
         pathType: 1
         easeValue: 3
         customCurve:
@@ -188,38 +191,55 @@ MonoBehaviour:
           - serializedVersion: 3
             time: 0
             value: 0
-            inSlope: 0
-            outSlope: 1
+            inSlope: 3.0350144
+            outSlope: 3.0350144
             tangentMode: 0
             weightedMode: 0
             inWeight: 0
-            outWeight: 0
+            outWeight: 0.08756883
+          - serializedVersion: 3
+            time: 0.3467697
+            value: 0.6059025
+            inSlope: 0.09443082
+            outSlope: 0.09443082
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.1738879
+            outWeight: 0.11941429
+          - serializedVersion: 3
+            time: 0.8653298
+            value: 0.65875036
+            inSlope: 0.32938245
+            outSlope: 0.32938245
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0.54143274
           - serializedVersion: 3
             time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
+            value: 1.0023804
+            inSlope: 1.6473737
+            outSlope: 1.6473737
             tangentMode: 0
             weightedMode: 0
-            inWeight: 0
+            inWeight: 0.08976552
             outWeight: 0
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 0
-    - rid: 8577112580335075461
+        curvePreset: {fileID: 11400000, guid: a207b09336e403743ba71552144dc7ea, type: 2}
+        isRelative: 1
+    - rid: 8577112587349262344
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
         duration: 1
-    - rid: 8577112580335075476
+    - rid: 8577112587349262349
       type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
         waypoints:
-        - {x: 0, y: -1.3, z: 0}
-        - {x: -7, y: 0, z: 0}
-        - {x: -14, y: 1.3, z: 0}
-        duration: 4
+        - {x: 0.5, y: 1, z: 0}
+        - {x: 3.5, y: 2, z: 0}
+        duration: 2.5
         pathType: 1
         easeValue: 2
         customCurve:
@@ -247,7 +267,11 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
-        isRelative: 0
+        isRelative: 1
+    - rid: 8577112587349262364
+      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        velocity: {x: 1, y: 0, z: 0}
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,7 +330,7 @@ SpriteRenderer:
   m_SortingLayerID: 254900173
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: -6886211784984959920, guid: b7b0dc7bcb8544247b12309ab0d9e33a, type: 3}
+  m_Sprite: {fileID: 7450309199561605471, guid: ea0bc0a409639854a9a0b61d18f12f0e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -355,7 +379,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 4.5, y: 5.12}
+    oldSize: {x: 2.78, y: 3.16}
     newSize: {x: 3.84, y: 3.84}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

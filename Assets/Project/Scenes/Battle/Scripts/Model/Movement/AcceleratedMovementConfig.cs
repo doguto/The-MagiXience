@@ -20,8 +20,48 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         [SerializeField, Tooltip("ワールド座標での加速度。Yを負にすると、発射方向に関係なく下に落ちる。")]
         Vector2 worldAcceleration = Vector2.down;
 
+        [Header("Aimed parabola")]
+        [SerializeField, Tooltip("発射時の自機を狙い、画面内の頂点を通る初速度と加速度を計算する。")]
+        bool aimAtPlayer = false;
+        [SerializeField, Tooltip("発射時の風向きを加速度の向きに使用。無風では自機狙いの直線弾。")]
+        bool useBattleWind = true;
+        [SerializeField, Min(0.1f), Tooltip("発射時の自機位置に到達するまでの秒数。")]
+        float targetFlightTime = 4f;
+        [SerializeField, Min(0.001f), Tooltip("発射位置と自機より風上側に折り返す距離。画面端では自動で縮める。")]
+        float vertexDepth = 1.1f;
+        [SerializeField, Min(0f)] float vertexScreenMargin = 0.35f;
+
         public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)
         {
+            if (aimAtPlayer && PlayerPositionReference.Transform != null)
+            {
+                Vector2 start = target.position;
+                Vector2 aim = PlayerPositionReference.Transform.position;
+                Vector2 axis = useBattleWind ? BattleWind.Vector : worldAcceleration.normalized;
+                float flightTime = Mathf.Max(0.1f, targetFlightTime);
+                var screen = Rect.MinMaxRect(ScreenBoundsCache.MinX, ScreenBoundsCache.MinY,
+                    ScreenBoundsCache.MaxX, ScreenBoundsCache.MaxY);
+                bool solved = AimedParabola.TrySolve(start, aim, axis, screen, flightTime,
+                    vertexDepth, vertexScreenMargin, out var launchVelocity, out var windAcceleration, out _);
+                if (!solved)
+                {
+                    // Calm, or a launch/target outside the visible area: no invisible turning point.
+                    launchVelocity = (aim - start) / flightTime;
+                    windAcceleration = Vector2.zero;
+                }
+#if UNITY_EDITOR
+                AimedParabola.RecordLaunch(start, aim, launchVelocity, windAcceleration, flightTime, axis == Vector2.zero, solved);
+#endif
+                float elapsed = 0f;
+                float z = target.position.z;
+                return PullMovementHelper.Create(target, duration, (t, dt) =>
+                {
+                    elapsed += dt;
+                    Vector2 p = AimedParabola.Position(start, launchVelocity, windAcceleration, elapsed);
+                    t.position = new Vector3(p.x, p.y, z);
+                }, Ease.Linear);
+            }
+
             Vector3 dir = ((Vector3)(!useConfiguredDirection && overrideDirection != Vector2.zero
                 ? overrideDirection : direction)).normalized;
             Vector3 velocity = dir * initialSpeed;

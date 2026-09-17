@@ -352,10 +352,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         Vector3 HandleMovement()
         {
-            if (currentMoveInput.sqrMagnitude < 0.01f) return Vector3.zero;
-
             var currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
-            var movement = new Vector3(currentMoveInput.x, currentMoveInput.y, 0) * currentSpeed * Time.deltaTime;
+            var input = currentMoveInput.sqrMagnitude < 0.01f ? Vector2.zero : currentMoveInput;
+            Vector3 movement = BattleWind.PlayerVelocity(input, currentSpeed) * Time.deltaTime;
             return movement;
         }
 

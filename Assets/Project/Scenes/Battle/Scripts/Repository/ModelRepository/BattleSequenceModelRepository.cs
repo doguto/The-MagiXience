@@ -47,7 +47,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
 
             return new BattleSequenceModel(
                 asset.Situation, groups, CreatePhaseModel,
-                asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement);
+                asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement, asset.Wind);
         }
 
         List<SequenceGroupRuntime> BuildGroups(BattleSequenceAsset asset)
