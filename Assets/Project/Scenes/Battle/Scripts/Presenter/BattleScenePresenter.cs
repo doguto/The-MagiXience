@@ -643,7 +643,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             phaseStateMachine.Stop();
 
             // BGMをタイトルのものに切り替える
-            soundManager?.PlayBGMAsync(SceneType.Title).Forget();
+            // ステージクリアを反映した後に取得するため、4面クリア時はこの時点で切り替わる
+            var titleBgmType = UserModelRepository.Instance.Get().TitleBgmType;
+            soundManager?.PlayBGMAsync(SceneType.Title, titleBgmType).Forget();
 
             var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
             await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();

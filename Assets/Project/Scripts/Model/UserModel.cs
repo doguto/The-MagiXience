@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Project.Scripts.Extensions;
 using Project.Scripts.Infra;
 using UnityEngine;
 
@@ -25,6 +26,13 @@ namespace Project.Scripts.Model
 
         public int ClearedStageNumber => UserData.clearedStageNumber;
         public int OpenedStageNumber => UserData.clearedStageNumber - 1;
+
+        // このステージをクリアするとタイトルのBGMが変化する
+        const int TitleBgmChangedStageNumber = 4;
+
+        // タイトルで再生するBGMの種類。ステージ4クリア後は Phase2 の楽曲へ切り替わる。
+        public BgmType TitleBgmType
+            => IsClearedStage(TitleBgmChangedStageNumber) ? BgmType.Phase2 : BgmType.Default;
 
         public int BgmVolume => UserData.bgmVolume;
         public int SeVolume => UserData.seVolume;

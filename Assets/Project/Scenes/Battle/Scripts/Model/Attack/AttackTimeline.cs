@@ -155,6 +155,12 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 return;
             }
 
+            if (entry.signal is SpriteBeamAttackSignal spriteBeamSignal)
+            {
+                ExpandSpriteBeam(spriteBeamSignal, fireTime);
+                return;
+            }
+
             Observable.Timer(TimeSpan.FromSeconds(fireTime))
                 .Subscribe(_ =>
                 {
@@ -226,6 +232,58 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                     ScheduleEntry(inner, fireStartTime + shot * signal.ShotInterval + inner.time, depth);
                 }
             }
+        }
+
+        /// <summary>
+        /// ビーム1本を「予告線 → 本体を1体生成」に展開する(一枚絵式)。
+        /// 予告線と同じ SpawnAtWorld 経路で本体を線分の起点に生成し、range=線分長 / duration=表示時間 を本体へ渡す。
+        /// 本体側(SpriteBeamView/Presenter)が1枚のスプライトの表示/非表示でビームを表現する。
+        /// </summary>
+        void ExpandSpriteBeam(SpriteBeamAttackSignal signal, float baseTime)
+        {
+            // 予告線を出す瞬間(baseTime到達時)に line を確定する。
+            // isRelative の敵位置基準もこのタイミングで取るので、敵が画面外から入場してくる場合でも
+            // 「予告が始まる時点の敵位置」からビームが出る。確定した line を本体にも渡して起点を一致させる。
+            if (signal.ShowWarning)
+            {
+                Observable.Timer(TimeSpan.FromSeconds(baseTime))
+                    .Subscribe(_ =>
+                    {
+                        var line = ResolveBeamLine(signal);
+                        onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                            line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration));
+                        ScheduleSpriteBeamBody(signal, line, signal.WarningDuration);
+                    })
+                    .AddTo(phaseDisposables);
+                return;
+            }
+
+            // 予告なしの場合は baseTime 到達時に line を確定して即本体を出す。
+            Observable.Timer(TimeSpan.FromSeconds(baseTime))
+                .Subscribe(_ => ScheduleSpriteBeamBody(signal, ResolveBeamLine(signal), 0f))
+                .AddTo(phaseDisposables);
+        }
+
+        /// <summary>予告開始時に確定した line を使い、delay 秒後にビーム本体を1体生成する。</summary>
+        void ScheduleSpriteBeamBody(SpriteBeamAttackSignal signal, BeamLine line, float delay)
+        {
+            Observable.Timer(TimeSpan.FromSeconds(delay))
+                .Subscribe(_ => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                    line.Start, line.Direction, line.Rotation, signal.BodySourceIndex, line.Length, signal.BodyDuration)))
+                .AddTo(phaseDisposables);
+        }
+
+        /// <summary>
+        /// signal の line を絶対ワールド座標の BeamLine に解決する。
+        /// isRelative なら呼び出し時点の敵位置を基準に、Start/End をワールド軸のオフセットとして加算する。
+        /// </summary>
+        BeamLine ResolveBeamLine(SpriteBeamAttackSignal signal)
+        {
+            var line = signal.Line;
+            if (!signal.IsRelative) return line;
+
+            var origin = (Vector2)(getEnemyPosition?.Invoke() ?? Vector3.zero);
+            return new BeamLine(line.Start + origin, line.End + origin);
         }
 
         void ExpandPreset(PresetAttackSignal signal, SeType parentSeType, float baseTime, int depth)
