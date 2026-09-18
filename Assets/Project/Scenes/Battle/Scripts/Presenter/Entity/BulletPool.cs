@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
@@ -26,10 +27,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限。ビームの終点表現に使う</param>
         /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
-        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f)
+        /// <param name="movementOverride">この弾に限り使う移動ステップ。nullならPrefab側のmovementStepsを使う(従来動作)</param>
+        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null)
         {
             var bullet = pool.Get();
-            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation, range, startDelay);
+            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation, range, startDelay, movementOverride);
             return bullet;
         }
 

@@ -329,6 +329,53 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 1
+--- !u!1 &4664769827271025035
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 967093733412080464}
+  - component: {fileID: 5200424670002446680}
+  m_Layer: 0
+  m_Name: BulletPoolCharge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &967093733412080464
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4664769827271025035}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2.8571427, y: 2.8571427, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7486072411720941906}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5200424670002446680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4664769827271025035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: -4487681364143076941, guid: 118a344943d79ef4b8234910b6c79a93, type: 3}
+  defaultCapacity: 20
+  maxSize: 100
 --- !u!1 &5028213517167419934
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +465,7 @@ Transform:
   - {fileID: 8848714979993588391}
   - {fileID: 4874211356999839437}
   - {fileID: 1563634681088382991}
+  - {fileID: 967093733412080464}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &94871712968117621
@@ -442,6 +490,7 @@ MonoBehaviour:
   - {fileID: 1234444714283703794}
   - {fileID: 6410389016492623775}
   - {fileID: 703793410916534001}
+  - {fileID: 5200424670002446680}
   bulletDamage: 10
   enemySpawnPrefabs:
   - {fileID: 5888170941882211794, guid: 8f439dc00bd56d044b2c7618ab0167cf, type: 3}

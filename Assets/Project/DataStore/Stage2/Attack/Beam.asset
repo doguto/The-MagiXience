@@ -21,6 +21,16 @@ MonoBehaviour:
       entries:
       - time: 0.6
         signal:
+          rid: 8800764161865547899
+        directionProvider:
+          rid: 8800764161865547900
+        rotationProvider:
+          rid: 8800764161865547901
+        sourceIndexProvider:
+          rid: 8800764161865547902
+        seType: 0
+      - time: 0.7
+        signal:
           rid: 9205483607032594520
         directionProvider:
           rid: 9205483607032594521
@@ -29,7 +39,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 9205483607032594523
         seType: 0
-      - time: 1.6
+      - time: 2
         signal:
           rid: 9205483607032594524
         directionProvider:
@@ -46,6 +56,24 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 8800764161865547899
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 6842ee2b76fe10a4b9ab261ef5cab918, type: 2}
+        loop: 0
+        loopCount: 1
+        cycleDuration: 2
+    - rid: 8800764161865547900
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: 1, y: 0}
+    - rid: 8800764161865547901
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764161865547902
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
     - rid: 9205483607032594520
       type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:

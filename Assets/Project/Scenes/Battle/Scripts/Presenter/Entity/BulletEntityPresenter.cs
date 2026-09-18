@@ -45,7 +45,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>
         /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f)
+        /// <param name="movementOverride">この弾に限り使う移動ステップ。nullならPrefab側のmovementStepsを使う(従来動作)</param>
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null)
         {
             pool = objectPool;
             var resolvedRotation = rotation == default ? Quaternion.identity : rotation;
@@ -60,7 +61,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             else
                 model.Reinitialize(damage, isPlayerBullet);
 
-            StartMovementSequence(direction, startDelay);
+            StartMovementSequence(direction, startDelay, movementOverride);
 
             view.ResetView();
             view.UpdatePosition(position);
@@ -68,22 +69,26 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             BindModelToView();
         }
 
-        void StartMovementSequence(Vector2 direction, float startDelay = 0f)
+        void StartMovementSequence(Vector2 direction, float startDelay, IMovementStep movementOverride)
         {
             StopMovement();
 
-            if (movementSteps == null || movementSteps.Count == 0) return;
+            bool isOverride = movementOverride != null;
+            IReadOnlyList<IMovementStep> steps = isOverride ? new[] { movementOverride } : movementSteps;
+            if (steps == null || steps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
-            RunMovementStepsAsync(direction, startDelay, movementCts.Token).Forget();
+            RunMovementStepsAsync(steps, direction, startDelay, isOverride, movementCts.Token).Forget();
         }
 
-        async UniTaskVoid RunMovementStepsAsync(Vector2 direction, float startDelay, CancellationToken ct)
+        // movementOverride経由(AttackEvent.BulletMovement)の一時的な移動は、完了と同時に役目を終えるため
+        // Prefab固定のlifetimeを待たずに自分でプールへ返す。通常のmovementSteps(Prefab固定)はそのまま留まる。
+        async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Vector2 direction, float startDelay, bool returnToPoolWhenDone, CancellationToken ct)
         {
             if (startDelay > 0f)
                 await UniTask.Delay(TimeSpan.FromSeconds(startDelay), cancellationToken: ct);
 
-            foreach (var step in movementSteps)
+            foreach (var step in steps)
             {
                 if (step == null) continue;
                 ct.ThrowIfCancellationRequested();
@@ -101,6 +106,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     if (grantsInvincibility) model.SetInvincible(false);
                 }
             }
+
+            if (returnToPoolWhenDone) ReturnToPool();
         }
 
         void StopMovement()

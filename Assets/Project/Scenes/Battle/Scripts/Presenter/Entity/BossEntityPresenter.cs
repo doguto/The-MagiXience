@@ -80,6 +80,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         BossEntityModel model;
         PlayerEntityPresenter playerPresenter;
         readonly List<IMovementStep> activeMovementSteps = new();
+        IReadOnlyList<IMovementStep> currentPhaseMovementSteps;
         Tween entranceTween;
         CancellationTokenSource movementCts;
         CancellationTokenSource deathCts;
@@ -169,6 +170,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (builder == null)
             {
                 ApplyAttackTimeline(null);
+                currentPhaseMovementSteps = null;
                 StartMovementSequence(null);
                 return;
             }
@@ -179,10 +181,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 : null;
             ApplyAttackTimeline(attackTimeline);
 
-            var movementSteps = builder.BossMovementPreset != null
+            currentPhaseMovementSteps = builder.BossMovementPreset != null
                 ? builder.BossMovementPreset.Steps
                 : null;
-            StartMovementSequence(movementSteps);
+            StartMovementSequence(currentPhaseMovementSteps);
         }
 
         void ApplyAttackTimeline(AttackTimeline attackTimeline)
@@ -300,12 +302,35 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             switch (ev.Type)
             {
                 case AttackEventType.Bullet:
+                    if (ev.MovementStep != null)
+                    {
+                        PlayMovementThenResume(ev.MovementStep).Forget();
+                    }
                     FireBullet(ev);
                     break;
                 case AttackEventType.EnemySpawn:
                     SpawnEnemy(ev);
                     break;
             }
+        }
+
+        /// <summary>
+        /// 通常の移動ループ(bossMovementPreset)を止めてMovementStepを再生する。
+        /// FireBulletとは並行実行され待ち合わせない(移動軌道上に弾が配置されるトレイル演出のため)。
+        /// 移動完了後は元のphaseの移動ループを最初から再開する(継続再生ではない。フェーズ開始時と同じ挙動)。
+        /// </summary>
+        async UniTaskVoid PlayMovementThenResume(IMovementStep step)
+        {
+            StopMovement();
+
+            var animator = GetComponent<Animator>();
+            var tween = step.Play(transform, Vector2.zero, animator);
+            if (tween != null)
+            {
+                await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
+            }
+
+            StartMovementSequence(currentPhaseMovementSteps);
         }
 
         void FireBullet(AttackEvent ev)
@@ -327,7 +352,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 }
                 else
                 {
-                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i));
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementOverride: ev.BulletMovement);
                 }
             }
         }
@@ -337,7 +362,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
             if (pool == null) return;
 
-            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index));
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement);
         }
 
         static Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)

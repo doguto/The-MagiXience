@@ -51,7 +51,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         /// <summary>弾ごとの生成(出現)自体の遅延秒数。null/未指定で全弾同時に出現(従来動作)</summary>
         public readonly IReadOnlyList<float> SpawnDelays;
 
-        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f, float startDelay = 0f, IReadOnlyList<float> startDelays = null, IReadOnlyList<float> spawnDelays = null)
+        /// <summary>発射元自身(Enemy/Boss本体)に対して、発射(弾の配置)と並行して再生する移動ステップ。nullなら移動なし(従来動作)</summary>
+        public readonly IMovementStep MovementStep;
+
+        /// <summary>Bulletタイプの弾自身に適用する移動ステップ(全弾共通)。nullならBullet Prefab側のmovementStepsを使う(従来動作)</summary>
+        public readonly IMovementStep BulletMovement;
+
+        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f, float startDelay = 0f, IReadOnlyList<float> startDelays = null, IReadOnlyList<float> spawnDelays = null, IMovementStep movementStep = null, IMovementStep bulletMovement = null)
         {
             Type = type;
             SourceIndex = sourceIndex;
@@ -67,6 +73,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             StartDelay = startDelay;
             StartDelays = startDelays;
             SpawnDelays = spawnDelays;
+            MovementStep = movementStep;
+            BulletMovement = bulletMovement;
         }
 
         /// <summary>index番目の弾に適用する移動開始待機秒数を解決する。StartDelays優先、無ければ全弾共通のStartDelay。</summary>
@@ -107,7 +115,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 origins[i] = origin + offset;
             }
 
-            return new AttackEvent(Type, Directions, SourceIndex, origins, SeType, Rotations, MovementOverride, AttackSpawnSpace.World, range, Duration, Width, StartDelay, StartDelays, SpawnDelays);
+            return new AttackEvent(Type, Directions, SourceIndex, origins, SeType, Rotations, MovementOverride, AttackSpawnSpace.World, range, Duration, Width, StartDelay, StartDelays, SpawnDelays, MovementStep, BulletMovement);
         }
 
         // default(Quaternion) は (0,0,0,0) で不正なので identity に補正
