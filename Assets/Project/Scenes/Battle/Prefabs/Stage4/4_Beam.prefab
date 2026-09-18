@@ -61,6 +61,7 @@ GameObject:
   - component: {fileID: 6449588308833420115}
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
+  - component: {fileID: -5413480227053357844}
   m_Layer: 7
   m_Name: 4_Beam
   m_TagString: Untagged
@@ -96,7 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 30
+  maxHp: 1500
   contactDamage: 15
   onlyChargeDamageable: 1
   lifetime: 0
@@ -396,3 +397,16 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-5413480227053357844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7074045735317373604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73cd48aa886de24dbe8fb7d7d7fc851, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bossPresenter: {fileID: 0}
