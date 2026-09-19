@@ -114,6 +114,10 @@ MonoBehaviour:
   bulletDamage: 10
   enemySpawnPrefabs:
   - {fileID: 7074045735317373604, guid: 0a45ad7ef98a2c34186a45adfdcbf7e9, type: 3}
+  - {fileID: 7074045735317373604, guid: c049be5d78a275a46bb26474f3be1d69, type: 3}
+  - {fileID: 7074045735317373604, guid: 3632c6aaeb997804db6ebdf3e76d065c, type: 3}
+  - {fileID: 7074045735317373604, guid: c631eb735149c234b8ec817c00bfcaf6, type: 3}
+  - {fileID: 7074045735317373604, guid: ba7580fc8958d7e4d803747eec65192c, type: 3}
   attackPreset: {fileID: 0}
   attackTimeline:
     phases:
@@ -122,27 +126,7 @@ MonoBehaviour:
       loopEnd: 15
       cycleDuration: 0.75
       entries:
-      - time: 2
-        signal:
-          rid: 5211421472506773684
-        directionProvider:
-          rid: 2259957373586637405
-        rotationProvider:
-          rid: 2259957373586636942
-        sourceIndexProvider:
-          rid: 2259957373586637410
-        seType: 3
-      - time: 2.125
-        signal:
-          rid: 5211421472506773853
-        directionProvider:
-          rid: 5211421472506773863
-        rotationProvider:
-          rid: 5211421472506773873
-        sourceIndexProvider:
-          rid: 5211421472506773883
-        seType: 3
-      - time: 2.25
+      - time: 1
         signal:
           rid: 5211421472506773854
         directionProvider:
@@ -152,27 +136,27 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506773884
         seType: 3
-      - time: 4
+      - time: 1.125
         signal:
-          rid: 5211421472506773855
+          rid: 5211421472506773853
         directionProvider:
-          rid: 5211421472506773865
+          rid: 5211421472506773863
         rotationProvider:
-          rid: 5211421472506773875
+          rid: 5211421472506773873
         sourceIndexProvider:
-          rid: 5211421472506773885
+          rid: 5211421472506773883
         seType: 3
-      - time: 4.125
+      - time: 1.25
         signal:
-          rid: 5211421472506773856
+          rid: 5211421472506773684
         directionProvider:
-          rid: 5211421472506773866
+          rid: 2259957373586637405
         rotationProvider:
-          rid: 5211421472506773876
+          rid: 2259957373586636942
         sourceIndexProvider:
-          rid: 5211421472506773886
+          rid: 2259957373586637410
         seType: 3
-      - time: 4.25
+      - time: 3
         signal:
           rid: 5211421472506773857
         directionProvider:
@@ -182,7 +166,27 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506773887
         seType: 3
-      - time: 7
+      - time: 3.125
+        signal:
+          rid: 5211421472506773856
+        directionProvider:
+          rid: 5211421472506773866
+        rotationProvider:
+          rid: 5211421472506773876
+        sourceIndexProvider:
+          rid: 5211421472506773886
+        seType: 3
+      - time: 3.25
+        signal:
+          rid: 5211421472506773855
+        directionProvider:
+          rid: 5211421472506773865
+        rotationProvider:
+          rid: 5211421472506773875
+        sourceIndexProvider:
+          rid: 5211421472506773885
+        seType: 3
+      - time: 6
         signal:
           rid: 5211421472506774105
         directionProvider:
@@ -191,6 +195,16 @@ MonoBehaviour:
           rid: 5211421472506774107
         sourceIndexProvider:
           rid: 5211421472506774108
+        seType: 3
+      - time: 9
+        signal:
+          rid: 5211421632496402659
+        directionProvider:
+          rid: 5211421632496402660
+        rotationProvider:
+          rid: 5211421632496402661
+        sourceIndexProvider:
+          rid: 5211421632496402662
         seType: 3
       nextPhaseTrigger:
         rid: -2
@@ -228,8 +242,8 @@ MonoBehaviour:
     - rid: 2259957373586636897
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: -3, y: 0, z: 0}
-        duration: 1.5
+        targetOffset: {x: -2.5, y: 0, z: 0}
+        duration: 0.5
         easeValue: 3
         customCurve:
           serializedVersion: 2
@@ -268,11 +282,11 @@ MonoBehaviour:
     - rid: 2259957373586637410
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
+        index: 2
     - rid: 2259957373586637429
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        duration: 3
+        duration: 5
     - rid: 2259957373586637446
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -428,7 +442,7 @@ MonoBehaviour:
     - rid: 5211421472506773883
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
+        index: 1
     - rid: 5211421472506773884
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -436,11 +450,11 @@ MonoBehaviour:
     - rid: 5211421472506773885
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
+        index: 2
     - rid: 5211421472506773886
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
+        index: 1
     - rid: 5211421472506773887
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -468,7 +482,7 @@ MonoBehaviour:
     - rid: 5211421472506774108
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
+        index: 3
     - rid: 5211421472506774285
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -505,6 +519,26 @@ MonoBehaviour:
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
         duration: 2
+    - rid: 5211421632496402659
+      type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        count: 14
+        spacing: 0.8
+        lineAxis: {x: 0, y: 1}
+        centerOffset: {x: -1, y: 0}
+        movementOverride: {fileID: 0}
+    - rid: 5211421632496402660
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421632496402661
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 5211421632496402662
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
