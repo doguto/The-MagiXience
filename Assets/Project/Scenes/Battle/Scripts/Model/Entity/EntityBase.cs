@@ -22,9 +22,19 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             currentHp.AddTo(disposables);
         }
 
-        public int MaxHp { get; }
+        public int MaxHp { get; private set; }
         public IReadOnlyReactiveProperty<int> CurrentHp => currentHp;
         public bool IsAlive => currentHp.Value > 0;
+
+        // 最大HPを再設定する。現在HPが新しい最大値を超える場合は切り詰める。
+        protected void SetMaxHp(int value)
+        {
+            MaxHp = Mathf.Max(1, value);
+            if (currentHp.Value > MaxHp)
+            {
+                currentHp.Value = MaxHp;
+            }
+        }
 
         public virtual void TakeDamage(int damage)
         {

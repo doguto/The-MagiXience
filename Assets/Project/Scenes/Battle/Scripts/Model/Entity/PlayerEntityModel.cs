@@ -63,6 +63,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             chargeTime.Value = 0f;
         }
 
+        // コンティニュー回数などに応じて最大HPを更新し、HPを満タンにする。
+        public void SetMaxHpAndRefill(int newMaxHp)
+        {
+            SetMaxHp(newMaxHp);
+            ResetHp();
+        }
+
         public void Reset()
         {
             ResetHp();

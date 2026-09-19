@@ -23,6 +23,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] BackgroundPresenter backgroundPresenter;
         [SerializeField] BulletClearReceiver bulletClearReceiver;
 
+        [Header("Continue Settings")]
+        [Tooltip("コンティニュー回数に応じたPlayerの最大HP。index=コンティニュー回数（0=初回）。回数がテーブル長を超えた場合は末尾の値を使用する。")]
+        [SerializeField] int[] continueHpTable = { 100 };
+
         BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
@@ -44,6 +48,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         bool isBattleStarted;
         bool hasResumedPlayerAnimationOnBoss;
         bool hasShownTutorial;
+
+        // コンティニュー回数。バトルシーン内でのみ保持し、シーン遷移でリセットされる。
+        int continueCount;
         CancellationTokenSource sequenceTransitionCts;
         IDisposable scenarioCompletedSubscription;
         IDisposable tutorialClosedSubscription;
@@ -252,6 +259,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             pendingScenarioCallback = null;
 
             playerPresenter?.Retry();
+            // コンティニュー回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
+            continueCount++;
+            ApplyPlayerMaxHp();
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
 
@@ -328,6 +338,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             backgroundModel.SetStage(stageModel.BackgroundAddress);
             backgroundPresenter?.Initialize(backgroundModel);
             playerPresenter?.Initialize();
+            ApplyPlayerMaxHp();
             playerPresenter?.SubscribeToAttackInput();
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
@@ -354,6 +365,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 Debug.LogError("No battle sequences are configured for this stage.", this);
             }
+        }
+
+        // 現在のコンティニュー回数に応じた最大HPをPlayerに適用する。
+        void ApplyPlayerMaxHp()
+        {
+            if (playerPresenter == null) return;
+            if (continueHpTable == null || continueHpTable.Length == 0) return;
+
+            var index = Mathf.Clamp(continueCount, 0, continueHpTable.Length - 1);
+            playerPresenter.SetMaxHp(continueHpTable[index]);
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
