@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: BossFirstThird
+  m_Name: Ushitora
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
@@ -91,6 +91,93 @@ MonoBehaviour:
         seType: 0
       nextPhaseTrigger:
         rid: 5211421599096111648
+    - loop: 1
+      loopStart: 0
+      loopEnd: 310
+      cycleDuration: 31
+      entries:
+      - time: 0
+        signal:
+          rid: 5211421632496402521
+        directionProvider:
+          rid: 5211421632496402522
+        rotationProvider:
+          rid: 5211421632496402523
+        sourceIndexProvider:
+          rid: 5211421632496402524
+        seType: 0
+      - time: 5
+        signal:
+          rid: 5211421632496402525
+        directionProvider:
+          rid: 5211421632496402526
+        rotationProvider:
+          rid: 5211421632496402527
+        sourceIndexProvider:
+          rid: 5211421632496402528
+        seType: 0
+      - time: 10
+        signal:
+          rid: 5211421632496402529
+        directionProvider:
+          rid: 5211421632496402530
+        rotationProvider:
+          rid: 5211421632496402531
+        sourceIndexProvider:
+          rid: 5211421632496402532
+        seType: 0
+      - time: 15
+        signal:
+          rid: 5211421632496402533
+        directionProvider:
+          rid: 5211421632496402534
+        rotationProvider:
+          rid: 5211421632496402535
+        sourceIndexProvider:
+          rid: 5211421632496402536
+        seType: 0
+      - time: 20
+        signal:
+          rid: 5211421632496402537
+        directionProvider:
+          rid: 5211421632496402538
+        rotationProvider:
+          rid: 5211421632496402539
+        sourceIndexProvider:
+          rid: 5211421632496402540
+        seType: 0
+      - time: 25
+        signal:
+          rid: 5211421632496402541
+        directionProvider:
+          rid: 5211421632496402542
+        rotationProvider:
+          rid: 5211421632496402543
+        sourceIndexProvider:
+          rid: 5211421632496402544
+        seType: 0
+      - time: 1
+        signal:
+          rid: 5211421632496402588
+        directionProvider:
+          rid: 5211421632496402589
+        rotationProvider:
+          rid: 5211421632496402590
+        sourceIndexProvider:
+          rid: 5211421632496402591
+        seType: 0
+      - time: 1
+        signal:
+          rid: 5211421632496402549
+        directionProvider:
+          rid: 5211421632496402550
+        rotationProvider:
+          rid: 5211421632496402551
+        sourceIndexProvider:
+          rid: 5211421632496402552
+        seType: 0
+      nextPhaseTrigger:
+        rid: 5211421632496402559
     - loop: 1
       loopStart: 0
       loopEnd: 310
@@ -429,4 +516,138 @@ MonoBehaviour:
     - rid: 5211421599096111648
       type: {class: HpPercentThresholdPhaseTriggerConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack.PhaseTrigger, asm: Model}
       data:
+        hpThresholdPercent: 70
+    - rid: 5211421632496402521
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: fab4e4418b31b9148ba4a898a12fc071, type: 2}
+    - rid: 5211421632496402522
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421632496402523
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402524
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421632496402525
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: a59172b72d124484cb4a9e2cd775e577, type: 2}
+    - rid: 5211421632496402526
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421632496402527
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402528
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421632496402529
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: ccc68233a8793454d85c9db8cfa876b6, type: 2}
+    - rid: 5211421632496402530
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421632496402531
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402532
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421632496402533
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: e84510addaff61a419a9ac74e49a2ce7, type: 2}
+    - rid: 5211421632496402534
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421632496402535
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402536
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421632496402537
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: a59172b72d124484cb4a9e2cd775e577, type: 2}
+    - rid: 5211421632496402538
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421632496402539
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402540
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421632496402541
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 11400000, guid: ccc68233a8793454d85c9db8cfa876b6, type: 2}
+    - rid: 5211421632496402542
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5211421632496402543
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402544
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 5211421632496402549
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 29288c5e4f379204c985ac79504552fd, type: 2}
+        loop: 1
+        loopCount: 6
+        cycleDuration: 5
+    - rid: 5211421632496402550
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402551
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402552
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421632496402559
+      type: {class: HpPercentThresholdPhaseTriggerConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack.PhaseTrigger, asm: Model}
+      data:
         hpThresholdPercent: 30
+    - rid: 5211421632496402588
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 1d5128659b3b7cc46bb6b8d2c2f506ee, type: 2}
+        loop: 1
+        loopCount: 15
+        cycleDuration: 2
+    - rid: 5211421632496402589
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402590
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421632496402591
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0

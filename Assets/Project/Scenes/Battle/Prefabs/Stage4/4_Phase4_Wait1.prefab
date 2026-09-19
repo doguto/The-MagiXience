@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d57fc07a0d26e47a6b2e9f582edd33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 366756060701291069, guid: 8eb5d6fbf01e5ed4287d3fcdbc162428, type: 3}
+  bulletPrefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
   defaultCapacity: 20
   maxSize: 100
 --- !u!1 &7074045735317373604
@@ -61,9 +61,8 @@ GameObject:
   - component: {fileID: 6449588308833420115}
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
-  - component: {fileID: -5413480227053357844}
   m_Layer: 7
-  m_Name: 4_Beam
+  m_Name: 4_Phase4_Wait1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79,7 +78,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.35, y: 0.35, z: 1}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8334555279690838701}
@@ -97,38 +96,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 1500
+  maxHp: 20
   contactDamage: 15
   onlyChargeDamageable: 0
   lifetime: 0
   movementPreset: {fileID: 0}
   movementSteps:
-  - rid: 2259957373586636897
-  - rid: 2259957373586637123
-  - rid: 5211421576021410627
+  - rid: 5211421472506774011
   bulletPools:
   - {fileID: 7996329089749057052}
   bulletDamage: 10
-  enemySpawnPrefabs:
-  - {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
-  - {fileID: 8143873751805396341, guid: dd82e0b2e7e5ee24b9c22d7ebdab8a59, type: 3}
-  attackPreset: {fileID: 11400000, guid: ef7247f3f90aecf43a22a4a4817059b6, type: 2}
+  enemySpawnPrefabs: []
+  attackPreset: {fileID: 0}
   attackTimeline:
     phases:
     - loop: 1
-      loopStart: 1
-      loopEnd: 20
-      cycleDuration: 5
+      loopStart: 2
+      loopEnd: 3.5
+      cycleDuration: 0.75
       entries:
       - time: 0
         signal:
-          rid: 5211421472506774364
+          rid: 2259957373586636932
         directionProvider:
-          rid: 5211421472506774029
+          rid: 2259957373586636937
         rotationProvider:
-          rid: 5211421472506774048
+          rid: 2259957373586636942
         sourceIndexProvider:
-          rid: 5211421472506774031
+          rid: -2
         seType: 0
       nextPhaseTrigger:
         rid: -2
@@ -163,98 +158,20 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 2259957373586636897
-      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        targetOffset: {x: -3.5, y: 0, z: 0}
-        duration: 0.66
-        easeValue: 6
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 1
-    - rid: 2259957373586637123
-      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        duration: 23.967054
-    - rid: 5211421472506774029
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
-    - rid: 5211421472506774031
-      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        index: 0
-    - rid: 5211421472506774048
+    - rid: 2259957373586636932
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 2259957373586636937
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 2259957373586636942
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
-    - rid: 5211421472506774364
-      type: {class: SpriteBeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+    - rid: 5211421472506774011
+      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        line:
-          start: {x: -1, y: 0}
-          end: {x: -100, y: 0}
-        isRelative: 1
-        bodySourceIndex: 1
-        bodyDuration: 2.5
-        showWarning: 1
-        warningDuration: 2
-        warningSourceIndex: 0
-    - rid: 5211421576021410627
-      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        targetOffset: {x: 3.5, y: 0, z: 0}
-        duration: 0.33
-        easeValue: 6
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 1
+        velocity: {x: -1, y: 0, z: 0}
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -314,7 +231,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 2198845017378358445, guid: ff685c9f173f16141b0dcf7b4cc7c674, type: 3}
-  m_Color: {r: 0.61004084, g: 0.46742615, b: 0.9811321, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -397,16 +314,3 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &-5413480227053357844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7074045735317373604}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d73cd48aa886de24dbe8fb7d7d7fc851, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bossPresenter: {fileID: 0}
