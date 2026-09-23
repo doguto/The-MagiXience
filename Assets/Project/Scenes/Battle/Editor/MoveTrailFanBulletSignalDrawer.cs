@@ -7,7 +7,7 @@ namespace Project.Editor
     [CustomPropertyDrawer(typeof(MoveTrailFanBulletSignal))]
     public class MoveTrailFanBulletSignalDrawer : PropertyDrawer
     {
-        const int FieldLineCount = 7; // targetOffset, isRelative, moveDuration, moveEaseValue, wayCount, spreadAngle, releaseDelay
+        const int FieldLineCount = 8; // targetOffset, isRelative, moveDuration, moveEaseValue, wayCount, spreadAngle, releaseDelay, emitBullets
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -49,6 +49,9 @@ namespace Project.Editor
                 lineRect = EaseDrawerHelper.NextLine(lineRect);
 
                 EditorGUI.PropertyField(lineRect, property.FindPropertyRelative("releaseDelay"));
+                lineRect = EaseDrawerHelper.NextLine(lineRect);
+
+                EditorGUI.PropertyField(lineRect, property.FindPropertyRelative("emitBullets"));
 
                 EditorGUI.indentLevel--;
             }

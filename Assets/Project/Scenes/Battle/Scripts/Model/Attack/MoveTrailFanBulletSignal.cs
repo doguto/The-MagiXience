@@ -29,6 +29,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] float spreadAngle = 15f;
         [SerializeField, Tooltip("全弾の配置が完了してから、一斉に発射するまでの余白(秒)")]
         float releaseDelay = 0.3f;
+        [SerializeField, Tooltip("falseなら弾を一切出さず、発射元の移動だけを行う(ただの経由地点への移動として使う)")]
+        bool emitBullets = true;
 
         public IAttackSignal Clone() => new MoveTrailFanBulletSignal
         {
@@ -39,10 +41,24 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             wayCount = wayCount,
             spreadAngle = spreadAngle,
             releaseDelay = releaseDelay,
+            emitBullets = emitBullets,
         };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
+            var movementStep = new TweenMovementConfig(targetOffset, moveDuration, moveEaseValue, isRelative);
+
+            if (!emitBullets)
+            {
+                return new AttackEvent(
+                    AttackEventType.Bullet,
+                    Array.Empty<Vector2>(),
+                    sourceIndex,
+                    spawnOffsets: null,
+                    seType,
+                    movementStep: movementStep);
+            }
+
             var baseDirection = directionProvider.GetDirection();
             float baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg;
 
@@ -88,8 +104,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 spawnDelays[i] = spawnDelay;
                 startDelays[i] = (totalSpawnTime - spawnDelay) + releaseDelay;
             }
-
-            var movementStep = new TweenMovementConfig(targetOffset, moveDuration, moveEaseValue, isRelative);
 
             return new AttackEvent(
                 AttackEventType.Bullet,

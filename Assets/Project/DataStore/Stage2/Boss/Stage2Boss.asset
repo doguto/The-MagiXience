@@ -26,7 +26,7 @@ MonoBehaviour:
       timelineBuilder: {fileID: 11400000, guid: df3ca4dad8ea39744aa6fcdc8651363e, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 8800764145469751541
+        rid: 8800764269365559369
     - phaseId: 2
       timelineBuilder: {fileID: 11400000, guid: 0ce9ca0fdcb6a6a4388a179ee76d5dba, type: 2}
       timelineBuilderStrong: {fileID: 0}
@@ -89,10 +89,10 @@ MonoBehaviour:
       type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
         hpThresholdPercent: 40
-    - rid: 8800764145469751541
-      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+    - rid: 8800764269365559369
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
-        hpThresholdPercent: 55
+        timeLimitSeconds: 4
     - rid: 9205483607032594528
       type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:

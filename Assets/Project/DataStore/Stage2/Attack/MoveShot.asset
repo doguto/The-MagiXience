@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
-    - loop: 1
-      loopStart: 0
+    - loop: 0
+      loopStart: 2
       loopEnd: 9999
       cycleDuration: 2
       entries:
-      - time: 0
+      - time: 2
         signal:
           rid: 8800764145469751542
         directionProvider:
@@ -29,7 +29,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 8800764145469751540
         seType: 0
-      - time: 0.2
+      - time: 2.2
         signal:
           rid: 8800764161865547849
         directionProvider:
@@ -39,7 +39,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 8800764161865547852
         seType: 0
-      - time: 0.4
+      - time: 2.4
         signal:
           rid: 8800764161865547853
         directionProvider:
@@ -49,7 +49,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 8800764161865547856
         seType: 0
-      - time: 0.6
+      - time: 2.6
         signal:
           rid: 8800764161865547857
         directionProvider:
@@ -59,7 +59,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 8800764161865547860
         seType: 0
-      - time: 0.8
+      - time: 2.8
         signal:
           rid: 8800764161865547861
         directionProvider:
@@ -86,23 +86,25 @@ MonoBehaviour:
     - rid: 8800764145469751542
       type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        targetOffset: {x: -2, y: 0, z: 0}
-        isRelative: 1
+        targetOffset: {x: 3, y: 0, z: 0}
+        isRelative: 0
         moveDuration: 0.2
         moveEaseValue: 1
         wayCount: 9
         spreadAngle: -1
         releaseDelay: 1
+        emitBullets: 1
     - rid: 8800764161865547849
       type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        targetOffset: {x: 2, y: 3.5, z: 0}
-        isRelative: 1
+        targetOffset: {x: 5, y: 3.5, z: 0}
+        isRelative: 0
         moveDuration: 0.2
         moveEaseValue: 1
         wayCount: 9
         spreadAngle: 3
         releaseDelay: 1
+        emitBullets: 1
     - rid: 8800764161865547851
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -113,13 +115,14 @@ MonoBehaviour:
     - rid: 8800764161865547853
       type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        targetOffset: {x: 0, y: -7, z: 0}
-        isRelative: 1
+        targetOffset: {x: 5, y: -3.5, z: 0}
+        isRelative: 0
         moveDuration: 0.2
         moveEaseValue: 1
         wayCount: 18
-        spreadAngle: 5
+        spreadAngle: -4
         releaseDelay: 1
+        emitBullets: 1
     - rid: 8800764161865547855
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -130,13 +133,14 @@ MonoBehaviour:
     - rid: 8800764161865547857
       type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        targetOffset: {x: 2, y: 3.5, z: 0}
-        isRelative: 1
+        targetOffset: {x: 7, y: 0, z: 0}
+        isRelative: 0
         moveDuration: 0.2
         moveEaseValue: 1
         wayCount: 9
         spreadAngle: -5
         releaseDelay: 1
+        emitBullets: 1
     - rid: 8800764161865547859
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -147,13 +151,14 @@ MonoBehaviour:
     - rid: 8800764161865547861
       type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        targetOffset: {x: -2, y: 0, z: 0}
-        isRelative: 1
+        targetOffset: {x: 5, y: 0, z: 0}
+        isRelative: 0
         moveDuration: 0.2
         moveEaseValue: 1
         wayCount: 9
         spreadAngle: 1
         releaseDelay: 1
+        emitBullets: 1
     - rid: 8800764161865547863
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 

@@ -17,27 +17,67 @@ MonoBehaviour:
     - loop: 1
       loopStart: 0
       loopEnd: 80
-      cycleDuration: 2
+      cycleDuration: 2.8
       entries:
       - time: 0
         signal:
-          rid: 8800764145469751486
+          rid: 8800764145469751700
         directionProvider:
-          rid: 8800764145469751487
+          rid: 8800764145469751701
         rotationProvider:
-          rid: 8800764145469751488
+          rid: 8800764145469751702
         sourceIndexProvider:
-          rid: 8800764145469751489
+          rid: 8800764145469751703
         seType: 0
-      - time: 1
+      - time: 0.5
         signal:
-          rid: 8800764145469751490
+          rid: 8800764145469751704
         directionProvider:
-          rid: 8800764145469751491
+          rid: 8800764145469751705
         rotationProvider:
-          rid: 8800764145469751492
+          rid: 8800764145469751706
         sourceIndexProvider:
-          rid: 8800764145469751493
+          rid: 8800764145469751707
+        seType: 0
+      - time: 0.6
+        signal:
+          rid: 8800764145469751708
+        directionProvider:
+          rid: 8800764145469751709
+        rotationProvider:
+          rid: 8800764145469751710
+        sourceIndexProvider:
+          rid: 8800764145469751711
+        seType: 0
+      - time: 0.7
+        signal:
+          rid: 8800764145469751712
+        directionProvider:
+          rid: 8800764145469751713
+        rotationProvider:
+          rid: 8800764145469751714
+        sourceIndexProvider:
+          rid: 8800764145469751715
+        seType: 0
+      - time: 0.8
+        signal:
+          rid: 8800764145469751716
+        directionProvider:
+          rid: 8800764145469751717
+        rotationProvider:
+          rid: 8800764145469751718
+        sourceIndexProvider:
+          rid: 8800764145469751719
+        seType: 0
+      - time: 0.9
+        signal:
+          rid: 8800764145469751720
+        directionProvider:
+          rid: 8800764145469751721
+        rotationProvider:
+          rid: 8800764145469751722
+        sourceIndexProvider:
+          rid: 8800764145469751723
         seType: 0
       nextPhaseTrigger:
         rid: -2
@@ -46,39 +86,135 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 8800764145469751486
-      type: {class: SequentialFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+    - rid: 8800764145469751700
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 18
-        spreadAngle: 6
-        spawnInterval: 0.05
-        releaseDelay: 0.1
-    - rid: 8800764145469751487
+        targetOffset: {x: 7, y: 3, z: 0}
+        isRelative: 0
+        moveDuration: 0.5
+        moveEaseValue: 1
+        wayCount: 1
+        spreadAngle: 0
+        releaseDelay: 0
+        emitBullets: 0
+    - rid: 8800764145469751701
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -0.5, y: -1}
-    - rid: 8800764145469751488
+        direction: {x: -1, y: 0}
+    - rid: 8800764145469751702
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 8800764145469751489
+    - rid: 8800764145469751703
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 4
-    - rid: 8800764145469751490
-      type: {class: SequentialFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+    - rid: 8800764145469751704
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 18
-        spreadAngle: 6
-        spawnInterval: 0.05
-        releaseDelay: 0.1
-    - rid: 8800764145469751491
+        targetOffset: {x: 3, y: 1.5, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: 2
+        releaseDelay: 0.4
+        emitBullets: 1
+    - rid: 8800764145469751705
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -0.5, y: 1}
-    - rid: 8800764145469751492
+        direction: {x: -1, y: 0.3}
+    - rid: 8800764145469751706
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 8800764145469751493
+    - rid: 8800764145469751707
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751708
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 7, y: 0, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: -0.3
+        releaseDelay: 0.3
+        emitBullets: 1
+    - rid: 8800764145469751709
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0.1}
+    - rid: 8800764145469751710
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764145469751711
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751712
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 3, y: -1.5, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: -0.3
+        releaseDelay: 0.2
+        emitBullets: 1
+    - rid: 8800764145469751713
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: -0.1}
+    - rid: 8800764145469751714
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764145469751715
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751716
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 7, y: -3, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: 2
+        releaseDelay: 0.1
+        emitBullets: 1
+    - rid: 8800764145469751717
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: -0.3}
+    - rid: 8800764145469751718
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764145469751719
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751720
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 7, y: 0, z: 0}
+        isRelative: 0
+        moveDuration: 0.5
+        moveEaseValue: 1
+        wayCount: 1
+        spreadAngle: 0
+        releaseDelay: 0
+        emitBullets: 0
+    - rid: 8800764145469751721
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764145469751722
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764145469751723
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 4
