@@ -1,0 +1,216 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: FanTrail 2
+  m_EditorClassIdentifier:
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 0
+      loopEnd: 80
+      cycleDuration: 4
+      entries:
+      - time: 0
+        signal:
+          rid: 8800764161865547885
+        directionProvider:
+          rid: 8800764161865547886
+        rotationProvider:
+          rid: 8800764161865547887
+        sourceIndexProvider:
+          rid: 8800764161865547888
+        seType: 0
+      - time: 2
+        signal:
+          rid: 8800764145469751486
+        directionProvider:
+          rid: 8800764145469751487
+        rotationProvider:
+          rid: 8800764145469751488
+        sourceIndexProvider:
+          rid: 8800764145469751489
+        seType: 0
+      - time: 2.1
+        signal:
+          rid: 8800764145469751490
+        directionProvider:
+          rid: 8800764145469751491
+        rotationProvider:
+          rid: 8800764145469751492
+        sourceIndexProvider:
+          rid: 8800764145469751493
+        seType: 0
+      - time: 2.2
+        signal:
+          rid: 8800764145469751494
+        directionProvider:
+          rid: 8800764145469751495
+        rotationProvider:
+          rid: 8800764145469751496
+        sourceIndexProvider:
+          rid: 8800764145469751497
+        seType: 0
+      - time: 2.4
+        signal:
+          rid: 8800764145469751498
+        directionProvider:
+          rid: 8800764145469751499
+        rotationProvider:
+          rid: 8800764145469751500
+        sourceIndexProvider:
+          rid: 8800764145469751501
+        seType: 0
+      - time: 2.5
+        signal:
+          rid: 8800764145469751502
+        directionProvider:
+          rid: 8800764145469751503
+        rotationProvider:
+          rid: 8800764145469751504
+        sourceIndexProvider:
+          rid: 8800764145469751505
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8800764161865547885
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 6842ee2b76fe10a4b9ab261ef5cab918, type: 2}
+        loop: 0
+        loopCount: 1
+        cycleDuration: 2
+    - rid: 8800764161865547886
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: 1, y: 0}
+    - rid: 8800764161865547887
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+    - rid: 8800764161865547888
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8800764145469751486
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 4, y: 3, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: 6
+        releaseDelay: 0.2
+        emitBullets: 1
+    - rid: 8800764145469751487
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764145469751488
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+    - rid: 8800764145469751489
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751490
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 8, y: 3, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: 6
+        releaseDelay: 0.2
+        emitBullets: 1
+    - rid: 8800764145469751491
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764145469751492
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+    - rid: 8800764145469751493
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751494
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 4, y: -3, z: 0}
+        isRelative: 0
+        moveDuration: 0.2
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: 6
+        releaseDelay: 0.2
+        emitBullets: 1
+    - rid: 8800764145469751495
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764145469751496
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+    - rid: 8800764145469751497
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751498
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 8, y: -3, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: 6
+        releaseDelay: 0.2
+        emitBullets: 1
+    - rid: 8800764145469751499
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764145469751500
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+    - rid: 8800764145469751501
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4
+    - rid: 8800764145469751502
+      type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        targetOffset: {x: 6, y: 0, z: 0}
+        isRelative: 0
+        moveDuration: 0.1
+        moveEaseValue: 1
+        wayCount: 10
+        spreadAngle: 6
+        releaseDelay: 0.2
+        emitBullets: 1
+    - rid: 8800764145469751503
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764145469751504
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+    - rid: 8800764145469751505
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 4

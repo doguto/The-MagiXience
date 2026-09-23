@@ -67,14 +67,15 @@ namespace Project.Scenes.Battle.Scripts.View
         }
 
         /// <summary>
-        /// ビームの線分に合わせて長さと表示時間を差し替える。
+        /// ビームの線分に合わせて長さ・表示時間・太さを差し替える。
         /// SpriteBeamPresenter が Instantiate 直後(Start前)に呼ぶ想定だが、
         /// 生成後に呼ばれても伸縮を反映する。
         /// </summary>
-        public void Configure(float range, float duration)
+        public void Configure(float range, float duration, float width = 0f)
         {
             if (range > 0f) length = range;
             if (duration > 0f) this.duration = duration;
+            if (width > 0f) thickness = width;
 
             if (spriteRenderer != null) ApplyLength();
         }

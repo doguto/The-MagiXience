@@ -199,7 +199,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             {
                 Observable.Timer(TimeSpan.FromSeconds(baseTime))
                     .Subscribe(_ => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
-                        line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration)))
+                        line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration, width: signal.WarningWidth)))
                     .AddTo(phaseDisposables);
             }
 

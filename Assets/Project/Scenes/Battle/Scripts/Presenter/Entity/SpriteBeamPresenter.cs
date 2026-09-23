@@ -60,11 +60,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         /// 生成側から線分の長さと表示時間を受け取り、Viewへ転送する。
         /// Start前に呼ばれる想定。
         /// </summary>
-        public void ConfigureBeam(float range, float duration)
+        public void ConfigureBeam(float range, float duration, float width = 0f)
         {
             if (duration > 0f) this.duration = duration;
 
-            if (view != null) view.Configure(range, duration);
+            if (view != null) view.Configure(range, duration, width);
         }
 
         void Update()

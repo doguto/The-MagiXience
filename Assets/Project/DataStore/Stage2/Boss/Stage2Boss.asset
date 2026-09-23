@@ -22,16 +22,21 @@ MonoBehaviour:
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 3310600040644083838
+    - phaseId: MoveShot
+      timelineBuilder: {fileID: 11400000, guid: df3ca4dad8ea39744aa6fcdc8651363e, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 8800764269365559369
+    - phaseId: 2
+      timelineBuilder: {fileID: 11400000, guid: 0ce9ca0fdcb6a6a4388a179ee76d5dba, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 8800764145469751494
     - phaseId: CrossBeam
       timelineBuilder: {fileID: 11400000, guid: 0a7fab46d82bc604aac8a5a8375ab26f, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 9205483607032594528
-    - phaseId: 3-Way2
-      timelineBuilder: {fileID: 11400000, guid: 87ea8837b6bf7e44d9411ae89d3b99db, type: 2}
-      timelineBuilderStrong: {fileID: 0}
-      exitConditionConfig:
-        rid: 9205483607032594598
     - phaseId: BeamStorm
       timelineBuilder: {fileID: 11400000, guid: 1ca7996f69e26324fac2a81eb83dc61b, type: 2}
       timelineBuilderStrong: {fileID: 0}
@@ -80,14 +85,18 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 0
+    - rid: 8800764145469751494
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 40
+    - rid: 8800764269365559369
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 4
     - rid: 9205483607032594528
       type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
         timeLimitSeconds: 5
-    - rid: 9205483607032594598
-      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        hpThresholdPercent: 30
     - rid: 9205483607032594599
       type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:

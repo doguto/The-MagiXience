@@ -27,6 +27,17 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         [SerializeField] EaseCurvePreset curvePreset;
         [SerializeField] bool isRelative = true;
 
+        public TweenMovementConfig() { }
+
+        /// <summary>コードから動的に組み立てる用(例: MoveNWaySignal)。カーブ指定は使わずeaseValueのみ渡す。</summary>
+        public TweenMovementConfig(Vector3 targetOffset, float duration, int easeValue, bool isRelative)
+        {
+            this.targetOffset = targetOffset;
+            this.duration = duration;
+            this.easeValue = easeValue;
+            this.isRelative = isRelative;
+        }
+
         public Tween Play(Transform target, Vector2 direction, Animator animator)
         {
             Vector3 destination = isRelative ? target.position + targetOffset : targetOffset;

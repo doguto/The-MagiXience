@@ -343,8 +343,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range);
+                var spawnDelay = ev.GetSpawnDelayAt(i);
+                if (spawnDelay > 0f)
+                {
+                    SpawnBulletDelayed(pool, ev, i, spawnDelay).Forget();
+                }
+                else
+                {
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i));
+                }
             }
+        }
+
+        async UniTaskVoid SpawnBulletDelayed(BulletPool pool, AttackEvent ev, int index, float spawnDelay)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
+            if (pool == null) return;
+
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index));
         }
 
         Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
@@ -386,7 +402,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 // 予告線のように「線分の長さ」を生成後に教える必要があるViewへ、Startが走る前に流し込む
                 if (instance.TryGetComponent<IBeamVisualReceiver>(out var beamVisual))
                 {
-                    beamVisual.ConfigureBeam(ev.Range, ev.Duration);
+                    beamVisual.ConfigureBeam(ev.Range, ev.Duration, ev.Width);
                 }
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
