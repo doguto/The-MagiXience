@@ -244,6 +244,26 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: -2
         seType: 0
+      - time: 0
+        signal:
+          rid: 8800764303442706513
+        directionProvider:
+          rid: 8800764303442706514
+        rotationProvider:
+          rid: 8800764303442706515
+        sourceIndexProvider:
+          rid: 8800764303442706516
+        seType: 0
+      - time: 5
+        signal:
+          rid: 8800764303442706517
+        directionProvider:
+          rid: 8800764303442706518
+        rotationProvider:
+          rid: 8800764303442706519
+        sourceIndexProvider:
+          rid: 8800764303442706520
+        seType: 0
       nextPhaseTrigger:
         rid: -2
   deathAttackEntry:
@@ -283,6 +303,7 @@ MonoBehaviour:
         wayCount: 3
         spreadAngle: 30
         radius: 0
+        startDelay: 0
     - rid: 3310600516686315796
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -341,11 +362,41 @@ MonoBehaviour:
         shotInterval: 0.0833
         showWarning: 1
         warningDuration: 3
+        warningWidth: 0
         warningSourceIndex: 0
     - rid: 8800763986918768744
       type: {class: HpPercentThresholdPhaseTriggerConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack.PhaseTrigger, asm: Model}
       data:
         hpThresholdPercent: 5
+    - rid: 8800764303442706513
+      type: {class: SetInvincibleSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        enabled: 1
+    - rid: 8800764303442706514
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764303442706515
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764303442706516
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8800764303442706517
+      type: {class: DespawnSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764303442706518
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8800764303442706519
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764303442706520
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
 --- !u!114 &9001089155439849903
 MonoBehaviour:
   m_ObjectHideFlags: 0

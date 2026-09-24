@@ -10,6 +10,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     {
         Bullet,
         EnemySpawn,
+        SetInvincible,
+        Despawn,
     }
 
     /// <summary>SpawnOffsets の解釈方法。</summary>
@@ -57,8 +59,12 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         /// <summary>Bulletタイプの弾自身に適用する移動ステップ(全弾共通)。nullならBullet Prefab側のmovementStepsを使う(従来動作)</summary>
         public readonly IMovementStep BulletMovement;
 
-        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f, float startDelay = 0f, IReadOnlyList<float> startDelays = null, IReadOnlyList<float> spawnDelays = null, IMovementStep movementStep = null, IMovementStep bulletMovement = null)
+        /// <summary>SetInvincibleタイプで無敵をONにするかOFFにするか</summary>
+        public readonly bool Enabled;
+
+        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f, float startDelay = 0f, IReadOnlyList<float> startDelays = null, IReadOnlyList<float> spawnDelays = null, IMovementStep movementStep = null, IMovementStep bulletMovement = null, bool enabled = false)
         {
+            Enabled = enabled;
             Type = type;
             SourceIndex = sourceIndex;
             SeType = seType;
@@ -96,6 +102,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public static AttackEvent Spawn(Vector2 direction, Quaternion rotation, int sourceIndex, Vector2 spawnOffset, SeType seType = SeType.None, MovementPreset movementOverride = null, float width = 0f) => new(AttackEventType.EnemySpawn, new[] { direction }, sourceIndex, new[] { spawnOffset }, seType, new[] { Normalize(rotation) }, movementOverride, width: width);
 
         public static AttackEvent SpawnMulti(IReadOnlyList<Vector2> directions, IReadOnlyList<Quaternion> rotations, int sourceIndex, IReadOnlyList<Vector2> spawnOffsets, SeType seType = SeType.None, MovementPreset movementOverride = null) => new(AttackEventType.EnemySpawn, directions, sourceIndex, spawnOffsets, seType, rotations, movementOverride);
+
+        public static AttackEvent SetInvincible(bool enabled) => new(AttackEventType.SetInvincible, enabled: enabled);
+
+        public static AttackEvent Despawn() => new(AttackEventType.Despawn);
 
         /// <summary>ワールド座標の一点に生成する。ビームの予告線のように発射元から切り離したい生成物で使う。</summary>
         public static AttackEvent SpawnAtWorld(Vector2 worldPosition, Vector2 direction, Quaternion rotation, int sourceIndex, float range = 0f, float duration = 0f, SeType seType = SeType.None, float width = 0f) =>
