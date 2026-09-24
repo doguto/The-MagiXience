@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
   m_Name: FanTrail 2
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   attackTimeline:
     phases:
     - loop: 1
@@ -86,24 +86,6 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 8800764161865547885
-      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        preset: {fileID: 11400000, guid: 6842ee2b76fe10a4b9ab261ef5cab918, type: 2}
-        loop: 0
-        loopCount: 1
-        cycleDuration: 2
-    - rid: 8800764161865547886
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: 1, y: 0}
-    - rid: 8800764161865547887
-      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-    - rid: 8800764161865547888
-      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        index: 0
     - rid: 8800764145469751486
       type: {class: MoveTrailFanBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -112,16 +94,16 @@ MonoBehaviour:
         moveDuration: 0.1
         moveEaseValue: 1
         wayCount: 10
-        spreadAngle: 6
-        releaseDelay: 0.2
+        spreadAngle: 1
+        releaseDelay: 0.7
         emitBullets: 1
     - rid: 8800764145469751487
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -1, y: 0}
+        direction: {x: -4, y: 3}
     - rid: 8800764145469751488
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
+      data: 
     - rid: 8800764145469751489
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -135,15 +117,15 @@ MonoBehaviour:
         moveEaseValue: 1
         wayCount: 10
         spreadAngle: 6
-        releaseDelay: 0.2
+        releaseDelay: 0.6
         emitBullets: 1
     - rid: 8800764145469751491
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -1, y: 0}
+        direction: {x: -5, y: 1}
     - rid: 8800764145469751492
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
+      data: 
     - rid: 8800764145469751493
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -156,16 +138,16 @@ MonoBehaviour:
         moveDuration: 0.2
         moveEaseValue: 1
         wayCount: 10
-        spreadAngle: 6
-        releaseDelay: 0.2
+        spreadAngle: 1
+        releaseDelay: 0.4
         emitBullets: 1
     - rid: 8800764145469751495
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -1, y: 0}
+        direction: {x: -4, y: -3}
     - rid: 8800764145469751496
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
+      data: 
     - rid: 8800764145469751497
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -178,16 +160,16 @@ MonoBehaviour:
         moveDuration: 0.1
         moveEaseValue: 1
         wayCount: 10
-        spreadAngle: 6
-        releaseDelay: 0.2
+        spreadAngle: -6
+        releaseDelay: 0.3
         emitBullets: 1
     - rid: 8800764145469751499
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -1, y: 0}
+        direction: {x: -5, y: -1}
     - rid: 8800764145469751500
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
+      data: 
     - rid: 8800764145469751501
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -200,17 +182,35 @@ MonoBehaviour:
         moveDuration: 0.1
         moveEaseValue: 1
         wayCount: 10
-        spreadAngle: 6
+        spreadAngle: 1
         releaseDelay: 0.2
         emitBullets: 1
     - rid: 8800764145469751503
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        direction: {x: -1, y: 0}
+        direction: {x: -2, y: 3}
     - rid: 8800764145469751504
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
+      data: 
     - rid: 8800764145469751505
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 4
+    - rid: 8800764161865547885
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 6842ee2b76fe10a4b9ab261ef5cab918, type: 2}
+        loop: 0
+        loopCount: 1
+        cycleDuration: 2
+    - rid: 8800764161865547886
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: 1, y: 0}
+    - rid: 8800764161865547887
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8800764161865547888
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0

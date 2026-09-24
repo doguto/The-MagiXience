@@ -327,6 +327,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 case AttackEventType.EnemySpawn:
                     SpawnEnemy(ev);
                     break;
+                case AttackEventType.SetInvincible:
+                    model.SetInvincible(ev.Enabled);
+                    break;
+                case AttackEventType.Despawn:
+                    StopMovement();
+                    Destroy(gameObject);
+                    break;
             }
         }
 

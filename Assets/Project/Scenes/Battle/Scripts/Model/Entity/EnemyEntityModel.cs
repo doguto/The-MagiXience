@@ -25,10 +25,26 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         // 通常攻撃無効の敵に通常弾が当たり、ダメージが無効化された時に発火
         public IObservable<Unit> OnIneffectiveHit => onIneffectiveHit;
 
+        public bool IsInvincible { get; private set; }
+
+        public void SetInvincible(bool enabled) => IsInvincible = enabled;
+
+        public override void TakeDamage(int damage)
+        {
+            if (IsInvincible) return;
+            base.TakeDamage(damage);
+        }
+
         public override void OnCollision(EntityBase other)
         {
             if (other is BulletEntityModel bullet)
             {
+                if (IsInvincible)
+                {
+                    onIneffectiveHit.OnNext(Unit.Default);
+                    return;
+                }
+
                 // 通常攻撃無効の敵に通常弾が当たった場合は被ダメージ0（＝ダメージ処理をスキップ）
                 if (OnlyChargeDamageable && !bullet.IsPlayerChargeBullet)
                 {
