@@ -20,18 +20,22 @@ MonoBehaviour:
     - rid: 5211421576021410580
       type: {class: LoopMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        loop: 1
+        loop: 0
         loopCount: 0
         entries:
         - preset: {fileID: 0}
           inlineSteps:
           - rid: 5211421576021410613
           - rid: 5211421576021410591
-          repeatCount: 0
+          repeatCount: 4
+        - preset: {fileID: 0}
+          inlineSteps:
+          - rid: 5211421878034628699
+          repeatCount: 1
     - rid: 5211421576021410591
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        duration: 2.036199
+        duration: 1.99
     - rid: 5211421576021410613
       type: {class: AimTweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -64,3 +68,35 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
+    - rid: 5211421878034628699
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 0, y: 10, z: 0}
+        duration: 0.1357466
+        easeValue: 18
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0
