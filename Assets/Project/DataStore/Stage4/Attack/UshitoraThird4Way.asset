@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: UshitoraThird3Way
+  m_Name: UshitoraThird4Way
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
@@ -60,8 +60,9 @@ MonoBehaviour:
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         wayCount: 4
-        spreadAngle: 30
+        spreadAngle: 45
         radius: 0.3
+        startDelay: 0
     - rid: 3310600516686315672
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -73,8 +74,9 @@ MonoBehaviour:
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         wayCount: 4
-        spreadAngle: 30
+        spreadAngle: 45
         radius: 0.3
+        startDelay: 0
     - rid: 5211421599096111520
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -86,8 +88,9 @@ MonoBehaviour:
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         wayCount: 4
-        spreadAngle: 30
+        spreadAngle: 45
         radius: 0.3
+        startDelay: 0
     - rid: 5211421599096111523
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
