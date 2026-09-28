@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
-  m_Name: GolemMoveBottomLeft
+  m_Name: GolemMoveTopLeftPhase3
   m_EditorClassIdentifier: 
   steps:
-  - rid: 5211421878034628684
-  - rid: 5211421599096111410
-  - rid: 5211421599096111411
-  - rid: 5211421599096111412
+  - rid: 5211421878034628610
+  - rid: 5211421599096111407
+  - rid: 5211421599096111408
+  - rid: 5211421599096111409
   references:
     version: 2
     RefIds:
-    - rid: 5211421599096111410
+    - rid: 5211421599096111407
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: -2.5, y: -4, z: 0}
+        targetOffset: {x: -5, y: 4, z: 0}
         duration: 0.3
         easeValue: 6
         customCurve:
@@ -52,14 +52,14 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 0
-    - rid: 5211421599096111411
+    - rid: 5211421599096111408
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
         duration: 6.9
-    - rid: 5211421599096111412
+    - rid: 5211421599096111409
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: 0, y: -20, z: 0}
+        targetOffset: {x: 0, y: 20, z: 0}
         duration: 0.8
         easeValue: 5
         customCurve:
@@ -88,10 +88,10 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 1
-    - rid: 5211421878034628684
+    - rid: 5211421878034628610
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: 2.5, y: -4, z: 0}
+        targetOffset: {x: 2.5, y: 4, z: 0}
         duration: 0.2
         easeValue: 1
         customCurve:
