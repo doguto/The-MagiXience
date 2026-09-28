@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: GolemAttackFirstAim
+  m_Name: GolemAttackFirstFixed
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
@@ -23,7 +23,7 @@ MonoBehaviour:
         signal:
           rid: 5211421599096111505
         directionProvider:
-          rid: 5211421878034628698
+          rid: 5211421878034628608
         rotationProvider:
           rid: 5211421599096111507
         sourceIndexProvider:
@@ -50,6 +50,7 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 5211421878034628698
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+    - rid: 5211421878034628608
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
