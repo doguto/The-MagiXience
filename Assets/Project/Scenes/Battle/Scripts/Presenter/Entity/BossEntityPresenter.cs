@@ -112,15 +112,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void SubscribeToHpBar()
         {
-            float normalDenom = model.NormalMaxHp > 0 ? model.NormalMaxHp : 1f;
-            float strongDenom = model.StrongMaxHp > 0 ? model.StrongMaxHp : 1f;
+            float denom = model.MaxHp > 0 ? model.MaxHp : 1f;
 
-            model.NormalHp
-                .Subscribe(hp => view.SetNormalHpRatio(hp / normalDenom))
-                .AddTo(disposables);
-
-            model.StrongHp
-                .Subscribe(hp => view.SetStrongHpRatio(hp / strongDenom))
+            model.CurrentHp
+                .Subscribe(hp => view.SetHpRatio(hp / denom))
                 .AddTo(disposables);
         }
 
