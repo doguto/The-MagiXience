@@ -5,8 +5,7 @@ namespace Project.Editor
 {
     public class AddressableAutoAddressAssigner : AssetPostprocessor
     {
-        const string TargetRoot = "Assets/Project/DataStore/";
-        const string TargetExtension = ".asset";
+        const string TargetRoot = "Assets/Project/Textures/";
 
         static void OnPostprocessAllAssets(
             string[] importedAssets,
@@ -37,7 +36,6 @@ namespace Project.Editor
             foreach (var assetPath in assetPaths)
             {
                 if (!assetPath.StartsWith(TargetRoot) ||
-                    !assetPath.EndsWith(TargetExtension) ||
                     AssetDatabase.IsValidFolder(assetPath))
                 {
                     continue;
