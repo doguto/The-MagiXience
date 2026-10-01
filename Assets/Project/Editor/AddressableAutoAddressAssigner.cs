@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 
 namespace Project.Editor
