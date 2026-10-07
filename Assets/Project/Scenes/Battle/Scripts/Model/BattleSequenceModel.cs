@@ -15,6 +15,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         int currentGroupIndex = -1;
         int currentPhaseInGroup = -1;
         int currentLoopIteration;
+        BattlePhaseDefinition pendingInterlude;
         BattlePhaseModelBase currentPhase;
 
         // Reset() 時に巻き戻す位置。通常は先頭(0, 0)だが、デバッグ起動時のみ途中を指す。
@@ -53,26 +54,37 @@ namespace Project.Scenes.Battle.Scripts.Model
                 if (currentGroupIndex >= 0 && currentGroupIndex < groups.Count)
                 {
                     var group = groups[currentGroupIndex];
-                    var nextPhaseIndex = currentPhaseInGroup + 1;
 
-                    if (nextPhaseIndex < group.Phases.Count)
+                    if (group.RandomPick && group.Phases.Count > 0)
                     {
-                        currentPhaseInGroup = nextPhaseIndex;
-                        currentPhase = phaseFactory(group.Phases[currentPhaseInGroup]);
-                        allCreatedPhases.Add(currentPhase);
-                        return currentPhase;
-                    }
-                    
-                    if (group.Loop)
-                    {
-                        currentLoopIteration++;
-                        var shouldLoop = group.LoopCount == 0 || currentLoopIteration < group.LoopCount;
-                        if (shouldLoop)
+                        if (TryMoveNextRandom(group))
                         {
-                            currentPhaseInGroup = 0;
-                            currentPhase = phaseFactory(group.Phases[0]);
+                            return currentPhase;
+                        }
+                    }
+                    else
+                    {
+                        var nextPhaseIndex = currentPhaseInGroup + 1;
+
+                        if (nextPhaseIndex < group.Phases.Count)
+                        {
+                            currentPhaseInGroup = nextPhaseIndex;
+                            currentPhase = phaseFactory(group.Phases[currentPhaseInGroup]);
                             allCreatedPhases.Add(currentPhase);
                             return currentPhase;
+                        }
+
+                        if (group.Loop)
+                        {
+                            currentLoopIteration++;
+                            var shouldLoop = group.LoopCount == 0 || currentLoopIteration < group.LoopCount;
+                            if (shouldLoop)
+                            {
+                                currentPhaseInGroup = 0;
+                                currentPhase = phaseFactory(group.Phases[0]);
+                                allCreatedPhases.Add(currentPhase);
+                                return currentPhase;
+                            }
                         }
                     }
                 }
@@ -85,7 +97,62 @@ namespace Project.Scenes.Battle.Scripts.Model
 
                 currentPhaseInGroup = -1;
                 currentLoopIteration = 0;
+                pendingInterlude = null;
             }
+        }
+
+        /// <summary>
+        /// randomPick グループ用。1周 = 「ランダム選択したフェーズ → (あれば) interlude」。
+        /// 周回判定は通常グループと同じく Loop / LoopCount に従う。続きが無ければ false を返す。
+        /// </summary>
+        bool TryMoveNextRandom(SequenceGroupRuntime group)
+        {
+            if (pendingInterlude != null)
+            {
+                var interlude = pendingInterlude;
+                pendingInterlude = null;
+                return SetCurrentPhase(interlude);
+            }
+
+            if (group.ShouldEndGroup != null && group.ShouldEndGroup())
+            {
+                return false;
+            }
+
+            // currentPhaseInGroup >= 0 は「1周分の選択を消化済み」を意味する
+            if (currentPhaseInGroup >= 0)
+            {
+                currentLoopIteration++;
+                var shouldLoop = group.Loop && (group.LoopCount == 0 || currentLoopIteration < group.LoopCount);
+                if (!shouldLoop)
+                {
+                    return false;
+                }
+            }
+
+            currentPhaseInGroup = UnityEngine.Random.Range(0, group.Phases.Count);
+            var picked = group.Phases[currentPhaseInGroup];
+            pendingInterlude = ResolveInterlude(group, picked);
+            return SetCurrentPhase(picked);
+        }
+
+        static BattlePhaseDefinition ResolveInterlude(SequenceGroupRuntime group, BattlePhaseDefinition picked)
+        {
+            if (group.Interlude == null)
+            {
+                return null;
+            }
+
+            return picked.InterludeBuilderOverride != null
+                ? group.Interlude.WithTimelineBuilder(picked.InterludeBuilderOverride, picked.InterludeTimeLimitOverride)
+                : group.Interlude;
+        }
+
+        bool SetCurrentPhase(BattlePhaseDefinition definition)
+        {
+            currentPhase = phaseFactory(definition);
+            allCreatedPhases.Add(currentPhase);
+            return true;
         }
 
         public void Reset()
@@ -93,6 +160,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             currentGroupIndex = startGroupIndex;
             currentPhaseInGroup = startPhaseInGroup - 1;
             currentLoopIteration = 0;
+            pendingInterlude = null;
             currentPhase = null;
         }
 
@@ -131,14 +199,24 @@ namespace Project.Scenes.Battle.Scripts.Model
         public SequenceGroupRuntime(
             bool loop,
             int loopCount,
-            IReadOnlyList<BattlePhaseDefinition> phases)
+            IReadOnlyList<BattlePhaseDefinition> phases,
+            bool randomPick = false,
+            BattlePhaseDefinition interlude = null,
+            Func<bool> shouldEndGroup = null)
         {
             Loop = loop;
             LoopCount = loopCount;
             Phases = phases;
+            RandomPick = randomPick;
+            Interlude = interlude;
+            ShouldEndGroup = shouldEndGroup;
         }
         public bool Loop { get; }
         public int LoopCount { get; } // 0 = infinite
         public IReadOnlyList<BattlePhaseDefinition> Phases { get; }
+        public bool RandomPick { get; }
+        public BattlePhaseDefinition Interlude { get; }
+        // randomPick 時、1周の区切りで true を返すとループ回数に関わらずグループを抜ける（ボスHP条件など）
+        public Func<bool> ShouldEndGroup { get; }
     }
 }

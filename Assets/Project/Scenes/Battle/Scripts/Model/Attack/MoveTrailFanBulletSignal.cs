@@ -15,6 +15,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
     /// wayCount:1 なら全弾同一方向、2以上なら spreadAngle で扇状に開く。
     /// 弾を配置する間隔(spawnInterval)は moveDuration / (wayCount - 1) で自動算出する。
     /// 移動時間と配置完了タイミングが常に一致するため、手動で揃える必要はない。
+    /// 弾は時間ではなく軌道上の等間隔な座標で生成される(AttackEvent.SpawnAlongMovementPath)。
+    /// フレーム落ちが起きても配置間隔は崩れず、生成時刻のみがズレる。
     /// </summary>
     [Serializable]
     public class MoveTrailFanBulletSignal : IAttackSignal
@@ -114,7 +116,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 new[] { rotationProvider.GetRotation() },
                 startDelays: startDelays,
                 spawnDelays: spawnDelays,
-                movementStep: movementStep);
+                movementStep: movementStep,
+                spawnAlongMovementPath: true);
         }
     }
 }

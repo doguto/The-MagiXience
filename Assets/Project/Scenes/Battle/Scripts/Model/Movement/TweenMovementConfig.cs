@@ -38,9 +38,14 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
             this.isRelative = isRelative;
         }
 
+        public float Duration => duration;
+
+        /// <summary>現在位置 from から見た最終到達座標。Play と同じ解決規則。</summary>
+        public Vector3 ResolveDestination(Vector3 from) => isRelative ? from + targetOffset : targetOffset;
+
         public Tween Play(Transform target, Vector2 direction, Animator animator)
         {
-            Vector3 destination = isRelative ? target.position + targetOffset : targetOffset;
+            Vector3 destination = ResolveDestination(target.position);
             var tween = target.DOMove(destination, duration);
 
             if (easeValue == CustomCurveValue)
