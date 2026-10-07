@@ -99,9 +99,12 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     var unknownArg2 = step.args.Length > 5 ? step.args[5] : "";
 
                     // args[1]がCrazyのときは発狂立ち絵、それ以外は通常立ち絵を使用
+                    // 発狂立ち絵が用意されていないキャラの場合は通常立ち絵で代用する
                     var isCrazy = stillType == "Crazy";
                     var playerStill = scenarioModel.PlayerStillSprite;
-                    var enemyStill = isCrazy ? scenarioModel.EnemyCrazyStillSprite : scenarioModel.EnemyStillSprite;
+                    var enemyStill = isCrazy && scenarioModel.EnemyCrazyStillSprite != null
+                        ? scenarioModel.EnemyCrazyStillSprite
+                        : scenarioModel.EnemyStillSprite;
 
                     // 表情Spriteを取得
                     Sprite faceSprite = null;
