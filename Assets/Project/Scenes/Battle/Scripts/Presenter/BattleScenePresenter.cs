@@ -629,16 +629,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             phaseStateMachine.PlaySequence(bossSequence);
         }
 
-        async void DemoClear()
-        {
-            stageModel?.Clear();
-            OpenNextStage(stageModel);
-
-            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
-
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
-        }
-
         // クリアしたステージの次のステージを開放する。
         void OpenNextStage(StageModel clearedStage)
         {
@@ -660,18 +650,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             stageModel?.Clear();
             OpenNextStage(stageModel);
 
-            // 次のステージをロードせず、ステージ選択画面へ遷移する
+            // 次のステージをロードせず、To be continued画面を経由してステージ選択画面へ遷移する
             phaseStateMachine.Stop();
 
-            // BGMをタイトルのものに切り替える
-            // ステージクリアを反映した後に取得するため、4面クリア時はこの時点で切り替わる
-            var titleBgmType = UserModelRepository.Instance.Get().TitleBgmType;
-            soundManager?.PlayBGMAsync(SceneType.Title, titleBgmType).Forget();
-
-            var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
-            await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.StageList));
-            SceneManager.UnloadSceneAsync(battleSceneName).ToUniTask().Forget();
+            // BGMの切り替え・StageListへの遷移・Battleシーンの破棄はDemoClearScenePresenterが行う
+            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
         }
 
         void OnDestroy()
