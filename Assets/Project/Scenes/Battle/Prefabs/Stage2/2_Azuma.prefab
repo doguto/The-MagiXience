@@ -278,11 +278,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bodySpriteRenderer: {fileID: 5423549007835280800}
   flashColor: {r: 0, g: 0, b: 0, a: 1}
-  bandSprite: {guid: da2dfb8795fe4e749bc7dc9c374af827, type: 3}
+  hpBarMask: {fileID: 1103004927009610263}
+  bandsContainer: {fileID: 7305842456790412554}
+  bandSprite: {fileID: 21300000, guid: da2dfb8795fe4e749bc7dc9c374af827, type: 3}
   colorStops:
   - upperRatio: 1
-    color: {b: 0.1, a: 1}
-  - color: {b: 0.1, a: 1}
+    color: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+  - upperRatio: 0.6
+    color: {r: 0.9, g: 0.5, b: 0.1, a: 1}
   - upperRatio: 0.3
     color: {r: 0.81, g: 0.85, b: 0.1, a: 1}
 --- !u!114 &2522827274938751839
