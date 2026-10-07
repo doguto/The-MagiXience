@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: 3line
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 0
+      loopEnd: 3
+      cycleDuration: 1
+      entries:
+      - time: 0
+        signal:
+          rid: 8421728175759818866
+        directionProvider:
+          rid: 8421728175759818870
+        rotationProvider:
+          rid: 8421728175759818873
+        sourceIndexProvider:
+          rid: -2
+        seType: 0
+      - time: 0
+        signal:
+          rid: 8421728175759818867
+        directionProvider:
+          rid: 8421728175759818871
+        rotationProvider:
+          rid: 8421728175759818872
+        sourceIndexProvider:
+          rid: -2
+        seType: 0
+      - time: 0
+        signal:
+          rid: 8421728175759818868
+        directionProvider:
+          rid: 8421728175759818875
+        rotationProvider:
+          rid: 8421728175759818876
+        sourceIndexProvider:
+          rid: -2
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8421728175759818866
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 60
+        radius: 0
+        startDelay: 0
+    - rid: 8421728175759818867
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 60
+        radius: 1
+        startDelay: 0
+    - rid: 8421728175759818868
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 60
+        radius: 2
+        startDelay: 0
+    - rid: 8421728175759818870
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728175759818871
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728175759818872
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728175759818873
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728175759818875
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728175759818876
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
