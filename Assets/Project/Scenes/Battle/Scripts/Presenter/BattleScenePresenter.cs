@@ -9,6 +9,7 @@ using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
@@ -22,6 +23,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] EnemyTracker enemyTracker;
         [SerializeField] BackgroundPresenter backgroundPresenter;
         [SerializeField] BulletClearReceiver bulletClearReceiver;
+        [SerializeField] BgmNameView bgmNameView;
 
         [Header("Continue Settings")]
         [Tooltip("コンティニュー回数に応じたPlayerの最大HP。index=コンティニュー回数（0=初回）。回数がテーブル長を超えた場合は末尾の値を使用する。")]
@@ -407,6 +409,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var sceneType = (SceneType)(stageNumber + 2);
             var bgmType = situation == BattleSituation.Boss ? BgmType.BattleBoss : BgmType.BattleWay;
             soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
+
+            // 東方風に、BGMの切り替わり時に曲名を表示する
+            if (bgmNameView != null)
+            {
+                var bgmModel = SoundModelRepository.Instance.GetBgmModel(sceneType, bgmType);
+                bgmNameView.Show(bgmModel.DisplayName);
+            }
         }
 
         StageModel ResolveStageModel()

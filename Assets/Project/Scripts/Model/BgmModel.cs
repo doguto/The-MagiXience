@@ -13,6 +13,7 @@ namespace Project.Scripts.Model
 
         public BgmData BgmData { get; }
         public string Name => BgmData.name;
+        public string DisplayName => string.IsNullOrEmpty(BgmData.displayName) ? BgmData.name : BgmData.displayName;
         public int LoopStartSamples => BgmData.loopStartSamples;
         public int LoopEndSamples => BgmData.loopEndSamples;
 
