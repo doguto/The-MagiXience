@@ -14,34 +14,66 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   situation: 1
   sequenceGroups:
-  - loop: 0
-    loopCount: 1
+  - loop: 1
+    loopCount: 0
     phases:
     - phaseId: 1
       timelineBuilder: {fileID: 11400000, guid: 87ea8837b6bf7e44d9411ae89d3b99db, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 3310600040644083838
+        rid: 8421728175759818959
+      interludeBuilderOverride: {fileID: 0}
     - phaseId: MoveShot
       timelineBuilder: {fileID: 11400000, guid: df3ca4dad8ea39744aa6fcdc8651363e, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 8800764269365559369
+        rid: 8421728175759818960
+      interludeBuilderOverride: {fileID: 0}
     - phaseId: 2
       timelineBuilder: {fileID: 11400000, guid: 0ce9ca0fdcb6a6a4388a179ee76d5dba, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 8800764145469751494
+        rid: 8421728175759818961
+      interludeBuilderOverride: {fileID: 0}
+    - phaseId: Line3
+      timelineBuilder: {fileID: 11400000, guid: 1d899fd61a2789f44b8eae7176167472, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 8421728175759818971
+      interludeBuilderOverride: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+    randomPick: 1
+    interlude:
+      phaseId: ReturnHome
+      timelineBuilder: {fileID: 11400000, guid: 5afc6df2430bb664bb5226a46030cd6b, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 8421728175759818957
+      interludeBuilderOverride: {fileID: 0}
+    endBossHpPercent: 40
+  - loop: 0
+    loopCount: 1
+    phases:
     - phaseId: CrossBeam
       timelineBuilder: {fileID: 11400000, guid: 0a7fab46d82bc604aac8a5a8375ab26f, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 9205483607032594528
+      interludeBuilderOverride: {fileID: 0}
     - phaseId: BeamStorm
       timelineBuilder: {fileID: 11400000, guid: 1ca7996f69e26324fac2a81eb83dc61b, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 9205483607032594599
+      interludeBuilderOverride: {fileID: 0}
+    randomPick: 0
+    interlude:
+      phaseId: 
+      timelineBuilder: {fileID: 0}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 8421728175759818953
+      interludeBuilderOverride: {fileID: 0}
+    endBossHpPercent: 0
   bossPrefab: {fileID: 5846423284816155308, guid: 2547cec9d2b889841984267e5a4822ec, type: 3}
   bossSpawnPosition: {x: 10, y: 0, z: 0}
   bossEntranceMovement:
@@ -49,10 +81,74 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 3310600040644083838
+    - rid: 8421728175759818953
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 10
+    - rid: 8421728175759818957
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 2.5
+    - rid: 8421728175759818959
+      type: {class: CompositeExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        mode: 1
+        conditions:
+        - rid: 8421728175759818962
+        - rid: 8421728175759818963
+    - rid: 8421728175759818960
+      type: {class: CompositeExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        mode: 1
+        conditions:
+        - rid: 8421728175759818964
+        - rid: 8421728175759818965
+    - rid: 8421728175759818961
+      type: {class: CompositeExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        mode: 1
+        conditions:
+        - rid: 8421728175759818966
+        - rid: 8421728175759818967
+    - rid: 8421728175759818962
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 3
+    - rid: 8421728175759818963
       type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
-        hpThresholdPercent: 70
+        hpThresholdPercent: 40
+    - rid: 8421728175759818964
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 4.5
+    - rid: 8421728175759818965
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 40
+    - rid: 8421728175759818966
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 4.2
+    - rid: 8421728175759818967
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 40
+    - rid: 8421728175759818971
+      type: {class: CompositeExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        mode: 1
+        conditions:
+        - rid: 8421728175759818972
+        - rid: 8421728175759818973
+    - rid: 8421728175759818972
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 3.5
+    - rid: 8421728175759818973
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 40
     - rid: 8577112454036455607
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -85,14 +181,6 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 0
-    - rid: 8800764145469751494
-      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        hpThresholdPercent: 40
-    - rid: 8800764269365559369
-      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        timeLimitSeconds: 4
     - rid: 9205483607032594528
       type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:

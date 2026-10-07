@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: 3line
+  m_Name: 3lineMini
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
@@ -27,7 +27,7 @@ MonoBehaviour:
         rotationProvider:
           rid: 8421728175759818873
         sourceIndexProvider:
-          rid: -2
+          rid: 8421728175759818975
         seType: 0
       - time: 0.1
         signal:
@@ -37,7 +37,7 @@ MonoBehaviour:
         rotationProvider:
           rid: 8421728175759818872
         sourceIndexProvider:
-          rid: -2
+          rid: 8421728175759818976
         seType: 0
       - time: 0
         signal:
@@ -47,7 +47,7 @@ MonoBehaviour:
         rotationProvider:
           rid: 8421728175759818876
         sourceIndexProvider:
-          rid: -2
+          rid: 8421728175759818977
         seType: 0
       nextPhaseTrigger:
         rid: -2
@@ -98,3 +98,15 @@ MonoBehaviour:
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
+    - rid: 8421728175759818975
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 6
+    - rid: 8421728175759818976
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 6
+    - rid: 8421728175759818977
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 6
