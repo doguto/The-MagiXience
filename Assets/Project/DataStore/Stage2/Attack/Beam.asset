@@ -49,6 +49,46 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 9205483607032594527
         seType: 0
+      - time: 0.7
+        signal:
+          rid: 8421728175759818888
+        directionProvider:
+          rid: 8421728175759818889
+        rotationProvider:
+          rid: 8421728175759818890
+        sourceIndexProvider:
+          rid: 8421728175759818891
+        seType: 0
+      - time: 2
+        signal:
+          rid: 8421728175759818892
+        directionProvider:
+          rid: 8421728175759818893
+        rotationProvider:
+          rid: 8421728175759818894
+        sourceIndexProvider:
+          rid: 8421728175759818895
+        seType: 0
+      - time: 0.7
+        signal:
+          rid: 8421728175759818896
+        directionProvider:
+          rid: 8421728175759818897
+        rotationProvider:
+          rid: 8421728175759818898
+        sourceIndexProvider:
+          rid: 8421728175759818899
+        seType: 0
+      - time: 2
+        signal:
+          rid: 8421728175759818900
+        directionProvider:
+          rid: 8421728175759818901
+        rotationProvider:
+          rid: 8421728175759818902
+        sourceIndexProvider:
+          rid: 8421728175759818903
+        seType: 0
       nextPhaseTrigger:
         rid: -2
   references:
@@ -56,6 +96,80 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 8421728175759818888
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 0}
+        width: 1.5
+    - rid: 8421728175759818889
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.76604444, y: 0.64278764}
+    - rid: 8421728175759818890
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 140
+    - rid: 8421728175759818891
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8421728175759818892
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 9ac68dec566c0cc4c9802ac37b0a9883, type: 2}
+        loop: 1
+        loopCount: 36
+        cycleDuration: 0.083333336
+    - rid: 8421728175759818893
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.76604444, y: 0.64278764}
+    - rid: 8421728175759818894
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728175759818895
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8421728175759818896
+      type: {class: EnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        offset: {x: 0, y: 0}
+        movementOverride: {fileID: 0}
+        width: 1.5
+    - rid: 8421728175759818897
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.7660445, y: -0.6427876}
+    - rid: 8421728175759818898
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 220
+    - rid: 8421728175759818899
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8421728175759818900
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 27aba1ecc3d4afa42908ed0965c35784, type: 2}
+        loop: 1
+        loopCount: 36
+        cycleDuration: 0.083333336
+    - rid: 8421728175759818901
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.7660445, y: -0.6427876}
+    - rid: 8421728175759818902
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728175759818903
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
     - rid: 8800764161865547899
       type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:

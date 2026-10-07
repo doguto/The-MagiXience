@@ -338,6 +338,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 soundManager?.PlaySE(ev.SeType);
             }
 
+            if (ev.SpawnAlongMovementPath && ev.MovementStep is TweenMovementConfig trailPath)
+            {
+                SpawnBulletsAlongPathAsync(pool, ev, trailPath).Forget();
+                return;
+            }
+
             for (int i = 0; i < ev.Directions.Count; i++)
             {
                 var spawnDelay = ev.GetSpawnDelayAt(i);
@@ -358,6 +364,48 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (pool == null) return;
 
             pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement);
+        }
+
+        /// <summary>
+        /// 移動の軌道(始点→終点)を弾数で等分した座標を事前に求め、本体がその座標を通過した時点で、
+        /// 通過時の位置ではなく事前計算した座標へ弾を生成する。
+        /// 時間駆動だとフレーム落ちで配置間隔が不均等になるため、座標の均等性を優先する(生成時刻はズレうる)。
+        /// 一斉発射の時刻は SpawnDelays + StartDelays の合計(全弾共通)を絶対時刻として維持し、生成が遅れた分は待機を短縮する。
+        /// </summary>
+        async UniTaskVoid SpawnBulletsAlongPathAsync(BulletPool pool, AttackEvent ev, TweenMovementConfig path)
+        {
+            const float ReachEpsilon = 1e-4f;
+            const float TimeoutGraceSeconds = 0.5f;
+
+            var ct = this.GetCancellationTokenOnDestroy();
+            var count = ev.Directions.Count;
+            var origin = transform.position;
+            var destination = path.ResolveDestination(origin);
+            var pathVector = destination - origin;
+            var pathLengthSqr = pathVector.sqrMagnitude;
+            var poolOffset = pool.transform.position - origin;
+            var startTime = Time.time;
+            // 移動が途中で中断された場合に待ち続けないための保険。期限を過ぎたら残りは事前計算座標へ一括生成する
+            var timeoutAt = startTime + path.Duration + TimeoutGraceSeconds;
+
+            for (int i = 0; i < count; i++)
+            {
+                var ratio = count > 1 ? (float)i / (count - 1) : 0f;
+
+                while (Time.time < timeoutAt && pathLengthSqr > 0f &&
+                       Vector3.Dot(transform.position - origin, pathVector) / pathLengthSqr < ratio - ReachEpsilon)
+                {
+                    await UniTask.Yield(PlayerLoopTiming.Update, ct);
+                }
+
+                if (pool == null) return;
+
+                var releaseAt = startTime + ev.GetSpawnDelayAt(i) + ev.GetStartDelayAt(i);
+                var startDelay = Mathf.Max(0f, releaseAt - Time.time);
+                var spawnPosition = Vector3.Lerp(origin, destination, ratio) + poolOffset;
+
+                pool.SpawnBullet(bulletDamage, spawnPosition, ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: startDelay, movementOverride: ev.BulletMovement);
+            }
         }
 
         static Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
