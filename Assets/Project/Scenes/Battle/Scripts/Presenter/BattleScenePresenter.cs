@@ -189,7 +189,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                            .Subscribe(_ =>
                            {
                                var gameOverModal = globalScenePresenter?.GameOverModalPresenter;
-                               gameOverModal?.Open();
+                               gameOverModal?.Open(CalculateRetryHpIncreaseRate());
                            })
                            .AddTo(disposables);
 
@@ -377,6 +377,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             var index = Mathf.Clamp(continueCount, 0, continueHpTable.Length - 1);
             playerPresenter.SetMaxHp(continueHpTable[index]);
+        }
+
+        // 次回リトライ時の最大HPが、初期HP(テーブル先頭)から何%増加しているかを返す。
+        int CalculateRetryHpIncreaseRate()
+        {
+            if (continueHpTable == null || continueHpTable.Length == 0) return 0;
+
+            var baseHp = continueHpTable[0];
+            if (baseHp <= 0) return 0;
+
+            var nextIndex = Mathf.Clamp(continueCount + 1, 0, continueHpTable.Length - 1);
+            var nextHp = continueHpTable[nextIndex];
+            return Mathf.RoundToInt((nextHp - baseHp) * 100f / baseHp);
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

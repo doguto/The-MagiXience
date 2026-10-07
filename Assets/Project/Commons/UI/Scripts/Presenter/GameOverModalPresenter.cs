@@ -57,7 +57,8 @@ namespace Project.Commons.UI.Scripts.Presenter
             }
         }
 
-        public void Open()
+        // retryHpIncreaseRate: 次回リトライ時のHP増加率(初期HP比, %)
+        public void Open(int retryHpIncreaseRate)
         {
             if (IsOpen) return;
             IsOpen = true;
@@ -66,6 +67,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             AudioListener.pause = true;
 
             gameObject.SetActive(true);
+            gameOverModalView.SetRetryHpIncreaseRate(retryHpIncreaseRate);
             gameOverModalView.InitStart();
         }
 
