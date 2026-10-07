@@ -59,19 +59,29 @@ namespace Project.Scenes.Battle.Scripts.Model
         IExitConditionConfig exitConditionConfig = new TimeLimitExitConditionConfig();
         [Tooltip("randomPickグループで、このフェーズの直後に挟むinterludeのTimelineBuilderを差し替える。未設定ならグループ共通のものを使う")]
         [SerializeField] BattleTimelineBuilderAsset interludeBuilderOverride;
+        [Tooltip("interludeBuilderOverride 使用時の終了時間(秒)。0ならグループ共通のinterludeの終了条件を使う")]
+        [SerializeField, Min(0f)] float interludeTimeLimitOverride;
 
         public string PhaseId => phaseId;
         public BattleTimelineBuilderAsset TimelineBuilder => timelineBuilder;
         public BattleTimelineBuilderAsset TimelineBuilderStrong => timelineBuilderStrong;
         public IExitConditionConfig ExitConditionConfig => exitConditionConfig;
         public BattleTimelineBuilderAsset InterludeBuilderOverride => interludeBuilderOverride;
+        public float InterludeTimeLimitOverride => interludeTimeLimitOverride;
 
-        /// <summary>TimelineBuilderだけを差し替えた浅いコピーを返す（Strong版は使わない）。</summary>
-        public BattlePhaseDefinition WithTimelineBuilder(BattleTimelineBuilderAsset builder)
+        /// <summary>
+        /// TimelineBuilderを差し替えた浅いコピーを返す（Strong版は使わない）。
+        /// timeLimitSeconds が0より大きければ、終了条件も時間制限に差し替える。
+        /// </summary>
+        public BattlePhaseDefinition WithTimelineBuilder(BattleTimelineBuilderAsset builder, float timeLimitSeconds = 0f)
         {
             var copy = (BattlePhaseDefinition)MemberwiseClone();
             copy.timelineBuilder = builder;
             copy.timelineBuilderStrong = null;
+            if (timeLimitSeconds > 0f)
+            {
+                copy.exitConditionConfig = new TimeLimitExitConditionConfig(timeLimitSeconds);
+            }
             return copy;
         }
 

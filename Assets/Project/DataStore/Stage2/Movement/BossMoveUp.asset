@@ -10,52 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
-  m_Name: BossLine3Sweep
+  m_Name: BossMoveUp
   m_EditorClassIdentifier: 
   steps:
-  - rid: 8421728175759818969
-  - rid: 8421728175759818970
+  - rid: 8421728175759818984
   references:
     version: 2
     RefIds:
-    - rid: 8421728175759818969
+    - rid: 8421728175759818984
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: 6, y: 3, z: 0}
-        duration: 0.5
+        targetOffset: {x: 5, y: 3, z: 0}
+        duration: 0.6
         easeValue: 6
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 0
-    - rid: 8421728175759818970
-      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        targetOffset: {x: 6, y: -3, z: 0}
-        duration: 1.2
-        easeValue: 4
         customCurve:
           serializedVersion: 2
           m_Curve:

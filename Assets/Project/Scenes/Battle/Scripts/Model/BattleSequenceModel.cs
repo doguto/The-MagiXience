@@ -144,7 +144,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             }
 
             return picked.InterludeBuilderOverride != null
-                ? group.Interlude.WithTimelineBuilder(picked.InterludeBuilderOverride)
+                ? group.Interlude.WithTimelineBuilder(picked.InterludeBuilderOverride, picked.InterludeTimeLimitOverride)
                 : group.Interlude;
         }
 
