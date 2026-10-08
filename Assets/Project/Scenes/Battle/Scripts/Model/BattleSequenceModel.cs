@@ -130,10 +130,24 @@ namespace Project.Scenes.Battle.Scripts.Model
                 }
             }
 
-            currentPhaseInGroup = UnityEngine.Random.Range(0, group.Phases.Count);
+            currentPhaseInGroup = PickRandomIndexExcluding(group.Phases.Count, currentPhaseInGroup);
             var picked = group.Phases[currentPhaseInGroup];
             pendingInterlude = ResolveInterlude(group, picked);
             return SetCurrentPhase(picked);
+        }
+
+        /// <summary>
+        /// 直前に選んだindex(excluded)を除外して抽選する。候補が1つ以下、またはexcludedが範囲外(未選択)なら通常抽選。
+        /// </summary>
+        static int PickRandomIndexExcluding(int count, int excluded)
+        {
+            if (count <= 1 || excluded < 0 || excluded >= count)
+            {
+                return UnityEngine.Random.Range(0, count);
+            }
+
+            var index = UnityEngine.Random.Range(0, count - 1);
+            return index >= excluded ? index + 1 : index;
         }
 
         static BattlePhaseDefinition ResolveInterlude(SequenceGroupRuntime group, BattlePhaseDefinition picked)
