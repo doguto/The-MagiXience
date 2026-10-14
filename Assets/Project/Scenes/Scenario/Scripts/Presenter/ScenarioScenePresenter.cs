@@ -27,6 +27,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         // AdvanceToNextSequence が複数回走ってステージ状態が暴走するため。
         bool isCompleted;
 
+        // 自動送り設定。有効中はメッセージ表示後に指定秒数経過で自動的に次へ進む
+        bool isAutoAdvanceEnabled;
+        float autoAdvanceSeconds;
+        readonly SerialDisposable autoAdvanceTimer = new();
+
         public IObservable<Unit> OnScenarioCompleted => scenarioCompleted;
 
         void Start()
@@ -54,6 +59,9 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         {
             if (isCompleted) return;
 
+            // 手動で進めた場合は待機中の自動送りを破棄する
+            autoAdvanceTimer.Disposable = null;
+
             scenarioModel.Next();
             ExecuteSteps();
         }
@@ -76,6 +84,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
                     var message = step.args.Length > 1 ? step.args[1] : "";
                     scenarioView.ShowCastMessage(characterName, message);
+                    StartAutoAdvanceTimerIfEnabled();
                     break;
                 }
 
@@ -84,7 +93,34 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
                     var message = step.args.Length > 1 ? step.args[1] : "";
                     scenarioView.ShowMessage(characterName, message);
+                    StartAutoAdvanceTimerIfEnabled();
                     break;
+                }
+
+                if (step.function == "AutoAdvance")
+                {
+                    // args[0]: true/false, args[1]: 秒数
+                    if (step.args.Length < 1 || !bool.TryParse(step.args[0], out isAutoAdvanceEnabled))
+                    {
+                        Debug.LogWarning($"[ScenarioScenePresenter] AutoAdvance: 有効フラグ '{(step.args.Length > 0 ? step.args[0] : "")}' をパースできません。無効として扱います。");
+                        isAutoAdvanceEnabled = false;
+                    }
+
+                    if (isAutoAdvanceEnabled)
+                    {
+                        if (step.args.Length < 2 || !float.TryParse(step.args[1], out autoAdvanceSeconds) || autoAdvanceSeconds < 0f)
+                        {
+                            Debug.LogWarning($"[ScenarioScenePresenter] AutoAdvance: 秒数 '{(step.args.Length > 1 ? step.args[1] : "")}' をパースできません。");
+                            autoAdvanceSeconds = 2f;
+                        }
+                    }
+                    else
+                    {
+                        autoAdvanceTimer.Disposable = null;
+                    }
+
+                    scenarioModel.Next();
+                    continue;
                 }
 
                 if (step.function == "ShowCast")
@@ -222,8 +258,18 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
             }
         }
 
+        void StartAutoAdvanceTimerIfEnabled()
+        {
+            if (!isAutoAdvanceEnabled) return;
+
+            // Scheduler.MainThread はtimeScaleの影響を受けるため、ポーズ中(timeScale=0)はタイマーも止まる
+            autoAdvanceTimer.Disposable = Observable.Timer(TimeSpan.FromSeconds(autoAdvanceSeconds), Scheduler.MainThread)
+                                                    .Subscribe(_ => OnPressNext());
+        }
+
         void OnDestroy()
         {
+            autoAdvanceTimer.Dispose();
             disposables.Dispose();
             scenarioCompleted.Dispose();
         }
