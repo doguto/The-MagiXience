@@ -215,7 +215,7 @@ MonoBehaviour:
     - loop: 1
       loopStart: 0
       loopEnd: 100
-      cycleDuration: 2
+      cycleDuration: 4
       entries:
       - time: 0
         signal:
@@ -224,6 +224,36 @@ MonoBehaviour:
           rid: 3310600516686315796
         rotationProvider:
           rid: 3310600516686315805
+        sourceIndexProvider:
+          rid: -2
+        seType: 0
+      - time: 2.2
+        signal:
+          rid: 8421728334146175051
+        directionProvider:
+          rid: 8421728334146175052
+        rotationProvider:
+          rid: 8421728334146175053
+        sourceIndexProvider:
+          rid: -2
+        seType: 0
+      - time: 2.1
+        signal:
+          rid: 8421728334146175054
+        directionProvider:
+          rid: 8421728334146175055
+        rotationProvider:
+          rid: 8421728334146175056
+        sourceIndexProvider:
+          rid: -2
+        seType: 0
+      - time: 2
+        signal:
+          rid: 8421728334146175057
+        directionProvider:
+          rid: 8421728334146175058
+        rotationProvider:
+          rid: 8421728334146175059
         sourceIndexProvider:
           rid: -2
         seType: 0
@@ -256,7 +286,7 @@ MonoBehaviour:
         seType: 0
       - time: 5
         signal:
-          rid: 8800764303442706517
+          rid: 8421728334146175068
         directionProvider:
           rid: 8800764303442706518
         rotationProvider:
@@ -351,6 +381,85 @@ MonoBehaviour:
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         direction: {x: -1, y: 0}
+    - rid: 8421728334146175051
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 5
+        spreadAngle: 72
+        radius: 0
+        startDelay: 0
+    - rid: 8421728334146175052
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728334146175053
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728334146175054
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 5
+        spreadAngle: 72
+        radius: 0.3
+        startDelay: 0
+    - rid: 8421728334146175055
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728334146175056
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728334146175057
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 5
+        spreadAngle: 72
+        radius: 0.6
+        startDelay: 0
+    - rid: 8421728334146175058
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728334146175059
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728334146175068
+      type: {class: ChangeMovementSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        movement:
+          rid: 8421728334146175069
+    - rid: 8421728334146175069
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 10, y: 0, z: 0}
+        duration: 1.5
+        easeValue: 1
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 1
     - rid: 8800763986918768719
       type: {class: BeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -362,7 +471,7 @@ MonoBehaviour:
         shotInterval: 0.0833
         showWarning: 1
         warningDuration: 3
-        warningWidth: 0
+        warningWidth: 1.5
         warningSourceIndex: 0
     - rid: 8800763986918768744
       type: {class: HpPercentThresholdPhaseTriggerConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack.PhaseTrigger, asm: Model}
@@ -383,9 +492,6 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 8800764303442706517
-      type: {class: DespawnSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
     - rid: 8800764303442706518
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:

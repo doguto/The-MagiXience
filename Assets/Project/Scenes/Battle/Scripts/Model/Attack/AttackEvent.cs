@@ -12,6 +12,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         EnemySpawn,
         SetInvincible,
         Despawn,
+        ChangeMovement,
     }
 
     /// <summary>SpawnOffsets の解釈方法。</summary>
@@ -114,6 +115,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public static AttackEvent SetInvincible(bool enabled) => new(AttackEventType.SetInvincible, enabled: enabled);
 
         public static AttackEvent Despawn() => new(AttackEventType.Despawn);
+
+        public static AttackEvent ChangeMovement(IMovementStep movementStep) => new(AttackEventType.ChangeMovement, movementStep: movementStep);
 
         /// <summary>ワールド座標の一点に生成する。ビームの予告線のように発射元から切り離したい生成物で使う。</summary>
         public static AttackEvent SpawnAtWorld(Vector2 worldPosition, Vector2 direction, Quaternion rotation, int sourceIndex, float range = 0f, float duration = 0f, SeType seType = SeType.None, float width = 0f) =>
