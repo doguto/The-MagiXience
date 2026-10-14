@@ -30,6 +30,8 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         // 自動送り設定。有効中はメッセージ表示後に指定秒数経過で自動的に次へ進む
         bool isAutoAdvanceEnabled;
         float autoAdvanceSeconds;
+        // trueのときは秒数の代わりにTypeWriterの1文字分の間隔だけ待つ
+        bool isAutoAdvanceIntervalAuto;
         readonly SerialDisposable autoAdvanceTimer = new();
 
         public IObservable<Unit> OnScenarioCompleted => scenarioCompleted;
@@ -59,6 +61,13 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         {
             if (isCompleted) return;
 
+            // 文字送り中なら全文を表示するだけで、次の会話には進まない
+            if (scenarioView.IsTyping)
+            {
+                scenarioView.CompleteTyping();
+                return;
+            }
+
             // 手動で進めた場合は待機中の自動送りを破棄する
             autoAdvanceTimer.Disposable = null;
 
@@ -83,8 +92,8 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     // args[0]: キャラ名 args[1]: 会話内容
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
                     var message = step.args.Length > 1 ? step.args[1] : "";
-                    scenarioView.ShowCastMessage(characterName, message);
-                    StartAutoAdvanceTimerIfEnabled();
+                    // 自動送りのタイマーは全文表示が終わってから開始する
+                    scenarioView.ShowCastMessage(characterName, message, StartAutoAdvanceTimerIfEnabled);
                     break;
                 }
 
@@ -92,23 +101,50 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 {
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
                     var message = step.args.Length > 1 ? step.args[1] : "";
-                    scenarioView.ShowMessage(characterName, message);
-                    StartAutoAdvanceTimerIfEnabled();
+                    scenarioView.ShowMessage(characterName, message, StartAutoAdvanceTimerIfEnabled);
                     break;
+                }
+
+                if (step.function == "TypeWriter")
+                {
+                    // args[0]: true/false, args[1]: 1秒あたりの表示文字数
+                    if (step.args.Length < 1 || !bool.TryParse(step.args[0], out var isTypeWriterEnabled))
+                    {
+                        Debug.LogWarning($"[ScenarioScenePresenter] TypeWriter: 有効フラグ '{(step.args.Length > 0 ? step.args[0] : "")}' をパースできません。無効として扱います。");
+                        isTypeWriterEnabled = false;
+                    }
+
+                    var charactersPerSecond = 0f;
+                    if (isTypeWriterEnabled
+                        && (step.args.Length < 2 || !float.TryParse(step.args[1], out charactersPerSecond) || charactersPerSecond <= 0f))
+                    {
+                        Debug.LogWarning($"[ScenarioScenePresenter] TypeWriter: 表示速度 '{(step.args.Length > 1 ? step.args[1] : "")}' をパースできません。");
+                        charactersPerSecond = 20f;
+                    }
+
+                    scenarioView.SetTypeWriter(isTypeWriterEnabled, charactersPerSecond);
+
+                    scenarioModel.Next();
+                    continue;
                 }
 
                 if (step.function == "AutoAdvance")
                 {
-                    // args[0]: true/false, args[1]: 秒数
+                    // args[0]: true/false, args[1]: 秒数 または auto(TypeWriterの1文字分の間隔)
                     if (step.args.Length < 1 || !bool.TryParse(step.args[0], out isAutoAdvanceEnabled))
                     {
                         Debug.LogWarning($"[ScenarioScenePresenter] AutoAdvance: 有効フラグ '{(step.args.Length > 0 ? step.args[0] : "")}' をパースできません。無効として扱います。");
                         isAutoAdvanceEnabled = false;
                     }
 
+                    isAutoAdvanceIntervalAuto = false;
                     if (isAutoAdvanceEnabled)
                     {
-                        if (step.args.Length < 2 || !float.TryParse(step.args[1], out autoAdvanceSeconds) || autoAdvanceSeconds < 0f)
+                        if (step.args.Length >= 2 && string.Equals(step.args[1], "auto", StringComparison.OrdinalIgnoreCase))
+                        {
+                            isAutoAdvanceIntervalAuto = true;
+                        }
+                        else if (step.args.Length < 2 || !float.TryParse(step.args[1], out autoAdvanceSeconds) || autoAdvanceSeconds < 0f)
                         {
                             Debug.LogWarning($"[ScenarioScenePresenter] AutoAdvance: 秒数 '{(step.args.Length > 1 ? step.args[1] : "")}' をパースできません。");
                             autoAdvanceSeconds = 2f;
@@ -262,8 +298,22 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         {
             if (!isAutoAdvanceEnabled) return;
 
+            var seconds = autoAdvanceSeconds;
+            if (isAutoAdvanceIntervalAuto)
+            {
+                if (scenarioView.IsTypeWriterEnabled)
+                {
+                    seconds = scenarioView.TypeWriterCharacterInterval;
+                }
+                else
+                {
+                    Debug.LogWarning("[ScenarioScenePresenter] AutoAdvance: auto指定ですがTypeWriterが無効のため2秒で送ります。");
+                    seconds = 2f;
+                }
+            }
+
             // Scheduler.MainThread はtimeScaleの影響を受けるため、ポーズ中(timeScale=0)はタイマーも止まる
-            autoAdvanceTimer.Disposable = Observable.Timer(TimeSpan.FromSeconds(autoAdvanceSeconds), Scheduler.MainThread)
+            autoAdvanceTimer.Disposable = Observable.Timer(TimeSpan.FromSeconds(seconds), Scheduler.MainThread)
                                                     .Subscribe(_ => OnPressNext());
         }
 
