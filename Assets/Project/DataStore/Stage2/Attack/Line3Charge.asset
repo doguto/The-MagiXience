@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: Line3Charge
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 0
+      loopStart: 0
+      loopEnd: 5
+      cycleDuration: 2
+      entries:
+      - time: 0
+        signal:
+          rid: 8421728198825345034
+        directionProvider:
+          rid: 8421728198825345035
+        rotationProvider:
+          rid: 8421728198825345036
+        sourceIndexProvider:
+          rid: 8421728198825345037
+        seType: 0
+      - time: 1
+        signal:
+          rid: 8421728198825345038
+        directionProvider:
+          rid: 8421728198825345039
+        rotationProvider:
+          rid: 8421728198825345040
+        sourceIndexProvider:
+          rid: 8421728198825345041
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8421728198825345034
+      type: {class: ChargeSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 16
+        radius: 1.5
+        targetRadius: 0
+        gatherDuration: 1
+        rotationSpeed: 480
+        startDelay: 0
+    - rid: 8421728198825345035
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: 1, y: 0}
+    - rid: 8421728198825345036
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728198825345037
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 8
+    - rid: 8421728198825345038
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 6428e1e8fb524df40b333d732d715400, type: 2}
+        loop: 1
+        loopCount: 3
+        cycleDuration: 1
+    - rid: 8421728198825345039
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8421728198825345040
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728198825345041
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
