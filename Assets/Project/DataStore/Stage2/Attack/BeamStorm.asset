@@ -69,6 +69,26 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 8800764269365559374
         seType: 0
+      - time: 5.2
+        signal:
+          rid: 8421728334146175097
+        directionProvider:
+          rid: 8421728334146175082
+        rotationProvider:
+          rid: 8421728334146175083
+        sourceIndexProvider:
+          rid: 8421728334146175087
+        seType: 0
+      - time: 11.2
+        signal:
+          rid: 8421728334146175098
+        directionProvider:
+          rid: 8421728334146175085
+        rotationProvider:
+          rid: 8421728334146175086
+        sourceIndexProvider:
+          rid: 8421728334146175088
+        seType: 0
       nextPhaseTrigger:
         rid: -2
   references:
@@ -76,6 +96,42 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 8421728334146175082
+      type: {class: ForwardDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728334146175083
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728334146175085
+      type: {class: ForwardDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728334146175086
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 8421728334146175087
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 6
+    - rid: 8421728334146175088
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 6
+    - rid: 8421728334146175097
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 18e2865531a85ab409cca92e549236dc, type: 2}
+        loop: 0
+        loopCount: 1
+        cycleDuration: 2
+    - rid: 8421728334146175098
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 18e2865531a85ab409cca92e549236dc, type: 2}
+        loop: 0
+        loopCount: 1
+        cycleDuration: 2
     - rid: 8800764145469751456
       type: {class: SequentialCircleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:

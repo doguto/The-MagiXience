@@ -334,6 +334,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     StopMovement();
                     Destroy(gameObject);
                     break;
+                case AttackEventType.ChangeMovement:
+                    if (ev.MovementStep != null) StartMovementSequence(new[] { ev.MovementStep }, GetComponent<Animator>());
+                    break;
             }
         }
 
