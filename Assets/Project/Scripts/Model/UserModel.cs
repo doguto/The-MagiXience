@@ -44,6 +44,15 @@ namespace Project.Scripts.Model
             UserData.seVolume = Mathf.Clamp(seVolume, 0, 100);
         }
 
+        // シナリオの文字送り速度(1秒あたりの表示文字数)。TypeWriterコマンドでdefault指定時に使用する
+        public float TextSpeed => UserData.textSpeed;
+
+        // 送り速度をメモリ上に反映する。永続化はSave()を別途呼ぶ。
+        public void SetTextSpeed(float textSpeed)
+        {
+            UserData.textSpeed = UserData.ClampTextSpeed(textSpeed);
+        }
+
         public void StageClear(int stageNumber)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);

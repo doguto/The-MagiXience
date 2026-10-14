@@ -34,6 +34,10 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         bool isAutoAdvanceIntervalAuto;
         readonly SerialDisposable autoAdvanceTimer = new();
 
+        // 文字送り設定。速度がnullのときはユーザー設定(UserModel.TextSpeed)の送り速度を使う
+        bool isTypeWriterEnabled;
+        float? typeWriterSpeed;
+
         public IObservable<Unit> OnScenarioCompleted => scenarioCompleted;
 
         void Start()
@@ -92,6 +96,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     // args[0]: キャラ名 args[1]: 会話内容
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
                     var message = step.args.Length > 1 ? step.args[1] : "";
+                    ApplyTypeWriterSetting();
                     // 自動送りのタイマーは全文表示が終わってから開始する
                     scenarioView.ShowCastMessage(characterName, message, StartAutoAdvanceTimerIfEnabled);
                     break;
@@ -101,28 +106,35 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 {
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
                     var message = step.args.Length > 1 ? step.args[1] : "";
+                    ApplyTypeWriterSetting();
                     scenarioView.ShowMessage(characterName, message, StartAutoAdvanceTimerIfEnabled);
                     break;
                 }
 
                 if (step.function == "TypeWriter")
                 {
-                    // args[0]: true/false, args[1]: 1秒あたりの表示文字数
-                    if (step.args.Length < 1 || !bool.TryParse(step.args[0], out var isTypeWriterEnabled))
+                    // args[0]: true/false, args[1]: 1秒あたりの表示文字数 または default(ユーザー設定の送り速度)
+                    if (step.args.Length < 1 || !bool.TryParse(step.args[0], out isTypeWriterEnabled))
                     {
                         Debug.LogWarning($"[ScenarioScenePresenter] TypeWriter: 有効フラグ '{(step.args.Length > 0 ? step.args[0] : "")}' をパースできません。無効として扱います。");
                         isTypeWriterEnabled = false;
                     }
 
-                    var charactersPerSecond = 0f;
+                    typeWriterSpeed = null;
                     if (isTypeWriterEnabled
-                        && (step.args.Length < 2 || !float.TryParse(step.args[1], out charactersPerSecond) || charactersPerSecond <= 0f))
+                        && !(step.args.Length >= 2 && string.Equals(step.args[1], "default", StringComparison.OrdinalIgnoreCase)))
                     {
-                        Debug.LogWarning($"[ScenarioScenePresenter] TypeWriter: 表示速度 '{(step.args.Length > 1 ? step.args[1] : "")}' をパースできません。");
-                        charactersPerSecond = 20f;
+                        if (step.args.Length >= 2 && float.TryParse(step.args[1], out var charactersPerSecond) && charactersPerSecond > 0f)
+                        {
+                            typeWriterSpeed = charactersPerSecond;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[ScenarioScenePresenter] TypeWriter: 表示速度 '{(step.args.Length > 1 ? step.args[1] : "")}' をパースできません。defaultの速度を使用します。");
+                        }
                     }
 
-                    scenarioView.SetTypeWriter(isTypeWriterEnabled, charactersPerSecond);
+                    ApplyTypeWriterSetting();
 
                     scenarioModel.Next();
                     continue;
@@ -292,6 +304,13 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 SceneManager.UnloadSceneAsync(SceneRouterModel.Scenario);
                 ScenarioModelRepository.Instance.Refresh();
             }
+        }
+
+        // default指定時はシナリオ途中でオプションから送り速度が変更されても反映されるよう、メッセージ表示のたびに速度を解決する
+        void ApplyTypeWriterSetting()
+        {
+            var speed = typeWriterSpeed ?? UserModelRepository.Instance.Get().TextSpeed;
+            scenarioView.SetTypeWriter(isTypeWriterEnabled, speed);
         }
 
         void StartAutoAdvanceTimerIfEnabled()
