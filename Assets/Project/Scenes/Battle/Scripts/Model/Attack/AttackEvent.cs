@@ -21,8 +21,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public readonly IReadOnlyList<Vector2> SpawnOffsets;
         public readonly IReadOnlyList<Quaternion> Rotations;
         public readonly MovementPreset MovementOverride;
+        public readonly MovementPreset BulletMovementOverride;
 
-        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null)
+        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, MovementPreset bulletMovementOverride = null)
         {
             Type = type;
             SourceIndex = sourceIndex;
@@ -31,7 +32,11 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             SpawnOffsets = spawnOffsets;
             Rotations = rotations;
             MovementOverride = movementOverride;
+            BulletMovementOverride = bulletMovementOverride;
         }
+
+        public AttackEvent WithBulletMovementOverride(MovementPreset preset)
+            => new(Type, Directions, SourceIndex, SpawnOffsets, SeType, Rotations, MovementOverride, preset);
 
         public static AttackEvent Single(Vector2 direction, Quaternion rotation, int sourceIndex = 0, SeType seType = SeType.None) => new(AttackEventType.Bullet, new[] { direction }, sourceIndex, seType: seType, rotations: new[] { Normalize(rotation) });
 

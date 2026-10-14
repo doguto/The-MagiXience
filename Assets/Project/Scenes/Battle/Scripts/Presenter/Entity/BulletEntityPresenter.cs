@@ -40,7 +40,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public BulletEntityModel Model => model;
 
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default)
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, MovementPreset movementOverride = null)
         {
             pool = objectPool;
             var resolvedRotation = rotation == default ? Quaternion.identity : rotation;
@@ -51,7 +51,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             else
                 model.Reinitialize(damage, isPlayerBullet);
 
-            StartMovementSequence(direction);
+            StartMovementSequence(direction, movementOverride);
 
             view.ResetView();
             view.UpdatePosition(position);
@@ -59,19 +59,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             BindModelToView();
         }
 
-        void StartMovementSequence(Vector2 direction)
+        void StartMovementSequence(Vector2 direction, MovementPreset movementOverride)
         {
             StopMovement();
 
-            if (movementSteps == null || movementSteps.Count == 0) return;
+            // Select per launch. Never replace the prefab's list or retain a previous pooled launch's override.
+            var steps = movementOverride != null ? movementOverride.Steps : movementSteps;
+            if (steps == null || steps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
-            RunMovementStepsAsync(direction, movementCts.Token).Forget();
+            RunMovementStepsAsync(steps, direction, movementCts.Token).Forget();
         }
 
-        async UniTaskVoid RunMovementStepsAsync(Vector2 direction, CancellationToken ct)
+        async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Vector2 direction, CancellationToken ct)
         {
-            foreach (var step in movementSteps)
+            foreach (var step in steps)
             {
                 if (step == null) continue;
                 ct.ThrowIfCancellationRequested();
@@ -82,6 +84,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 try
                 {
                     currentTween = step.Play(transform, direction, null);
+                    if (currentTween == null)
+                    {
+                        // Let Initialize finish before returning an invalid movement to the pool.
+                        await UniTask.Yield(PlayerLoopTiming.Update, ct);
+                        ReturnToPool();
+                        return;
+                    }
                     await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
                 }
                 finally

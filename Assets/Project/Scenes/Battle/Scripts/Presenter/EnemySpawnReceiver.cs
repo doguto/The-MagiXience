@@ -39,6 +39,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // EnemyEntityPresenterの場合のみ動き・攻撃の上書き、トラッカー登録を行う
             if (presenter is EnemyEntityPresenter enemyPresenter)
             {
+                enemyPresenter.OverrideBulletMovement(signal.BulletMovementOverride);
                 if (signal.MovementOverride != null) enemyPresenter.OverrideMovement(signal.MovementOverride);
                 if (signal.AttackOverride != null) enemyPresenter.OverrideAttack(signal.AttackOverride);
                 enemyTracker?.RegisterEnemy(enemyPresenter);

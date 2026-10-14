@@ -16,6 +16,7 @@ namespace Project.Scenes.Battle.Scripts.Model
     [Serializable]
     public class BattleWindSettings
     {
+        [Tooltip("自機への風の影響と風向き表示を有効にする。OFFでも弾用の方向スケジュールは継続する。")]
         public bool enabled;
         [Range(0f, 1f)] public float playerSpeedRatio = 0.2f;
         public List<WindInterval> intervals = new();
@@ -27,8 +28,12 @@ namespace Project.Scenes.Battle.Scripts.Model
         static BattleWindSettings settings;
         static int index;
         static float remaining;
-        public static bool Enabled => settings != null && settings.enabled && settings.intervals.Count > 0;
-        public static WindDirection Direction => Enabled ? settings.intervals[index].direction : WindDirection.None;
+        static bool HasSchedule => settings != null && settings.intervals != null && settings.intervals.Count > 0;
+        public static bool Enabled => HasSchedule && settings.enabled;
+        // Projectile paths retain the authored schedule even when player wind and its HUD are disabled.
+        public static WindDirection ProjectileDirection => HasSchedule ? settings.intervals[index].direction : WindDirection.None;
+        public static Vector2 ProjectileVector => ToVector(ProjectileDirection);
+        public static WindDirection Direction => Enabled ? ProjectileDirection : WindDirection.None;
         public static Vector2 Vector => ToVector(Direction);
         public static float PlayerSpeedRatio => Enabled ? Mathf.Clamp01(settings.playerSpeedRatio) : 0f;
 
@@ -39,12 +44,12 @@ namespace Project.Scenes.Battle.Scripts.Model
         {
             Reset();
             settings = value;
-            if (Enabled) remaining = Mathf.Max(0.1f, settings.intervals[0].seconds);
+            if (HasSchedule) remaining = Mathf.Max(0.1f, settings.intervals[0].seconds);
         }
 
         public static void Tick(float deltaTime)
         {
-            if (!Enabled || deltaTime <= 0f) return;
+            if (!HasSchedule || deltaTime <= 0f) return;
             remaining -= deltaTime;
             while (remaining <= 0f)
             {

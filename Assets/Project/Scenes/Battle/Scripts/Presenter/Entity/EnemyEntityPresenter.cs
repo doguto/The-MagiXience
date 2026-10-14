@@ -100,6 +100,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         IDisposable damageFlashSubscription;
         IDisposable attackTimingSubscription;
         bool isEnteredScreen = false;
+        MovementPreset bulletMovementOverride;
+
+        // Runtime instance setting supplied by its spawn clip; never changes the enemy or bullet prefab.
+        public void OverrideBulletMovement(MovementPreset preset) => bulletMovementOverride = preset;
 
         public EnemyEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
@@ -342,7 +346,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i));
+                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i),
+                    movementOverride: ev.BulletMovementOverride != null ? ev.BulletMovementOverride : bulletMovementOverride);
             }
         }
 
@@ -378,6 +383,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
                 {
+                    enemyPresenter.OverrideBulletMovement(ev.BulletMovementOverride);
                     if (ev.MovementOverride != null) enemyPresenter.OverrideMovement(ev.MovementOverride);
                     enemyTracker?.RegisterEnemy(enemyPresenter);
                 }
@@ -408,12 +414,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (deathAttackEntry?.signal == null) return;
 
-            var sourceIndex = deathAttackEntry.sourceIndexProvider?.Get() ?? 0;
-            var ev = deathAttackEntry.signal.CreateEvent(
-                deathAttackEntry.directionProvider,
-                deathAttackEntry.rotationProvider,
-                sourceIndex,
-                deathAttackEntry.seType);
+            var ev = deathAttackEntry.CreateEvent();
             HandleAttackEvent(ev);
         }
 

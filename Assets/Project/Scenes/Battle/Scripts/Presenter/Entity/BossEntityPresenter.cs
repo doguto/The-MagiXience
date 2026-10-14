@@ -319,7 +319,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i));
+                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i),
+                    movementOverride: ev.BulletMovementOverride);
             }
         }
 
@@ -348,6 +349,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
                 {
+                    enemyPresenter.OverrideBulletMovement(ev.BulletMovementOverride);
                     if (ev.MovementOverride != null) enemyPresenter.OverrideMovement(ev.MovementOverride);
                     enemyTracker?.RegisterEnemy(enemyPresenter);
                 }

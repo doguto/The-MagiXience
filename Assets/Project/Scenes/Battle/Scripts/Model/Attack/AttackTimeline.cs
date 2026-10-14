@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.Model.Attack.PhaseTrigger;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scripts.Extensions;
 using UniRx;
 using UnityEngine;
@@ -130,7 +131,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
         const int MaxPresetDepth = 8;
 
-        void ScheduleEntry(AttackTimelineEntry entry, float fireTime, int depth = 0)
+        void ScheduleEntry(AttackTimelineEntry entry, float fireTime, int depth = 0, MovementPreset inheritedBulletMovement = null)
         {
             if (entry.signal is PresetAttackSignal presetSignal)
             {
@@ -140,7 +141,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                     Debug.LogError("[AttackTimeline] Preset nesting depth limit reached. Circular reference?");
                     return;
                 }
-                ExpandPreset(presetSignal, entry.seType, fireTime, depth + 1);
+                ExpandPreset(presetSignal, entry.seType, fireTime, depth + 1,
+                    entry.bulletMovementOverride != null ? entry.bulletMovementOverride : inheritedBulletMovement);
                 return;
             }
 
@@ -149,14 +151,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 {
                     if (entry.signal != null)
                     {
-                        var sourceIndex = entry.sourceIndexProvider?.Get() ?? 0;
-                        onAttackTiming.OnNext(entry.signal.CreateEvent(entry.directionProvider, entry.rotationProvider, sourceIndex, entry.seType));
+                        onAttackTiming.OnNext(entry.CreateEvent(inheritedBulletMovement));
                     }
                 })
                 .AddTo(phaseDisposables);
         }
 
-        void ExpandPreset(PresetAttackSignal signal, SeType parentSeType, float baseTime, int depth)
+        void ExpandPreset(PresetAttackSignal signal, SeType parentSeType, float baseTime, int depth, MovementPreset inheritedBulletMovement)
         {
             var timeline = signal.Preset.CreateTimeline();
             if (timeline == null) return;
@@ -182,7 +183,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 foreach (var inner in entries)
                 {
                     var innerTime = baseTime + cycle * signal.CycleDuration + inner.time;
-                    ScheduleEntry(inner, innerTime, depth);
+                    ScheduleEntry(inner, innerTime, depth, inheritedBulletMovement);
                 }
             }
         }

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8877745320614750256}
   - component: {fileID: 366756060701291069}
   m_Layer: 10
-  m_Name: 3_Bullet_ParabolaDownUp
+  m_Name: 3_Bullet_Parabola
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -162,22 +162,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementSteps:
-  - rid: 8577112587349262546
+  - rid: 1781713956665032833
   view: {fileID: 8877745320614750256}
   spriteRenderer: {fileID: 1851957906713825068}
-  lifetime: 10
+  lifetime: 12
   references:
     version: 2
     RefIds:
-    - rid: 8577112587349262546
-      type: {class: AcceleratedMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 1781713956665032833
+      type: {class: VertexParabolaMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        direction: {x: -1, y: -1}
-        useConfiguredDirection: 1
-        initialSpeed: 3
-        acceleration: 0
-        maxSpeed: 0
-        minSpeed: 0
-        duration: 0
-        useWorldAcceleration: 1
-        worldAcceleration: {x: 0, y: 2}
+        orientation: 0
+        vertex: {x: -3, y: -4.5}
+        initialSpeed: 5

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
@@ -24,10 +25,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             );
         }
 
-        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false, Quaternion rotation = default)
+        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false, Quaternion rotation = default, MovementPreset movementOverride = null)
         {
             var bullet = pool.Get();
-            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation);
+            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation, movementOverride);
             return bullet;
         }
 
