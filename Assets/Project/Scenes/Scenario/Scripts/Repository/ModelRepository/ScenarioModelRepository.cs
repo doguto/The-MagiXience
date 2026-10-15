@@ -29,9 +29,9 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
                 scenarioModel.LoadData(data.steps);
 
                 // キャラクター画像をロード
-                var stageType = runtimeModel.CurrentStageType;
-                var enemyCharaName = GetEnemyCharaName(stageType.AsInt());
-                scenarioModel.LoadCharacterSprites(enemyCharaName);
+                var stageData = StageModelRepository.Instance.GetByStageNumber(runtimeModel.CurrentStageType.AsInt()).StageData;
+                scenarioModel.LoadCharacterSprites(stageData.charaStillAddress);
+                scenarioModel.SetEnemyStillLayout(stageData.scenarioEnemyStillOffset, stageData.scenarioEnemyStillScale);
             }
 
             return scenarioModel;
@@ -67,12 +67,6 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
         {
             var situationSuffix = situation == BattleSituation.Way ? "Way" : "Boss";
             return $"Stage{stageNumber}{situationSuffix}Scenario";
-        }
-
-        string GetEnemyCharaName(int stageNumber)
-        {
-            var stageModel = StageModelRepository.Instance.GetByStageNumber(stageNumber);
-            return stageModel.StageData.charaStillAddress;
         }
     }
 }

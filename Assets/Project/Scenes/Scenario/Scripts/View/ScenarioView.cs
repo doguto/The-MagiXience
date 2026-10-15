@@ -17,6 +17,9 @@ namespace Project.Scenes.Scenario.Scripts.View
         [SerializeField] Image enemyImage;
         [SerializeField] Image faceImage;
 
+        Vector2 enemyImageBasePosition;
+        Vector3 enemyImageBaseScale;
+
         // キャラ名 → 位置(LL/RR) のマッピング
         readonly Dictionary<string, string> castPositions = new();
 
@@ -33,6 +36,23 @@ namespace Project.Scenes.Scenario.Scripts.View
 
         /// <summary>文字送りで1文字を表示する間隔(秒)</summary>
         public float TypeWriterCharacterInterval => 1f / typeWriterCharactersPerSecond;
+
+        void Awake()
+        {
+            var enemyRect = enemyImage.rectTransform;
+            enemyImageBasePosition = enemyRect.anchoredPosition;
+            enemyImageBaseScale = enemyRect.localScale;
+        }
+
+        /// <summary>
+        /// 敵立ち絵ごとに顔の位置や大きさが違うため、シーン上の配置を基準に補正をかける
+        /// </summary>
+        public void SetEnemyStillLayout(Vector2 offset, float scale)
+        {
+            var enemyRect = enemyImage.rectTransform;
+            enemyRect.anchoredPosition = enemyImageBasePosition + offset;
+            enemyRect.localScale = enemyImageBaseScale * scale;
+        }
 
         public void SetTypeWriter(bool enabled, float charactersPerSecond)
         {

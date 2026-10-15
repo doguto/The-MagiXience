@@ -16,6 +16,8 @@ namespace Project.Scenes.Scenario.Scripts.Model
         public Sprite EnemyCrazyStillSprite { get; private set; }
         public Dictionary<string, Sprite> PlayerFaceSprites { get; private set; }
         public Dictionary<string, Sprite> EnemyFaceSprites { get; private set; }
+        public Vector2 EnemyStillOffset { get; private set; }
+        public float EnemyStillScale { get; private set; } = 1f;
 
 
         public ScenarioStep CurrentStep => steps[currentIndex];
@@ -45,6 +47,12 @@ namespace Project.Scenes.Scenario.Scripts.Model
             PlayerFaceSprites = faceAssetRepository.LoadAll("Ten");
 
             EnemyFaceSprites = faceAssetRepository.LoadAll(enemyCharaName);
+        }
+
+        public void SetEnemyStillLayout(Vector2 offset, float scale)
+        {
+            EnemyStillOffset = offset;
+            EnemyStillScale = scale > 0f ? scale : 1f;
         }
     }
 }

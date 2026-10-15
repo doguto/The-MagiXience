@@ -43,6 +43,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         void Start()
         {
             scenarioModel = ScenarioModelRepository.Instance.Get();
+            scenarioView.SetEnemyStillLayout(scenarioModel.EnemyStillOffset, scenarioModel.EnemyStillScale);
             globalScenePresenter = FindFirstObjectByType<GlobalScenePresenter>();
 
             MessageBroker.Default.Receive<UISubmitMessage>()
