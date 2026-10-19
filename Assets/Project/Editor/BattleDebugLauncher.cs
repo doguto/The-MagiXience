@@ -18,6 +18,9 @@ namespace Project.Editor
         const string PrefKeySituation = "BattleDebugLauncher.Situation";
         const string PrefKeyStartPhaseIndex = "BattleDebugLauncher.StartPhaseIndex";
 
+        static readonly Vector2 WindowMinSize = new(360f, 220f);
+        static readonly Vector2 WindowInitialSize = new(420f, 260f);
+
         int stageNumber = 1;
         BattleSituation situation = BattleSituation.Way;
         int startPhaseIndex;
@@ -31,7 +34,9 @@ namespace Project.Editor
         [MenuItem("Tools/Battle Debug Launcher")]
         public static void ShowWindow()
         {
-            GetWindow<BattleDebugLauncher>("Battle Debug Launcher");
+            var window = GetWindow<BattleDebugLauncher>("Battle Debug Launcher");
+            window.minSize = WindowMinSize;
+            window.position = new Rect(window.position.position, WindowInitialSize);
         }
 
         void OnEnable()
@@ -126,7 +131,10 @@ namespace Project.Editor
             startPhaseIndex = EditorGUILayout.Popup("Start Phase", startPhaseIndex, phaseLabels);
         }
 
-        string BuildPhaseCacheKey() => $"{stageNumber}/{situation}";
+        string BuildPhaseCacheKey()
+        {
+            return $"{stageNumber}/{situation}";
+        }
 
         void RefreshPhaseLabelsIfNeeded()
         {
@@ -172,12 +180,8 @@ namespace Project.Editor
             var labels = new List<string>();
 
             foreach (var group in sequenceAsset.SequenceGroups)
-            {
-                foreach (var phase in group.Phases)
-                {
-                    labels.Add(phase.TimelineBuilder != null ? phase.TimelineBuilder.name : "(no timeline)");
-                }
-            }
+            foreach (var phase in group.Phases)
+                labels.Add(phase.TimelineBuilder != null ? phase.TimelineBuilder.name : "(no timeline)");
 
             return labels.ToArray();
         }
