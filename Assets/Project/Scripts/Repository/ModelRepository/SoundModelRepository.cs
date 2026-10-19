@@ -51,7 +51,15 @@ namespace Project.Scripts.Repository.ModelRepository
         // 逆にSEは使用頻度が高そうなためリフレッシュせずメモリにずっと置く
         public bool RefreshBgmModel(SceneType sceneType, BgmType bgmType)
         {
-            var bgmModel = bgmModels.Find(x => x.BgmData.bgmType == bgmType);
+            var bgmModel = bgmModels.Find(x => x.BgmData.bgmType == bgmType && x.BgmData.sceneType == sceneType);
+            return RefreshBgmModel(bgmModel);
+        }
+
+        public bool RefreshBgmModel(BgmModel bgmModel)
+        {
+            if (bgmModel == null) return false;
+
+            bgmModel.ReleaseAudioClip();
             return bgmModels.Remove(bgmModel);
         }
 

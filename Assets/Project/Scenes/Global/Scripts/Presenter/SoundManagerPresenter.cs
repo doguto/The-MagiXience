@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Extensions;
+using Project.Scripts.Model;
 using Project.Scripts.Presenter;
 using Project.Scripts.Repository.ModelRepository;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
         public AudioSource BgmAudioSource => bgmAudioSource;
 
         SoundModelRepository soundModelRepository;
+        BgmModel currentBgmModel;
 
         int bgmLoopStartSamples;
         int bgmLoopEndSamples;
@@ -63,6 +65,13 @@ namespace Project.Scenes.Global.Scripts.Presenter
             {
                 bgmAudioSource.Play();
             }
+
+            // 曲が切り替わったら前の曲を解放する
+            if (currentBgmModel != null && currentBgmModel != bgmModel)
+            {
+                soundModelRepository.RefreshBgmModel(currentBgmModel);
+            }
+            currentBgmModel = bgmModel;
 
             await UniTask.CompletedTask;
         }
