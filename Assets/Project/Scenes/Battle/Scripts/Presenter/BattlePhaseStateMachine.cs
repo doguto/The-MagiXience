@@ -18,6 +18,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         BattleSequenceModel activeSequence;
         BattlePhaseModelBase activePhase;
+        // 直前に終了したフェーズ。そのフェーズのOnExitPhase通知の最中に破棄しないよう、次の遷移まで破棄を遅らせる
+        BattlePhaseModelBase exitedPhase;
         IDisposable exitSubscription;
         Func<BattlePhaseModelBase, TimelineAsset> timelineResolver;
 
@@ -61,6 +63,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 return;
             }
+
+            // Directorがまだ再生中のTimelineAssetを持つフェーズは破棄しない(次フェーズにTimelineが無い場合など)
+            if (exitedPhase != null && !(playableDirector && exitedPhase.OwnsTimeline(playableDirector.playableAsset)))
+            {
+                activeSequence.ReleasePhase(exitedPhase);
+            }
+            exitedPhase = activePhase;
 
             var nextPhase = activeSequence.MoveNext();
             if (nextPhase == null)
@@ -146,11 +155,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.Situation} with {sequence.AllCreatedPhases.Count} phases", this);
             foreach (var phase in sequence.AllCreatedPhases)
             {
-                Debug.Log($"[BattlePhaseStateMachine] Disposing phase {phase.PhaseId}", this);
                 phase.Dispose();
+            }
+
+            if (sequence == activeSequence)
+            {
+                exitedPhase = null;
             }
         }
 

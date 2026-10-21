@@ -58,7 +58,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         protected override void OnDeathCore()
         {
-            Debug.Log("[EnemyEntityModel] Enemy died.");
         }
 
         public override void Dispose()

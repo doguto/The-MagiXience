@@ -86,6 +86,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         CancellationTokenSource deathCts;
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
+        readonly SerialDisposable attackTimingSubscription = new();
+        Animator animator;
         readonly Subject<Unit> deathSequenceCompleted = new();
 
         public BossEntityModel Model => model;
@@ -97,6 +99,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
+            animator = GetComponent<Animator>();
 
             model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
 
@@ -196,10 +199,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             attackTimeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation, model.CurrentHp, model.MaxHp);
             model.SetAttackStrategy(attackTimeline);
 
-            model.AttackStrategy.OnAttackTiming
+            // Phase毎に購読し直すため、presenter寿命のdisposablesへ積み上げず前回分を置き換える
+            attackTimingSubscription.Disposable = model.AttackStrategy.OnAttackTiming
                 .TakeUntil(model.OnDeath)
-                .Subscribe(ev => HandleAttackEvent(ev))
-                .AddTo(disposables);
+                .Subscribe(ev => HandleAttackEvent(ev));
         }
 
         void StartMovementSequence(IReadOnlyList<IMovementStep> steps)
@@ -209,7 +212,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (steps == null || steps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
-            var animator = GetComponent<Animator>();
             RunMovementStepsAsync(steps, animator, movementCts.Token).Forget();
         }
 
@@ -217,7 +219,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (steps == null || steps.Count == 0) return;
 
-            var animator = GetComponent<Animator>();
             var sequence = DOTween.Sequence();
             foreach (var step in steps)
             {
@@ -289,7 +290,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (model == null || !model.IsAlive) return;
 
             model.UpdateAttack(Time.deltaTime);
-            view.UpdatePosition(transform.position);
         }
 
         void HandleAttackEvent(AttackEvent ev)
@@ -318,7 +318,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             StopMovement();
 
-            var animator = GetComponent<Animator>();
             var tween = step.Play(transform, Vector2.zero, animator);
             if (tween != null)
             {
@@ -478,8 +477,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             var col = GetComponent<Collider2D>();
             if (col != null) col.enabled = false;
 
-            Debug.Log("[BossEntityPresenter] Boss died.");
-
             deathCts?.Cancel();
             deathCts?.Dispose();
             deathCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
@@ -522,6 +519,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             deathCts = null;
             damageFlashSubscription?.Dispose();
             disposables.Dispose();
+            attackTimingSubscription.Dispose();
             deathSequenceCompleted.Dispose();
             model?.AttackStrategy?.Dispose();
             model?.Dispose();

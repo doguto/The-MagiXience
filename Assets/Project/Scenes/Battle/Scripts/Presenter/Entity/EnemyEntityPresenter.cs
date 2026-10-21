@@ -105,11 +105,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public EnemyEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
 
+        // 敵は大量に生成されるため、シーン全体を走査するFindFirstObjectByTypeの結果を全インスタンスで共有する。
+        // 破棄済み(シーン遷移後)の場合はUnityのnull判定で再検索される。
+        static PlayerEntityPresenter cachedPlayerPresenter;
+        static EnemyTracker cachedEnemyTracker;
+        Animator animator;
+
         void Awake()
         {
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[EnemyEntityPresenter] BulletPools is not assigned!");
-            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
-            enemyTracker = FindFirstObjectByType<EnemyTracker>();
+            if (cachedPlayerPresenter == null) cachedPlayerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            if (cachedEnemyTracker == null) cachedEnemyTracker = FindFirstObjectByType<EnemyTracker>();
+            playerPresenter = cachedPlayerPresenter;
+            enemyTracker = cachedEnemyTracker;
+            animator = GetComponent<Animator>();
             Initialize(transform.position);
         }
 
@@ -117,8 +126,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             transform.position = spawnPosition;
             model = new EnemyEntityModel(maxHp, contactDamage, onlyChargeDamageable);
-
-            var animator = GetComponent<Animator>();
 
             // Movement: プリセット優先、なければインライン
             var steps = movementPreset != null
@@ -230,7 +237,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public void OverrideMovement(MovementPreset preset)
         {
             if (preset == null) return;
-            StartMovementSequence(preset.Steps, GetComponent<Animator>());
+            StartMovementSequence(preset.Steps, animator);
         }
 
         /// <summary>
@@ -295,8 +302,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.UpdateAttack(Time.deltaTime);
 
-            view.UpdatePosition(transform.position);
-
             if (IsOutOfScreen())
             {
                 Destroy(gameObject);
@@ -335,7 +340,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     Destroy(gameObject);
                     break;
                 case AttackEventType.ChangeMovement:
-                    if (ev.MovementStep != null) StartMovementSequence(new[] { ev.MovementStep }, GetComponent<Animator>());
+                    if (ev.MovementStep != null) StartMovementSequence(new[] { ev.MovementStep }, animator);
                     break;
             }
         }

@@ -84,7 +84,10 @@ namespace Project.Scenes.Battle.Scripts.View
         static Sprite fallbackArrowSprite;
 
         readonly List<SpriteRenderer> dots = new();
+        // 点線全体を流すための親。点を個別に毎フレーム動かす代わりに、この1つのTransformだけを動かす
+        Transform dotRoot;
         SpriteRenderer arrowRenderer;
+        float appliedAlpha = -1f;
         float elapsed;
         float blinkTimer;
         bool blinkOn = true;
@@ -132,10 +135,16 @@ namespace Project.Scenes.Battle.Scripts.View
             var dotWidth = width > 0f ? width : dotSize;
             var count = Mathf.Max(1, Mathf.FloorToInt((length - startOffset) / dotSpacing) + 1);
 
+            if (dotRoot == null)
+            {
+                dotRoot = new GameObject("Dots").transform;
+                dotRoot.SetParent(transform, false);
+            }
+
             for (var i = 0; i < count; i++)
             {
-                var dot = new GameObject($"Dot{i}");
-                dot.transform.SetParent(transform, false);
+                var dot = new GameObject("Dot");
+                dot.transform.SetParent(dotRoot, false);
                 dot.transform.localPosition = new Vector3(startOffset + dotSpacing * i, 0f, 0f);
 
                 var renderer = dot.AddComponent<SpriteRenderer>();
@@ -149,6 +158,8 @@ namespace Project.Scenes.Battle.Scripts.View
 
                 dots.Add(renderer);
             }
+
+            appliedAlpha = -1f;
         }
 
         /// <summary>
@@ -212,21 +223,22 @@ namespace Project.Scenes.Battle.Scripts.View
             if (Mathf.Approximately(flowSpeed, 0f)) return;
 
             var span = dotSpacing * dots.Count;
-            if (span <= 0f) return;
+            if (span <= 0f || dotRoot == null) return;
 
-            for (var i = 0; i < dots.Count; i++)
-            {
-                var baseX = startOffset + dotSpacing * i;
-                // 点線全体を dotSpacing 単位で循環させるので、見た目は「流れ続ける点線」になる
-                var offset = Mathf.Repeat(flowSpeed * elapsed, dotSpacing);
-                dots[i].transform.localPosition = new Vector3(baseX + offset, 0f, 0f);
-            }
+            // 点線全体を dotSpacing 単位で循環させるので、見た目は「流れ続ける点線」になる
+            var offset = Mathf.Repeat(flowSpeed * elapsed, dotSpacing);
+            dotRoot.localPosition = new Vector3(offset, 0f, 0f);
         }
 
         void ApplyAlpha()
         {
             var fade = fadeInDuration > 0f ? Mathf.Clamp01(elapsed / fadeInDuration) : 1f;
             var alpha = color.a * fade * (blinkOn ? 1f : 0.25f);
+
+            // 点滅の切り替わり・フェード中以外は値が変わらないため、全点への再設定を省く
+            if (Mathf.Approximately(alpha, appliedAlpha)) return;
+            appliedAlpha = alpha;
+
             var applied = new Color(color.r, color.g, color.b, alpha);
 
             foreach (var dot in dots)
