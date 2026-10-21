@@ -84,6 +84,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Tween entranceTween;
         CancellationTokenSource movementCts;
         CancellationTokenSource deathCts;
+        // 撃破時にキャンセルされる。spawnDelay等で予約済みの弾生成を、撃破後(BulletClear後)に実行させないために使う
+        CancellationTokenSource aliveCts;
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
         readonly SerialDisposable attackTimingSubscription = new();
@@ -101,6 +103,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
             animator = GetComponent<Animator>();
 
+            aliveCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
             model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
 
             model.OnDeath
@@ -321,9 +324,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             var tween = step.Play(transform, Vector2.zero, animator);
             if (tween != null)
             {
-                await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
+                await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, aliveCts.Token);
             }
 
+            if (!model.IsAlive) return;
             StartMovementSequence(currentPhaseMovementSteps);
         }
 
@@ -359,7 +363,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         async UniTaskVoid SpawnBulletDelayed(BulletPool pool, AttackEvent ev, int index, float spawnDelay)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: aliveCts.Token);
             if (pool == null) return;
 
             pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement);
@@ -376,7 +380,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             const float ReachEpsilon = 1e-4f;
             const float TimeoutGraceSeconds = 0.5f;
 
-            var ct = this.GetCancellationTokenOnDestroy();
+            var ct = aliveCts.Token;
             var count = ev.Directions.Count;
             var origin = transform.position;
             var destination = path.ResolveDestination(origin);
@@ -397,7 +401,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     await UniTask.Yield(PlayerLoopTiming.Update, ct);
                 }
 
-                if (pool == null) return;
+                if (pool == null || ct.IsCancellationRequested) return;
 
                 var releaseAt = startTime + ev.GetSpawnDelayAt(i) + ev.GetStartDelayAt(i);
                 var startDelay = Mathf.Max(0f, releaseAt - Time.time);
@@ -472,6 +476,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void HandleDeath()
         {
+            aliveCts?.Cancel();
             StopMovement();
             model.AttackStrategy?.Dispose();
             var col = GetComponent<Collider2D>();
@@ -517,6 +522,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             deathCts?.Cancel();
             deathCts?.Dispose();
             deathCts = null;
+            aliveCts?.Cancel();
+            aliveCts?.Dispose();
+            aliveCts = null;
             damageFlashSubscription?.Dispose();
             disposables.Dispose();
             attackTimingSubscription.Dispose();
