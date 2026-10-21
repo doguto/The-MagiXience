@@ -29,6 +29,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         public void SetTimelineResolver(Func<BattlePhaseModelBase, TimelineAsset> resolver)
             => timelineResolver = resolver;
 
+        void Update() => BattleWind.Tick(Time.deltaTime);
+        void OnGUI() => WindIndicator.Draw();
+
         public void PlaySequence(BattleSequenceModel sequence)
         {
             if (sequence == null)
@@ -41,9 +44,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             Stop(sequenceToKeep: sequence);
             activeSequence = sequence;
             activeSequence.Reset();
+            BattleWind.Begin(sequence.Wind);
 
             if (!activeSequence.HasPhases)
             {
+                BattleWind.Reset();
                 sequenceCompleted.OnNext(activeSequence.Situation);
                 DisposeSequence(activeSequence);
                 activeSequence = null;
@@ -74,6 +79,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var nextPhase = activeSequence.MoveNext();
             if (nextPhase == null)
             {
+                BattleWind.Reset();
                 playableDirector?.Stop();
                 sequenceCompleted.OnNext(activeSequence.Situation);
                 DisposeSequence(activeSequence);
@@ -129,6 +135,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public void Stop(BattleSequenceModel sequenceToKeep = null)
         {
+            BattleWind.Reset();
             Debug.Log($"[BattlePhaseStateMachine] Stop called, activeSequence: {activeSequence?.Situation}", this);
             exitSubscription?.Dispose();
             exitSubscription = null;

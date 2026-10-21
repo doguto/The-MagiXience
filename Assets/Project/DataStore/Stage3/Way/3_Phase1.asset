@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e9eb2c7bf1b4174a965e674148ccd2f, type: 3}
+  m_Name: 3_Phase1
+  m_EditorClassIdentifier: 
+  signalTracks: []
+  animationTracks: []
+  activationTracks: []
+  audioTracks: []
+  controlTracks: []
+  enemySpawnTracks:
+  - trackName: EnemySpawn
+    clips:
+    - time: 0
+      spawnPosition: {x: 10, y: 0, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 78621f3e2651cc84598d881bd44a6090, type: 3}
+      movementOverride: {fileID: 11400000, guid: ddd87d1dc8c8af140a0f2309255006fb, type: 2}
+      attackOverride: {fileID: 11400000, guid: fb5ddadccad144246b8373128b3d2299, type: 2}
+      bulletMovementOverride: {fileID: 11400000, guid: 4ae66a92b1e07b74083bbb07c3a2f98e, type: 2}
+    - time: 1.5
+      spawnPosition: {x: 10, y: 0, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 78621f3e2651cc84598d881bd44a6090, type: 3}
+      movementOverride: {fileID: 11400000, guid: 273b2a0e381de0e489c85b61b0ae4cc4, type: 2}
+      attackOverride: {fileID: 11400000, guid: fb5ddadccad144246b8373128b3d2299, type: 2}
+      bulletMovementOverride: {fileID: 11400000, guid: 4ae66a92b1e07b74083bbb07c3a2f98e, type: 2}
+    - time: 3
+      spawnPosition: {x: 10, y: 0, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 78621f3e2651cc84598d881bd44a6090, type: 3}
+      movementOverride: {fileID: 11400000, guid: 6dced5624621fbf479abaa2d36d030a2, type: 2}
+      attackOverride: {fileID: 11400000, guid: fb5ddadccad144246b8373128b3d2299, type: 2}
+      bulletMovementOverride: {fileID: 11400000, guid: 4ae66a92b1e07b74083bbb07c3a2f98e, type: 2}
+    - time: 4.5
+      spawnPosition: {x: 10, y: 0, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 78621f3e2651cc84598d881bd44a6090, type: 3}
+      movementOverride: {fileID: 11400000, guid: 7f67d5ee6419f14459cf0c4179cf2aba, type: 2}
+      attackOverride: {fileID: 11400000, guid: fb5ddadccad144246b8373128b3d2299, type: 2}
+      bulletMovementOverride: {fileID: 11400000, guid: 4ae66a92b1e07b74083bbb07c3a2f98e, type: 2}
+    - time: 6
+      spawnPosition: {x: 10, y: 0, z: 0}
+      prefab: {fileID: 7074045735317373604, guid: 78621f3e2651cc84598d881bd44a6090, type: 3}
+      movementOverride: {fileID: 11400000, guid: 748d98622b4cf384b845b98792d7dccf, type: 2}
+      attackOverride: {fileID: 11400000, guid: fb5ddadccad144246b8373128b3d2299, type: 2}
+      bulletMovementOverride: {fileID: 11400000, guid: 4ae66a92b1e07b74083bbb07c3a2f98e, type: 2}
+  bulletClearTracks: []
+  bossAttackPreset: {fileID: 0}
+  bossMovementPreset: {fileID: 0}

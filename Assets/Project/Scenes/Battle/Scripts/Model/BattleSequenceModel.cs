@@ -28,7 +28,8 @@ namespace Project.Scenes.Battle.Scripts.Model
             Func<BattlePhaseDefinition, BattlePhaseModelBase> phaseFactory,
             GameObject bossPrefab = null,
             Vector3 bossSpawnPosition = default,
-            IReadOnlyList<IMovementStep> bossEntranceMovement = null)
+            IReadOnlyList<IMovementStep> bossEntranceMovement = null,
+            BattleWindSettings wind = null)
         {
             Situation = situation;
             this.groups = groups;
@@ -36,9 +37,11 @@ namespace Project.Scenes.Battle.Scripts.Model
             BossPrefab = bossPrefab;
             BossSpawnPosition = bossSpawnPosition;
             BossEntranceMovement = bossEntranceMovement;
+            Wind = wind;
         }
 
         public BattleSituation Situation { get; }
+        public BattleWindSettings Wind { get; }
         public bool HasPhases => groups.Count > 0;
         public IReadOnlyList<BattlePhaseModelBase> AllCreatedPhases => allCreatedPhases;
         public GameObject BossPrefab { get; }
