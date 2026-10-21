@@ -9,6 +9,7 @@ using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
@@ -22,6 +23,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] EnemyTracker enemyTracker;
         [SerializeField] BackgroundPresenter backgroundPresenter;
         [SerializeField] BulletClearReceiver bulletClearReceiver;
+        [SerializeField] BgmNameView bgmNameView;
+
+        [Header("Continue Settings")]
+        [Tooltip("コンティニュー回数に応じたPlayerの最大HP。index=コンティニュー回数（0=初回）。回数がテーブル長を超えた場合は末尾の値を使用する。")]
+        [SerializeField] int[] continueHpTable = { 100 };
 
         BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
@@ -44,6 +50,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         bool isBattleStarted;
         bool hasResumedPlayerAnimationOnBoss;
         bool hasShownTutorial;
+
+        // コンティニュー回数。バトルシーン内でのみ保持し、シーン遷移でリセットされる。
+        int continueCount;
         CancellationTokenSource sequenceTransitionCts;
         IDisposable scenarioCompletedSubscription;
         IDisposable tutorialClosedSubscription;
@@ -180,7 +189,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                            .Subscribe(_ =>
                            {
                                var gameOverModal = globalScenePresenter?.GameOverModalPresenter;
-                               gameOverModal?.Open();
+                               gameOverModal?.Open(CalculateRetryHpIncreaseRate());
                            })
                            .AddTo(disposables);
 
@@ -252,6 +261,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             pendingScenarioCallback = null;
 
             playerPresenter?.Retry();
+            // コンティニュー回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
+            continueCount++;
+            ApplyPlayerMaxHp();
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
 
@@ -328,6 +340,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             backgroundModel.SetStage(stageModel.BackgroundAddress);
             backgroundPresenter?.Initialize(backgroundModel);
             playerPresenter?.Initialize();
+            ApplyPlayerMaxHp();
             playerPresenter?.SubscribeToAttackInput();
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
@@ -354,6 +367,29 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 Debug.LogError("No battle sequences are configured for this stage.", this);
             }
+        }
+
+        // 現在のコンティニュー回数に応じた最大HPをPlayerに適用する。
+        void ApplyPlayerMaxHp()
+        {
+            if (playerPresenter == null) return;
+            if (continueHpTable == null || continueHpTable.Length == 0) return;
+
+            var index = Mathf.Clamp(continueCount, 0, continueHpTable.Length - 1);
+            playerPresenter.SetMaxHp(continueHpTable[index]);
+        }
+
+        // 次回リトライ時の最大HPが、初期HP(テーブル先頭)から何%増加しているかを返す。
+        int CalculateRetryHpIncreaseRate()
+        {
+            if (continueHpTable == null || continueHpTable.Length == 0) return 0;
+
+            var baseHp = continueHpTable[0];
+            if (baseHp <= 0) return 0;
+
+            var nextIndex = Mathf.Clamp(continueCount + 1, 0, continueHpTable.Length - 1);
+            var nextHp = continueHpTable[nextIndex];
+            return Mathf.RoundToInt((nextHp - baseHp) * 100f / baseHp);
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -386,6 +422,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var sceneType = (SceneType)(stageNumber + 2);
             var bgmType = situation == BattleSituation.Boss ? BgmType.BattleBoss : BgmType.BattleWay;
             soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
+
+            // 東方風に、BGMの切り替わり時に曲名を表示する
+            if (bgmNameView != null)
+            {
+                var bgmModel = SoundModelRepository.Instance.GetBgmModel(sceneType, bgmType);
+                bgmNameView.Show(bgmModel.DisplayName);
+            }
         }
 
         StageModel ResolveStageModel()
@@ -608,16 +651,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             phaseStateMachine.PlaySequence(bossSequence);
         }
 
-        async void DemoClear()
-        {
-            stageModel?.Clear();
-            OpenNextStage(stageModel);
-
-            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
-
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
-        }
-
         // クリアしたステージの次のステージを開放する。
         void OpenNextStage(StageModel clearedStage)
         {
@@ -639,16 +672,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             stageModel?.Clear();
             OpenNextStage(stageModel);
 
-            // 次のステージをロードせず、ステージ選択画面へ遷移する
+            // 次のステージをロードせず、To be continued画面を経由してステージ選択画面へ遷移する
             phaseStateMachine.Stop();
 
-            // BGMをタイトルのものに切り替える
-            soundManager?.PlayBGMAsync(SceneType.Title).Forget();
-
-            var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
-            await SceneManager.LoadSceneAsync(SceneRouterModel.StageList, LoadSceneMode.Additive).ToUniTask();
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.StageList));
-            SceneManager.UnloadSceneAsync(battleSceneName).ToUniTask().Forget();
+            // BGMの切り替え・StageListへの遷移・Battleシーンの破棄はDemoClearScenePresenterが行う
+            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
         }
 
         void OnDestroy()

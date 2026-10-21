@@ -22,6 +22,19 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         IReadOnlyReactiveProperty<int> currentHp;
         int maxHp;
 
+        // 発火予定の一覧(発火時刻の昇順)。エントリ毎にObservable.Timerを作ると、ループ展開で
+        // 数百個のタイマーがPhase開始時に生成され毎フレームポーリングされるため、Update()でまとめて捌く。
+        List<ScheduledAction> scheduledActions;
+        int scheduledHead;
+        float phaseElapsed;
+        int phaseGeneration;
+
+        struct ScheduledAction
+        {
+            public float Time;
+            public Action Action;
+        }
+
         public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
         public bool IsCompleted { get; private set; }
 
@@ -73,6 +86,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             phaseDisposables = new CompositeDisposable();
             disposables.Add(phaseDisposables);
 
+            ClearSchedule();
+            phaseGeneration++;
+
             bool isLastPhase = index >= phases.Count - 1;
             ScheduleEntries(phase, isLastPhase);
 
@@ -106,9 +122,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
                 if (isLastPhase)
                 {
-                    Observable.Timer(TimeSpan.FromSeconds(phase.loopEnd))
-                        .Subscribe(_ => IsCompleted = true)
-                        .AddTo(phaseDisposables);
+                    Schedule(phase.loopEnd, () => IsCompleted = true);
                 }
             }
             else
@@ -122,9 +136,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
                 if (isLastPhase)
                 {
-                    Observable.Timer(TimeSpan.FromSeconds(maxTime))
-                        .Subscribe(_ => IsCompleted = true)
-                        .AddTo(phaseDisposables);
+                    Schedule(maxTime, () => IsCompleted = true);
                 }
             }
         }
@@ -146,15 +158,134 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 return;
             }
 
-            Observable.Timer(TimeSpan.FromSeconds(fireTime))
-                .Subscribe(_ =>
+            if (entry.signal is BeamAttackSignal beamSignal)
+            {
+                if (depth >= MaxPresetDepth)
                 {
-                    if (entry.signal != null)
-                    {
-                        onAttackTiming.OnNext(entry.CreateEvent(inheritedBulletMovement));
-                    }
-                })
-                .AddTo(phaseDisposables);
+                    Debug.LogError("[AttackTimeline] Preset nesting depth limit reached. Circular reference?");
+                    return;
+                }
+                ExpandBeam(beamSignal, entry.seType, fireTime, depth + 1);
+                return;
+            }
+
+            if (entry.signal is SpriteBeamAttackSignal spriteBeamSignal)
+            {
+                ExpandSpriteBeam(spriteBeamSignal, fireTime);
+                return;
+            }
+
+            if (entry.signal == null) return;
+
+            Schedule(fireTime, () =>
+            {
+                var attackEvent = entry.CreateEvent(inheritedBulletMovement);
+                onAttackTiming.OnNext(ApplyBeamOrigin(attackEvent, entry.directionProvider));
+            });
+        }
+
+        /// <summary>
+        /// directionProvider がビーム線を持っている弾イベントは、発射口ではなく線分の起点から出し、
+        /// 終点で消えるよう射程を持たせる。シグナル側にビームを意識させないための後処理。
+        /// </summary>
+        static AttackEvent ApplyBeamOrigin(AttackEvent attackEvent, IDirectionProvider directionProvider)
+        {
+            if (attackEvent.Type != AttackEventType.Bullet) return attackEvent;
+            if (directionProvider is not IBeamLineProvider beamProvider) return attackEvent;
+
+            var line = beamProvider.Line;
+            return attackEvent.WithWorldOrigin(line.Start, line.Length);
+        }
+
+        /// <summary>
+        /// ビーム1本を「予告線 → 連射」に展開する。
+        /// 起点・終点は展開時に確定して全弾で共有するため、予告線と弾の軌道がズレることはない。
+        /// </summary>
+        void ExpandBeam(BeamAttackSignal signal, SeType parentSeType, float baseTime, int depth)
+        {
+            var line = signal.Line;
+
+            if (signal.ShowWarning)
+            {
+                Schedule(baseTime, () => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                    line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration, width: signal.WarningWidth)));
+            }
+
+            if (signal.BulletPreset == null) return;
+
+            var timeline = signal.BulletPreset.CreateTimeline();
+            if (timeline == null) return;
+
+            // ネストしたプリセットと同じく、先頭Phaseのみを1周期分として展開する
+            var entries = timeline.phases.Count > 0 ? timeline.phases[0].entries : null;
+            if (entries == null || entries.Count == 0) return;
+
+            foreach (var inner in entries)
+            {
+                // 起点・射程はここで刺した directionProvider 経由で ApplyBeamOrigin に伝わる
+                inner.directionProvider = new BeamLineDirectionConfig(line.Clone());
+                InitializeEntryProviders(inner);
+
+                if (inner.seType == SeType.None && parentSeType != SeType.None)
+                {
+                    inner.seType = parentSeType;
+                }
+            }
+
+            var fireStartTime = baseTime + signal.WarningDuration;
+            for (var shot = 0; shot < signal.ShotCount; shot++)
+            {
+                foreach (var inner in entries)
+                {
+                    ScheduleEntry(inner, fireStartTime + shot * signal.ShotInterval + inner.time, depth);
+                }
+            }
+        }
+
+        /// <summary>
+        /// ビーム1本を「予告線 → 本体を1体生成」に展開する(一枚絵式)。
+        /// 予告線と同じ SpawnAtWorld 経路で本体を線分の起点に生成し、range=線分長 / duration=表示時間 を本体へ渡す。
+        /// 本体側(SpriteBeamView/Presenter)が1枚のスプライトの表示/非表示でビームを表現する。
+        /// </summary>
+        void ExpandSpriteBeam(SpriteBeamAttackSignal signal, float baseTime)
+        {
+            // 予告線を出す瞬間(baseTime到達時)に line を確定する。
+            // isRelative の敵位置基準もこのタイミングで取るので、敵が画面外から入場してくる場合でも
+            // 「予告が始まる時点の敵位置」からビームが出る。確定した line を本体にも渡して起点を一致させる。
+            if (signal.ShowWarning)
+            {
+                Schedule(baseTime, () =>
+                {
+                    var line = ResolveBeamLine(signal);
+                    onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                        line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration));
+                    ScheduleSpriteBeamBody(signal, line, signal.WarningDuration);
+                });
+                return;
+            }
+
+            // 予告なしの場合は baseTime 到達時に line を確定して即本体を出す。
+            Schedule(baseTime, () => ScheduleSpriteBeamBody(signal, ResolveBeamLine(signal), 0f));
+        }
+
+        /// <summary>予告開始時に確定した line を使い、delay 秒後にビーム本体を1体生成する。</summary>
+        void ScheduleSpriteBeamBody(SpriteBeamAttackSignal signal, BeamLine line, float delay)
+        {
+            Schedule(phaseElapsed + delay, () => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                line.Start, line.Direction, line.Rotation, signal.BodySourceIndex, line.Length, signal.BodyDuration)));
+        }
+
+        /// <summary>
+        /// signal の line を絶対ワールド座標の BeamLine に解決する。
+        /// isRelative なら呼び出し時点の敵位置を基準に、Start/End をワールド軸のオフセットとして加算する。
+        /// </summary>
+        BeamLine ResolveBeamLine(SpriteBeamAttackSignal signal)
+        {
+            var line = signal.Line;
+            if (!signal.IsRelative) return line;
+
+            var origin = (Vector2)(getEnemyPosition?.Invoke() ?? Vector3.zero);
+            return new BeamLine(line.Start + origin, line.End + origin);
         }
 
         void ExpandPreset(PresetAttackSignal signal, SeType parentSeType, float baseTime, int depth, MovementPreset inheritedBulletMovement)
@@ -201,10 +332,59 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             return copy;
         }
 
-        public void Update(float deltaTime) { }
+        /// <summary>現在のPhase開始からの経過時間 fireTime 秒で action を実行するよう登録する。</summary>
+        void Schedule(float fireTime, Action action)
+        {
+            scheduledActions ??= new List<ScheduledAction>();
+            var item = new ScheduledAction { Time = fireTime, Action = action };
+
+            // 同時刻は登録順に発火させるため、同時刻の末尾へ挿入する
+            int lo = scheduledHead, hi = scheduledActions.Count;
+            while (lo < hi)
+            {
+                var mid = (lo + hi) >> 1;
+                if (scheduledActions[mid].Time <= fireTime) lo = mid + 1;
+                else hi = mid;
+            }
+            scheduledActions.Insert(lo, item);
+        }
+
+        void ClearSchedule()
+        {
+            scheduledActions?.Clear();
+            scheduledHead = 0;
+            phaseElapsed = 0f;
+        }
+
+        public void Update(float deltaTime)
+        {
+            if (onAttackTiming == null || scheduledActions == null) return;
+
+            phaseElapsed += deltaTime;
+
+            var generation = phaseGeneration;
+            while (scheduledHead < scheduledActions.Count && scheduledActions[scheduledHead].Time <= phaseElapsed)
+            {
+                var action = scheduledActions[scheduledHead].Action;
+                scheduledHead++;
+                action();
+
+                // 発火した攻撃によってPhaseが切り替わった(スケジュールが作り直された)場合は打ち切る
+                if (generation != phaseGeneration) return;
+            }
+
+            // 消化済みの要素が溜まったらまとめて詰める
+            if (scheduledHead > 0 && scheduledHead * 2 >= scheduledActions.Count)
+            {
+                scheduledActions.RemoveRange(0, scheduledHead);
+                scheduledHead = 0;
+            }
+        }
 
         public void Dispose()
         {
+            ClearSchedule();
+            phaseGeneration++;
             phaseDisposables?.Dispose();
             disposables?.Dispose();
             onAttackTiming?.Dispose();

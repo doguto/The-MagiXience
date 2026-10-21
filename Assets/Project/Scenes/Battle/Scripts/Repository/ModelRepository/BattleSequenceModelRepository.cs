@@ -55,9 +55,26 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
             var groups = new List<SequenceGroupRuntime>(asset.SequenceGroups.Count);
             foreach (var sg in asset.SequenceGroups)
             {
-                groups.Add(new SequenceGroupRuntime(sg.Loop, sg.LoopCount, sg.Phases));
+                groups.Add(new SequenceGroupRuntime(
+                    sg.Loop, sg.LoopCount, sg.Phases, sg.RandomPick, sg.Interlude,
+                    CreateBossHpEndCondition(sg.EndBossHpPercent)));
             }
             return groups;
+        }
+
+        // HPが閾値以下になったかを返す判定。閾値0（無効）の場合は null。
+        Func<bool> CreateBossHpEndCondition(float hpPercent)
+        {
+            if (hpPercent <= 0f)
+            {
+                return null;
+            }
+
+            return () =>
+            {
+                var boss = getBossModel?.Invoke();
+                return boss != null && boss.CurrentHp.Value <= Mathf.CeilToInt(boss.MaxHp * hpPercent / 100f);
+            };
         }
 
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)

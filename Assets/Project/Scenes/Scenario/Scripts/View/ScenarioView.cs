@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
@@ -19,20 +20,90 @@ namespace Project.Scenes.Scenario.Scripts.View
         // キャラ名 → 位置(LL/RR) のマッピング
         readonly Dictionary<string, string> castPositions = new();
 
-        public void ShowCastMessage(string characterName, string message)
+        // 文字送り設定
+        bool isTypeWriterEnabled;
+        float typeWriterCharactersPerSecond;
+        Tween typingTween;
+        Action onTypingCompleted;
+
+        /// <summary>文字送り中かどうか</summary>
+        public bool IsTyping => typingTween != null;
+
+        public bool IsTypeWriterEnabled => isTypeWriterEnabled;
+
+        /// <summary>文字送りで1文字を表示する間隔(秒)</summary>
+        public float TypeWriterCharacterInterval => 1f / typeWriterCharactersPerSecond;
+
+        public void SetTypeWriter(bool enabled, float charactersPerSecond)
+        {
+            isTypeWriterEnabled = enabled;
+            typeWriterCharactersPerSecond = charactersPerSecond;
+        }
+
+        /// <param name="onDisplayed">全文の表示が完了したときに呼ばれる</param>
+        public void ShowCastMessage(string characterName, string message, Action onDisplayed = null)
         {
             // ChangeCastLayer();
             StopGrayingCast(characterName);
-            ShowMessage(characterName, message);
+            ShowMessage(characterName, message, onDisplayed);
         }
 
-        public void ShowMessage(string characterName, string message)
+        /// <param name="onDisplayed">全文の表示が完了したときに呼ばれる</param>
+        public void ShowMessage(string characterName, string message, Action onDisplayed = null)
         {
             characterNameText.text = characterName ?? "";
             contentsText.text = message ?? "";
+
+            typingTween?.Kill();
+            typingTween = null;
+            contentsText.maxVisibleCharacters = int.MaxValue;
+
+            if (!isTypeWriterEnabled)
+            {
+                onDisplayed?.Invoke();
+                return;
+            }
+
+            // リッチテキストタグを除いた表示文字数を取得するためメッシュを更新する
+            contentsText.ForceMeshUpdate();
+            var totalCharacters = contentsText.textInfo.characterCount;
+            if (totalCharacters == 0)
+            {
+                onDisplayed?.Invoke();
+                return;
+            }
+
+            onTypingCompleted = onDisplayed;
+            contentsText.maxVisibleCharacters = 0;
+            typingTween = DOTween.To(() => contentsText.maxVisibleCharacters,
+                                     x => contentsText.maxVisibleCharacters = x,
+                                     totalCharacters,
+                                     totalCharacters / typeWriterCharactersPerSecond)
+                                 .SetEase(Ease.Linear)
+                                 .SetLink(gameObject)
+                                 .OnComplete(FinishTyping);
         }
 
-        public void ShowCast(string characterName, string unknownArg1, string faceExpression,
+        /// <summary>文字送りを打ち切って全文を表示する</summary>
+        public void CompleteTyping()
+        {
+            if (typingTween == null) return;
+
+            typingTween.Kill();
+            FinishTyping();
+        }
+
+        void FinishTyping()
+        {
+            typingTween = null;
+            contentsText.maxVisibleCharacters = int.MaxValue;
+
+            var callback = onTypingCompleted;
+            onTypingCompleted = null;
+            callback?.Invoke();
+        }
+
+        public void ShowCast(string characterName, string stillType, string faceExpression,
             string displayTime, string position, string unknownArg2,
             Sprite playerSprite, Sprite enemySprite, Sprite faceSprite)
         {

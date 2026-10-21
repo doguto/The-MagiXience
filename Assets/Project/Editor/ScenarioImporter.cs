@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Project.Scenes.Scenario.Scripts.Model;
 using UnityEditor;
 using UnityEngine;
@@ -18,14 +19,45 @@ namespace Project.Editor
                 return;
             }
 
+            string fileName = Path.GetFileNameWithoutExtension(path);
+
+            // ファイル名から「{ステージ名}面ボス{前/後}」を解析してパスを組み立てる
+            var match = Regex.Match(fileName, @"^(.+?)面ボス(前|後)$");
+            if (!match.Success)
+            {
+                Debug.LogError($"シナリオファイル名が想定の形式ではありません（例: 1面ボス前）: {fileName}");
+                return;
+            }
+
+            string stageName = match.Groups[1].Value;
+            string wayOrBoss = match.Groups[2].Value == "前" ? "Way" : "Boss";
+
+            string directory = $"Assets/Project/DataStore/Stage{stageName}/{wayOrBoss}";
+            if (!AssetDatabase.IsValidFolder(directory))
+            {
+                Debug.LogError($"出力先フォルダが存在しません: {directory}");
+                return;
+            }
+
             string content = File.ReadAllText(path);
             ScenarioData data = ScriptableObject.CreateInstance<ScenarioData>();
             data.steps = ParseScenario(content);
 
-            string fileName = Path.GetFileNameWithoutExtension(path);
+            string assetPath = $"{directory}/Stage{stageName}{wayOrBoss}Scenario.asset";
 
-            string assetPath = $"Assets/Project/DataStore/{fileName}.asset";
-            AssetDatabase.CreateAsset(data, assetPath);
+            // 既存アセットがあれば上書きする
+            var existing = AssetDatabase.LoadAssetAtPath<ScenarioData>(assetPath);
+            if (existing != null)
+            {
+                existing.steps = data.steps;
+                EditorUtility.SetDirty(existing);
+                data = existing;
+            }
+            else
+            {
+                AssetDatabase.CreateAsset(data, assetPath);
+            }
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 

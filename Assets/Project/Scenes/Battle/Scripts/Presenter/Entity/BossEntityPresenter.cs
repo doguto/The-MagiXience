@@ -9,6 +9,7 @@ using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Model.Attack;
 using Project.Scenes.Battle.Scripts.Model.Movement;
+using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
@@ -79,11 +80,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         BossEntityModel model;
         PlayerEntityPresenter playerPresenter;
         readonly List<IMovementStep> activeMovementSteps = new();
+        IReadOnlyList<IMovementStep> currentPhaseMovementSteps;
         Tween entranceTween;
         CancellationTokenSource movementCts;
         CancellationTokenSource deathCts;
+        // 撃破時にキャンセルされる。spawnDelay等で予約済みの弾生成を、撃破後(BulletClear後)に実行させないために使う
+        CancellationTokenSource aliveCts;
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
+        readonly SerialDisposable attackTimingSubscription = new();
+        Animator animator;
         readonly Subject<Unit> deathSequenceCompleted = new();
 
         public BossEntityModel Model => model;
@@ -95,7 +101,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
+            animator = GetComponent<Animator>();
 
+            aliveCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
             model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
 
             model.OnDeath
@@ -110,15 +118,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void SubscribeToHpBar()
         {
-            float normalDenom = model.NormalMaxHp > 0 ? model.NormalMaxHp : 1f;
-            float strongDenom = model.StrongMaxHp > 0 ? model.StrongMaxHp : 1f;
+            float denom = model.MaxHp > 0 ? model.MaxHp : 1f;
 
-            model.NormalHp
-                .Subscribe(hp => view.SetNormalHpRatio(hp / normalDenom))
-                .AddTo(disposables);
-
-            model.StrongHp
-                .Subscribe(hp => view.SetStrongHpRatio(hp / strongDenom))
+            model.CurrentHp
+                .Subscribe(hp => view.SetHpRatio(hp / denom))
                 .AddTo(disposables);
         }
 
@@ -168,6 +171,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (builder == null)
             {
                 ApplyAttackTimeline(null);
+                currentPhaseMovementSteps = null;
                 StartMovementSequence(null);
                 return;
             }
@@ -178,10 +182,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 : null;
             ApplyAttackTimeline(attackTimeline);
 
-            var movementSteps = builder.BossMovementPreset != null
+            currentPhaseMovementSteps = builder.BossMovementPreset != null
                 ? builder.BossMovementPreset.Steps
                 : null;
-            StartMovementSequence(movementSteps);
+            StartMovementSequence(currentPhaseMovementSteps);
         }
 
         void ApplyAttackTimeline(AttackTimeline attackTimeline)
@@ -198,10 +202,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             attackTimeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation, model.CurrentHp, model.MaxHp);
             model.SetAttackStrategy(attackTimeline);
 
-            model.AttackStrategy.OnAttackTiming
+            // Phase毎に購読し直すため、presenter寿命のdisposablesへ積み上げず前回分を置き換える
+            attackTimingSubscription.Disposable = model.AttackStrategy.OnAttackTiming
                 .TakeUntil(model.OnDeath)
-                .Subscribe(ev => HandleAttackEvent(ev))
-                .AddTo(disposables);
+                .Subscribe(ev => HandleAttackEvent(ev));
         }
 
         void StartMovementSequence(IReadOnlyList<IMovementStep> steps)
@@ -211,7 +215,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (steps == null || steps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
-            var animator = GetComponent<Animator>();
             RunMovementStepsAsync(steps, animator, movementCts.Token).Forget();
         }
 
@@ -219,7 +222,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (steps == null || steps.Count == 0) return;
 
-            var animator = GetComponent<Animator>();
             var sequence = DOTween.Sequence();
             foreach (var step in steps)
             {
@@ -291,7 +293,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (model == null || !model.IsAlive) return;
 
             model.UpdateAttack(Time.deltaTime);
-            view.UpdatePosition(transform.position);
         }
 
         void HandleAttackEvent(AttackEvent ev)
@@ -299,12 +300,35 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             switch (ev.Type)
             {
                 case AttackEventType.Bullet:
+                    if (ev.MovementStep != null)
+                    {
+                        PlayMovementThenResume(ev.MovementStep).Forget();
+                    }
                     FireBullet(ev);
                     break;
                 case AttackEventType.EnemySpawn:
                     SpawnEnemy(ev);
                     break;
             }
+        }
+
+        /// <summary>
+        /// 通常の移動ループ(bossMovementPreset)を止めてMovementStepを再生する。
+        /// FireBulletとは並行実行され待ち合わせない(移動軌道上に弾が配置されるトレイル演出のため)。
+        /// 移動完了後は元のphaseの移動ループを最初から再開する(継続再生ではない。フェーズ開始時と同じ挙動)。
+        /// </summary>
+        async UniTaskVoid PlayMovementThenResume(IMovementStep step)
+        {
+            StopMovement();
+
+            var tween = step.Play(transform, Vector2.zero, animator);
+            if (tween != null)
+            {
+                await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, aliveCts.Token);
+            }
+
+            if (!model.IsAlive) return;
+            StartMovementSequence(currentPhaseMovementSteps);
         }
 
         void FireBullet(AttackEvent ev)
@@ -317,17 +341,86 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 soundManager?.PlaySE(ev.SeType);
             }
 
+            if (ev.SpawnAlongMovementPath && ev.MovementStep is TweenMovementConfig trailPath)
+            {
+                SpawnBulletsAlongPathAsync(pool, ev, trailPath).Forget();
+                return;
+            }
+
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i),
-                    movementOverride: ev.BulletMovementOverride);
+                var spawnDelay = ev.GetSpawnDelayAt(i);
+                if (spawnDelay > 0f)
+                {
+                    SpawnBulletDelayed(pool, ev, i, spawnDelay).Forget();
+                }
+                else
+                {
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
+                }
+            }
+        }
+
+        async UniTaskVoid SpawnBulletDelayed(BulletPool pool, AttackEvent ev, int index, float spawnDelay)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: aliveCts.Token);
+            if (pool == null) return;
+
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
+        }
+
+        /// <summary>
+        /// 移動の軌道(始点→終点)を弾数で等分した座標を事前に求め、本体がその座標を通過した時点で、
+        /// 通過時の位置ではなく事前計算した座標へ弾を生成する。
+        /// 時間駆動だとフレーム落ちで配置間隔が不均等になるため、座標の均等性を優先する(生成時刻はズレうる)。
+        /// 一斉発射の時刻は SpawnDelays + StartDelays の合計(全弾共通)を絶対時刻として維持し、生成が遅れた分は待機を短縮する。
+        /// </summary>
+        async UniTaskVoid SpawnBulletsAlongPathAsync(BulletPool pool, AttackEvent ev, TweenMovementConfig path)
+        {
+            const float ReachEpsilon = 1e-4f;
+            const float TimeoutGraceSeconds = 0.5f;
+
+            var ct = aliveCts.Token;
+            var count = ev.Directions.Count;
+            var origin = transform.position;
+            var destination = path.ResolveDestination(origin);
+            var pathVector = destination - origin;
+            var pathLengthSqr = pathVector.sqrMagnitude;
+            var poolOffset = pool.transform.position - origin;
+            var startTime = Time.time;
+            // 移動が途中で中断された場合に待ち続けないための保険。期限を過ぎたら残りは事前計算座標へ一括生成する
+            var timeoutAt = startTime + path.Duration + TimeoutGraceSeconds;
+
+            for (int i = 0; i < count; i++)
+            {
+                var ratio = count > 1 ? (float)i / (count - 1) : 0f;
+
+                while (Time.time < timeoutAt && pathLengthSqr > 0f &&
+                       Vector3.Dot(transform.position - origin, pathVector) / pathLengthSqr < ratio - ReachEpsilon)
+                {
+                    await UniTask.Yield(PlayerLoopTiming.Update, ct);
+                }
+
+                if (pool == null || ct.IsCancellationRequested) return;
+
+                var releaseAt = startTime + ev.GetSpawnDelayAt(i) + ev.GetStartDelayAt(i);
+                var startDelay = Mathf.Max(0f, releaseAt - Time.time);
+                var spawnPosition = Vector3.Lerp(origin, destination, ratio) + poolOffset;
+
+                pool.SpawnBullet(bulletDamage, spawnPosition, ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: startDelay, movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
             }
         }
 
         static Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
         {
             if (ev.SpawnOffsets == null || index >= ev.SpawnOffsets.Count) return basePosition;
-            return basePosition + (Vector3)ev.SpawnOffsets[index];
+
+            var offset = ev.SpawnOffsets[index];
+            // World指定のとき SpawnOffsets は発射元からの相対ではなくワールド座標そのもの。
+            // zは発射元のものを引き継いで、描画順が変わらないようにする。
+            if (ev.SpawnSpace == AttackSpawnSpace.World) return new Vector3(offset.x, offset.y, basePosition.z);
+
+            return basePosition + (Vector3)offset;
         }
 
         void SpawnEnemy(AttackEvent ev)
@@ -345,7 +438,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
                 var instance = Instantiate(prefab);
-                instance.transform.SetPositionAndRotation(transform.position + (Vector3)ev.SpawnOffsets[i], GetRotationAt(ev, i));
+                instance.transform.SetPositionAndRotation(GetSpawnPosition(ev, transform.position, i), GetRotationAt(ev, i));
+
+                // 予告線のように「線分の長さ」を生成後に教える必要があるViewへ、Startが走る前に流し込む
+                if (instance.TryGetComponent<IBeamVisualReceiver>(out var beamVisual))
+                {
+                    beamVisual.ConfigureBeam(ev.Range, ev.Duration, ev.Width);
+                }
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
                 {
@@ -378,12 +477,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void HandleDeath()
         {
+            aliveCts?.Cancel();
             StopMovement();
             model.AttackStrategy?.Dispose();
             var col = GetComponent<Collider2D>();
             if (col != null) col.enabled = false;
-
-            Debug.Log("[BossEntityPresenter] Boss died.");
 
             deathCts?.Cancel();
             deathCts?.Dispose();
@@ -425,8 +523,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             deathCts?.Cancel();
             deathCts?.Dispose();
             deathCts = null;
+            aliveCts?.Cancel();
+            aliveCts?.Dispose();
+            aliveCts = null;
             damageFlashSubscription?.Dispose();
             disposables.Dispose();
+            attackTimingSubscription.Dispose();
             deathSequenceCompleted.Dispose();
             model?.AttackStrategy?.Dispose();
             model?.Dispose();

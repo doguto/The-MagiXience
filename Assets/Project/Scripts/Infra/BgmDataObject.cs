@@ -17,6 +17,9 @@ namespace Project.Scripts.Infra
         // 曲名を使いたいこともある気がするので、Nameも持つ
         public string name;
 
+        [Tooltip("ゲーム内で表示する曲名。空の場合はnameを使用。")]
+        public string displayName;
+
         public SceneType sceneType;
         public BgmType bgmType;
 

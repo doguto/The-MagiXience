@@ -58,6 +58,13 @@ namespace Project.Scenes.Battle.Scripts.Model
             return resolvedTimelineStrong;
         }
 
+        /// <summary>このフェーズが生成したTimelineAssetかどうか(未生成なら生成しない)</summary>
+        public bool OwnsTimeline(PlayableAsset asset)
+        {
+            if (!asset) return false;
+            return asset == resolvedTimeline || asset == resolvedTimelineStrong;
+        }
+
         public void Enter(PlayableDirector director)
         {
             Director = director;

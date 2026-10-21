@@ -18,6 +18,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         BattleSequenceModel activeSequence;
         BattlePhaseModelBase activePhase;
+        // 直前に終了したフェーズ。そのフェーズのOnExitPhase通知の最中に破棄しないよう、次の遷移まで破棄を遅らせる
+        BattlePhaseModelBase exitedPhase;
         IDisposable exitSubscription;
         Func<BattlePhaseModelBase, TimelineAsset> timelineResolver;
 
@@ -67,6 +69,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // Directorがまだ再生中のTimelineAssetを持つフェーズは破棄しない(次フェーズにTimelineが無い場合など)
+            if (exitedPhase != null && !(playableDirector && exitedPhase.OwnsTimeline(playableDirector.playableAsset)))
+            {
+                activeSequence.ReleasePhase(exitedPhase);
+            }
+            exitedPhase = activePhase;
+
             var nextPhase = activeSequence.MoveNext();
             if (nextPhase == null)
             {
@@ -80,11 +89,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             activePhase = nextPhase;
-            ApplyTimeline(activePhase);
-            activePhase.Enter(playableDirector);
-            phaseStarted.OnNext(activePhase);
 
-            exitSubscription = activePhase.OnExitPhase.Subscribe(_ => MoveNextPhase());
+            // Enter() 内で ExitCondition が即座に満たされ CompletePhase が同期発火するケースがあるため、
+            // 購読を Enter() より先に済ませておく。後から購読すると OnExitPhase の通知を取りこぼし、
+            // シーケンスがそのフェーズで止まったままになる。
+            exitSubscription = nextPhase.OnExitPhase.Subscribe(_ => MoveNextPhase());
+            ApplyTimeline(nextPhase);
+            nextPhase.Enter(playableDirector);
+
+            // Enter() 中に即完了して MoveNextPhase が再帰済みの場合、activePhase は既に
+            // 後続フェーズへ進んでいるため、このフェーズ分の開始通知は出さない。
+            if (activePhase == nextPhase)
+            {
+                phaseStarted.OnNext(nextPhase);
+            }
         }
 
         void ApplyTimeline(BattlePhaseModelBase phase)
@@ -144,11 +162,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.Situation} with {sequence.AllCreatedPhases.Count} phases", this);
             foreach (var phase in sequence.AllCreatedPhases)
             {
-                Debug.Log($"[BattlePhaseStateMachine] Disposing phase {phase.PhaseId}", this);
                 phase.Dispose();
+            }
+
+            if (sequence == activeSequence)
+            {
+                exitedPhase = null;
             }
         }
 

@@ -11,8 +11,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] int wayCount = 3;
         [SerializeField] float spreadAngle = 60f;
         [SerializeField] float radius = 0f;
+        [SerializeField, Tooltip("弾を生成してから移動を開始するまでの待機秒数。0で即座に移動開始")]
+        float startDelay = 0f;
 
-        public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle, radius = radius };
+        public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle, radius = radius, startDelay = startDelay };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
@@ -57,7 +59,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 }
             }
 
-            return new AttackEvent(AttackEventType.Bullet, directions, sourceIndex, spawnOffsets, seType, new[] { rotationProvider.GetRotation() });
+            return new AttackEvent(AttackEventType.Bullet, directions, sourceIndex, spawnOffsets, seType, new[] { rotationProvider.GetRotation() }, startDelay: startDelay);
         }
     }
 }

@@ -12,6 +12,8 @@ namespace Project.Scenes.Scenario.Scripts.Model
 
         public Sprite PlayerStillSprite { get; private set; }
         public Sprite EnemyStillSprite { get; private set; }
+        public Sprite PlayerCrazyStillSprite { get; private set; }
+        public Sprite EnemyCrazyStillSprite { get; private set; }
         public Dictionary<string, Sprite> PlayerFaceSprites { get; private set; }
         public Dictionary<string, Sprite> EnemyFaceSprites { get; private set; }
 
@@ -37,6 +39,7 @@ namespace Project.Scenes.Scenario.Scripts.Model
         {
             PlayerStillSprite = stillAssetRepository.Load("Ten", false);
             EnemyStillSprite = stillAssetRepository.Load(enemyCharaName, false);
+            EnemyCrazyStillSprite = stillAssetRepository.Load(enemyCharaName, true);
 
             // 表情SpriteをListで取得してDictionaryに変換
             PlayerFaceSprites = faceAssetRepository.LoadAll("Ten");

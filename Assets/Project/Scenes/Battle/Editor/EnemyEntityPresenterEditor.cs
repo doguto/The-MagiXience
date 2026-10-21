@@ -100,7 +100,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             var srcProp = serializedObject.FindProperty("attackTimeline");
             var dstProp = presetSO.FindProperty("attackTimeline");
 
-            CopyPropertyValue(srcProp, dstProp);
+            // boxedValue で AttackTimeline 実体ごと取り出し、DeepCopy して代入する。
+            // SerializedProperty を手動走査すると Phase→entries のネストや SerializeReference を
+            // 取りこぼすため、実体側の DeepCopy に任せる。
+            dstProp.boxedValue = ((AttackTimeline)srcProp.boxedValue).DeepCopy();
             presetSO.ApplyModifiedPropertiesWithoutUndo();
 
             AssetDatabase.CreateAsset(preset, path);
@@ -117,61 +120,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity.Editor
             {
                 dst.GetArrayElementAtIndex(i).managedReferenceValue =
                     src.GetArrayElementAtIndex(i).managedReferenceValue;
-            }
-        }
-
-        static void CopyPropertyValue(SerializedProperty src, SerializedProperty dst)
-        {
-            var srcJson = new SerializedObject(src.serializedObject.targetObject);
-            var dstObj = dst.serializedObject;
-
-            // プロパティパスを使って直接値をコピー
-            var srcIter = src.Copy();
-            var dstIter = dst.Copy();
-            var endProp = src.Copy();
-            endProp.Next(false);
-
-            if (srcIter.Next(true))
-            {
-                dstIter.Next(true);
-                do
-                {
-                    if (SerializedProperty.EqualContents(srcIter, endProp)) break;
-
-                    switch (srcIter.propertyType)
-                    {
-                        case SerializedPropertyType.Integer:
-                            dstIter.intValue = srcIter.intValue;
-                            break;
-                        case SerializedPropertyType.Boolean:
-                            dstIter.boolValue = srcIter.boolValue;
-                            break;
-                        case SerializedPropertyType.Float:
-                            dstIter.floatValue = srcIter.floatValue;
-                            break;
-                        case SerializedPropertyType.String:
-                            dstIter.stringValue = srcIter.stringValue;
-                            break;
-                        case SerializedPropertyType.ObjectReference:
-                            dstIter.objectReferenceValue = srcIter.objectReferenceValue;
-                            break;
-                        case SerializedPropertyType.ManagedReference:
-                            dstIter.managedReferenceValue = srcIter.managedReferenceValue;
-                            break;
-                        case SerializedPropertyType.Enum:
-                            dstIter.enumValueIndex = srcIter.enumValueIndex;
-                            break;
-                        case SerializedPropertyType.Vector2:
-                            dstIter.vector2Value = srcIter.vector2Value;
-                            break;
-                        case SerializedPropertyType.Vector3:
-                            dstIter.vector3Value = srcIter.vector3Value;
-                            break;
-                        case SerializedPropertyType.AnimationCurve:
-                            dstIter.animationCurveValue = srcIter.animationCurveValue;
-                            break;
-                    }
-                } while (srcIter.Next(false) && dstIter.Next(false));
             }
         }
 

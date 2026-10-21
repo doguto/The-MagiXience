@@ -7,6 +7,7 @@ using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
+using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.Model.Attack;
@@ -108,11 +109,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public EnemyEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
 
+        // 敵は大量に生成されるため、シーン全体を走査するFindFirstObjectByTypeの結果を全インスタンスで共有する。
+        // 破棄済み(シーン遷移後)の場合はUnityのnull判定で再検索される。
+        static PlayerEntityPresenter cachedPlayerPresenter;
+        static EnemyTracker cachedEnemyTracker;
+        Animator animator;
+
         void Awake()
         {
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[EnemyEntityPresenter] BulletPools is not assigned!");
-            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
-            enemyTracker = FindFirstObjectByType<EnemyTracker>();
+            if (cachedPlayerPresenter == null) cachedPlayerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            if (cachedEnemyTracker == null) cachedEnemyTracker = FindFirstObjectByType<EnemyTracker>();
+            playerPresenter = cachedPlayerPresenter;
+            enemyTracker = cachedEnemyTracker;
+            animator = GetComponent<Animator>();
             Initialize(transform.position);
         }
 
@@ -120,8 +130,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             transform.position = spawnPosition;
             model = new EnemyEntityModel(maxHp, contactDamage, onlyChargeDamageable);
-
-            var animator = GetComponent<Animator>();
 
             // Movement: プリセット優先、なければインライン
             var steps = movementPreset != null
@@ -233,7 +241,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public void OverrideMovement(MovementPreset preset)
         {
             if (preset == null) return;
-            StartMovementSequence(preset.Steps, GetComponent<Animator>());
+            StartMovementSequence(preset.Steps, animator);
         }
 
         /// <summary>
@@ -298,8 +306,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.UpdateAttack(Time.deltaTime);
 
-            view.UpdatePosition(transform.position);
-
             if (IsOutOfScreen())
             {
                 Destroy(gameObject);
@@ -330,6 +336,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 case AttackEventType.EnemySpawn:
                     SpawnEnemy(ev);
                     break;
+                case AttackEventType.SetInvincible:
+                    model.SetInvincible(ev.Enabled);
+                    break;
+                case AttackEventType.Despawn:
+                    StopMovement();
+                    Destroy(gameObject);
+                    break;
+                case AttackEventType.ChangeMovement:
+                    if (ev.MovementStep != null) StartMovementSequence(new[] { ev.MovementStep }, animator);
+                    break;
             }
         }
 
@@ -346,15 +362,39 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
             for (int i = 0; i < ev.Directions.Count; i++)
             {
-                pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i),
-                    movementOverride: ev.BulletMovementOverride != null ? ev.BulletMovementOverride : bulletMovementOverride);
+                var spawnDelay = ev.GetSpawnDelayAt(i);
+                if (spawnDelay > 0f)
+                {
+                    SpawnBulletDelayed(pool, ev, i, spawnDelay).Forget();
+                }
+                else
+                {
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementPresetOverride: ResolveBulletMovementOverride(ev));
+                }
             }
         }
+
+        async UniTaskVoid SpawnBulletDelayed(BulletPool pool, AttackEvent ev, int index, float spawnDelay)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
+            if (pool == null) return;
+
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementPresetOverride: ResolveBulletMovementOverride(ev));
+        }
+
+        // 攻撃エントリの指定を優先し、無ければ出現Clipで指定された敵単位の設定を使う
+        MovementPreset ResolveBulletMovementOverride(AttackEvent ev) => ev.BulletMovementOverride != null ? ev.BulletMovementOverride : bulletMovementOverride;
 
         Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
         {
             if (ev.SpawnOffsets == null || index >= ev.SpawnOffsets.Count) return basePosition;
-            return basePosition + (Vector3)ev.SpawnOffsets[index];
+
+            var offset = ev.SpawnOffsets[index];
+            // World指定のとき SpawnOffsets は発射元からの相対ではなくワールド座標そのもの。
+            // zは発射元のものを引き継いで、描画順が変わらないようにする。
+            if (ev.SpawnSpace == AttackSpawnSpace.World) return new Vector3(offset.x, offset.y, basePosition.z);
+
+            return basePosition + (Vector3)offset;
         }
 
         BulletPool GetBulletPool(int index)
@@ -379,7 +419,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
                 var instance = Instantiate(prefab);
-                instance.transform.SetPositionAndRotation(transform.position + (Vector3)ev.SpawnOffsets[i], GetRotationAt(ev, i));
+                instance.transform.SetPositionAndRotation(GetSpawnPosition(ev, transform.position, i), GetRotationAt(ev, i));
+
+                // 予告線のように「線分の長さ」を生成後に教える必要があるViewへ、Startが走る前に流し込む
+                if (instance.TryGetComponent<IBeamVisualReceiver>(out var beamVisual))
+                {
+                    beamVisual.ConfigureBeam(ev.Range, ev.Duration, ev.Width);
+                }
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
                 {

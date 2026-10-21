@@ -16,6 +16,9 @@ namespace Project.Editor
         static string[] _displayNames;
         static int[] _easeValues;
 
+        static string[] _easeOnlyDisplayNames;
+        static int[] _easeOnlyValues;
+
         internal static void BuildPopupEntries()
         {
             if (_displayNames != null) return;
@@ -32,6 +35,35 @@ namespace Project.Editor
 
             _displayNames = entries.Select(x => x.name).ToArray();
             _easeValues = entries.Select(x => x.value).ToArray();
+        }
+
+        internal static void BuildEaseOnlyPopupEntries()
+        {
+            if (_easeOnlyDisplayNames != null) return;
+
+            var entries = new List<(string name, int value)>();
+            foreach (Ease e in Enum.GetValues(typeof(Ease)))
+            {
+                if (e == Ease.Unset || e == Ease.INTERNAL_Zero || e == Ease.INTERNAL_Custom)
+                    continue;
+                entries.Add((e.ToString(), (int)e));
+            }
+
+            _easeOnlyDisplayNames = entries.Select(x => x.name).ToArray();
+            _easeOnlyValues = entries.Select(x => x.value).ToArray();
+        }
+
+        /// <summary>
+        /// CustomCurve を持たないフィールド向けに、Ease ドロップダウンだけを描画する。
+        /// </summary>
+        internal static void DrawEaseOnlyPopup(Rect rect, SerializedProperty easeValueProperty, string label = "Ease")
+        {
+            BuildEaseOnlyPopupEntries();
+
+            int currentIndex = Array.IndexOf(_easeOnlyValues, easeValueProperty.intValue);
+            if (currentIndex < 0) currentIndex = 0;
+            int newIndex = EditorGUI.Popup(rect, label, currentIndex, _easeOnlyDisplayNames);
+            easeValueProperty.intValue = _easeOnlyValues[newIndex];
         }
 
         /// <summary>

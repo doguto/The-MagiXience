@@ -1,0 +1,77 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+    # Optional: Only run on specific file changes
+    paths:
+      - "Assets/**/*.cs"
+      - "Document/**/*.md"
+
+jobs:
+  check-participant:
+    # doguto が participant (author/assignee/commenter/reviewer 等) に含まれる PR でのみ後続のレビューを実行する
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      has_doguto: ${{ steps.check.outputs.has_doguto }}
+    steps:
+      - name: Check if doguto is a participant
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LOGINS=$(gh api graphql -f query='
+            query($owner: String!, $repo: String!, $number: Int!) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $number) {
+                  participants(first: 100) {
+                    nodes { login }
+                  }
+                }
+              }
+            }' \
+            -f owner="${{ github.repository_owner }}" \
+            -f repo="${{ github.event.repository.name }}" \
+            -F number=${{ github.event.pull_request.number }} \
+            --jq '.data.repository.pullRequest.participants.nodes[].login')
+          if echo "$LOGINS" | grep -qx 'doguto'; then
+            echo "has_doguto=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_doguto=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  claude-review:
+    needs: check-participant
+    if: needs.check-participant.outputs.has_doguto == 'true'
+    # Optional: Filter by PR author
+    # if: |
+    #   github.event.pull_request.user.login == 'external-contributor' ||
+    #   github.event.pull_request.user.login == 'new-developer' ||
+    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: '/pr-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }} --comment'
+          # 公式 code-review プラグインはレビュー処理を Task（サブエージェント起動）に依存しており、
+          # allowed-tools に Task が無いためヘッドレスCIでは常に permission 拒否されコメントが一切付かなかった。
+          # そのため自前の単一エージェント構成コマンド (.claude/commands/pr-review.md) を使う。
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://code.claude.com/docs/en/cli-reference for available options
