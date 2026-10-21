@@ -80,32 +80,84 @@ namespace Project.Scripts.Model
 
         public UserData Load()
         {
-            if (!File.Exists(saveFilePath))
+            if (!File.Exists(saveFilePath) && !File.Exists(BackupFilePath))
             {
                 UserData = new UserData();
-                if (!Directory.Exists(saveDirectoryPath))
-                {
-                    Directory.CreateDirectory(saveDirectoryPath);
-                }
-                var json = JsonUtility.ToJson(UserData, true);
-                File.WriteAllText(saveFilePath, json);
-                return new UserData();
+                Save();
+                return UserData;
+            }
+
+            if (TryLoadFrom(saveFilePath, out var data)) return data;
+
+            // 本体が壊れている場合はバックアップから復旧を試みる。
+            // 壊れたファイルは次回Save()で上書きされないよう退避しておく。
+            QuarantineCorruptFile();
+            if (TryLoadFrom(BackupFilePath, out data)) return data;
+
+            return new UserData();
+        }
+
+        string TempFilePath => saveFilePath + ".tmp";
+        string BackupFilePath => saveFilePath + ".bak";
+        string CorruptFilePath => saveFilePath + ".corrupt";
+
+        bool TryLoadFrom(string path, out UserData data)
+        {
+            data = null;
+            try
+            {
+                if (!File.Exists(path)) return false;
+
+                var json = File.ReadAllText(path);
+                if (string.IsNullOrWhiteSpace(json)) return false;
+
+                // 音量フィールドが無い旧データを読み込むと0になるため、
+                // 既定値で初期化したインスタンスへ上書きして欠損フィールドを補完する。
+                var loaded = new UserData();
+                JsonUtility.FromJsonOverwrite(json, loaded);
+                loaded.Validate();
+                data = loaded;
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to load user data ({path}): {e.Message}");
+                return false;
+            }
+        }
+
+        void QuarantineCorruptFile()
+        {
+            try
+            {
+                if (!File.Exists(saveFilePath)) return;
+                if (File.Exists(CorruptFilePath)) File.Delete(CorruptFilePath);
+                File.Move(saveFilePath, CorruptFilePath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Failed to quarantine corrupt user data: " + e.Message);
+            }
+        }
+
+        void ReplaceSaveFile()
+        {
+            if (!File.Exists(saveFilePath))
+            {
+                File.Move(TempFilePath, saveFilePath);
+                return;
             }
 
             try
             {
-                var json = File.ReadAllText(saveFilePath);
-                // 音量フィールドが無い旧データを読み込むと0になるため、
-                // 既定値で初期化したインスタンスへ上書きして欠損フィールドを補完する。
-                var data = new UserData();
-                JsonUtility.FromJsonOverwrite(json, data);
-                data.Validate();
-                return data;
+                File.Replace(TempFilePath, saveFilePath, BackupFilePath);
             }
-            catch (Exception e)
+            catch (PlatformNotSupportedException)
             {
-                Debug.LogError("Failed to load user data: " + e.Message);
-                return new UserData();
+                // File.Replace非対応のプラットフォーム向け。本体が消えた瞬間に落ちてもLoad()が.bakから復旧する。
+                File.Copy(saveFilePath, BackupFilePath, true);
+                File.Delete(saveFilePath);
+                File.Move(TempFilePath, saveFilePath);
             }
         }
 
@@ -119,15 +171,19 @@ namespace Project.Scripts.Model
                 }
 
                 var json = JsonUtility.ToJson(UserData, true);
-                Debug.Log(json);
-                File.WriteAllText(saveFilePath, json);
+
+                // 書き込み途中のクラッシュでセーブが破損しないよう、一時ファイルへ書いてから置き換える。
+                File.WriteAllText(TempFilePath, json);
+                ReplaceSaveFile();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                Debug.Log("Saved user data");
+#endif
             }
             catch (Exception e)
             {
                 Debug.LogError("Failed to save user data: " + e.Message);
             }
-
-            Debug.Log("Saved user data");
         }
     }
 }

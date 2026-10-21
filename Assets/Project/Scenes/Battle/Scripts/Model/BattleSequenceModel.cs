@@ -162,6 +162,17 @@ namespace Project.Scenes.Battle.Scripts.Model
                 : group.Interlude;
         }
 
+        /// <summary>
+        /// 終了済みのフェーズを破棄して保持リストから外す。ループするグループではフェーズ遷移の度に
+        /// TimelineAssetが生成されるため、シーケンス終了まで溜め込まないようにする。
+        /// </summary>
+        public void ReleasePhase(BattlePhaseModelBase phase)
+        {
+            if (phase == null || phase == currentPhase) return;
+            if (!allCreatedPhases.Remove(phase)) return;
+            phase.Dispose();
+        }
+
         bool SetCurrentPhase(BattlePhaseDefinition definition)
         {
             currentPhase = phaseFactory(definition);

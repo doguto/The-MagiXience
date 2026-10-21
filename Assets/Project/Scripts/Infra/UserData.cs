@@ -42,6 +42,8 @@ namespace Project.Scripts.Infra
 
         public static float ClampTextSpeed(float textSpeed)
         {
+            // Mathf.ClampはNaN/Infinityを素通しするため、不正値は既定値に戻す
+            if (float.IsNaN(textSpeed) || float.IsInfinity(textSpeed)) return DefaultTextSpeed;
             return Mathf.Clamp(textSpeed, MinTextSpeed, MaxTextSpeed);
         }
     }

@@ -31,6 +31,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
+        void Awake()
+        {
+            // Rigidbody2Dを持たないColliderは静的コライダー扱いとなり、Transformで動かすたびに
+            // ブロードフェーズへの再登録が発生して重い。移動する弾はKinematicとして扱わせる。
+            if (!TryGetComponent<Rigidbody2D>(out _))
+            {
+                var body = gameObject.AddComponent<Rigidbody2D>();
+                body.bodyType = RigidbodyType2D.Kinematic;
+                body.useFullKinematicContacts = false;
+                hasRuntimeKinematicBody = true;
+            }
+        }
+
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
         Vector3 travelOrigin;
@@ -38,7 +51,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float travelRange;
         Tween currentTween;
         CancellationTokenSource movementCts;
-        CancellationTokenSource lifetimeCts;
+        float lifetimeElapsed;
+        float screenMargin;
+        bool isInPool;
+        bool hasRuntimeKinematicBody;
+        readonly IMovementStep[] movementOverrideBuffer = new IMovementStep[1];
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
@@ -57,16 +74,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             travelRange = travelAxis == Vector2.zero ? 0f : range;
 
             if (model == null)
+            {
                 model = new BulletEntityModel(damage, isPlayerBullet);
+                BindModelToView();
+            }
             else
+            {
                 model.Reinitialize(damage, isPlayerBullet);
+            }
 
+            isInPool = false;
             StartMovementSequence(direction, startDelay, movementOverride);
 
             view.ResetView();
-            view.UpdatePosition(position);
 
-            BindModelToView();
+            // 画面外判定の余白は毎フレームbounds計算するとコストが高いため生成時に求める。
+            // 回転しても外接円に収まるようextentsの長さを使う。
+            screenMargin = spriteRenderer.bounds.extents.magnitude + 0.1f;
+            lifetimeElapsed = 0f;
         }
 
         void StartMovementSequence(Vector2 direction, float startDelay, IMovementStep movementOverride)
@@ -74,7 +99,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             StopMovement();
 
             bool isOverride = movementOverride != null;
-            IReadOnlyList<IMovementStep> steps = isOverride ? new[] { movementOverride } : movementSteps;
+            IReadOnlyList<IMovementStep> steps = movementSteps;
+            if (isOverride)
+            {
+                movementOverrideBuffer[0] = movementOverride;
+                steps = movementOverrideBuffer;
+            }
             if (steps == null || steps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
@@ -118,23 +148,28 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             currentTween = null;
         }
 
+        // modelはプールから再利用されても同一インスタンスのため、購読は生成時の1回のみ行う
         void BindModelToView()
         {
-            disposables.Clear();
-
             model.CurrentHp
                 .Where(hp => hp <= 0)
                 .Subscribe(_ => HandleDestruction())
                 .AddTo(disposables);
-
-            StartLifetimeTimer();
         }
 
         void Update()
         {
             if (model == null || !model.IsAlive) return;
 
-            view.UpdatePosition(transform.position);
+            if (lifetime > 0f)
+            {
+                lifetimeElapsed += Time.deltaTime;
+                if (lifetimeElapsed >= lifetime)
+                {
+                    ReturnToPool();
+                    return;
+                }
+            }
 
             if (IsOutOfScreen() || HasReachedRangeLimit())
             {
@@ -155,39 +190,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         bool IsOutOfScreen()
         {
             var position = transform.position;
-            var extents = spriteRenderer.bounds.extents;
-            var margin = Mathf.Max(extents.x, extents.y) + 0.1f;
+            var margin = screenMargin;
 
             return position.x < ScreenBoundsCache.MinX - margin || position.x > ScreenBoundsCache.MaxX + margin ||
                    position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
-        }
-
-        void StartLifetimeTimer()
-        {
-            CancelLifetimeTimer();
-            if (lifetime <= 0f) return;
-
-            lifetimeCts = new CancellationTokenSource();
-            LifetimeTimerAsync(lifetimeCts.Token).Forget();
-        }
-
-        async UniTaskVoid LifetimeTimerAsync(CancellationToken ct)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(lifetime), cancellationToken: ct);
-            ReturnToPool();
-        }
-
-        void CancelLifetimeTimer()
-        {
-            lifetimeCts?.Cancel();
-            lifetimeCts?.Dispose();
-            lifetimeCts = null;
         }
 
         void HandleDestruction() => ReturnToPool();
 
         public void ReturnToPool()
         {
+            // 寿命・画面外・被弾が同フレームに重なった場合の二重返却を防ぐ
+            if (isInPool) return;
+            isInPool = true;
+
             StopMovement();
             if (pool != null)
                 pool.Release(this);
@@ -198,6 +214,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerEnter2D(Collider2D other)
         {
             if (model == null || !model.IsAlive) return;
+
+            // 実行時に付与したKinematicボディにより、従来は接触判定されなかった静的コライダーとも
+            // トリガーが発生するようになるため、従来どおり無視する
+            if (hasRuntimeKinematicBody && (other.attachedRigidbody == null || other.attachedRigidbody.bodyType == RigidbodyType2D.Static)) return;
+
             var otherPresenter = other.GetComponent<IEntityPresenter>();
             if (otherPresenter != null)
                 model.OnCollision(otherPresenter.GetModel());
@@ -205,7 +226,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public void OnReturnedToPool()
         {
-            CancelLifetimeTimer();
+            isInPool = true;
             StopMovement();
             view.SetVisible(false);
             gameObject.SetActive(false);
@@ -218,7 +239,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            CancelLifetimeTimer();
             StopMovement();
             disposables.Dispose();
             model?.Dispose();

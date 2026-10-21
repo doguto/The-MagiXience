@@ -21,6 +21,19 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         IReadOnlyReactiveProperty<int> currentHp;
         int maxHp;
 
+        // 発火予定の一覧(発火時刻の昇順)。エントリ毎にObservable.Timerを作ると、ループ展開で
+        // 数百個のタイマーがPhase開始時に生成され毎フレームポーリングされるため、Update()でまとめて捌く。
+        List<ScheduledAction> scheduledActions;
+        int scheduledHead;
+        float phaseElapsed;
+        int phaseGeneration;
+
+        struct ScheduledAction
+        {
+            public float Time;
+            public Action Action;
+        }
+
         public IObservable<AttackEvent> OnAttackTiming => onAttackTiming;
         public bool IsCompleted { get; private set; }
 
@@ -72,6 +85,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             phaseDisposables = new CompositeDisposable();
             disposables.Add(phaseDisposables);
 
+            ClearSchedule();
+            phaseGeneration++;
+
             bool isLastPhase = index >= phases.Count - 1;
             ScheduleEntries(phase, isLastPhase);
 
@@ -105,9 +121,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
                 if (isLastPhase)
                 {
-                    Observable.Timer(TimeSpan.FromSeconds(phase.loopEnd))
-                        .Subscribe(_ => IsCompleted = true)
-                        .AddTo(phaseDisposables);
+                    Schedule(phase.loopEnd, () => IsCompleted = true);
                 }
             }
             else
@@ -121,9 +135,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
                 if (isLastPhase)
                 {
-                    Observable.Timer(TimeSpan.FromSeconds(maxTime))
-                        .Subscribe(_ => IsCompleted = true)
-                        .AddTo(phaseDisposables);
+                    Schedule(maxTime, () => IsCompleted = true);
                 }
             }
         }
@@ -161,17 +173,14 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 return;
             }
 
-            Observable.Timer(TimeSpan.FromSeconds(fireTime))
-                .Subscribe(_ =>
-                {
-                    if (entry.signal != null)
-                    {
-                        var sourceIndex = entry.sourceIndexProvider?.Get() ?? 0;
-                        var attackEvent = entry.signal.CreateEvent(entry.directionProvider, entry.rotationProvider, sourceIndex, entry.seType);
-                        onAttackTiming.OnNext(ApplyBeamOrigin(attackEvent, entry.directionProvider));
-                    }
-                })
-                .AddTo(phaseDisposables);
+            if (entry.signal == null) return;
+
+            Schedule(fireTime, () =>
+            {
+                var sourceIndex = entry.sourceIndexProvider?.Get() ?? 0;
+                var attackEvent = entry.signal.CreateEvent(entry.directionProvider, entry.rotationProvider, sourceIndex, entry.seType);
+                onAttackTiming.OnNext(ApplyBeamOrigin(attackEvent, entry.directionProvider));
+            });
         }
 
         /// <summary>
@@ -197,10 +206,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
             if (signal.ShowWarning)
             {
-                Observable.Timer(TimeSpan.FromSeconds(baseTime))
-                    .Subscribe(_ => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
-                        line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration, width: signal.WarningWidth)))
-                    .AddTo(phaseDisposables);
+                Schedule(baseTime, () => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                    line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration, width: signal.WarningWidth)));
             }
 
             if (signal.BulletPreset == null) return;
@@ -246,31 +253,25 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             // 「予告が始まる時点の敵位置」からビームが出る。確定した line を本体にも渡して起点を一致させる。
             if (signal.ShowWarning)
             {
-                Observable.Timer(TimeSpan.FromSeconds(baseTime))
-                    .Subscribe(_ =>
-                    {
-                        var line = ResolveBeamLine(signal);
-                        onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
-                            line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration));
-                        ScheduleSpriteBeamBody(signal, line, signal.WarningDuration);
-                    })
-                    .AddTo(phaseDisposables);
+                Schedule(baseTime, () =>
+                {
+                    var line = ResolveBeamLine(signal);
+                    onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                        line.Start, line.Direction, line.Rotation, signal.WarningSourceIndex, line.Length, signal.WarningDuration));
+                    ScheduleSpriteBeamBody(signal, line, signal.WarningDuration);
+                });
                 return;
             }
 
             // 予告なしの場合は baseTime 到達時に line を確定して即本体を出す。
-            Observable.Timer(TimeSpan.FromSeconds(baseTime))
-                .Subscribe(_ => ScheduleSpriteBeamBody(signal, ResolveBeamLine(signal), 0f))
-                .AddTo(phaseDisposables);
+            Schedule(baseTime, () => ScheduleSpriteBeamBody(signal, ResolveBeamLine(signal), 0f));
         }
 
         /// <summary>予告開始時に確定した line を使い、delay 秒後にビーム本体を1体生成する。</summary>
         void ScheduleSpriteBeamBody(SpriteBeamAttackSignal signal, BeamLine line, float delay)
         {
-            Observable.Timer(TimeSpan.FromSeconds(delay))
-                .Subscribe(_ => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
-                    line.Start, line.Direction, line.Rotation, signal.BodySourceIndex, line.Length, signal.BodyDuration)))
-                .AddTo(phaseDisposables);
+            Schedule(phaseElapsed + delay, () => onAttackTiming.OnNext(AttackEvent.SpawnAtWorld(
+                line.Start, line.Direction, line.Rotation, signal.BodySourceIndex, line.Length, signal.BodyDuration)));
         }
 
         /// <summary>
@@ -330,10 +331,59 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             return copy;
         }
 
-        public void Update(float deltaTime) { }
+        /// <summary>現在のPhase開始からの経過時間 fireTime 秒で action を実行するよう登録する。</summary>
+        void Schedule(float fireTime, Action action)
+        {
+            scheduledActions ??= new List<ScheduledAction>();
+            var item = new ScheduledAction { Time = fireTime, Action = action };
+
+            // 同時刻は登録順に発火させるため、同時刻の末尾へ挿入する
+            int lo = scheduledHead, hi = scheduledActions.Count;
+            while (lo < hi)
+            {
+                var mid = (lo + hi) >> 1;
+                if (scheduledActions[mid].Time <= fireTime) lo = mid + 1;
+                else hi = mid;
+            }
+            scheduledActions.Insert(lo, item);
+        }
+
+        void ClearSchedule()
+        {
+            scheduledActions?.Clear();
+            scheduledHead = 0;
+            phaseElapsed = 0f;
+        }
+
+        public void Update(float deltaTime)
+        {
+            if (onAttackTiming == null || scheduledActions == null) return;
+
+            phaseElapsed += deltaTime;
+
+            var generation = phaseGeneration;
+            while (scheduledHead < scheduledActions.Count && scheduledActions[scheduledHead].Time <= phaseElapsed)
+            {
+                var action = scheduledActions[scheduledHead].Action;
+                scheduledHead++;
+                action();
+
+                // 発火した攻撃によってPhaseが切り替わった(スケジュールが作り直された)場合は打ち切る
+                if (generation != phaseGeneration) return;
+            }
+
+            // 消化済みの要素が溜まったらまとめて詰める
+            if (scheduledHead > 0 && scheduledHead * 2 >= scheduledActions.Count)
+            {
+                scheduledActions.RemoveRange(0, scheduledHead);
+                scheduledHead = 0;
+            }
+        }
 
         public void Dispose()
         {
+            ClearSchedule();
+            phaseGeneration++;
             phaseDisposables?.Dispose();
             disposables?.Dispose();
             onAttackTiming?.Dispose();
