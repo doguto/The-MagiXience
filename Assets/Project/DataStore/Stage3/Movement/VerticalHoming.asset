@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
-  m_Name: Bullet_ParabolaDown
+  m_Name: VerticalHoming
   m_EditorClassIdentifier: 
   steps:
-  - rid: 5417143486211424502
+  - rid: 3310600516686315605
   references:
     version: 2
     RefIds:
-    - rid: 5417143486211424502
-      type: {class: VertexParabolaMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 3310600516686315605
+      type: {class: StraightWithHomingMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        orientation: 0
-        vertex: {x: -3, y: -4.5}
-        initialSpeed: 5
+        speed: 2
+        verticalTrackingSpeed: 0.6
+        duration: 0

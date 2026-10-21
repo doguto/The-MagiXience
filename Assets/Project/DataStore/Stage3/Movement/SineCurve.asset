@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
-  m_Name: Bullet_ParabolaUp
+  m_Name: SineCurve
   m_EditorClassIdentifier: 
   steps:
-  - rid: 5417143486211424501
+  - rid: 3310600516686315656
   references:
     version: 2
     RefIds:
-    - rid: 5417143486211424501
-      type: {class: VertexParabolaMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 3310600516686315656
+      type: {class: SineMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        orientation: 0
-        vertex: {x: -3, y: 4.5}
-        initialSpeed: 5
+        baseVelocity: {x: -1.8, y: 0, z: 0}
+        amplitude: 1.2
+        frequency: 0.25
+        duration: 0
