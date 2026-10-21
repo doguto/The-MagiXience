@@ -27,5 +27,13 @@ namespace Project.Scripts.Model
             audioClip = soundAssetRepository.LoadBGM(BgmData.sceneType, BgmData.bgmType);
             return audioClip;
         }
+
+        public void ReleaseAudioClip()
+        {
+            if (audioClip == null) return;
+
+            soundAssetRepository.ReleaseBGM(audioClip);
+            audioClip = null;
+        }
     }
 }
