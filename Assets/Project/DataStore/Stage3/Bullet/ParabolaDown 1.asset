@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
-  m_Name: InfiniteStraight
+  m_Name: ParabolaDown 1
   m_EditorClassIdentifier: 
   steps:
-  - rid: 3310600516686315641
+  - rid: 5417143486211424502
   references:
     version: 2
     RefIds:
-    - rid: 3310600516686315641
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+    - rid: 5417143486211424502
+      type: {class: VertexParabolaMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        velocity: {x: -2.4, y: 0, z: 0}
+        orientation: 0
+        vertex: {x: -4, y: -3}
+        initialSpeed: 12

@@ -17,7 +17,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     {
         [SerializeField, FormerlySerializedAs("bulge"), Tooltip("縦：上下に折り返す。横：左右に折り返す。凸の向きは発射位置と頂点から自動で決まります。")]
         ParabolaOrientation orientation = ParabolaOrientation.Vertical;
-        [SerializeField, Tooltip("ワールド座標で指定する頂点。発射位置からの相対座標ではありません。")]
+        [SerializeField, Tooltip("移動開始位置からの頂点の相対座標（ワールド軸）。Xは右、Yは上が正です。")]
         Vector2 vertex = new(-3f, 4.5f);
         [SerializeField, Min(0.01f), Tooltip("発射時の速さ（ワールド単位/秒）。軌道を保ったまま速さを変更できます。飛行中は等速ではありません。")]
         float initialSpeed = 5f;
@@ -25,9 +25,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)
         {
             Vector2 start = target.position;
-            if (!VertexParabola.TrySolve(start, vertex, orientation, initialSpeed, out var velocity, out var acceleration, out _))
+            Vector2 worldVertex = start + vertex;
+            if (!VertexParabola.TrySolve(start, worldVertex, orientation, initialSpeed, out var velocity, out var acceleration, out _))
             {
-                Debug.LogWarning($"[VertexParabola] {target.name}: invalid {orientation} parabola. Start={start}, Vertex={vertex}, InitialSpeed={initialSpeed}. " +
+                Debug.LogWarning($"[VertexParabola] {target.name}: invalid {orientation} parabola. Start={start}, VertexOffset={vertex}, Vertex={worldVertex}, InitialSpeed={initialSpeed}. " +
                     "The vertex must differ from the start in both X and Y, with a positive finite speed.", target);
                 return null; // BulletEntityPresenter returns rejected shots to their pool.
             }
