@@ -356,7 +356,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 }
                 else
                 {
-                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementOverride: ev.BulletMovement);
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
                 }
             }
         }
@@ -366,7 +366,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: aliveCts.Token);
             if (pool == null) return;
 
-            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement);
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
         }
 
         /// <summary>
@@ -407,7 +407,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 var startDelay = Mathf.Max(0f, releaseAt - Time.time);
                 var spawnPosition = Vector3.Lerp(origin, destination, ratio) + poolOffset;
 
-                pool.SpawnBullet(bulletDamage, spawnPosition, ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: startDelay, movementOverride: ev.BulletMovement);
+                pool.SpawnBullet(bulletDamage, spawnPosition, ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: startDelay, movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
             }
         }
 
@@ -448,6 +448,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
                 {
+                    enemyPresenter.OverrideBulletMovement(ev.BulletMovementOverride);
                     if (ev.MovementOverride != null) enemyPresenter.OverrideMovement(ev.MovementOverride);
                     enemyTracker?.RegisterEnemy(enemyPresenter);
                 }
