@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: 3_Phase20-2
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 0
+      loopEnd: 6
+      cycleDuration: 2.5
+      entries:
+      - time: 0.5
+        signal:
+          rid: 5417143486211424470
+        directionProvider:
+          rid: 5417143486211424517
+        rotationProvider:
+          rid: 5417143486211424518
+        sourceIndexProvider:
+          rid: 5417143486211424465
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: a3ec6bb1cf322414eabb2a40c63f68c6, type: 2}
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5417143486211424465
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 1
+    - rid: 5417143486211424470
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5417143486211424517
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 5417143486211424518
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
