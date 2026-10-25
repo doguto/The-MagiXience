@@ -27,6 +27,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         Vector2 offset;
         bool isDecelerating;
 
+        /// <summary>背景の見た目が流れる速度(背景ドット/秒)。UVオフセットを増やすと絵は逆向きに流れる。</summary>
+        public Vector2 ScrollVelocityPixels => view != null ? -currentSpeed * view.SpritePixelSize : Vector2.zero;
+
         void Reset()
         {
             view = GetComponent<BackgroundView>();

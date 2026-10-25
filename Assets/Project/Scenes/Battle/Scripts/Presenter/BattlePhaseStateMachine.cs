@@ -30,7 +30,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             => timelineResolver = resolver;
 
         void Update() => BattleWind.Tick(Time.deltaTime);
-        void OnGUI() => WindIndicator.Draw();
 
         public void PlaySequence(BattleSequenceModel sequence)
         {
