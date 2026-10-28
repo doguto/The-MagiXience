@@ -40,6 +40,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             for (var i = 0; i < stageModels.Count; i++)
             {
                 stageCardListView.stageCardViews[i].Setup(stageModels[i].GetIdAndTitle(), stageModels[i].IsOpened);
+                stageCardListView.stageCardViews[i].SetClearFrame(ToClearFrameType(stageModels[i].ClearRank));
             }
 
             ShowCharaImage(0);
@@ -48,6 +49,17 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             MessageBroker.Default.Receive<UICancelMessage>()
                 .SubscribeBlocking(_ => BackToTitle())
                 .AddTo(this);
+        }
+
+        static ClearFrameType ToClearFrameType(StageClearRank rank)
+        {
+            return rank switch
+            {
+                StageClearRank.Normal => ClearFrameType.Normal,
+                StageClearRank.NoContinue => ClearFrameType.NoContinue,
+                StageClearRank.NoDamage => ClearFrameType.NoDamage,
+                _ => ClearFrameType.None
+            };
         }
 
         void ShowCharaImage(int buttonIndex)
