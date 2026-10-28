@@ -14,7 +14,9 @@ namespace Project.Commons.UI.Scripts.Presenter
     public class OptionModalPresenter : MonoPresenter
     {
         [SerializeField] OptionModalView optionModalView;
+        readonly Subject<Unit> onOpened = new();
         readonly Subject<Unit> onClosed = new();
+        public IObservable<Unit> OnOpened => onOpened;
         public IObservable<Unit> OnClosed => onClosed;
         public bool IsOpen => gameObject.activeSelf;
         RuntimeModel runtimeModel;
@@ -76,6 +78,8 @@ namespace Project.Commons.UI.Scripts.Presenter
             // 現在のUserDataの音量をスライダーへ反映する(通知を発火させずに初期化)。
             optionModalView.SetBgmValueWithoutNotify(userModel.BgmVolume);
             optionModalView.SetSeValueWithoutNotify(userModel.SeVolume);
+
+            onOpened.OnNext(Unit.Default);
         }
 
         public void Close()

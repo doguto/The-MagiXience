@@ -2,6 +2,7 @@ using Project.Commons.UI.Scripts.Presenter;
 using Project.Scripts.Extensions;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
+using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -21,6 +22,12 @@ namespace Project.Scenes.Global.Scripts.Presenter
         public SoundManagerPresenter SoundManagerPresenter => soundManagerPresenter;
         [SerializeField] InputActionAsset inputActions;
         InputManager inputManager;
+        InputSystemUIInputModule uiInputModule;
+        InputActionReference pointAction;
+        InputActionReference leftClickAction;
+        InputActionReference rightClickAction;
+        InputActionReference middleClickAction;
+        InputActionReference scrollWheelAction;
 
         public OptionModalPresenter OptionModalPresenter => optionModalPresenter;
         public PauseModalPresenter PauseModalPresenter => pauseModalPresenter;
@@ -49,11 +56,34 @@ namespace Project.Scenes.Global.Scripts.Presenter
                 if (inputModule != null)
                 {
                     inputModule.actionsAsset = keyConfigModel.GetInputActions();
+                    uiInputModule = inputModule;
+                    pointAction = inputModule.point;
+                    leftClickAction = inputModule.leftClick;
+                    rightClickAction = inputModule.rightClick;
+                    middleClickAction = inputModule.middleClick;
+                    scrollWheelAction = inputModule.scrollWheel;
                 }
             }
 
             inputManager = new InputManager();
             inputManager.Setup(keyConfigModel.GetInputActions());
+
+            // UIのマウス操作はデフォルトで無効にし、音量設定(オプション)画面を開いている間だけ有効にする。
+            SetUIMouseEnabled(false);
+            optionModalPresenter.OnOpened.Subscribe(_ => SetUIMouseEnabled(true)).AddTo(this);
+            optionModalPresenter.OnClosed.Subscribe(_ => SetUIMouseEnabled(false)).AddTo(this);
+        }
+
+        // InputModuleからポインタ系のActionを外すことで、UIがマウスのホバー・クリックを拾わないようにする。
+        void SetUIMouseEnabled(bool enabled)
+        {
+            if (uiInputModule == null) return;
+
+            uiInputModule.point = enabled ? pointAction : null;
+            uiInputModule.leftClick = enabled ? leftClickAction : null;
+            uiInputModule.rightClick = enabled ? rightClickAction : null;
+            uiInputModule.middleClick = enabled ? middleClickAction : null;
+            uiInputModule.scrollWheel = enabled ? scrollWheelAction : null;
         }
     }
 }
