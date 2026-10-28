@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &19141353 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8852521904100577385, guid: 1c69ad879718fa5418458c49cda791ce, type: 3}
+  m_PrefabInstance: {fileID: 57786229}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &34987453
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,6 +515,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 4e3945dcdc69ea44c97865ef4de3b503, type: 2}
     - target: {fileID: 8433828296718569437, guid: 1c69ad879718fa5418458c49cda791ce, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8433828296718569437, guid: 1c69ad879718fa5418458c49cda791ce, type: 3}
       propertyPath: m_sharedMaterial
       value: 
       objectReference: {fileID: -2641868492675607700, guid: 4e3945dcdc69ea44c97865ef4de3b503, type: 2}
@@ -520,7 +529,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8852521904100577385, guid: 1c69ad879718fa5418458c49cda791ce, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 57786236}
+    - targetCorrespondingSourceObject: {fileID: 8852521904100577385, guid: 1c69ad879718fa5418458c49cda791ce, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 57786235}
   m_SourcePrefab: {fileID: 100100000, guid: 1c69ad879718fa5418458c49cda791ce, type: 3}
 --- !u!224 &57786230 stripped
 RectTransform:
@@ -532,12 +547,50 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3737863894395765297, guid: 1c69ad879718fa5418458c49cda791ce, type: 3}
   m_PrefabInstance: {fileID: 57786229}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 19141353}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f221f29cec134c06b3f630342a96f869, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &57786235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19141353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &57786236
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19141353}
+  m_CullTransparentMesh: 1
 --- !u!1001 &92098525
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2568,7 +2621,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
