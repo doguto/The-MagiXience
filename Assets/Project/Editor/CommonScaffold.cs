@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Project.Editor
 {
@@ -27,6 +28,13 @@ namespace Project.Editor
                 if (string.IsNullOrEmpty(scriptName))
                 {
                     EditorUtility.DisplayDialog("Error", "Please enter a folder name", "OK");
+                    return;
+                }
+
+                // パス区切りや".."を含む名前でCommons配下の外へ書き込まないよう、フォルダ名を制限する
+                if (!Regex.IsMatch(scriptName, "^[A-Za-z_][A-Za-z0-9_]*$"))
+                {
+                    EditorUtility.DisplayDialog("Error", "Folder name must contain only letters, digits and '_'", "OK");
                     return;
                 }
 

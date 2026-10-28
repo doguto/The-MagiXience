@@ -28,7 +28,8 @@ namespace Project.Scenes.Battle.Scripts.Model
             Func<BattlePhaseDefinition, BattlePhaseModelBase> phaseFactory,
             GameObject bossPrefab = null,
             Vector3 bossSpawnPosition = default,
-            IReadOnlyList<IMovementStep> bossEntranceMovement = null)
+            IReadOnlyList<IMovementStep> bossEntranceMovement = null,
+            BattleWindSettings wind = null)
         {
             Situation = situation;
             this.groups = groups;
@@ -36,9 +37,11 @@ namespace Project.Scenes.Battle.Scripts.Model
             BossPrefab = bossPrefab;
             BossSpawnPosition = bossSpawnPosition;
             BossEntranceMovement = bossEntranceMovement;
+            Wind = wind;
         }
 
         public BattleSituation Situation { get; }
+        public BattleWindSettings Wind { get; }
         public bool HasPhases => groups.Count > 0;
         public IReadOnlyList<BattlePhaseModelBase> AllCreatedPhases => allCreatedPhases;
         public GameObject BossPrefab { get; }
@@ -160,6 +163,17 @@ namespace Project.Scenes.Battle.Scripts.Model
             return picked.InterludeBuilderOverride != null
                 ? group.Interlude.WithTimelineBuilder(picked.InterludeBuilderOverride, picked.InterludeTimeLimitOverride)
                 : group.Interlude;
+        }
+
+        /// <summary>
+        /// 終了済みのフェーズを破棄して保持リストから外す。ループするグループではフェーズ遷移の度に
+        /// TimelineAssetが生成されるため、シーケンス終了まで溜め込まないようにする。
+        /// </summary>
+        public void ReleasePhase(BattlePhaseModelBase phase)
+        {
+            if (phase == null || phase == currentPhase) return;
+            if (!allCreatedPhases.Remove(phase)) return;
+            phase.Dispose();
         }
 
         bool SetCurrentPhase(BattlePhaseDefinition definition)

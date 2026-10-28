@@ -12,6 +12,11 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         BoxCollider2D solidCollider;
 
         float barWidth;
+        float currentHeight = -1f;
+        float currentBottomY;
+
+        // これ未満の高さ変化はコライダー再構築のコストに見合わないため反映しない
+        const float HeightUpdateThreshold = 0.001f;
 
         public void Initialize(float width, Color color)
         {
@@ -34,11 +39,22 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
             solidCollider = gameObject.AddComponent<BoxCollider2D>();
             solidCollider.isTrigger = false;
 
+            // コライダーサイズはスケールに合わせて1x1（SpriteRendererのスケールで拡大される）。
+            // サイズの再設定は形状の再生成を伴うため初期化時に1回だけ行う。
+            var colliderSize = new Vector2(1f, 1f);
+            triggerCollider.size = colliderSize;
+            solidCollider.size = colliderSize;
+
             transform.localScale = new Vector3(barWidth, 0f, 1f);
         }
 
         public void UpdateBar(float height, float screenBottomY)
         {
+            // Static剛体のTransform変更はコライダー形状の再生成を伴うため、変化が無ければ何もしない
+            if (Mathf.Abs(height - currentHeight) < HeightUpdateThreshold && Mathf.Approximately(screenBottomY, currentBottomY)) return;
+            currentHeight = height;
+            currentBottomY = screenBottomY;
+
             // スケール更新（幅は固定、高さのみ変動）
             var scale = transform.localScale;
             scale.y = height;
@@ -48,11 +64,6 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
             var pos = transform.position;
             pos.y = screenBottomY + height * 0.5f;
             transform.position = pos;
-
-            // コライダーサイズはスケールに合わせて1x1（SpriteRendererのスケールで拡大される）
-            var colliderSize = new Vector2(1f, 1f);
-            triggerCollider.size = colliderSize;
-            solidCollider.size = colliderSize;
         }
 
         static Sprite CreateWhitePixelSprite()

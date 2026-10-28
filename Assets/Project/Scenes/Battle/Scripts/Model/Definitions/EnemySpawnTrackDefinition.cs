@@ -22,6 +22,8 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] GameObject prefab;
         [SerializeField] MovementPreset movementOverride;
         [SerializeField] AttackPreset attackOverride;
+        [SerializeField, Tooltip("この出現の敵が撃つ弾のMovement Stepsを置き換える。攻撃Entryにも指定があればEntryを優先。Noneなら弾Prefabの設定。")]
+        MovementPreset bulletMovementOverride;
 
         public double Time => time;
 
@@ -35,7 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             signal.hideFlags = HideFlags.DontSave;
 
             // プロパティを設定
-            signal.SetProperties(spawnPosition, prefab, movementOverride, attackOverride);
+            signal.SetProperties(spawnPosition, prefab, movementOverride, attackOverride, bulletMovementOverride);
 
             var emitter = track.CreateMarker<SignalEmitter>(time);
             emitter.asset = signal;

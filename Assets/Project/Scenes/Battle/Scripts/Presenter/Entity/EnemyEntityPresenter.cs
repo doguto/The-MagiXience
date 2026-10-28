@@ -101,15 +101,28 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         IDisposable damageFlashSubscription;
         IDisposable attackTimingSubscription;
         bool isEnteredScreen = false;
+        MovementPreset bulletMovementOverride;
+
+        // Runtime instance setting supplied by its spawn clip; never changes the enemy or bullet prefab.
+        public void OverrideBulletMovement(MovementPreset preset) => bulletMovementOverride = preset;
 
         public EnemyEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
 
+        // 敵は大量に生成されるため、シーン全体を走査するFindFirstObjectByTypeの結果を全インスタンスで共有する。
+        // 破棄済み(シーン遷移後)の場合はUnityのnull判定で再検索される。
+        static PlayerEntityPresenter cachedPlayerPresenter;
+        static EnemyTracker cachedEnemyTracker;
+        Animator animator;
+
         void Awake()
         {
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[EnemyEntityPresenter] BulletPools is not assigned!");
-            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
-            enemyTracker = FindFirstObjectByType<EnemyTracker>();
+            if (cachedPlayerPresenter == null) cachedPlayerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            if (cachedEnemyTracker == null) cachedEnemyTracker = FindFirstObjectByType<EnemyTracker>();
+            playerPresenter = cachedPlayerPresenter;
+            enemyTracker = cachedEnemyTracker;
+            animator = GetComponent<Animator>();
             Initialize(transform.position);
         }
 
@@ -117,8 +130,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             transform.position = spawnPosition;
             model = new EnemyEntityModel(maxHp, contactDamage, onlyChargeDamageable);
-
-            var animator = GetComponent<Animator>();
 
             // Movement: プリセット優先、なければインライン
             var steps = movementPreset != null
@@ -230,7 +241,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public void OverrideMovement(MovementPreset preset)
         {
             if (preset == null) return;
-            StartMovementSequence(preset.Steps, GetComponent<Animator>());
+            StartMovementSequence(preset.Steps, animator);
         }
 
         /// <summary>
@@ -295,8 +306,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.UpdateAttack(Time.deltaTime);
 
-            view.UpdatePosition(transform.position);
-
             if (IsOutOfScreen())
             {
                 Destroy(gameObject);
@@ -335,7 +344,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     Destroy(gameObject);
                     break;
                 case AttackEventType.ChangeMovement:
-                    if (ev.MovementStep != null) StartMovementSequence(new[] { ev.MovementStep }, GetComponent<Animator>());
+                    if (ev.MovementStep != null) StartMovementSequence(new[] { ev.MovementStep }, animator);
                     break;
             }
         }
@@ -360,7 +369,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 }
                 else
                 {
-                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i));
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementPresetOverride: ResolveBulletMovementOverride(ev));
                 }
             }
         }
@@ -370,8 +379,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
             if (pool == null) return;
 
-            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index));
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementPresetOverride: ResolveBulletMovementOverride(ev));
         }
+
+        // 攻撃エントリの指定を優先し、無ければ出現Clipで指定された敵単位の設定を使う
+        MovementPreset ResolveBulletMovementOverride(AttackEvent ev) => ev.BulletMovementOverride != null ? ev.BulletMovementOverride : bulletMovementOverride;
 
         Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
         {
@@ -417,6 +429,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
                 {
+                    enemyPresenter.OverrideBulletMovement(ev.BulletMovementOverride);
                     if (ev.MovementOverride != null) enemyPresenter.OverrideMovement(ev.MovementOverride);
                     enemyTracker?.RegisterEnemy(enemyPresenter);
                 }
@@ -447,12 +460,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (deathAttackEntry?.signal == null) return;
 
-            var sourceIndex = deathAttackEntry.sourceIndexProvider?.Get() ?? 0;
-            var ev = deathAttackEntry.signal.CreateEvent(
-                deathAttackEntry.directionProvider,
-                deathAttackEntry.rotationProvider,
-                sourceIndex,
-                deathAttackEntry.seType);
+            var ev = deathAttackEntry.CreateEvent();
             HandleAttackEvent(ev);
         }
 

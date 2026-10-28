@@ -84,8 +84,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Tween entranceTween;
         CancellationTokenSource movementCts;
         CancellationTokenSource deathCts;
+        // 撃破時にキャンセルされる。spawnDelay等で予約済みの弾生成を、撃破後(BulletClear後)に実行させないために使う
+        CancellationTokenSource aliveCts;
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
+        readonly SerialDisposable attackTimingSubscription = new();
+        Animator animator;
         readonly Subject<Unit> deathSequenceCompleted = new();
 
         public BossEntityModel Model => model;
@@ -97,7 +101,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
             playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
             enemyTracker = FindFirstObjectByType<EnemyTracker>();
+            animator = GetComponent<Animator>();
 
+            aliveCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
             model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
 
             model.OnDeath
@@ -196,10 +202,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             attackTimeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation, model.CurrentHp, model.MaxHp);
             model.SetAttackStrategy(attackTimeline);
 
-            model.AttackStrategy.OnAttackTiming
+            // Phase毎に購読し直すため、presenter寿命のdisposablesへ積み上げず前回分を置き換える
+            attackTimingSubscription.Disposable = model.AttackStrategy.OnAttackTiming
                 .TakeUntil(model.OnDeath)
-                .Subscribe(ev => HandleAttackEvent(ev))
-                .AddTo(disposables);
+                .Subscribe(ev => HandleAttackEvent(ev));
         }
 
         void StartMovementSequence(IReadOnlyList<IMovementStep> steps)
@@ -209,7 +215,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (steps == null || steps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
-            var animator = GetComponent<Animator>();
             RunMovementStepsAsync(steps, animator, movementCts.Token).Forget();
         }
 
@@ -217,7 +222,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             if (steps == null || steps.Count == 0) return;
 
-            var animator = GetComponent<Animator>();
             var sequence = DOTween.Sequence();
             foreach (var step in steps)
             {
@@ -289,7 +293,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (model == null || !model.IsAlive) return;
 
             model.UpdateAttack(Time.deltaTime);
-            view.UpdatePosition(transform.position);
         }
 
         void HandleAttackEvent(AttackEvent ev)
@@ -318,13 +321,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             StopMovement();
 
-            var animator = GetComponent<Animator>();
             var tween = step.Play(transform, Vector2.zero, animator);
             if (tween != null)
             {
-                await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
+                await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, aliveCts.Token);
             }
 
+            if (!model.IsAlive) return;
             StartMovementSequence(currentPhaseMovementSteps);
         }
 
@@ -353,17 +356,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 }
                 else
                 {
-                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementOverride: ev.BulletMovement);
+                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
                 }
             }
         }
 
         async UniTaskVoid SpawnBulletDelayed(BulletPool pool, AttackEvent ev, int index, float spawnDelay)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: aliveCts.Token);
             if (pool == null) return;
 
-            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement);
+            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
         }
 
         /// <summary>
@@ -377,7 +380,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             const float ReachEpsilon = 1e-4f;
             const float TimeoutGraceSeconds = 0.5f;
 
-            var ct = this.GetCancellationTokenOnDestroy();
+            var ct = aliveCts.Token;
             var count = ev.Directions.Count;
             var origin = transform.position;
             var destination = path.ResolveDestination(origin);
@@ -398,13 +401,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     await UniTask.Yield(PlayerLoopTiming.Update, ct);
                 }
 
-                if (pool == null) return;
+                if (pool == null || ct.IsCancellationRequested) return;
 
                 var releaseAt = startTime + ev.GetSpawnDelayAt(i) + ev.GetStartDelayAt(i);
                 var startDelay = Mathf.Max(0f, releaseAt - Time.time);
                 var spawnPosition = Vector3.Lerp(origin, destination, ratio) + poolOffset;
 
-                pool.SpawnBullet(bulletDamage, spawnPosition, ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: startDelay, movementOverride: ev.BulletMovement);
+                pool.SpawnBullet(bulletDamage, spawnPosition, ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: startDelay, movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
             }
         }
 
@@ -445,6 +448,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
                 if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
                 {
+                    enemyPresenter.OverrideBulletMovement(ev.BulletMovementOverride);
                     if (ev.MovementOverride != null) enemyPresenter.OverrideMovement(ev.MovementOverride);
                     enemyTracker?.RegisterEnemy(enemyPresenter);
                 }
@@ -473,12 +477,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void HandleDeath()
         {
+            aliveCts?.Cancel();
             StopMovement();
             model.AttackStrategy?.Dispose();
             var col = GetComponent<Collider2D>();
             if (col != null) col.enabled = false;
-
-            Debug.Log("[BossEntityPresenter] Boss died.");
 
             deathCts?.Cancel();
             deathCts?.Dispose();
@@ -520,8 +523,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             deathCts?.Cancel();
             deathCts?.Dispose();
             deathCts = null;
+            aliveCts?.Cancel();
+            aliveCts?.Dispose();
+            aliveCts = null;
             damageFlashSubscription?.Dispose();
             disposables.Dispose();
+            attackTimingSubscription.Dispose();
             deathSequenceCompleted.Dispose();
             model?.AttackStrategy?.Dispose();
             model?.Dispose();

@@ -13,6 +13,9 @@ namespace Project.Scenes.Battle.Scripts.Model
     {
         [SerializeField] BattleSituation situation = BattleSituation.Way;
         [SerializeField] List<SequenceGroup> sequenceGroups = new();
+        [Header("Wind")]
+        [SerializeField] BattleWindSettings wind = new();
+        public BattleWindSettings Wind => wind;
 
         [Header("Boss Prefab")]
         [SerializeField] GameObject bossPrefab;

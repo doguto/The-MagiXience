@@ -31,6 +31,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
+        void Awake()
+        {
+            // Rigidbody2Dを持たないColliderは静的コライダー扱いとなり、Transformで動かすたびに
+            // ブロードフェーズへの再登録が発生して重い。移動する弾はKinematicとして扱わせる。
+            if (!TryGetComponent<Rigidbody2D>(out _))
+            {
+                var body = gameObject.AddComponent<Rigidbody2D>();
+                body.bodyType = RigidbodyType2D.Kinematic;
+                body.useFullKinematicContacts = false;
+                hasRuntimeKinematicBody = true;
+            }
+        }
+
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
         Vector3 travelOrigin;
@@ -38,7 +51,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float travelRange;
         Tween currentTween;
         CancellationTokenSource movementCts;
-        CancellationTokenSource lifetimeCts;
+        float lifetimeElapsed;
+        float screenMargin;
+        bool isInPool;
+        bool hasRuntimeKinematicBody;
+        readonly IMovementStep[] movementOverrideBuffer = new IMovementStep[1];
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
@@ -46,7 +63,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>
         /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
         /// <param name="movementOverride">この弾に限り使う移動ステップ。nullならPrefab側のmovementStepsを使う(従来動作)</param>
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null)
+        /// <param name="movementPresetOverride">この弾に限り使うMovement Stepsのプリセット。movementOverrideが指定されていればそちらを優先する</param>
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null)
         {
             pool = objectPool;
             var resolvedRotation = rotation == default ? Quaternion.identity : rotation;
@@ -57,24 +75,38 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             travelRange = travelAxis == Vector2.zero ? 0f : range;
 
             if (model == null)
+            {
                 model = new BulletEntityModel(damage, isPlayerBullet);
+                BindModelToView();
+            }
             else
+            {
                 model.Reinitialize(damage, isPlayerBullet);
+            }
 
-            StartMovementSequence(direction, startDelay, movementOverride);
+            isInPool = false;
+            StartMovementSequence(direction, startDelay, movementOverride, movementPresetOverride);
 
             view.ResetView();
-            view.UpdatePosition(position);
 
-            BindModelToView();
+            // 画面外判定の余白は毎フレームbounds計算するとコストが高いため生成時に求める。
+            // 回転しても外接円に収まるようextentsの長さを使う。
+            screenMargin = spriteRenderer.bounds.extents.magnitude + 0.1f;
+            lifetimeElapsed = 0f;
         }
 
-        void StartMovementSequence(Vector2 direction, float startDelay, IMovementStep movementOverride)
+        void StartMovementSequence(Vector2 direction, float startDelay, IMovementStep movementOverride, MovementPreset movementPresetOverride)
         {
             StopMovement();
 
+            // Select per launch. Never replace the prefab's list or retain a previous pooled launch's override.
             bool isOverride = movementOverride != null;
-            IReadOnlyList<IMovementStep> steps = isOverride ? new[] { movementOverride } : movementSteps;
+            IReadOnlyList<IMovementStep> steps = movementPresetOverride != null ? movementPresetOverride.Steps : movementSteps;
+            if (isOverride)
+            {
+                movementOverrideBuffer[0] = movementOverride;
+                steps = movementOverrideBuffer;
+            }
             if (steps == null || steps.Count == 0) return;
 
             movementCts = new CancellationTokenSource();
@@ -82,7 +114,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         // movementOverride経由(AttackEvent.BulletMovement)の一時的な移動は、完了と同時に役目を終えるため
-        // Prefab固定のlifetimeを待たずに自分でプールへ返す。通常のmovementSteps(Prefab固定)はそのまま留まる。
+        // Prefab固定のlifetimeを待たずに自分でプールへ返す。通常のmovementSteps(Prefab固定)やプリセットによる置き換えはそのまま留まる。
         async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Vector2 direction, float startDelay, bool returnToPoolWhenDone, CancellationToken ct)
         {
             if (startDelay > 0f)
@@ -99,6 +131,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 try
                 {
                     currentTween = step.Play(transform, direction, null);
+                    if (currentTween == null)
+                    {
+                        // Let Initialize finish before returning an invalid movement to the pool.
+                        await UniTask.Yield(PlayerLoopTiming.Update, ct);
+                        ReturnToPool();
+                        return;
+                    }
                     await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
                 }
                 finally
@@ -118,23 +157,28 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             currentTween = null;
         }
 
+        // modelはプールから再利用されても同一インスタンスのため、購読は生成時の1回のみ行う
         void BindModelToView()
         {
-            disposables.Clear();
-
             model.CurrentHp
                 .Where(hp => hp <= 0)
                 .Subscribe(_ => HandleDestruction())
                 .AddTo(disposables);
-
-            StartLifetimeTimer();
         }
 
         void Update()
         {
             if (model == null || !model.IsAlive) return;
 
-            view.UpdatePosition(transform.position);
+            if (lifetime > 0f)
+            {
+                lifetimeElapsed += Time.deltaTime;
+                if (lifetimeElapsed >= lifetime)
+                {
+                    ReturnToPool();
+                    return;
+                }
+            }
 
             if (IsOutOfScreen() || HasReachedRangeLimit())
             {
@@ -155,39 +199,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         bool IsOutOfScreen()
         {
             var position = transform.position;
-            var extents = spriteRenderer.bounds.extents;
-            var margin = Mathf.Max(extents.x, extents.y) + 0.1f;
+            var margin = screenMargin;
 
             return position.x < ScreenBoundsCache.MinX - margin || position.x > ScreenBoundsCache.MaxX + margin ||
                    position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
-        }
-
-        void StartLifetimeTimer()
-        {
-            CancelLifetimeTimer();
-            if (lifetime <= 0f) return;
-
-            lifetimeCts = new CancellationTokenSource();
-            LifetimeTimerAsync(lifetimeCts.Token).Forget();
-        }
-
-        async UniTaskVoid LifetimeTimerAsync(CancellationToken ct)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(lifetime), cancellationToken: ct);
-            ReturnToPool();
-        }
-
-        void CancelLifetimeTimer()
-        {
-            lifetimeCts?.Cancel();
-            lifetimeCts?.Dispose();
-            lifetimeCts = null;
         }
 
         void HandleDestruction() => ReturnToPool();
 
         public void ReturnToPool()
         {
+            // 寿命・画面外・被弾が同フレームに重なった場合の二重返却を防ぐ
+            if (isInPool) return;
+            isInPool = true;
+
             StopMovement();
             if (pool != null)
                 pool.Release(this);
@@ -198,6 +223,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerEnter2D(Collider2D other)
         {
             if (model == null || !model.IsAlive) return;
+
+            // 実行時に付与したKinematicボディにより、従来は接触判定されなかった静的コライダーとも
+            // トリガーが発生するようになるため、従来どおり無視する
+            if (hasRuntimeKinematicBody && (other.attachedRigidbody == null || other.attachedRigidbody.bodyType == RigidbodyType2D.Static)) return;
+
             var otherPresenter = other.GetComponent<IEntityPresenter>();
             if (otherPresenter != null)
                 model.OnCollision(otherPresenter.GetModel());
@@ -205,7 +235,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public void OnReturnedToPool()
         {
-            CancelLifetimeTimer();
+            isInPool = true;
             StopMovement();
             view.SetVisible(false);
             gameObject.SetActive(false);
@@ -218,7 +248,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            CancelLifetimeTimer();
             StopMovement();
             disposables.Dispose();
             model?.Dispose();

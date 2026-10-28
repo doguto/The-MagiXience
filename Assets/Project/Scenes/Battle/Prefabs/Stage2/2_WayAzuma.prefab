@@ -257,6 +257,26 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: -2
         seType: 0
+      - time: 1
+        signal:
+          rid: 8421728446350360654
+        directionProvider:
+          rid: 8421728446350360655
+        rotationProvider:
+          rid: 8421728446350360656
+        sourceIndexProvider:
+          rid: 8421728446350360657
+        seType: 0
+      - time: 3
+        signal:
+          rid: 8421728446350360659
+        directionProvider:
+          rid: 8421728446350360660
+        rotationProvider:
+          rid: 8421728446350360661
+        sourceIndexProvider:
+          rid: 8421728446350360662
+        seType: 0
       nextPhaseTrigger:
         rid: 8800763986918768744
     - loop: 0
@@ -293,6 +313,16 @@ MonoBehaviour:
           rid: 8800764303442706519
         sourceIndexProvider:
           rid: 8800764303442706520
+        seType: 0
+      - time: 0
+        signal:
+          rid: 8421728446350360692
+        directionProvider:
+          rid: 8421728446350360693
+        rotationProvider:
+          rid: 8421728446350360694
+        sourceIndexProvider:
+          rid: 8421728446350360695
         seType: 0
       nextPhaseTrigger:
         rid: -2
@@ -344,7 +374,7 @@ MonoBehaviour:
     - rid: 3310600516686315830
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: -3, y: 0, z: 0}
+        targetOffset: {x: -3, y: -1, z: 0}
         duration: 1
         easeValue: 1
         customCurve:
@@ -460,6 +490,150 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 1
+    - rid: 8421728446350360654
+      type: {class: ChangeMovementSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        movement:
+          rid: 8421728446350360658
+    - rid: 8421728446350360655
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8421728446350360656
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728446350360657
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8421728446350360658
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 0, y: 2, z: 0}
+        duration: 0.2
+        easeValue: 1
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 1
+    - rid: 8421728446350360659
+      type: {class: ChangeMovementSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        movement:
+          rid: 8421728446350360663
+    - rid: 8421728446350360660
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8421728446350360661
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728446350360662
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8421728446350360663
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 0, y: -2, z: 0}
+        duration: 0.2
+        easeValue: 1
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 1
+    - rid: 8421728446350360692
+      type: {class: ChangeMovementSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        movement:
+          rid: 8421728446350360696
+    - rid: 8421728446350360693
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 8421728446350360694
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 8421728446350360695
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 8421728446350360696
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 7, y: 0, z: 0}
+        duration: 0.5
+        easeValue: 4
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0
     - rid: 8800763986918768719
       type: {class: BeamAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -606,7 +780,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.5, y: -0.4}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -616,7 +790,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.2, y: 1.2}
+  m_Size: {x: 2.8, y: 5}
   m_EdgeRadius: 0
 --- !u!50 &-6218252827413775343
 Rigidbody2D:

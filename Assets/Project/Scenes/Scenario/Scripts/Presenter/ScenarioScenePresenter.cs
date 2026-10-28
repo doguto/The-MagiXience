@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using UniRx;
 using Project.Scenes.Battle.Scripts.Presenter;
 using Project.Scenes.Global.Scripts.Presenter;
@@ -125,7 +126,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     if (isTypeWriterEnabled
                         && !(step.args.Length >= 2 && string.Equals(step.args[1], "default", StringComparison.OrdinalIgnoreCase)))
                     {
-                        if (step.args.Length >= 2 && float.TryParse(step.args[1], out var charactersPerSecond) && charactersPerSecond > 0f)
+                        if (step.args.Length >= 2 && TryParseFloat(step.args[1], out var charactersPerSecond) && charactersPerSecond > 0f)
                         {
                             typeWriterSpeed = charactersPerSecond;
                         }
@@ -157,7 +158,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                         {
                             isAutoAdvanceIntervalAuto = true;
                         }
-                        else if (step.args.Length < 2 || !float.TryParse(step.args[1], out autoAdvanceSeconds) || autoAdvanceSeconds < 0f)
+                        else if (step.args.Length < 2 || !TryParseFloat(step.args[1], out autoAdvanceSeconds) || autoAdvanceSeconds < 0f)
                         {
                             Debug.LogWarning($"[ScenarioScenePresenter] AutoAdvance: 秒数 '{(step.args.Length > 1 ? step.args[1] : "")}' をパースできません。");
                             autoAdvanceSeconds = 2f;
@@ -247,10 +248,10 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 {
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
 
-                    float fadeDuration;
-                    if (!float.TryParse(step.args[1], out fadeDuration))
+                    var fadeDurationArg = step.args.Length > 1 ? step.args[1] : "";
+                    if (!TryParseFloat(fadeDurationArg, out var fadeDuration))
                     {
-                        Debug.LogWarning($"[ScenarioScenePresenter] HideCast: fadeDuration '{step.args[1]}' をパースできません。");
+                        Debug.LogWarning($"[ScenarioScenePresenter] HideCast: fadeDuration '{fadeDurationArg}' をパースできません。");
                         fadeDuration = 0.5f;
                     }
 
@@ -335,6 +336,12 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
             // Scheduler.MainThread はtimeScaleの影響を受けるため、ポーズ中(timeScale=0)はタイマーも止まる
             autoAdvanceTimer.Disposable = Observable.Timer(TimeSpan.FromSeconds(seconds), Scheduler.MainThread)
                                                     .Subscribe(_ => OnPressNext());
+        }
+
+        // シナリオデータは小数点に"."を使うため、実行環境のロケール(例: de-DEでは"."が桁区切り)に依存せずパースする
+        static bool TryParseFloat(string s, out float value)
+        {
+            return float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
         }
 
         void OnDestroy()

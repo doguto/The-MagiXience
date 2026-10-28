@@ -60,6 +60,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         /// <summary>Bulletタイプの弾自身に適用する移動ステップ(全弾共通)。nullならBullet Prefab側のmovementStepsを使う(従来動作)</summary>
         public readonly IMovementStep BulletMovement;
 
+        /// <summary>Bulletタイプの弾のMovement Stepsを置き換えるプリセット。BulletMovement が指定されていればそちらを優先する</summary>
+        public readonly MovementPreset BulletMovementOverride;
+
         /// <summary>
         /// trueなら弾を時間(SpawnDelays)ではなく MovementStep の軌道上の等間隔な座標で生成する。
         /// 発射元が通過した座標へ生成するため、フレーム落ちが起きても配置間隔が崩れない(生成時刻はズレうる)。
@@ -70,7 +73,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         /// <summary>SetInvincibleタイプで無敵をONにするかOFFにするか</summary>
         public readonly bool Enabled;
 
-        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f, float startDelay = 0f, IReadOnlyList<float> startDelays = null, IReadOnlyList<float> spawnDelays = null, IMovementStep movementStep = null, IMovementStep bulletMovement = null, bool enabled = false, bool spawnAlongMovementPath = false)
+        public AttackEvent(AttackEventType type, IReadOnlyList<Vector2> directions = null, int sourceIndex = 0, IReadOnlyList<Vector2> spawnOffsets = null, SeType seType = SeType.None, IReadOnlyList<Quaternion> rotations = null, MovementPreset movementOverride = null, AttackSpawnSpace spawnSpace = AttackSpawnSpace.Source, float range = 0f, float duration = 0f, float width = 0f, float startDelay = 0f, IReadOnlyList<float> startDelays = null, IReadOnlyList<float> spawnDelays = null, IMovementStep movementStep = null, IMovementStep bulletMovement = null, bool enabled = false, bool spawnAlongMovementPath = false, MovementPreset bulletMovementOverride = null)
         {
             Enabled = enabled;
             SpawnAlongMovementPath = spawnAlongMovementPath;
@@ -81,6 +84,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             SpawnOffsets = spawnOffsets;
             Rotations = rotations;
             MovementOverride = movementOverride;
+            BulletMovementOverride = bulletMovementOverride;
             SpawnSpace = spawnSpace;
             Range = range;
             Duration = duration;
@@ -105,6 +109,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
             if (SpawnDelays != null && index < SpawnDelays.Count) return SpawnDelays[index];
             return 0f;
         }
+
+        public AttackEvent WithBulletMovementOverride(MovementPreset preset)
+            => new(Type, Directions, SourceIndex, SpawnOffsets, SeType, Rotations, MovementOverride, SpawnSpace, Range, Duration, Width, StartDelay, StartDelays, SpawnDelays, MovementStep, BulletMovement, Enabled, SpawnAlongMovementPath, preset);
 
         public static AttackEvent Single(Vector2 direction, Quaternion rotation, int sourceIndex = 0, SeType seType = SeType.None) => new(AttackEventType.Bullet, new[] { direction }, sourceIndex, seType: seType, rotations: new[] { Normalize(rotation) });
 
@@ -136,7 +143,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 origins[i] = origin + offset;
             }
 
-            return new AttackEvent(Type, Directions, SourceIndex, origins, SeType, Rotations, MovementOverride, AttackSpawnSpace.World, range, Duration, Width, StartDelay, StartDelays, SpawnDelays, MovementStep, BulletMovement, Enabled, SpawnAlongMovementPath);
+            return new AttackEvent(Type, Directions, SourceIndex, origins, SeType, Rotations, MovementOverride, AttackSpawnSpace.World, range, Duration, Width, StartDelay, StartDelays, SpawnDelays, MovementStep, BulletMovement, Enabled, SpawnAlongMovementPath, BulletMovementOverride);
         }
 
         // default(Quaternion) は (0,0,0,0) で不正なので identity に補正
