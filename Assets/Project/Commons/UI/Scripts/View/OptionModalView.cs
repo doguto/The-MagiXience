@@ -5,6 +5,7 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Project.Commons.UI.Scripts.View
@@ -20,6 +21,8 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] Slider seSlider;
         [SerializeField] TMP_Text bgmValueText;
         [SerializeField] TMP_Text seValueText;
+
+        const int CtrlStep = 10;
 
         readonly Subject<int> onBgmValueChanged = new();
         readonly Subject<int> onSeValueChanged = new();
@@ -70,6 +73,32 @@ namespace Project.Commons.UI.Scripts.View
                     var value = Mathf.RoundToInt(v);
                     seValueText.text = value.ToString();
                     onSeValueChanged.OnNext(value);
+                })
+                .AddTo(this);
+
+            // Ctrl+左右キーでは変化量を10にする。
+            BindCtrlStep(bgmSlider);
+            BindCtrlStep(seSlider);
+        }
+
+        // Slider標準のOnMove(±1)の後に呼ばれるため、Ctrl押下中は残りの±9を加算して±10にする。
+        // 端で標準の±1が効かなかった場合もClampで端に留まる。
+        void BindCtrlStep(Slider slider)
+        {
+            slider.OnMoveAsObservable()
+                .Where(_ => Keyboard.current != null && Keyboard.current.ctrlKey.isPressed)
+                .Subscribe(e =>
+                {
+                    var sign = e.moveDir switch
+                    {
+                        MoveDirection.Right => 1,
+                        MoveDirection.Left => -1,
+                        _ => 0
+                    };
+                    if (slider.direction == Slider.Direction.RightToLeft) sign = -sign;
+                    if (sign == 0) return;
+
+                    slider.value = Mathf.Clamp(slider.value + sign * (CtrlStep - 1), slider.minValue, slider.maxValue);
                 })
                 .AddTo(this);
         }
