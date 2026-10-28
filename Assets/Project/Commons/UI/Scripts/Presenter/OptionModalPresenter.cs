@@ -8,6 +8,7 @@ using Project.Scripts.Repository.ModelRepository;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace Project.Commons.UI.Scripts.Presenter
 {
@@ -24,6 +25,7 @@ namespace Project.Commons.UI.Scripts.Presenter
         {
             runtimeModel = RuntimeModelRepository.Get();
             userModel = UserModelRepository.Instance.Get();
+            optionModalView.SetCtrlPressedProvider(() => Keyboard.current != null && Keyboard.current.ctrlKey.isPressed);
         }
 
         protected override void Start()

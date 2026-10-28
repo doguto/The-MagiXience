@@ -5,7 +5,6 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Project.Commons.UI.Scripts.View
@@ -23,6 +22,9 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] TMP_Text seValueText;
 
         const int CtrlStep = 10;
+
+        // ViewアセンブリはInputSystemを参照しないため、Ctrl押下判定はPresenterから注入する。
+        Func<bool> isCtrlPressed = () => false;
 
         readonly Subject<int> onBgmValueChanged = new();
         readonly Subject<int> onSeValueChanged = new();
@@ -86,7 +88,7 @@ namespace Project.Commons.UI.Scripts.View
         void BindCtrlStep(Slider slider)
         {
             slider.OnMoveAsObservable()
-                .Where(_ => Keyboard.current != null && Keyboard.current.ctrlKey.isPressed)
+                .Where(_ => isCtrlPressed())
                 .Subscribe(e =>
                 {
                     var sign = e.moveDir switch
@@ -101,6 +103,11 @@ namespace Project.Commons.UI.Scripts.View
                     slider.value = Mathf.Clamp(slider.value + sign * (CtrlStep - 1), slider.minValue, slider.maxValue);
                 })
                 .AddTo(this);
+        }
+
+        public void SetCtrlPressedProvider(Func<bool> provider)
+        {
+            isCtrlPressed = provider;
         }
 
         // 通知を発火せずにスライダー・テキストへ値を反映する(初期化・外部反映用)。
