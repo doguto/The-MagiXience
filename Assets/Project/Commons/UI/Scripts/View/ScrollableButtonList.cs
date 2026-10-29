@@ -18,11 +18,6 @@ namespace Project.Commons.UI.Scripts.View
             maxScrollIndex = buttons.Count - 1;
         }
 
-        public void SetMaxScrollIndex(int index)
-        {
-            maxScrollIndex = index;
-        }
-
         public void SetLoop(bool loop)
         {
             isLoop = loop;
