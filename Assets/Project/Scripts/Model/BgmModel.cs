@@ -1,4 +1,5 @@
-﻿using Project.Scripts.Infra;
+﻿using Project.Scripts.Extensions;
+using Project.Scripts.Infra;
 using Project.Scripts.Repository.AssetRepository;
 using UnityEngine;
 
@@ -16,6 +17,10 @@ namespace Project.Scripts.Model
         public string DisplayName => string.IsNullOrEmpty(BgmData.displayName) ? BgmData.name : BgmData.displayName;
         public int LoopStartSamples => BgmData.loopStartSamples;
         public int LoopEndSamples => BgmData.loopEndSamples;
+        public SceneType SceneType => BgmData.sceneType;
+        public BgmType BgmType => BgmData.bgmType;
+        public int SoundRoomUnlockClearedStage => BgmData.soundRoomUnlockClearedStage;
+        public string Description => BgmData.description;
 
         public BgmModel(BgmData bgmData)
         {

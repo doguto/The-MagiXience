@@ -28,5 +28,13 @@ namespace Project.Scripts.Infra
 
         [Tooltip("ループ終了位置（サンプル数）。0の場合はクリップ全体の長さを使用。")]
         public int loopEndSamples;
+
+        [Header("Sound Room")]
+        [Tooltip("サウンドルームで解放されるのに必要なクリア済みステージ数。0なら最初から解放。")]
+        public int soundRoomUnlockClearedStage;
+
+        [Tooltip("サウンドルームで表示する説明文（3〜4行程度）。")]
+        [TextArea(3, 5)]
+        public string description;
     }
 }
