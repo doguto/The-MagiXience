@@ -4,7 +4,6 @@ using DG.Tweening;
 using Project.Commons.UI.Scripts.View;
 using UniRx;
 using UnityEngine;
-using UnityEngine.UI;
 
 
 namespace Project.Scenes.StageList.Scripts.View
@@ -36,21 +35,6 @@ namespace Project.Scenes.StageList.Scripts.View
                 simpleButtons[i].interactable = true;
                 simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
                 simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
-            }
-            SetLoopNavigation();
-        }
-
-        void SetLoopNavigation()
-        {
-            var count = simpleButtons.Count;
-            for (var i = 0; i < count; i++)
-            {
-                simpleButtons[i].navigation = new Navigation
-                {
-                    mode = Navigation.Mode.Explicit,
-                    selectOnUp = simpleButtons[(i - 1 + count) % count],
-                    selectOnDown = simpleButtons[(i + 1) % count],
-                };
             }
         }
 

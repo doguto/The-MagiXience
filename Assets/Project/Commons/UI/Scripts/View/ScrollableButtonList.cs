@@ -1,6 +1,7 @@
 using Project.Scripts.Extensions.Message;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Project.Commons.UI.Scripts.View
 {
@@ -21,6 +22,32 @@ namespace Project.Commons.UI.Scripts.View
         public void SetLoop(bool loop)
         {
             isLoop = loop;
+            if (isLoop) SetLoopNavigation();
+        }
+
+        // スクロールだけでなくEventSystemの選択も端から反対側の端へ回り込むよう、
+        // buttonsの並び順で上下(横なら左右)の遷移先を明示する
+        void SetLoopNavigation()
+        {
+            var isVertical = buttonListType == ButtonListType.Vertical;
+            var count = buttons.Count;
+            for (var i = 0; i < count; i++)
+            {
+                var selectable = buttons[i].GetComponent<Selectable>();
+                if (selectable == null) continue;
+
+                var prev = buttons[(i - 1 + count) % count].GetComponent<Selectable>();
+                var next = buttons[(i + 1) % count].GetComponent<Selectable>();
+                selectable.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnUp = isVertical ? prev : null,
+                    selectOnDown = isVertical ? next : null,
+                    // Move()では右入力でインデックスが戻るため、それに合わせる
+                    selectOnLeft = isVertical ? null : next,
+                    selectOnRight = isVertical ? null : prev,
+                };
+            }
         }
 
         public override void Move(UINavigateMessage message)
