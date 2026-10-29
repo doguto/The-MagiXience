@@ -4,6 +4,7 @@ using DG.Tweening;
 using Project.Commons.UI.Scripts.View;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 namespace Project.Scenes.StageList.Scripts.View
@@ -35,6 +36,25 @@ namespace Project.Scenes.StageList.Scripts.View
                 simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
             }
             scrollableButtonList.SetMaxScrollIndex(maxScrollIndex);
+
+            // 全ステージ解放後のみ、端で上下を押したら反対側の端へ回り込む
+            var isAllOpened = simpleButtons.TrueForAll(b => b.interactable);
+            scrollableButtonList.SetLoop(isAllOpened);
+            if (isAllOpened) SetLoopNavigation();
+        }
+
+        void SetLoopNavigation()
+        {
+            var count = simpleButtons.Count;
+            for (var i = 0; i < count; i++)
+            {
+                simpleButtons[i].navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnUp = simpleButtons[(i - 1 + count) % count],
+                    selectOnDown = simpleButtons[(i + 1) % count],
+                };
+            }
         }
 
         public void SetCharaImage(Sprite charaSprite, bool isCleared)

@@ -10,6 +10,7 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] float buttonInterval;
         float targetPosition;
         int maxScrollIndex;
+        bool isLoop;
 
         public override void Init(ButtonListType buttonListType, int index = 0, bool isActive = false)
         {
@@ -20,6 +21,11 @@ namespace Project.Commons.UI.Scripts.View
         public void SetMaxScrollIndex(int index)
         {
             maxScrollIndex = index;
+        }
+
+        public void SetLoop(bool loop)
+        {
+            isLoop = loop;
         }
 
         public override void Move(UINavigateMessage message)
@@ -48,14 +54,19 @@ namespace Project.Commons.UI.Scripts.View
                 isUp = message.value.x > 0;
             }
 
-            if (ButtonIndex == maxScrollIndex && !isUp) return;
-            if (ButtonIndex == 0 && isUp) return;
-            
-            targetPosition = isUp ? targetPosition - buttonInterval : targetPosition + buttonInterval;
+            var nextIndex = isUp ? ButtonIndex - 1 : ButtonIndex + 1;
+            if (nextIndex < 0 || nextIndex > maxScrollIndex)
+            {
+                if (!isLoop) return;
+                // 端から反対側の端へ回り込む
+                nextIndex = nextIndex < 0 ? maxScrollIndex : 0;
+            }
+
+            targetPosition = nextIndex * buttonInterval;
             var moveVector = isVertical ? new Vector2(0, targetPosition) : new Vector2(targetPosition, 0);
             foreach (var button in buttons) button.Move(moveVector);
 
-            SetButtonIndex(isUp ? ButtonIndex - 1 : ButtonIndex + 1);
+            SetButtonIndex(nextIndex);
         }
     }
 }
