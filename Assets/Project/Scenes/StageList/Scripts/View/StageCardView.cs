@@ -21,10 +21,14 @@ namespace Project.Scenes.StageList.Scripts.View
 
         [Header("Clear Frame")]
         [SerializeField] SpriteRenderer clearFrame;
-        [SerializeField] Color normalFrameColor = new(0.8f, 0.5f, 0.25f);
-        [SerializeField] Color noContinueFrameColor = new(0.85f, 0.88f, 0.95f);
-        [SerializeField] Color noDamageFrameColor = new(1f, 0.84f, 0.2f);
- 
+        [SerializeField] Color normalFrameColor = new(0.85f, 0.88f, 0.95f);
+        [SerializeField] Color noContinueFrameColor = new(1f, 0.84f, 0.2f);
+        // ノーダメ枠は色相を回して虹色にする。speedは1秒あたりの色相の周回数
+        [SerializeField] float rainbowSpeed = 0.5f;
+        [SerializeField, Range(0f, 1f)] float rainbowSaturation = 0.6f;
+
+        ClearFrameType currentFrameType;
+
         public void Setup((string id, string title) stage, bool isOpened)
         {
             stageIndexText.text = $"Stage.{stage.id}";
@@ -36,13 +40,27 @@ namespace Project.Scenes.StageList.Scripts.View
         {
             if (clearFrame == null) return;
 
+            currentFrameType = type;
             clearFrame.gameObject.SetActive(type != ClearFrameType.None);
             clearFrame.color = type switch
             {
-                ClearFrameType.NoDamage => noDamageFrameColor,
+                ClearFrameType.NoDamage => RainbowColor(),
                 ClearFrameType.NoContinue => noContinueFrameColor,
                 _ => normalFrameColor
             };
+        }
+
+        void Update()
+        {
+            if (clearFrame == null || currentFrameType != ClearFrameType.NoDamage) return;
+
+            clearFrame.color = RainbowColor();
+        }
+
+        Color RainbowColor()
+        {
+            var hue = Mathf.Repeat(Time.unscaledTime * rainbowSpeed, 1f);
+            return Color.HSVToRGB(hue, rainbowSaturation, 1f);
         }
     }
 }
