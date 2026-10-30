@@ -13,6 +13,18 @@ MonoBehaviour:
   m_Name: BetaAnnouncementScenario
   m_EditorClassIdentifier: 
   steps:
+  - function: TypeWriter
+    args:
+    - true
+    - default
+  - function: AutoAdvance
+    args:
+    - true
+    - 2
+  - function: ShowCastMessage
+    args:
+    - 
+    - 
   - function: ShowCast
     args:
     - "\u30C6\u30F3"
@@ -33,10 +45,18 @@ MonoBehaviour:
     args:
     - "\u30ED\u30B3"
     - "\u30C6\u30F3\u3001\u3044\u3088\u3044\u3088\u3053\u306E\u6642\u304C\u6765\u305F\u308F\u3002"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30C6\u30F3"
+    - Default
   - function: ShowCastMessage
     args:
     - "\u30C6\u30F3"
     - "\u2026\u2026\u306A\u3093\u3060\u7A81\u7136\u3002\n\u305D\u306E\u9854\u3001\u4F55\u304B\u826F\u3044\u3053\u3068\u3067\u3082\u3042\u3063\u305F\u306E\u304B\uFF1F"
+  - function: ChangeCastAnimation
+    args:
+    - "\u30ED\u30B3"
+    - Default
   - function: ShowCastMessage
     args:
     - "\u30ED\u30B3"

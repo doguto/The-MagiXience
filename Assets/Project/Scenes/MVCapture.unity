@@ -150,8 +150,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scenarioData: {fileID: 11400000, guid: d7498ed7cc02ebd45bae4f15f10415c9, type: 2}
   charaStageNumber: 1
-  backgroundStageNumber: 3
-  backgroundPresenter: {fileID: 1321875763}
+  backgroundStageNumber: 2
+  backgroundPresenter: {fileID: 0}
 --- !u!4 &96570601
 Transform:
   m_ObjectHideFlags: 0
@@ -315,8 +315,6 @@ GameObject:
   - component: {fileID: 1321875767}
   - component: {fileID: 1321875766}
   - component: {fileID: 1321875765}
-  - component: {fileID: 1321875764}
-  - component: {fileID: 1321875763}
   m_Layer: 0
   m_Name: BackGround_1_0
   m_TagString: Untagged
@@ -324,33 +322,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1321875763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1321875762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a7e7b5ce52e85a46a62036cf09a432a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  view: {fileID: 1321875764}
-  scrollSpeed: {x: 0.5, y: 0}
-  decelerationPerSecond: 0.2
---- !u!114 &1321875764
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1321875762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e40b58b5052bdf646b1a045fc417afc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1321875765
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -371,7 +342,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3498336094683241577, guid: a48c5a13033bbde48a2476df84c68735, type: 3}
+  m_Sprite: {fileID: 1817689115901117875, guid: 6e180a91141a6f447a250ffe722a4264, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
