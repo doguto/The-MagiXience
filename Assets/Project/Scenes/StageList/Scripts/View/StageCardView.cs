@@ -10,9 +10,10 @@ namespace Project.Scenes.StageList.Scripts.View
         [SerializeField] TextMeshProUGUI stageTitle;
         [SerializeField] TextMeshProUGUI stageIndexText;
  
-        public void Setup((string id, string title) stage, bool isOpened)
+        public void Setup((string id, string title) stage, bool isOpened, bool isLastStage)
         {
-            stageIndexText.text = $"Stage.{stage.id}";
+            // 最終面(EX)だけ区切りをコロンにする
+            stageIndexText.text = isLastStage ? $"Phase:{stage.id}." : $"Phase {stage.id}.";
             stageTitle.text = isOpened ? stage.title : "？？？？？？？？";
         }
     }
