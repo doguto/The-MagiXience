@@ -39,7 +39,8 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             stageCardListView.Init(isOpenedList);
             for (var i = 0; i < stageModels.Count; i++)
             {
-                stageCardListView.stageCardViews[i].Setup(stageModels[i].GetIdAndTitle(), stageModels[i].IsOpened);
+                var isLastStage = stageModels[i].BattleStageType == BattleStageType.StageEx;
+                stageCardListView.stageCardViews[i].Setup(stageModels[i].GetIdAndTitle(), stageModels[i].IsOpened, isLastStage);
                 stageCardListView.stageCardViews[i].SetClearFrame(ToClearFrameType(stageModels[i].ClearRank));
             }
 

@@ -18,7 +18,7 @@ namespace Project.Scenes.StageList.Scripts.View
     {
         [SerializeField] TextMeshProUGUI stageTitle;
         [SerializeField] TextMeshProUGUI stageIndexText;
-
+ 
         [Header("Clear Frame")]
         [SerializeField] SpriteRenderer clearFrame;
         // ノーコンは白い枠画像に色を掛けて使い、通常・ノーダメは枠画像の色をそのまま使う
@@ -28,9 +28,10 @@ namespace Project.Scenes.StageList.Scripts.View
         [SerializeField] Color normalFrameColor = Color.white;
         [SerializeField] Color noContinueFrameColor = new(1f, 0.84f, 0.2f);
 
-        public void Setup((string id, string title) stage, bool isOpened)
+        public void Setup((string id, string title) stage, bool isOpened, bool isLastStage)
         {
-            stageIndexText.text = $"Stage.{stage.id}";
+            // 最終面(EX)だけ区切りをコロンにする
+            stageIndexText.text = isLastStage ? $"Phase:{stage.id}." : $"Phase {stage.id}.";
             stageTitle.text = isOpened ? stage.title : "？？？？？？？？";
         }
 
