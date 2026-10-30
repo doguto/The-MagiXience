@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scripts.Extensions.Message;
 using TMPro;
 using UniRx;
 using UniRx.Triggers;
@@ -23,8 +24,7 @@ namespace Project.Commons.UI.Scripts.View
 
         const int CtrlStep = 10;
 
-        // ViewアセンブリはInputSystemを参照しないため、Ctrl押下判定はPresenterから注入する。
-        Func<bool> isCtrlPressed = () => false;
+        bool isCtrlPressed;
 
         readonly Subject<int> onBgmValueChanged = new();
         readonly Subject<int> onSeValueChanged = new();
@@ -79,6 +79,9 @@ namespace Project.Commons.UI.Scripts.View
                 .AddTo(this);
 
             // Ctrl+左右キーでは変化量を10にする。
+            MessageBroker.Default.Receive<UICtrlMessage>()
+                .Subscribe(message => isCtrlPressed = message.isPressed)
+                .AddTo(this);
             BindCtrlStep(bgmSlider);
             BindCtrlStep(seSlider);
         }
@@ -88,7 +91,7 @@ namespace Project.Commons.UI.Scripts.View
         void BindCtrlStep(Slider slider)
         {
             slider.OnMoveAsObservable()
-                .Where(_ => isCtrlPressed())
+                .Where(_ => isCtrlPressed)
                 .Subscribe(e =>
                 {
                     var sign = e.moveDir switch
@@ -103,11 +106,6 @@ namespace Project.Commons.UI.Scripts.View
                     slider.value = Mathf.Clamp(slider.value + sign * (CtrlStep - 1), slider.minValue, slider.maxValue);
                 })
                 .AddTo(this);
-        }
-
-        public void SetCtrlPressedProvider(Func<bool> provider)
-        {
-            isCtrlPressed = provider;
         }
 
         // 通知を発火せずにスライダー・テキストへ値を反映する(初期化・外部反映用)。

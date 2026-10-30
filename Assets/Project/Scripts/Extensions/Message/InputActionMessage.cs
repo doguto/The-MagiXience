@@ -86,4 +86,9 @@ namespace Project.Scripts.Extensions.Message
     {
         public Vector2 value;
     }
+
+    public struct UICtrlMessage
+    {
+        public bool isPressed;
+    }
 }

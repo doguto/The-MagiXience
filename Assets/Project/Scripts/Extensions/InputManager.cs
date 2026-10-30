@@ -143,6 +143,11 @@ namespace Project.Scripts.Extensions
             RegisterAction(scrollWheelAction, OnUIScrollWheel, InputActionPhase.Started);
             RegisterAction(scrollWheelAction, OnUIScrollWheel, InputActionPhase.Performed);
 
+            // UI - Ctrl
+            var ctrlAction = uiMap.FindAction("Ctrl");
+            RegisterAction(ctrlAction, OnUICtrl, InputActionPhase.Started);
+            RegisterAction(ctrlAction, OnUICtrl, InputActionPhase.Canceled);
+
             // InputSystemを有効化
             inputActionAsset.Enable();
         }
@@ -274,6 +279,11 @@ namespace Project.Scripts.Extensions
         {
             var value = context.ReadValue<Vector2>();
             MessageBroker.Default.Publish(new UIScrollWheelMessage { value = value });
+        }
+
+        public void OnUICtrl(InputAction.CallbackContext context)
+        {
+            MessageBroker.Default.Publish(new UICtrlMessage { isPressed = context.started });
         }
     }
 }
