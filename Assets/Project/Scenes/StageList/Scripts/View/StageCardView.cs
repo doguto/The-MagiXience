@@ -21,13 +21,12 @@ namespace Project.Scenes.StageList.Scripts.View
 
         [Header("Clear Frame")]
         [SerializeField] SpriteRenderer clearFrame;
-        [SerializeField] Color normalFrameColor = new(0.85f, 0.88f, 0.95f);
+        // ノーコンは白い枠画像に色を掛けて使い、通常・ノーダメは枠画像の色をそのまま使う
+        [SerializeField] Sprite plainFrameSprite;
+        [SerializeField] Sprite noContinueFrameSprite;
+        [SerializeField] Sprite noDamageFrameSprite;
+        [SerializeField] Color normalFrameColor = Color.white;
         [SerializeField] Color noContinueFrameColor = new(1f, 0.84f, 0.2f);
-        // ノーダメ枠は色相を回して虹色にする。speedは1秒あたりの色相の周回数
-        [SerializeField] float rainbowSpeed = 0.5f;
-        [SerializeField, Range(0f, 1f)] float rainbowSaturation = 0.6f;
-
-        ClearFrameType currentFrameType;
 
         public void Setup((string id, string title) stage, bool isOpened)
         {
@@ -40,27 +39,19 @@ namespace Project.Scenes.StageList.Scripts.View
         {
             if (clearFrame == null) return;
 
-            currentFrameType = type;
             clearFrame.gameObject.SetActive(type != ClearFrameType.None);
+            clearFrame.sprite = type switch
+            {
+                ClearFrameType.NoDamage => noDamageFrameSprite,
+                ClearFrameType.NoContinue => noContinueFrameSprite,
+                _ => plainFrameSprite
+            };
             clearFrame.color = type switch
             {
-                ClearFrameType.NoDamage => RainbowColor(),
+                ClearFrameType.NoDamage => Color.white,
                 ClearFrameType.NoContinue => noContinueFrameColor,
                 _ => normalFrameColor
             };
-        }
-
-        void Update()
-        {
-            if (clearFrame == null || currentFrameType != ClearFrameType.NoDamage) return;
-
-            clearFrame.color = RainbowColor();
-        }
-
-        Color RainbowColor()
-        {
-            var hue = Mathf.Repeat(Time.unscaledTime * rainbowSpeed, 1f);
-            return Color.HSVToRGB(hue, rainbowSaturation, 1f);
         }
     }
 }
