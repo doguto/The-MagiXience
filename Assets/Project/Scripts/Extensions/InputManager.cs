@@ -118,6 +118,11 @@ namespace Project.Scripts.Extensions
             var cancelAction = uiMap.FindAction("Cancel");
             RegisterAction(cancelAction, OnUICancel, InputActionPhase.Started);
 
+            // UI - Ctrl
+            var ctrlAction = uiMap.FindAction("Ctrl");
+            RegisterAction(ctrlAction, OnUICtrl, InputActionPhase.Started);
+            RegisterAction(ctrlAction, OnUICtrl, InputActionPhase.Canceled);
+
             // InputSystemを有効化
             inputActionAsset.Enable();
         }
@@ -222,6 +227,11 @@ namespace Project.Scripts.Extensions
         public void OnUICancel(InputAction.CallbackContext context)
         {
             MessageBroker.Default.Publish(new UICancelMessage());
+        }
+
+        public void OnUICtrl(InputAction.CallbackContext context)
+        {
+            MessageBroker.Default.Publish(new UICtrlMessage { isPressed = context.started });
         }
     }
 }

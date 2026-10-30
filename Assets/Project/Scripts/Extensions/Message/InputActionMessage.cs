@@ -64,4 +64,9 @@ namespace Project.Scripts.Extensions.Message
     public struct UICancelMessage
     {
     }
+
+    public struct UICtrlMessage
+    {
+        public bool isPressed;
+    }
 }
