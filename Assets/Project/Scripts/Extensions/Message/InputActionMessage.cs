@@ -64,31 +64,4 @@ namespace Project.Scripts.Extensions.Message
     public struct UICancelMessage
     {
     }
-
-    public struct UIPointMessage
-    {
-        public Vector2 value;
-    }
-
-    public struct UIClickMessage
-    {
-    }
-
-    public struct UIRightClickMessage
-    {
-    }
-
-    public struct UIMiddleClickMessage
-    {
-    }
-
-    public struct UIScrollWheelMessage
-    {
-        public Vector2 value;
-    }
-
-    public struct UICtrlMessage
-    {
-        public bool isPressed;
-    }
 }
