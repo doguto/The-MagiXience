@@ -41,6 +41,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             {
                 var isLastStage = stageModels[i].BattleStageType == BattleStageType.StageEx;
                 stageCardListView.stageCardViews[i].Setup(stageModels[i].GetIdAndTitle(), stageModels[i].IsOpened, isLastStage);
+                stageCardListView.stageCardViews[i].SetClearFrame(ToClearFrameType(stageModels[i].ClearRank));
             }
 
             ShowCharaImage(0);
@@ -49,6 +50,17 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             MessageBroker.Default.Receive<UICancelMessage>()
                 .SubscribeBlocking(_ => BackToTitle())
                 .AddTo(this);
+        }
+
+        static ClearFrameType ToClearFrameType(StageClearRank rank)
+        {
+            return rank switch
+            {
+                StageClearRank.Normal => ClearFrameType.Normal,
+                StageClearRank.NoContinue => ClearFrameType.NoContinue,
+                StageClearRank.NoDamage => ClearFrameType.NoDamage,
+                _ => ClearFrameType.None
+            };
         }
 
         void ShowCharaImage(int buttonIndex)
