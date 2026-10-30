@@ -53,10 +53,33 @@ namespace Project.Scripts.Model
             UserData.textSpeed = UserData.ClampTextSpeed(textSpeed);
         }
 
-        public void StageClear(int stageNumber)
+        public void StageClear(int stageNumber, StageClearRank rank)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);
+
+            // クリアランクは最高記録のみ保持する
+            var index = stageNumber - 1;
+            if (index >= 0)
+            {
+                if (UserData.stageClearRanks.Length <= index)
+                {
+                    Array.Resize(ref UserData.stageClearRanks, index + 1);
+                }
+                UserData.stageClearRanks[index] = Math.Max(UserData.stageClearRanks[index], (int)rank);
+            }
             Save();
+        }
+
+        // 記録が無いがクリア済みのステージ(ランク記録導入前のセーブ)はNormal扱いにする
+        public StageClearRank GetStageClearRank(int stageNumber)
+        {
+            if (!IsClearedStage(stageNumber)) return StageClearRank.None;
+
+            var index = stageNumber - 1;
+            var rank = index >= 0 && index < UserData.stageClearRanks.Length
+                ? (StageClearRank)UserData.stageClearRanks[index]
+                : StageClearRank.None;
+            return rank == StageClearRank.None ? StageClearRank.Normal : rank;
         }
 
         public bool HasEnteredStage1 => UserData.hasEnteredStage1;

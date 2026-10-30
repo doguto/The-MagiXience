@@ -18,6 +18,8 @@ namespace Project.Scripts.Infra
         // 1面に一度でも入ったことがあるか（初回チュートリアルのスキップ待ち判定に使用）
         public bool hasEnteredStage1;
         public float textSpeed;
+        // ステージごとの最高クリアランク(index=ステージ番号-1)。値はStageClearRankのint値
+        public int[] stageClearRanks;
 
         public UserData()
         {
@@ -27,6 +29,7 @@ namespace Project.Scripts.Infra
             seVolume = DefaultVolume;
             hasEnteredStage1 = false;
             textSpeed = DefaultTextSpeed;
+            stageClearRanks = new int[0];
         }
 
         // 読み込んだ値を正常な範囲へ補正する。不正なJSON(欠損・型不一致)はJsonUtilityにより
@@ -38,6 +41,7 @@ namespace Project.Scripts.Infra
             bgmVolume = Mathf.Clamp(bgmVolume, 0, 100);
             seVolume = Mathf.Clamp(seVolume, 0, 100);
             textSpeed = ClampTextSpeed(textSpeed);
+            stageClearRanks ??= new int[0];
         }
 
         public static float ClampTextSpeed(float textSpeed)
