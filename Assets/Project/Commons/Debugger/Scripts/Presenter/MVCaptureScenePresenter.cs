@@ -1,22 +1,21 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Presenter;
 using Project.Scenes.Scenario.Scripts.Model;
+using Project.Scenes.Scenario.Scripts.Presenter;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Model;
 using Project.Scripts.Presenter;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 namespace Project.Commons.Debugger.Scripts.Presenter
 {
     /// <summary>
     /// 告知MVなどの撮影用シーンの進行役。
-    /// 指定したステージの背景の上でシナリオを流し、Eキーで DemoClear を重ねて表示する。
+    /// 指定したステージの背景の上でシナリオを流し、終わったら DemoClear を表示する。
     /// </summary>
     public class MVCaptureScenePresenter : MonoPresenter
     {
@@ -28,7 +27,6 @@ namespace Project.Commons.Debugger.Scripts.Presenter
         [SerializeField] BackgroundPresenter backgroundPresenter;
 
         readonly BattleBackgroundModel backgroundModel = new();
-        bool isDemoClearRequested;
 
         protected override void Start()
         {
@@ -49,43 +47,26 @@ namespace Project.Commons.Debugger.Scripts.Presenter
             }
 
             ScenarioModelRepository.Instance.SetOverrideData(scenarioData);
-            SceneManager.LoadSceneAsync(SceneRouterModel.Scenario, LoadSceneMode.Additive);
+            PlayScenarioThenDemoClear().Forget();
         }
 
-        void Update()
+        // 本編のボス戦後と同じく、シナリオが終わった直後に DemoClear を表示する
+        async UniTaskVoid PlayScenarioThenDemoClear()
         {
-            if (isDemoClearRequested) return;
+            var token = destroyCancellationToken;
+            await SceneManager.LoadSceneAsync(SceneRouterModel.Scenario, LoadSceneMode.Additive)
+                              .ToUniTask(cancellationToken: token);
 
-            var keyboard = Keyboard.current;
-            if (keyboard == null || !keyboard.eKey.wasPressedThisFrame) return;
+            var scenarioPresenter = FindFirstObjectByType<ScenarioScenePresenter>();
+            if (scenarioPresenter == null)
+            {
+                Debug.LogWarning("[MVCaptureScenePresenter] ScenarioScenePresenter が見つかりません", this);
+                return;
+            }
 
-            isDemoClearRequested = true;
-            LoadDemoClear().Forget();
-        }
-
-        async UniTaskVoid LoadDemoClear()
-        {
+            await scenarioPresenter.OnScenarioCompleted.ToUniTask(useFirstValue: true, cancellationToken: token);
             await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive)
-                              .ToUniTask(cancellationToken: destroyCancellationToken);
-
-            // DemoClearのCanvasは本編ではシナリオ終了後に出るため、シナリオのCanvasより下に描画される設定になっている。
-            // 撮影ではシナリオに重ねたいので、シナリオのCanvasより手前に出す
-            var scenarioCanvas = FindRootCanvas(SceneRouterModel.Scenario);
-            var demoClearCanvas = FindRootCanvas(SceneRouterModel.DemoClear);
-            if (scenarioCanvas == null || demoClearCanvas == null) return;
-
-            demoClearCanvas.sortingLayerID = scenarioCanvas.sortingLayerID;
-            demoClearCanvas.sortingOrder = scenarioCanvas.sortingOrder + 1;
-        }
-
-        static Canvas FindRootCanvas(string sceneName)
-        {
-            var scene = SceneManager.GetSceneByName(sceneName);
-            if (!scene.IsValid() || !scene.isLoaded) return null;
-
-            return scene.GetRootGameObjects()
-                        .SelectMany(root => root.GetComponentsInChildren<Canvas>(true))
-                        .FirstOrDefault(canvas => canvas.isRootCanvas);
+                              .ToUniTask(cancellationToken: token);
         }
 
         void OnDestroy()
