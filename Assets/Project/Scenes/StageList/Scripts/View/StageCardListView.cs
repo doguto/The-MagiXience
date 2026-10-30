@@ -24,17 +24,18 @@ namespace Project.Scenes.StageList.Scripts.View
         public void Init(IReadOnlyList<bool> isOpenedList)
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
+            // 端で上下を押したら反対側の端へ回り込む
+            scrollableButtonList.SetLoop(true);
 
-            var maxScrollIndex = 0;
             for (var i = 0; i < simpleButtons.Count; i++)
             {
                 var isOpened = i < isOpenedList.Count && isOpenedList[i];
-                if (isOpened) maxScrollIndex = i;
                 simpleButtons[i].Init(isOpened, i == 0 && isOpened);
+                // 未解放のカードもフォーカスの移動先にする(決定はIsOpenedで弾かれる)
+                simpleButtons[i].interactable = true;
                 simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
                 simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
             }
-            scrollableButtonList.SetMaxScrollIndex(maxScrollIndex);
         }
 
         public void SetCharaImage(Sprite charaSprite, bool isCleared)

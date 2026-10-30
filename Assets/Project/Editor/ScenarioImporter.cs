@@ -25,7 +25,16 @@ namespace Project.Editor
             var match = Regex.Match(fileName, @"^(.+?)面ボス(前|後)$");
             if (!match.Success)
             {
-                Debug.LogError($"シナリオファイル名が想定の形式ではありません（例: 1面ボス前）: {fileName}");
+                // ステージのシナリオ以外(MV撮影用など)は保存先を選んでもらう
+                string selectedPath = EditorUtility.SaveFilePanelInProject(
+                    "Save Scenario Asset", $"{fileName}Scenario", "asset",
+                    "ステージのシナリオ名（例: 1面ボス前）ではないため、保存先を指定してください", "Assets/Project/DataStore");
+                if (string.IsNullOrEmpty(selectedPath))
+                {
+                    return;
+                }
+
+                ImportScenario(path, selectedPath);
                 return;
             }
 
@@ -39,11 +48,17 @@ namespace Project.Editor
                 return;
             }
 
-            string content = File.ReadAllText(path);
+            ImportScenario(path, $"{directory}/Stage{stageName}{wayOrBoss}Scenario.asset");
+        }
+
+        /// <summary>
+        /// シナリオテキストをパースし、指定パスのScenarioDataアセットとして保存する（既存アセットは上書き）。
+        /// </summary>
+        public static void ImportScenario(string textPath, string assetPath)
+        {
+            string content = File.ReadAllText(textPath);
             ScenarioData data = ScriptableObject.CreateInstance<ScenarioData>();
             data.steps = ParseScenario(content);
-
-            string assetPath = $"{directory}/Stage{stageName}{wayOrBoss}Scenario.asset";
 
             // 既存アセットがあれば上書きする
             var existing = AssetDatabase.LoadAssetAtPath<ScenarioData>(assetPath);
