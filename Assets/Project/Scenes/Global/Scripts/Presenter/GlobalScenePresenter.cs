@@ -31,48 +31,52 @@ namespace Project.Scenes.Global.Scripts.Presenter
         public SceneNavigator SceneNavigator { get; } = new SceneNavigator();
 
         // 画面のアスペクト比は16:9に固定する。
+        // ウィンドウサイズは補正せず、カメラのViewport Rectで16:9の描画領域を作り、余白は黒帯にする。
         const float TargetAspect = 16f / 9f;
-        int lastScreenWidth;
-        int lastScreenHeight;
+
+        // 黒帯を塗りつぶす全画面のカメラ。Viewport Rectの補正対象から除外する。
+        [SerializeField] Camera letterboxCamera;
+        Camera[] cameraBuffer = new Camera[8];
 
         void Update()
         {
             KeepTargetAspect();
         }
 
-        // ウィンドウのリサイズ・フルスクリーン切り替えで16:9から外れたら解像度を補正する。
-        // 非16:9ディスプレイでのフルスクリーン(FullScreenWindow)は、Unityが黒帯を付けて表示する。
         void KeepTargetAspect()
         {
-            if (Application.isEditor) return;
-
             var width = Screen.width;
             var height = Screen.height;
             if (width <= 0 || height <= 0) return; // 最小化中
-            if (width == lastScreenWidth && height == lastScreenHeight) return;
 
-            var widthChanged = Mathf.Abs(width - lastScreenWidth) >= Mathf.Abs(height - lastScreenHeight);
-            lastScreenWidth = width;
-            lastScreenHeight = height;
-            if (Mathf.Abs((float)width / height - TargetAspect) < 0.01f) return;
+            var viewportRect = CalculateViewportRect((float)width / height);
 
-            // ウィンドウ時は主に変化した辺を基準にし、フルスクリーン時は画面に収まる最大サイズにする。
-            var mode = Screen.fullScreenMode;
-            var displayInfo = Screen.mainWindowDisplayInfo;
-            var maxWidth = mode == FullScreenMode.Windowed ? displayInfo.workArea.width : displayInfo.width;
-            var maxHeight = mode == FullScreenMode.Windowed ? displayInfo.workArea.height : displayInfo.height;
-            if (mode != FullScreenMode.Windowed) widthChanged = (float)width / height < TargetAspect;
-
-            var newWidth = widthChanged ? width : Mathf.RoundToInt(height * TargetAspect);
-            if (newWidth > maxWidth) newWidth = maxWidth;
-            var newHeight = Mathf.RoundToInt(newWidth / TargetAspect);
-            if (newHeight > maxHeight)
+            // シーン遷移でカメラが入れ替わるため、毎フレーム全カメラを確認する。
+            if (cameraBuffer.Length < Camera.allCamerasCount)
             {
-                newHeight = maxHeight;
-                newWidth = Mathf.RoundToInt(newHeight * TargetAspect);
+                cameraBuffer = new Camera[Camera.allCamerasCount];
             }
 
-            Screen.SetResolution(newWidth, newHeight, mode);
+            var cameraCount = Camera.GetAllCameras(cameraBuffer);
+            for (var i = 0; i < cameraCount; i++)
+            {
+                var targetCamera = cameraBuffer[i];
+                if (targetCamera == letterboxCamera) continue;
+                if (targetCamera.rect != viewportRect) targetCamera.rect = viewportRect;
+            }
+        }
+
+        static Rect CalculateViewportRect(float screenAspect)
+        {
+            // 横長の画面は左右に、縦長の画面は上下に黒帯を付ける。
+            if (screenAspect > TargetAspect)
+            {
+                var widthRatio = TargetAspect / screenAspect;
+                return new Rect((1f - widthRatio) / 2f, 0f, widthRatio, 1f);
+            }
+
+            var heightRatio = screenAspect / TargetAspect;
+            return new Rect(0f, (1f - heightRatio) / 2f, 1f, heightRatio);
         }
 
         void Awake()
@@ -80,6 +84,11 @@ namespace Project.Scenes.Global.Scripts.Presenter
             if (inputActions == null)
             {
                 Debug.LogError("InputActionsが設定されていません", this);
+            }
+
+            if (letterboxCamera == null)
+            {
+                Debug.LogWarning("LetterboxCameraが設定されていません", this);
             }
 
             // InputActionAssetをRepositoryに設定
