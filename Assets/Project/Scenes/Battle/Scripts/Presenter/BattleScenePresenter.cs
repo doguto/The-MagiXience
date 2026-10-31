@@ -674,9 +674,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
+        StageClearRank ResolveClearRank()
+        {
+            if (continueCount > 0) return StageClearRank.Normal;
+            if (playerPresenter != null && playerPresenter.HasTakenDamage) return StageClearRank.NoContinue;
+            return StageClearRank.NoDamage;
+        }
+
         async void CompleteStage()
         {
-            stageModel?.Clear();
+            stageModel?.Clear(ResolveClearRank());
             OpenNextStage(stageModel);
 
             // 次のステージをロードせず、To be continued画面を経由してステージ選択画面へ遷移する

@@ -13,6 +13,10 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
         ScenarioModel scenarioModel;
         RuntimeModel runtimeModel;
 
+        // 撮影用シーンなど、ステージ進行と無関係なシナリオを流すときの差し替えデータ。
+        // Refreshでクリアされるため、通常のステージ進行には持ち越されない
+        ScenarioData overrideData;
+
         public ScenarioModelRepository()
         {
             runtimeModel = RuntimeModelRepository.Instance.Get();
@@ -29,9 +33,9 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
                 scenarioModel.LoadData(data.steps);
 
                 // キャラクター画像をロード
-                var stageType = runtimeModel.CurrentStageType;
-                var enemyCharaName = GetEnemyCharaName(stageType.AsInt());
-                scenarioModel.LoadCharacterSprites(enemyCharaName);
+                var stageData = StageModelRepository.Instance.GetByStageNumber(runtimeModel.CurrentStageType.AsInt()).StageData;
+                scenarioModel.LoadCharacterSprites(stageData.charaStillAddress);
+                scenarioModel.SetEnemyStillLayout(stageData.scenarioEnemyStillOffset, stageData.scenarioEnemyStillScale);
             }
 
             return scenarioModel;
@@ -40,10 +44,26 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
         public void Refresh()
         {
             scenarioModel = null;
+            overrideData = null;
+        }
+
+        /// <summary>
+        /// 次にGetで生成するシナリオを、ステージ番号・Situationから決まるものではなく指定データにする。
+        /// </summary>
+        public void SetOverrideData(ScenarioData data)
+        {
+            overrideData = data;
+            scenarioModel = null;
         }
 
         ScenarioData LoadData()
         {
+            if (overrideData != null)
+            {
+                Debug.Log($"[ScenarioModelRepository] Using override scenario: {overrideData.name}");
+                return overrideData;
+            }
+
             var stageNumber = runtimeModel.CurrentStageType.AsInt();
             var situation = runtimeModel.CurrentSituation;
 
@@ -67,12 +87,6 @@ namespace Project.Scenes.Scenario.Scripts.Repository.ModelRepository
         {
             var situationSuffix = situation == BattleSituation.Way ? "Way" : "Boss";
             return $"Stage{stageNumber}{situationSuffix}Scenario";
-        }
-
-        string GetEnemyCharaName(int stageNumber)
-        {
-            var stageModel = StageModelRepository.Instance.GetByStageNumber(stageNumber);
-            return stageModel.StageData.charaStillAddress;
         }
     }
 }

@@ -118,30 +118,10 @@ namespace Project.Scripts.Extensions
             var cancelAction = uiMap.FindAction("Cancel");
             RegisterAction(cancelAction, OnUICancel, InputActionPhase.Started);
 
-            // UI - Point
-            var pointAction = uiMap.FindAction("Point");
-            RegisterAction(pointAction, OnUIPoint, InputActionPhase.Started);
-            RegisterAction(pointAction, OnUIPoint, InputActionPhase.Performed);
-
-            // UI - Click
-            var clickAction = uiMap.FindAction("Click");
-            clickAction.started += OnUIClick;
-            clickAction.performed += OnUIClick;
-
-            // UI - Right Click
-            var rightClickAction = uiMap.FindAction("RightClick");
-            rightClickAction.started += OnUIRightClick;
-            rightClickAction.performed += OnUIRightClick;
-
-            // UI - Middle Click
-            var middleClickAction = uiMap.FindAction("MiddleClick");
-            middleClickAction.started += OnUIMiddleClick;
-            middleClickAction.performed += OnUIMiddleClick;
-
-            // UI - Scroll Wheel
-            var scrollWheelAction = uiMap.FindAction("ScrollWheel");
-            RegisterAction(scrollWheelAction, OnUIScrollWheel, InputActionPhase.Started);
-            RegisterAction(scrollWheelAction, OnUIScrollWheel, InputActionPhase.Performed);
+            // UI - Ctrl
+            var ctrlAction = uiMap.FindAction("Ctrl");
+            RegisterAction(ctrlAction, OnUICtrl, InputActionPhase.Started);
+            RegisterAction(ctrlAction, OnUICtrl, InputActionPhase.Canceled);
 
             // InputSystemを有効化
             inputActionAsset.Enable();
@@ -249,31 +229,9 @@ namespace Project.Scripts.Extensions
             MessageBroker.Default.Publish(new UICancelMessage());
         }
 
-        public void OnUIPoint(InputAction.CallbackContext context)
+        public void OnUICtrl(InputAction.CallbackContext context)
         {
-            var value = context.ReadValue<Vector2>();
-            MessageBroker.Default.Publish(new UIPointMessage { value = value });
-        }
-
-        public void OnUIClick(InputAction.CallbackContext context)
-        {
-            MessageBroker.Default.Publish(new UIClickMessage());
-        }
-
-        public void OnUIRightClick(InputAction.CallbackContext context)
-        {
-            MessageBroker.Default.Publish(new UIRightClickMessage());
-        }
-
-        public void OnUIMiddleClick(InputAction.CallbackContext context)
-        {
-            MessageBroker.Default.Publish(new UIMiddleClickMessage());
-        }
-
-        public void OnUIScrollWheel(InputAction.CallbackContext context)
-        {
-            var value = context.ReadValue<Vector2>();
-            MessageBroker.Default.Publish(new UIScrollWheelMessage { value = value });
+            MessageBroker.Default.Publish(new UICtrlMessage { isPressed = context.started });
         }
     }
 }

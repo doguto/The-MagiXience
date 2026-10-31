@@ -15,6 +15,8 @@ namespace Project.Scenes.Battle.Scripts.View
         Image image;
         Material material;
 
+        public Vector2 SpritePixelSize => image != null && image.sprite != null ? image.sprite.rect.size : Vector2.zero;
+
         void Awake()
         {
             image = GetComponent<Image>();

@@ -65,25 +65,8 @@ namespace Project.Scripts.Extensions.Message
     {
     }
 
-    public struct UIPointMessage
+    public struct UICtrlMessage
     {
-        public Vector2 value;
-    }
-
-    public struct UIClickMessage
-    {
-    }
-
-    public struct UIRightClickMessage
-    {
-    }
-
-    public struct UIMiddleClickMessage
-    {
-    }
-
-    public struct UIScrollWheelMessage
-    {
-        public Vector2 value;
+        public bool isPressed;
     }
 }
