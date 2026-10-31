@@ -24,7 +24,6 @@ namespace Project.Commons.UI.Scripts.View
             maxScrollIndex = index;
         }
 
-        // SetMaxScrollIndexを使う場合は先に呼んでおくこと
         public void SetLoop(bool loop)
         {
             isLoop = loop;
@@ -32,11 +31,11 @@ namespace Project.Commons.UI.Scripts.View
         }
 
         // スクロールだけでなくEventSystemの選択も端から反対側の端へ回り込むよう、
-        // buttonsの並び順で上下(横なら左右)の遷移先を明示する(maxScrollIndexまでが対象)
+        // buttonsの並び順で上下(横なら左右)の遷移先を明示する
         void SetLoopNavigation()
         {
             var isVertical = buttonListType == ButtonListType.Vertical;
-            var count = maxScrollIndex + 1;
+            var count = buttons.Count;
             for (var i = 0; i < count; i++)
             {
                 var selectable = buttons[i].GetComponent<Selectable>();

@@ -25,7 +25,6 @@ namespace Project.Scenes.StageList.Scripts.View
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
 
-            // 未解放のカードにはフォーカスを移せないよう、解放済みの最後のカードまでに制限する
             var maxScrollIndex = 0;
             for (var i = 0; i < simpleButtons.Count; i++)
             {
@@ -36,8 +35,10 @@ namespace Project.Scenes.StageList.Scripts.View
                 simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
             }
             scrollableButtonList.SetMaxScrollIndex(maxScrollIndex);
-            // 最後のカード(EX)に挑戦可能になったら、端で上下を押したとき反対側の端へ回り込む
-            scrollableButtonList.SetLoop(maxScrollIndex == simpleButtons.Count - 1);
+
+            // 全ステージ解放後(EXに挑戦可能になってから)のみ、端で上下を押したら反対側の端へ回り込む
+            var isAllOpened = simpleButtons.TrueForAll(b => b.interactable);
+            scrollableButtonList.SetLoop(isAllOpened);
         }
 
         public void SetCharaImage(Sprite charaSprite, bool isCleared)
