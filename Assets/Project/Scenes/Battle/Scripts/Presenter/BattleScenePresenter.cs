@@ -487,6 +487,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             if (situation == BattleSituation.Way)
             {
+                // 制作中のステージは道中（中ボスを含む）だけでも再生できる。
+                // 本ボス未設定ならボス前シナリオへ進めず、ステージクリア扱いにもせずここで終了する。
+                if (bossSequence == null)
+                {
+                    Debug.Log("[BattleScenePresenter] 道中完了。本ボスのシーケンスは未設定のため、ボス戦への移行を停止します。", this);
+                    return;
+                }
                 TransitionToScenario(StartBossSequence);
             }
             else
