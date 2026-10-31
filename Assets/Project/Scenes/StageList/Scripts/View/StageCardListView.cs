@@ -24,18 +24,20 @@ namespace Project.Scenes.StageList.Scripts.View
         public void Init(IReadOnlyList<bool> isOpenedList)
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
-            // 端で上下を押したら反対側の端へ回り込む
-            scrollableButtonList.SetLoop(true);
 
+            // 未解放のカードにはフォーカスを移せないよう、解放済みの最後のカードまでに制限する
+            var maxScrollIndex = 0;
             for (var i = 0; i < simpleButtons.Count; i++)
             {
                 var isOpened = i < isOpenedList.Count && isOpenedList[i];
+                if (isOpened) maxScrollIndex = i;
                 simpleButtons[i].Init(isOpened, i == 0 && isOpened);
-                // 未解放のカードもフォーカスの移動先にする(決定はIsOpenedで弾かれる)
-                simpleButtons[i].interactable = true;
                 simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
                 simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
             }
+            scrollableButtonList.SetMaxScrollIndex(maxScrollIndex);
+            // 最後のカード(EX)に挑戦可能になったら、端で上下を押したとき反対側の端へ回り込む
+            scrollableButtonList.SetLoop(maxScrollIndex == simpleButtons.Count - 1);
         }
 
         public void SetCharaImage(Sprite charaSprite, bool isCleared)
