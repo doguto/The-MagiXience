@@ -116,8 +116,14 @@ namespace Project.Scenes.SoundRoom.Scripts.Presenter
         {
             try
             {
-                await UniTask.WaitUntil(() => soundManager.BgmLoopCount >= autoPlayLoopCount, cancellationToken: cancellationToken);
-                await soundManager.FadeOutBGMAsync(autoPlayFadeDuration, cancellationToken);
+                // ループしない曲(ジングル等)は、最後まで流れて止まった時点で次へ進む
+                await UniTask.WaitUntil(
+                    () => soundManager.BgmLoopCount >= autoPlayLoopCount || !soundManager.BgmAudioSource.isPlaying,
+                    cancellationToken: cancellationToken);
+                if (soundManager.BgmAudioSource.isPlaying)
+                {
+                    await soundManager.FadeOutBGMAsync(autoPlayFadeDuration, cancellationToken);
+                }
             }
             catch (OperationCanceledException)
             {

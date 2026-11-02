@@ -48,6 +48,8 @@ namespace Project.Scenes.SoundRoom.Scripts.View
                 trackButtons[i].OnPressed.Subscribe(_ => onTrackPressed.OnNext(index)).AddTo(this);
             }
             scrollableButtonList.SetMaxScrollIndex(Mathf.Max(visibleCount - 1, 0));
+            // ステージ選択と同様、端で上下を押したら反対側の端へ回り込む
+            scrollableButtonList.SetLoop(true);
         }
 
         public void SetTrack(int index, string indexText, string title, int cardStageNumber)

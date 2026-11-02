@@ -28,6 +28,10 @@ namespace Project.Scenes.DemoClear.Scripts.Presenter
 
         async UniTask LoadStageList()
         {
+            // MV撮影用シーンなど、Battleを経由せずに重ねて表示された場合は遷移しない
+            var battleScene = SceneManager.GetSceneByName(SceneRouterModel.Battle);
+            if (!battleScene.IsValid() || !battleScene.isLoaded) return;
+
             var titleBgmType = UserModelRepository.Instance.Get().TitleBgmType;
             soundManager?.PlayBGMAsync(SceneType.Title, titleBgmType).Forget();
 

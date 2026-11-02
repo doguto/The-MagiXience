@@ -30,6 +30,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         public IObservable<bool> IsChargeCompleteChanged =>
             chargeTime.Select(t => t >= ChargeThreshold).DistinctUntilChanged();
         public IReadOnlyReactiveProperty<bool> IsInvincible => isInvincible;
+        // バトル中に一度でも被弾したか。ノーダメージクリア判定に使用し、Retryでもリセットしない
+        public bool HasTakenDamage { get; private set; }
 
         public void SetSneaking(bool sneaking)
         {
@@ -83,6 +85,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         {
             if (isInvincible.Value) return;
 
+            if (damage > 0) HasTakenDamage = true;
             TakeDamage(damage);
 
             if (IsAlive)
