@@ -121,7 +121,7 @@ MonoBehaviour:
         signal:
           rid: 8577112587349262617
         directionProvider:
-          rid: 8577112587349262582
+          rid: 2878396149664055636
         rotationProvider:
           rid: 1000
         sourceIndexProvider:
@@ -169,6 +169,10 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
+    - rid: 2878396149664055636
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
     - rid: 8577112580335075430
       type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -243,9 +247,6 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 0
-    - rid: 8577112587349262582
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
     - rid: 8577112587349262617
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
