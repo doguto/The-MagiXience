@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: 3_Phase8_NWayDownLeft3
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 1.6
+      loopEnd: 5.2
+      cycleDuration: 0.9
+      entries:
+      - time: 0
+        signal:
+          rid: 1906880873211363620
+        directionProvider:
+          rid: 1906880873211363621
+        rotationProvider:
+          rid: 1906880873211363622
+        sourceIndexProvider:
+          rid: 1906880873211363623
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: 8751b9c31c119724faf3f00f145215aa, type: 2}
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1906880873211363620
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 3
+        spreadAngle: 15
+        radius: 0
+        startDelay: 0
+    - rid: 1906880873211363621
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: -0.8}
+    - rid: 1906880873211363622
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880873211363623
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0

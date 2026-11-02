@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: 3_Boss_Fan3
+  m_Name: 3_Boss_Fan8
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
@@ -21,13 +21,13 @@ MonoBehaviour:
       entries:
       - time: 0
         signal:
-          rid: 1906880873211363442
+          rid: 1906880873211363438
         directionProvider:
-          rid: 1906880873211363443
+          rid: 1906880873211363439
         rotationProvider:
-          rid: 1906880873211363444
+          rid: 1906880873211363440
         sourceIndexProvider:
-          rid: 1906880873211363445
+          rid: 1906880873211363441
         seType: 0
         bulletMovementOverride: {fileID: 11400000, guid: ca9a80a60ac94924d88a1bf69cc5b283, type: 2}
       nextPhaseTrigger:
@@ -37,22 +37,21 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 1906880873211363442
+    - rid: 1906880873211363438
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 3
+        wayCount: 9
         spreadAngle: 45
         radius: 0
         startDelay: 0
-    - rid: 1906880873211363443
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
-    - rid: 1906880873211363444
+    - rid: 1906880873211363439
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1906880873211363440
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
-    - rid: 1906880873211363445
+    - rid: 1906880873211363441
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0

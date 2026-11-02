@@ -10,26 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: 3_Boss_Fan7
+  m_Name: 3_Phase8_ParabolaDownShallow
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
-    - loop: 0
-      loopStart: 0
-      loopEnd: 5
-      cycleDuration: 2
+    - loop: 1
+      loopStart: 1.6
+      loopEnd: 5.2
+      cycleDuration: 0.7
       entries:
       - time: 0
         signal:
-          rid: 1906880873211363438
+          rid: 1906880873211363640
         directionProvider:
-          rid: 1906880873211363439
+          rid: 1906880873211363641
         rotationProvider:
-          rid: 1906880873211363440
+          rid: 1906880873211363642
         sourceIndexProvider:
-          rid: 1906880873211363441
+          rid: 1906880873211363643
         seType: 0
-        bulletMovementOverride: {fileID: 11400000, guid: ca9a80a60ac94924d88a1bf69cc5b283, type: 2}
+        bulletMovementOverride: {fileID: 11400000, guid: 2583bd516ebd4c9419d8754ac7677305, type: 2}
       nextPhaseTrigger:
         rid: -2
   references:
@@ -37,21 +37,18 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 1906880873211363438
-      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        wayCount: 7
-        spreadAngle: 35
-        radius: 0
-        startDelay: 0
-    - rid: 1906880873211363439
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+    - rid: 1906880873211363640
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 1906880873211363440
+    - rid: 1906880873211363641
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1906880873211363642
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
-    - rid: 1906880873211363441
+    - rid: 1906880873211363643
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
+        index: 1
