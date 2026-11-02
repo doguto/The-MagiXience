@@ -87,6 +87,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // フェーズ専用の風は入場時から開始する。未指定の既存フェーズ間では時計を維持する。
+            if (nextPhase.WindOverride != null)
+                BattleWind.Begin(nextPhase.WindOverride);
+            else if (activePhase?.WindOverride != null)
+                BattleWind.Begin(activeSequence.Wind);
+
             activePhase = nextPhase;
 
             // Enter() 内で ExitCondition が即座に満たされ CompletePhase が同期発火するケースがあるため、

@@ -25,6 +25,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         protected CompositeDisposable Disposables { get; } = new();
 
         public string PhaseId => Definition.PhaseId;
+        public BattleWindSettings WindOverride => Definition.WindOverride;
         public BattleTimelineBuilderAsset Builder => Definition.TimelineBuilder;
         public BattleTimelineBuilderAsset BuilderStrong => Definition.TimelineBuilderStrong;
         public TimelineAsset TimelineAsset => ResolveTimeline();

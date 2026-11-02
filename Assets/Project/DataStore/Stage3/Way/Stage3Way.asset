@@ -22,41 +22,157 @@ MonoBehaviour:
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 5417143486211424451
+      overrideWind: 0
+      wind:
+        enabled: 0
+        playerSpeedRatio: 0.2
+        intervals: []
+        bulletAcceleration: 3
+        bulletDrag: 0.6
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
     - phaseId: 2
       timelineBuilder: {fileID: 11400000, guid: 7b66151e13f2a1b45aa40f6f3ded2a60, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 5417143486211424452
+      overrideWind: 0
+      wind:
+        enabled: 0
+        playerSpeedRatio: 0.2
+        intervals: []
+        bulletAcceleration: 3
+        bulletDrag: 0.6
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
     - phaseId: 3
       timelineBuilder: {fileID: 11400000, guid: 5dbdf5795cafb854d859ba9e40dea66e, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 5417143486211424453
+      overrideWind: 0
+      wind:
+        enabled: 0
+        playerSpeedRatio: 0.2
+        intervals: []
+        bulletAcceleration: 3
+        bulletDrag: 0.6
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
     - phaseId: 4
       timelineBuilder: {fileID: 11400000, guid: b6a5c834c588d0d4db322440992589c9, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 5417143486211424454
+      overrideWind: 0
+      wind:
+        enabled: 0
+        playerSpeedRatio: 0.2
+        intervals: []
+        bulletAcceleration: 3
+        bulletDrag: 0.6
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
     - phaseId: 5
       timelineBuilder: {fileID: 11400000, guid: dc142f5da384b304193fd359be9a43a2, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
         rid: 5417143486211424455
+      overrideWind: 0
+      wind:
+        enabled: 0
+        playerSpeedRatio: 0.2
+        intervals: []
+        bulletAcceleration: 3
+        bulletDrag: 0.6
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
     - phaseId: 6
       timelineBuilder: {fileID: 11400000, guid: 50e861567ad3d164da9b66e45a4e43fe, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 5417143486211424456
+        rid: 1906880873211363414
+      overrideWind: 1
+      wind:
+        enabled: 1
+        playerSpeedRatio: 0.2
+        intervals:
+        - direction: 1
+          seconds: 3600
+        bulletAcceleration: 2
+        bulletDrag: 0.25
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    - phaseId: 7
+      timelineBuilder: {fileID: 11400000, guid: 99b397807908e1e438efbb65527afbc8, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 1906880873211363415
+      overrideWind: 1
+      wind:
+        enabled: 1
+        playerSpeedRatio: 0.2
+        intervals:
+        - direction: 2
+          seconds: 3600
+        bulletAcceleration: 2
+        bulletDrag: 0.25
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    - phaseId: 8
+      timelineBuilder: {fileID: 11400000, guid: 2464c822042667d429e79a925b5ecc48, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 1906880873211363416
+      overrideWind: 1
+      wind:
+        enabled: 1
+        playerSpeedRatio: 0.2
+        intervals:
+        - direction: 3
+          seconds: 3600
+        bulletAcceleration: 2
+        bulletDrag: 0.25
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    randomPick: 0
+    interlude:
+      phaseId: 
+      timelineBuilder: {fileID: 0}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 5417143862029451432
+      overrideWind: 0
+      wind:
+        enabled: 0
+        playerSpeedRatio: 0.2
+        intervals: []
+        bulletAcceleration: 3
+        bulletDrag: 0.6
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    endBossHpPercent: 0
   wind:
     enabled: 0
     playerSpeedRatio: 0.2
     intervals: []
+    bulletAcceleration: 3
+    bulletDrag: 0.6
   bossPrefab: {fileID: 0}
   bossSpawnPosition: {x: 0, y: 0, z: 0}
   bossEntranceMovement: []
   references:
     version: 2
     RefIds:
+    - rid: 1906880873211363414
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 1906880873211363415
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
+    - rid: 1906880873211363416
+      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data: 
     - rid: 5417143486211424451
       type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data: 
@@ -72,6 +188,7 @@ MonoBehaviour:
     - rid: 5417143486211424455
       type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data: 
-    - rid: 5417143486211424456
-      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data: 
+    - rid: 5417143862029451432
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 10

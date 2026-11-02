@@ -18,9 +18,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         static bool isSceneHookRegistered;
 
         IObjectPool<BulletEntityPresenter> pool;
+        bool affectedByWind;
 
         void Awake()
         {
+            affectedByWind = GetComponentInParent<PlayerEntityPresenter>() == null;
             pool = GetOrCreateSharedPool(bulletPrefab, defaultCapacity, maxSize);
         }
 
@@ -31,7 +33,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null)
         {
             var bullet = pool.Get();
-            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation, range, startDelay, movementOverride, movementPresetOverride);
+            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation, range, startDelay, movementOverride, movementPresetOverride, affectedByWind);
             return bullet;
         }
 

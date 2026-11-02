@@ -95,6 +95,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public BossEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
         public IObservable<Unit> OnDeathSequenceCompleted => deathSequenceCompleted;
+        public event Action<BattlePhaseModelBase, BattleTimelineBuilderAsset> PhaseStarted;
 
         void Awake()
         {
@@ -173,6 +174,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 ApplyAttackTimeline(null);
                 currentPhaseMovementSteps = null;
                 StartMovementSequence(null);
+                PhaseStarted?.Invoke(phase, builder);
                 return;
             }
 
@@ -186,6 +188,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 ? builder.BossMovementPreset.Steps
                 : null;
             StartMovementSequence(currentPhaseMovementSteps);
+            PhaseStarted?.Invoke(phase, builder);
         }
 
         void ApplyAttackTimeline(AttackTimeline attackTimeline)
