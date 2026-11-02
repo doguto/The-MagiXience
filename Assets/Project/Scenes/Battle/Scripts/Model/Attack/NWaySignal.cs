@@ -14,6 +14,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField, Tooltip("弾を生成してから移動を開始するまでの待機秒数。0で即座に移動開始")]
         float startDelay = 0f;
 
+        public NWaySignal() { }
+        public NWaySignal(int count, float angleBetweenBullets)
+        {
+            wayCount = count;
+            spreadAngle = angleBetweenBullets;
+        }
+
         public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle, radius = radius, startDelay = startDelay };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)

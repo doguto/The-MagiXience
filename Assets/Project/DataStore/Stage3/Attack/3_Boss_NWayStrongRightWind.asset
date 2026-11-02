@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: 3_Boss_NWayStrongRightWind
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 0
+      loopStart: 0
+      loopEnd: 5
+      cycleDuration: 2
+      entries:
+      - time: 0.9
+        signal:
+          rid: 1906880873211363482
+        directionProvider:
+          rid: 1906880873211363483
+        rotationProvider:
+          rid: 1906880873211363484
+        sourceIndexProvider:
+          rid: 1906880873211363485
+        seType: 0
+        bulletMovementOverride: {fileID: 0}
+      - time: 0.9
+        signal:
+          rid: 1906880873211363486
+        directionProvider:
+          rid: 1906880873211363487
+        rotationProvider:
+          rid: 1906880873211363488
+        sourceIndexProvider:
+          rid: 1906880873211363489
+        seType: 0
+        bulletMovementOverride: {fileID: 0}
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1906880873211363482
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 716b2ec2a03e2aa40b20b9cbdd5b8421, type: 2}
+        loop: 1
+        loopCount: 31
+        cycleDuration: 0.2
+    - rid: 1906880873211363483
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1906880873211363484
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880873211363485
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880873211363486
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 2dd3ec9b986d3fa4986f7aa1e2e775d5, type: 2}
+        loop: 1
+        loopCount: 7
+        cycleDuration: 1
+    - rid: 1906880873211363487
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1906880873211363488
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880873211363489
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0

@@ -13,7 +13,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     }
 
     [Serializable]
-    public class VertexParabolaMovementConfig : IMovementStep, ISerializationCallbackReceiver
+    public class VertexParabolaMovementConfig : IMovementStep, ISerializationCallbackReceiver, IAttackTimeMovementStep
     {
         [SerializeField, FormerlySerializedAs("bulge"), Tooltip("縦：上下に折り返す。横：左右に折り返す。凸の向きは発射位置と頂点から自動で決まります。")]
         ParabolaOrientation orientation = ParabolaOrientation.Vertical;
@@ -22,15 +22,41 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         [SerializeField, Min(0.01f), Tooltip("発射時の速さ（ワールド単位/秒）。軌道を保ったまま速さを変更できます。飛行中は等速ではありません。")]
         float initialSpeed = 5f;
 
+        [SerializeField, Tooltip("AttackPresetから発射する場合、発射予定時刻に応じて頂点を正弦波で変える。飛行中の頂点は固定。")]
+        bool oscillateVertex;
+        [SerializeField] Vector2 vertexAmplitude;
+        [SerializeField, Tooltip("頂点X・Yの角速度（ラジアン/秒）。0ならその軸は変化しない。")]
+        Vector2 vertexAngularSpeed;
+        [SerializeField, Tooltip("頂点の往復を開始するAttackPreset内の時刻（秒）。")]
+        float attackTimeOffset;
+
+        public Vector2 VertexOffset => vertex;
+        public float InitialSpeed => initialSpeed;
+
+        public IMovementStep SampleForAttackTime(float attackTime)
+        {
+            float time = Mathf.Max(0f, attackTime - attackTimeOffset);
+            var offset = oscillateVertex
+                ? new Vector2(vertexAmplitude.x * Mathf.Sin(time * vertexAngularSpeed.x),
+                    vertexAmplitude.y * Mathf.Sin(time * vertexAngularSpeed.y))
+                : Vector2.zero;
+            return new VertexParabolaMovementConfig(vertex + offset, initialSpeed, orientation);
+        }
+
         public VertexParabolaMovementConfig() { }
 
         /// <summary>発射ごとに頂点を決める攻撃用。共有プリセットは変更しない。</summary>
         public VertexParabolaMovementConfig(Vector2 vertexOffset, float speed,
-            ParabolaOrientation orientation = ParabolaOrientation.Vertical)
+            ParabolaOrientation orientation = ParabolaOrientation.Vertical,
+            Vector2 amplitude = default, Vector2 angularSpeed = default, float timeOffset = 0f)
         {
             vertex = vertexOffset;
             initialSpeed = speed;
             this.orientation = orientation;
+            oscillateVertex = amplitude != Vector2.zero;
+            vertexAmplitude = amplitude;
+            vertexAngularSpeed = angularSpeed;
+            attackTimeOffset = timeOffset;
         }
 
         public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)

@@ -184,10 +184,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 : null;
             ApplyAttackTimeline(attackTimeline);
 
-            currentPhaseMovementSteps = builder.BossMovementPreset != null
+            var nextMovementSteps = builder.BossMovementPreset != null
                 ? builder.BossMovementPreset.Steps
                 : null;
-            StartMovementSequence(currentPhaseMovementSteps);
+            // 同じ無期限の移動は時計を戻さず継続する。攻撃と風のフェーズ切替は通常通り行う。
+            bool continueMovement = ReferenceEquals(currentPhaseMovementSteps, nextMovementSteps)
+                && activeMovementSteps.Count == 1
+                && activeMovementSteps[0] is IPhaseContinuousMovementStep continuous
+                && continuous.ContinueAcrossPhases;
+            currentPhaseMovementSteps = nextMovementSteps;
+            if (!continueMovement) StartMovementSequence(currentPhaseMovementSteps);
             PhaseStarted?.Invoke(phase, builder);
         }
 
