@@ -4,7 +4,6 @@ using Project.Commons.UI.Scripts.View;
 using TMPro;
 using UniRx;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Project.Scenes.SoundRoom.Scripts.View
 {
@@ -16,9 +15,9 @@ namespace Project.Scenes.SoundRoom.Scripts.View
         [SerializeField] List<TMP_Text> trackIndexTexts;
         [SerializeField] List<TMP_Text> trackTitleTexts;
 
-        [Header("Background")]
-        [Tooltip("曲ごとの背景を表示するImage。背景が無い曲は黒で塗りつぶす")]
-        [SerializeField] Image backgroundImage;
+        [Header("Card Image")]
+        [Tooltip("ステージ番号ごとのカード画像。Element0=黒カード, 1〜6=各ステージ, 7=EX")]
+        [SerializeField] List<Sprite> cardSpritesByStage;
 
         [Header("Description")]
         [SerializeField] TMP_Text descriptionTitleText;
@@ -51,27 +50,34 @@ namespace Project.Scenes.SoundRoom.Scripts.View
             scrollableButtonList.SetMaxScrollIndex(Mathf.Max(visibleCount - 1, 0));
         }
 
-        public void SetTrack(int index, string indexText, string title)
+        public void SetTrack(int index, string indexText, string title, int cardStageNumber)
         {
             if (index >= trackButtons.Count) return;
 
             trackIndexTexts[index].text = indexText;
             trackTitleTexts[index].text = title;
+            SetCardSprite(index, cardStageNumber);
+        }
+
+        // カード本体のSpriteRendererの画像を、ステージ番号に対応する画像に差し替える
+        void SetCardSprite(int index, int cardStageNumber)
+        {
+            if (cardStageNumber < 0 || cardStageNumber >= cardSpritesByStage.Count || cardSpritesByStage[cardStageNumber] == null)
+            {
+                Debug.LogWarning($"[SoundRoom] カード画像が未設定: stage={cardStageNumber}", this);
+                return;
+            }
+
+            var cardRenderer = trackButtons[index].GetComponent<SpriteRenderer>();
+            if (cardRenderer == null) return;
+
+            cardRenderer.sprite = cardSpritesByStage[cardStageNumber];
         }
 
         public void SetDescription(string title, string description)
         {
             descriptionTitleText.text = title;
             descriptionText.text = description;
-        }
-
-        // spriteがnullなら黒背景にする
-        public void SetBackground(Sprite sprite)
-        {
-            if (backgroundImage == null) return;
-
-            backgroundImage.sprite = sprite;
-            backgroundImage.color = sprite != null ? Color.white : Color.black;
         }
 
         public void Dispose()

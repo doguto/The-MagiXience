@@ -36,7 +36,7 @@ namespace Project.Scripts.Infra
         [Tooltip("ONにすると、解放されるまでカード自体を表示しない。通し番号も振らない。")]
         public bool soundRoomSecret;
 
-        [Tooltip("サウンドルームの背景に使うステージ番号(BackGround_N)。0なら黒背景。")]
+        [Tooltip("サウンドルームのカード画像に使うステージ番号(1〜6、EXは7)。0なら黒カード。")]
         public int soundRoomBackgroundStageNumber;
 
         [Tooltip("サウンドルームで表示する説明文（3〜4行程度）。")]

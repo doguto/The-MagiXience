@@ -31,7 +31,6 @@ namespace Project.Scenes.SoundRoom.Scripts.Presenter
         IReadOnlyList<BgmModel> bgmModels;
         UserModel userModel;
 
-        readonly Dictionary<int, Sprite> backgroundCache = new();
         CancellationTokenSource playbackCts;
 
         void Awake()
@@ -56,7 +55,7 @@ namespace Project.Scenes.SoundRoom.Scripts.Presenter
             for (var i = 0; i < bgmModels.Count; i++)
             {
                 var indexText = bgmModels[i].IsSoundRoomSecret ? string.Empty : $"No.{++trackNumber:00}";
-                soundRoomView.SetTrack(i, indexText, GetTitle(i));
+                soundRoomView.SetTrack(i, indexText, GetTitle(i), bgmModels[i].SoundRoomBackgroundStageNumber);
             }
             soundRoomView.Init(bgmModels.Count);
             ShowTrackInfo(0);
@@ -91,22 +90,8 @@ namespace Project.Scenes.SoundRoom.Scripts.Presenter
         {
             if (index < 0 || index >= bgmModels.Count) return;
 
-            var isUnlocked = IsUnlocked(index);
-            var description = isUnlocked ? bgmModels[index].Description : UndiscoveredDescription;
+            var description = IsUnlocked(index) ? bgmModels[index].Description : UndiscoveredDescription;
             soundRoomView.SetDescription(GetTitle(index), description);
-            // 未発見の曲は初登場ステージが分からないよう黒背景にする
-            soundRoomView.SetBackground(isUnlocked ? GetBackground(bgmModels[index]) : null);
-        }
-
-        Sprite GetBackground(BgmModel model)
-        {
-            var stageNumber = model.SoundRoomBackgroundStageNumber;
-            if (stageNumber <= 0) return null;
-            if (backgroundCache.TryGetValue(stageNumber, out var cached)) return cached;
-
-            var sprite = model.LoadSoundRoomBackground();
-            backgroundCache[stageNumber] = sprite;
-            return sprite;
         }
 
         // 選択した曲を再生し、指定ループ数流したらフェードアウトして次の曲へ進む。未発見の曲は再生しない
