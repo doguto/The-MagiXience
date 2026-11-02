@@ -127,18 +127,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 1001
         seType: 0
-        bulletMovementOverride: {fileID: 0}
-      - time: 3
-        signal:
-          rid: 8577112587349262618
-        directionProvider:
-          rid: 8577112587349262592
-        rotationProvider:
-          rid: 1002
-        sourceIndexProvider:
-          rid: 1003
-        seType: 0
-        bulletMovementOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 11400000, guid: 9ce875ae92ba0994cad39705ccf83ec3, type: 2}
       nextPhaseTrigger:
         rid: -2
   deathAttackEntry:
@@ -166,13 +155,6 @@ MonoBehaviour:
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
     - rid: 1001
-      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        index: 0
-    - rid: 1002
-      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 1003
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
@@ -264,22 +246,12 @@ MonoBehaviour:
     - rid: 8577112587349262582
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
-    - rid: 8577112587349262592
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
     - rid: 8577112587349262617
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 5
+        wayCount: 7
         spreadAngle: 22.5
-        radius: 0
-        startDelay: 0
-    - rid: 8577112587349262618
-      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        wayCount: 5
-        spreadAngle: 22.5
-        radius: 0
+        radius: 0.5
         startDelay: 0
 --- !u!114 &5041210401996759946
 MonoBehaviour:
