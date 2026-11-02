@@ -21,6 +21,16 @@ namespace Project.Scripts.Model
         public BgmType BgmType => BgmData.bgmType;
         public int SoundRoomUnlockClearedStage => BgmData.soundRoomUnlockClearedStage;
         public string Description => BgmData.description;
+        public bool IsSoundRoomSecret => BgmData.soundRoomSecret;
+        public int SoundRoomBackgroundStageNumber => BgmData.soundRoomBackgroundStageNumber;
+
+        // サウンドルームの背景を読み込む。0以下は黒背景としてnullを返す
+        public Sprite LoadSoundRoomBackground()
+        {
+            if (SoundRoomBackgroundStageNumber <= 0) return null;
+
+            return new BackGroundAssetRepository().Load(SoundRoomBackgroundStageNumber);
+        }
 
         public BgmModel(BgmData bgmData)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Extensions;
 using Project.Scripts.Model;
@@ -18,6 +19,12 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         SoundModelRepository soundModelRepository;
         BgmModel currentBgmModel;
+
+        // 再生開始からループ地点に戻った回数。サウンドルームの自動送りで使う
+        public int BgmLoopCount { get; private set; }
+
+        float bgmBaseVolume;
+        CancellationTokenSource bgmFadeCts;
 
         int bgmLoopStartSamples;
         int bgmLoopEndSamples;
@@ -39,6 +46,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
                 && bgmAudioSource.timeSamples >= bgmLoopEndSamples)
             {
                 bgmAudioSource.timeSamples = bgmLoopStartSamples;
+                BgmLoopCount++;
             }
 
             if (loopSeAudioSource.isPlaying && loopSeLoopEndSamples > 0
@@ -63,6 +71,8 @@ namespace Project.Scenes.Global.Scripts.Presenter
             bgmAudioSource.loop = false;
             if (!shouldSkip)
             {
+                CancelBGMFade();
+                BgmLoopCount = 0;
                 bgmAudioSource.Play();
             }
 
@@ -78,8 +88,50 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         public void StopBGM()
         {
+            CancelBGMFade();
             bgmAudioSource.Stop();
             bgmLoopEndSamples = 0;
+        }
+
+        // BGMを徐々に小さくして停止する。途中で別のBGMが再生された場合はキャンセルされる
+        public async UniTask FadeOutBGMAsync(float duration, CancellationToken cancellationToken = default)
+        {
+            CancelBGMFade();
+            var fadeCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.GetCancellationTokenOnDestroy());
+            bgmFadeCts = fadeCts;
+
+            try
+            {
+                var elapsed = 0f;
+                while (elapsed < duration)
+                {
+                    bgmAudioSource.volume = bgmBaseVolume * (1f - elapsed / duration);
+                    await UniTask.Yield(PlayerLoopTiming.Update, fadeCts.Token);
+                    elapsed += Time.unscaledDeltaTime;
+                }
+
+                bgmAudioSource.Stop();
+                bgmLoopEndSamples = 0;
+            }
+            finally
+            {
+                // 自分が最新のフェードのときだけ音量を戻す（新しいフェードの音量を上書きしないため）
+                if (bgmFadeCts == fadeCts)
+                {
+                    bgmFadeCts = null;
+                    bgmAudioSource.volume = bgmBaseVolume;
+                }
+                fadeCts.Dispose();
+            }
+        }
+
+        void CancelBGMFade()
+        {
+            if (bgmFadeCts == null) return;
+
+            bgmFadeCts.Cancel();
+            bgmFadeCts = null;
+            bgmAudioSource.volume = bgmBaseVolume;
         }
 
         public void PlaySE(SeType seType)
@@ -132,7 +184,9 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         public void SetBGMVolume(int volume)
         {
-            bgmAudioSource.volume = ConvertToAudioVolume(volume);
+            bgmBaseVolume = ConvertToAudioVolume(volume);
+            // フェード中はフェード側が音量を制御するので、基準値だけ更新する
+            if (bgmFadeCts == null) bgmAudioSource.volume = bgmBaseVolume;
         }
 
         public void SetSEVolume(int volume)

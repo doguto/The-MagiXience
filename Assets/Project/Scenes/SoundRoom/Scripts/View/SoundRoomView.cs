@@ -4,6 +4,7 @@ using Project.Commons.UI.Scripts.View;
 using TMPro;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Project.Scenes.SoundRoom.Scripts.View
 {
@@ -14,6 +15,10 @@ namespace Project.Scenes.SoundRoom.Scripts.View
         [SerializeField] List<SimpleButton> trackButtons;
         [SerializeField] List<TMP_Text> trackIndexTexts;
         [SerializeField] List<TMP_Text> trackTitleTexts;
+
+        [Header("Background")]
+        [Tooltip("曲ごとの背景を表示するImage。背景が無い曲は黒で塗りつぶす")]
+        [SerializeField] Image backgroundImage;
 
         [Header("Description")]
         [SerializeField] TMP_Text descriptionTitleText;
@@ -58,6 +63,15 @@ namespace Project.Scenes.SoundRoom.Scripts.View
         {
             descriptionTitleText.text = title;
             descriptionText.text = description;
+        }
+
+        // spriteがnullなら黒背景にする
+        public void SetBackground(Sprite sprite)
+        {
+            if (backgroundImage == null) return;
+
+            backgroundImage.sprite = sprite;
+            backgroundImage.color = sprite != null ? Color.white : Color.black;
         }
 
         public void Dispose()

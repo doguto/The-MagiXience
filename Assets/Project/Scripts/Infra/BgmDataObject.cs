@@ -33,6 +33,12 @@ namespace Project.Scripts.Infra
         [Tooltip("サウンドルームで解放されるのに必要なクリア済みステージ数。0なら最初から解放。")]
         public int soundRoomUnlockClearedStage;
 
+        [Tooltip("ONにすると、解放されるまでカード自体を表示しない。通し番号も振らない。")]
+        public bool soundRoomSecret;
+
+        [Tooltip("サウンドルームの背景に使うステージ番号(BackGround_N)。0なら黒背景。")]
+        public int soundRoomBackgroundStageNumber;
+
         [Tooltip("サウンドルームで表示する説明文（3〜4行程度）。")]
         [TextArea(3, 5)]
         public string description;
