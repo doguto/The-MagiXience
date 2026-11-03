@@ -13,6 +13,7 @@
         Damage,
 	    LocoAttack1,
 	    LocoAttack2,
-        Metal
+        Metal,
+        WindEffect
     }
 }

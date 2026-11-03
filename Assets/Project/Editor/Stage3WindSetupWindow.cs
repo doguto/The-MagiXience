@@ -12,6 +12,7 @@ using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scripts.Infra;
 using Project.Commons.Debugger.Scripts.Presenter;
 using Project.Scripts.Model;
+using Project.Scripts.Extensions;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEngine;
@@ -218,6 +219,54 @@ namespace Project.Editor
         {
             var window = GetWindow<Stage3WindSetupWindow>("Stage3 風ステージ作成");
             window.StartWayPreviewAt("5.5");
+        }
+
+        [MenuItem("Tools/Stage3/Set Wind Introduction Sound")]
+        static void SetWindIntroductionSound()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            const string path = "Assets/Project/Textures/Sounds/Se/wind_effect.wav";
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            if (!clip) throw new InvalidOperationException("Missing wind_effect.wav");
+            var importer = (AudioImporter)AssetImporter.GetAtPath(path);
+            var reference = (AudioImporter)AssetImporter.GetAtPath("Assets/Project/Textures/Sounds/Se/EnemyShotShort.mp3");
+            importer.defaultSampleSettings = reference.defaultSampleSettings;
+            importer.forceToMono = reference.forceToMono;
+            importer.loadInBackground = reference.loadInBackground;
+            importer.SaveAndReimport();
+
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            var entry = settings.CreateOrMoveEntry(AssetDatabase.AssetPathToGUID(path), settings.DefaultGroup);
+            entry.address = "Assets/Project/Textures/Sounds/Se/WindEffect";
+            EditorUtility.SetDirty(settings);
+
+            var seData = AssetDatabase.LoadAssetAtPath<SeDataObject>("Assets/Project/DataStore/SeData.asset");
+            var sound = seData.seData.Find(item => item.seType == SeType.WindEffect);
+            if (sound == null)
+            {
+                sound = new SeData { seType = SeType.WindEffect };
+                seData.seData.Add(sound);
+            }
+            sound.name = "wind_effect";
+            EditorUtility.SetDirty(seData);
+            var sequence = AssetDatabase.LoadAssetAtPath<BattleSequenceAsset>(Data + "Way/Stage3Way.asset");
+            var intro = sequence.SequenceGroups[0].Phases.Single(phase => phase.PhaseId == "5.5");
+            intro.WindOverride.startSe = SeType.WindEffect;
+            EditorUtility.SetDirty(sequence);
+            AssetDatabase.SaveAssets();
+            try
+            {
+                BattleWind.Begin(intro.WindOverride);
+                BattleWind.Tick(1.49f);
+                if (BattleWind.Direction != WindDirection.None) throw new Exception("Wind started too early");
+                BattleWind.Tick(0.02f);
+                if (BattleWind.Direction != WindDirection.Up || BattleWind.StartSe != SeType.WindEffect)
+                    throw new Exception("Wind sound does not match wind start");
+            }
+            finally { BattleWind.Reset(); }
+            Selection.activeObject = sequence;
+            Debug.Log($"[Stage3WindSound] Saved WindEffect SE ({clip.length:F2}s) with standard SE import settings and Addressables. Phase5.5: calm 1.5s, then Up wind + one-shot sound; normal SE volume applies, playback continues across Phase6.");
         }
 
         void StartWayPreviewAt(string phaseId)
@@ -579,21 +628,21 @@ namespace Project.Editor
             Debug.Log("[Stage3BossParabolaTune] Set normal/strong boss parabola base relative vertex Y +2.6/-2.6. Speed, X, vertex oscillation, wind and shot counts preserved.");
         }
 
-        [MenuItem("Tools/Stage3/Set Way Parabola Seven Aimed Two")]
-        static void SetWayParabolaSevenAimedTwo()
+        [MenuItem("Tools/Stage3/Set Early Way Aimed Speed Four")]
+        static void SetEarlyWayAimedSpeedFour()
         {
             if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
-            foreach (var pair in new[] { ("3_Phase2_AimedSpeed5", "3_AimedSpeed2") })
+            foreach (var pair in new[] { ("3_Phase2_AimedSpeed5", "3_AimedSpeed4"), ("3_AimedSpeed2", "3_AimedSpeed4") })
             {
                 string oldPath = Data + "Bullet/" + pair.Item1 + ".asset";
                 string newPath = Data + "Bullet/" + pair.Item2 + ".asset";
                 if (AssetDatabase.LoadAssetAtPath<MovementPreset>(oldPath) == null) continue;
+                if (AssetDatabase.LoadAssetAtPath<MovementPreset>(newPath) != null)
+                    throw new InvalidOperationException("Both old and new aimed presets exist; review references first");
                 string error = AssetDatabase.MoveAsset(oldPath, newPath);
                 if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
             }
-            string[] names = { "3_Phase1", "ParabolaUp", "ParabolaSuperDown", "ParabolaSuperUp",
-                "3_Wind_ShowerDown", "3_Wind_ShowerUp", "3_Phase7_ParabolaDown", "3_Phase7_ParabolaUp",
-                "3_Phase7_ParabolaDownDeep", "3_Phase7_ParabolaDownShallow", "3_AimedSpeed2" };
+            string[] names = { "3_AimedSpeed4" };
             foreach (string name in names)
             {
                 var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/" + name + ".asset");
@@ -602,22 +651,13 @@ namespace Project.Editor
                 var steps = so.FindProperty("steps");
                 if (steps.arraySize != 1) throw new InvalidOperationException("Expected one bullet movement step: " + name);
                 var step = steps.GetArrayElementAtIndex(0);
-                if (step.managedReferenceValue is VertexParabolaMovementConfig)
-                    P(step, "initialSpeed").floatValue = 7f;
-                else if (step.managedReferenceValue is InfiniteMovementConfig)
+                if (step.managedReferenceValue is InfiniteMovementConfig)
                 {
                     Vector3 velocity = P(step, "velocity").vector3Value;
                     if (velocity == Vector3.zero) throw new InvalidOperationException("Do not change wind-only bullet speed");
-                    P(step, "velocity").vector3Value = velocity.normalized * 2f;
+                    P(step, "velocity").vector3Value = velocity.normalized * 4f;
                 }
                 else throw new InvalidOperationException("Unexpected bullet movement: " + name);
-                Apply(so);
-            }
-            // 中ボス後のPhase6/7の通常弾は初速4。Phase2の自機狙い2とは分ける。
-            using (var so = Edit(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Wind_Fan3.asset")))
-            {
-                var entry = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries").GetArrayElementAtIndex(0);
-                P(entry, "bulletMovementOverride").objectReferenceValue = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/3_Wind_NormalSpeed4.asset");
                 Apply(so);
             }
             foreach (string name in new[] { "3_MidBoss_blue", "3_MidBoss_red" })
@@ -627,8 +667,7 @@ namespace Project.Editor
                 try
                 {
                     using var so = Edit(root.GetComponent<TwinParabolaMidBossController>());
-                    so.FindProperty("parabolaSpeed").floatValue = 7f;
-                    so.FindProperty("aimedShotSpeed").floatValue = 2f;
+                    so.FindProperty("aimedShotSpeed").floatValue = 4f;
                     Apply(so);
                     PrefabUtility.SaveAsPrefabAsset(root, path);
                 }
@@ -639,18 +678,17 @@ namespace Project.Editor
             {
                 using var so = new SerializedObject(AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/" + name + ".asset"));
                 var step = so.FindProperty("steps").GetArrayElementAtIndex(0);
-                float speed = step.managedReferenceValue is VertexParabolaMovementConfig
-                    ? P(step, "initialSpeed").floatValue : P(step, "velocity").vector3Value.magnitude;
-                float expected = step.managedReferenceValue is VertexParabolaMovementConfig ? 7f : 2f;
+                float speed = P(step, "velocity").vector3Value.magnitude;
+                float expected = 4f;
                 if (Mathf.Abs(speed - expected) > 0.0001f) throw new Exception("Incorrect way bullet speed: " + name);
             }
             foreach (string name in new[] { "3_MidBoss_blue", "3_MidBoss_red" })
             {
                 using var so = new SerializedObject(AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + name + ".prefab").GetComponent<TwinParabolaMidBossController>());
-                if (so.FindProperty("parabolaSpeed").floatValue != 7f || so.FindProperty("aimedShotSpeed").floatValue != 2f)
+                if (so.FindProperty("aimedShotSpeed").floatValue != 4f)
                     throw new Exception("Incorrect midboss bullet speed: " + name);
             }
-            Debug.Log("[Stage3WaySpeeds] Saved and verified Phase1–7 including both midbosses: parabola initial speed 7, early aimed initial speed 2, Phase6/7 normal initial speed 4. Wind-only leaf settings and main boss unchanged.");
+            Debug.Log("[Stage3WaySpeeds] Saved and verified Phase1–5 aimed initial speed 4: Phase2 pink enemies and both Phase5 midbosses. Renamed aimed movement preset with GUID preserved. Parabolas, later phases and main boss unchanged.");
         }
 
         [MenuItem("Tools/Stage3/Revise Phase Two And Wind Sequence")]
@@ -659,7 +697,7 @@ namespace Project.Editor
             if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
             if (Camera.main == null) throw new InvalidOperationException("Open Battle scene first");
             ScreenBoundsCache.Initialize(Camera.main);
-            var aimedMovement = BossBullet("3_AimedSpeed2", new InfiniteMovementConfig(Vector3.left * 2f));
+            var aimedMovement = BossBullet("3_AimedSpeed4", new InfiniteMovementConfig(Vector3.left * 4f));
             var aimed = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase2.asset");
             using (var so = Edit(aimed))
             {
@@ -792,7 +830,7 @@ namespace Project.Editor
             AssetDatabase.SaveAssets();
             ValidateRevisedWay(sequence, phase2, phase7, breakBuilder);
             Selection.activeObject = sequence;
-            Debug.Log("[Stage3WayRevision] Saved Phase2: aimed speed 2, two lower parabola/aimed pairs (12 enemies total). Sequence 1,2,3,4,5,5.5,6,7. Phase5.5: no enemies, calm 1.5s then Up wind 2.5s. Merged Phase7: 26 enemies over 16.1s plus 4 leaf sets at 3/7.3/11.6/15.9s; old Phase8 removed from progression. Boss settings unchanged.");
+            Debug.Log("[Stage3WayRevision] Saved Phase2: aimed speed 4, two lower parabola/aimed pairs (12 enemies total). Sequence 1,2,3,4,5,5.5,6,7. Phase5.5: no enemies, calm 1.5s then Up wind 2.5s. Merged Phase7: 26 enemies over 16.1s plus 4 leaf sets at 3/7.3/11.6/15.9s; old Phase8 removed from progression. Boss settings unchanged.");
         }
 
         static void SetRevisionSpawn(SerializedProperty clip, double time, Vector3 position, GameObject prefab, MovementPreset movement, AttackPreset attack)
@@ -1037,7 +1075,7 @@ namespace Project.Editor
                 Apply(so);
             }
             AssetDatabase.SaveAssets();
-            Debug.Log($"[Stage3ThreeWaySpeed] Saved {entriesUpdated} three-way attacks: aimed and fixed initial speed 4 throughout Phase6/7. Phase2 aimed speed 2, midboss, directions, shot counts, parabola speed 7, leaf wind-only motion and main boss unchanged.");
+            Debug.Log($"[Stage3ThreeWaySpeed] Saved {entriesUpdated} three-way attacks: aimed and fixed initial speed 4 throughout Phase6/7. Phase2 aimed speed 4, midboss, directions, shot counts, parabola speed 7, leaf wind-only motion and main boss unchanged.");
         }
 
         [MenuItem("Tools/Stage3/Set Wind Three Way Two Volleys")]
