@@ -33,7 +33,12 @@ namespace Project.Editor
         [SerializeField] string wayPreviewRestoreJson;
 
         [MenuItem("Tools/Stage3/Wind Stage Setup")]
-        static void Open() => GetWindow<Stage3WindSetupWindow>("Stage3 風ステージ作成");
+        static void Open()
+        {
+            var window = GetWindow<Stage3WindSetupWindow>("Stage3 風ステージ作成");
+            window.Show();
+            window.Focus();
+        }
 
         void OnEnable()
         {
@@ -86,6 +91,17 @@ namespace Project.Editor
             scroll = EditorGUILayout.BeginScrollView(scroll);
             using (new EditorGUI.DisabledScope(Application.isPlaying))
             {
+                if (GUILayout.Button("Phase6〜8の放物弾を下辺基準に・出現Xを分散して保存", GUILayout.Height(28)))
+                {
+                    try { ConfigureBottomVerticesAndSpawnX(); result = "放物弾の頂点を下辺＋0.35（風補正なし）、敵の出現Xを9.4〜12.4へ分散して保存しました。"; }
+                    catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
+                }
+                if (GUILayout.Button("Phase6〜8の3wayを2回発射にして保存", GUILayout.Height(28)))
+                {
+                    try { ReduceWindShotDensity(); result = "3way：1.6秒間隔で2回。保存・発射回数の確認完了。"; }
+                    catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
+                }
+                if (GUILayout.Button("Phase6から確認再生（自機HP補助）")) StartWayPreview(5);
                 if (GUILayout.Button("Phase7・8を上風の配置・攻撃へ更新して保存", GUILayout.Height(28)))
                 {
                     try { ConfigurePhase7And8(); result = "Phase7:下側16/20体、Phase8:各所24体。両方Up固定で保存しました。"; }
@@ -316,7 +332,7 @@ namespace Project.Editor
 
         static AttackPreset MakeFan()
         {
-            var asset = Asset<AttackPreset>(Data + "Attack/3_Wind_Fan5.asset", Data + "Attack/Normal_Fan3.asset");
+            var asset = Asset<AttackPreset>(Data + "Attack/3_Wind_Fan3.asset", Data + "Attack/Normal_Fan3.asset");
             var so = Edit(asset);
             var phase = P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0);
             P(phase, "loopStart").floatValue = 1.5f;
@@ -324,8 +340,9 @@ namespace Project.Editor
             P(phase, "cycleDuration").floatValue = 0.8f;
             var entry = P(phase, "entries").GetArrayElementAtIndex(0);
             P(entry, "directionProvider").managedReferenceValue = new AimDirectionConfig();
-            P(P(entry, "signal"), "wayCount").intValue = 5;
+            P(P(entry, "signal"), "wayCount").intValue = 3;
             P(P(entry, "signal"), "spreadAngle").floatValue = 20f;
+            P(entry, "bulletMovementOverride").objectReferenceValue = BossBullet("3_Wind_NormalSpeed4", new InfiniteMovementConfig(Vector3.left * 4f));
             Apply(so);
             return asset;
         }
@@ -423,16 +440,16 @@ namespace Project.Editor
             var back = WindFormationMovement("3_Wind_BackHold", -4.4f, 4.5f, Vector3.zero);
             var rise = WindFormationMovement("3_Wind_RiseAndExit", -6.3f, 1.7f, new Vector3(-1.8f, 1.3f));
             var dip = WindFormationMovement("3_Wind_DipAndExit", -5.7f, 1.7f, new Vector3(-2.2f, -0.8f));
-            var slow = BossBullet("3_Wind_NormalSpeed3_6", new InfiniteMovementConfig(Vector3.left * 3.6f));
-            var fast = BossBullet("3_Wind_NormalSpeed4_5", new InfiniteMovementConfig(Vector3.left * 4.5f));
+            var slow = BossBullet("3_Wind_NormalSpeed4", new InfiniteMovementConfig(Vector3.left * 4f));
+            var fast = slow;
             var lowDown = BossBullet("3_Phase7_ParabolaDown", new VertexParabolaMovementConfig(new Vector2(-5f, -1.6f), 5.5f));
             var lowUp = BossBullet("3_Phase7_ParabolaUp", new VertexParabolaMovementConfig(new Vector2(-6f, 2.6f), 5f));
             var deep = BossBullet("3_Phase8_ParabolaDownDeep", new VertexParabolaMovementConfig(new Vector2(-5.5f, -3.4f), 6.5f));
             var shallow = BossBullet("3_Phase8_ParabolaDownShallow", new VertexParabolaMovementConfig(new Vector2(-6f, -1.8f), 5.8f));
-            var fanLeft = WindFormationAttack("3_Phase7_FanLeft5", 5, 12f, new Vector2(-1f, -0.2f), slow, 1.1f);
+            var fanLeft = WindFormationAttack("3_Phase7_FanLeft3", 3, 12f, new Vector2(-1f, -0.2f), slow, 1.1f);
             var fanUp = WindFormationAttack("3_Phase7_FanUpLeft3", 3, 18f, new Vector2(-1f, 0.25f), slow, 0.9f);
             var fanDown3 = WindFormationAttack("3_Phase8_NWayDownLeft3", 3, 15f, new Vector2(-1f, -0.8f), fast, 0.9f);
-            var fanDown5 = WindFormationAttack("3_Phase8_NWayDownLeft5", 5, 12f, new Vector2(-1f, -1f), fast, 1.2f);
+            var fanDown5 = WindFormationAttack("3_Phase8_NWayDownLeft3_Narrow", 3, 12f, new Vector2(-1f, -1f), fast, 1.2f);
             var shotLowDown = WindFormationAttack("3_Phase7_ParabolaDown", 1, 0f, Vector2.left, lowDown, 0.6f, true);
             var shotLowUp = WindFormationAttack("3_Phase7_ParabolaUp", 1, 0f, Vector2.left, lowUp, 0.7f, true);
             var shotDeep = WindFormationAttack("3_Phase8_ParabolaDownDeep", 1, 0f, Vector2.left, deep, 0.6f, true);
@@ -498,6 +515,494 @@ namespace Project.Editor
             AssetDatabase.SaveAssets();
             Selection.activeObject = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + "Way/3_Phase7.asset");
             Debug.Log("[Stage3WindFormations] Saved Phase7: 20 enemies (16 lower), Phase8: 24 scattered enemies; both Up wind. New Attack/Movement/Bullet presets only; Phase1–6 and boss unchanged.");
+        }
+
+        [MenuItem("Tools/Stage3/Set Bottom Vertices And Spread X")]
+        static void ConfigureBottomVerticesAndSpawnX()
+        {
+            var camera = Camera.main;
+            if (camera == null) throw new InvalidOperationException("Open Battle scene with its Main Camera first");
+            ScreenBoundsCache.Initialize(camera);
+            var bullets = new HashSet<MovementPreset>();
+            float[] spawnX = { 9.4f, 11.2f, 10f, 12.4f, 10.6f, 11.8f };
+            for (int number = 6; number <= 8; number++)
+            {
+                var builder = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + $"Way/3_Phase{number}.asset");
+                using var so = Edit(builder);
+                var tracks = so.FindProperty("enemySpawnTracks");
+                int spawnIndex = 0;
+                for (int i = 0; i < tracks.arraySize; i++)
+                {
+                    var clips = P(tracks.GetArrayElementAtIndex(i), "clips");
+                    for (int j = 0; j < clips.arraySize; j++)
+                    {
+                        var clip = clips.GetArrayElementAtIndex(j);
+                        var position = P(clip, "spawnPosition").vector3Value;
+                        position.x = spawnX[(spawnIndex++ * 5 + number) % spawnX.Length];
+                        P(clip, "spawnPosition").vector3Value = position;
+                        if (P(clip, "attackOverride").objectReferenceValue is not AttackPreset attack) continue;
+                        using var attackSo = new SerializedObject(attack);
+                        var phases = P(attackSo.FindProperty("attackTimeline"), "phases");
+                        for (int p = 0; p < phases.arraySize; p++)
+                        {
+                            var entries = P(phases.GetArrayElementAtIndex(p), "entries");
+                            for (int e = 0; e < entries.arraySize; e++)
+                                if (P(entries.GetArrayElementAtIndex(e), "bulletMovementOverride").objectReferenceValue is MovementPreset bullet
+                                    && bullet.Steps.Any(step => step is VertexParabolaMovementConfig)) bullets.Add(bullet);
+                        }
+                    }
+                }
+                Apply(so);
+            }
+            foreach (var bullet in bullets)
+            {
+                using var so = Edit(bullet);
+                var steps = so.FindProperty("steps");
+                for (int i = 0; i < steps.arraySize; i++)
+                {
+                    var step = steps.GetArrayElementAtIndex(i);
+                    if (step.managedReferenceValue is not VertexParabolaMovementConfig) continue;
+                    // 既存の相対頂点Xを、右側の基準発射位置X=5から見た絶対座標へ移す。
+                    // 再実行しても頂点Xを重ねて変換しない。
+                    if (P(step, "isRelative").boolValue)
+                    {
+                        var vertex = P(step, "vertex").vector2Value;
+                        vertex.x += 5f;
+                        P(step, "vertex").vector2Value = vertex;
+                    }
+                    P(step, "isRelative").boolValue = false;
+                    var bottomVertex = P(step, "vertex").vector2Value;
+                    bottomVertex.y = ScreenBoundsCache.MinY + 0.35f;
+                    P(step, "vertex").vector2Value = bottomVertex;
+                }
+                Apply(so);
+                foreach (var step in bullet.Steps.OfType<VertexParabolaMovementConfig>())
+                    foreach (float height in new[] { -3.4f, -1f, 0f, 2.6f, 3.4f })
+                    {
+                        var start = new Vector2(6f, height);
+                        var sampled = (VertexParabolaMovementConfig)step.SampleForAttackTime(5.2f);
+                        var vertex = sampled.GetWorldVertex(start);
+                        if (Mathf.Abs(vertex.y - (ScreenBoundsCache.MinY + 0.35f)) > 0.0001f ||
+                            Mathf.Abs(vertex.x - step.VertexOffset.x) > 0.0001f ||
+                            !VertexParabola.TrySolve(start, vertex, ParabolaOrientation.Vertical, step.InitialSpeed,
+                                out var velocity, out var acceleration, out float time) ||
+                            Vector2.Distance(VertexParabola.Position(start, velocity, acceleration, time), vertex) > 0.001f)
+                            throw new Exception("Invalid bottom vertex: " + bullet.name);
+                    }
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Stage3BottomVertices] Saved {bullets.Count} parabola presets: absolute vertex, bottom + 0.35, no wind compensation; enemy spawn X 9.4–12.4 in Phase6–8. Verified vertices at 5 launch heights; speed unchanged.");
+        }
+
+        [MenuItem("Tools/Stage3/Spread Wind Enemies And Vertices Left")]
+        static void SpreadWindEnemiesAndVerticesLeft()
+        {
+            foreach (var item in new[] { ("3_Wind_ShowerDown", -6f), ("3_Phase7_ParabolaDown", -5.5f),
+                         ("3_Phase8_ParabolaDownDeep", -6f) })
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/" + item.Item1 + ".asset");
+                using var so = Edit(asset);
+                var step = so.FindProperty("steps").GetArrayElementAtIndex(0);
+                var vertex = P(step, "vertex").vector2Value;
+                vertex.x = item.Item2;
+                P(step, "vertex").vector2Value = vertex;
+                Apply(so);
+            }
+            foreach (var item in new[] { ("3_Wind_HoldAndExit", -11.8f), ("3_Wind_AdvanceHold", -12.8f) })
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Movement/" + item.Item1 + ".asset");
+                using var so = Edit(asset);
+                var step = so.FindProperty("steps").GetArrayElementAtIndex(0);
+                var offset = P(step, "targetOffset").vector3Value;
+                offset.x = item.Item2;
+                P(step, "targetOffset").vector3Value = offset;
+                Apply(so);
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Stage3LeftSpread] Saved Phase6–8: left entry destinations X -3.4–0.6 mixed with existing right formations; left vertices X -5.5/-6 mixed with existing central vertices. Vertex Y, shot speed and shot counts unchanged.");
+        }
+
+        [MenuItem("Tools/Stage3/Use Three Way And Slow Left Entry")]
+        static void UseThreeWayAndSlowLeftEntry()
+        {
+            foreach (var item in new[] { ("3_Wind_Fan5", "3_Wind_Fan3"),
+                         ("3_Phase7_FanLeft5", "3_Phase7_FanLeft3"),
+                         ("3_Phase8_NWayDownLeft5", "3_Phase8_NWayDownLeft3_Narrow") })
+            {
+                string oldPath = Data + "Attack/" + item.Item1 + ".asset";
+                string newPath = Data + "Attack/" + item.Item2 + ".asset";
+                var attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(oldPath)
+                    ?? AssetDatabase.LoadAssetAtPath<AttackPreset>(newPath);
+                using (var so = Edit(attack))
+                {
+                    var phases = P(so.FindProperty("attackTimeline"), "phases");
+                    for (int p = 0; p < phases.arraySize; p++)
+                    {
+                        var entries = P(phases.GetArrayElementAtIndex(p), "entries");
+                        for (int e = 0; e < entries.arraySize; e++)
+                        {
+                            var signal = P(entries.GetArrayElementAtIndex(e), "signal");
+                            if (signal.managedReferenceValue is NWaySignal) P(signal, "wayCount").intValue = 3;
+                        }
+                    }
+                    Apply(so);
+                }
+                if (AssetDatabase.GetAssetPath(attack) != newPath)
+                {
+                    string error = AssetDatabase.MoveAsset(oldPath, newPath);
+                    if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
+                }
+            }
+            foreach (var item in new[] { ("3_Wind_HoldAndExit", 2.8f), ("3_Wind_AdvanceHold", 3f) })
+            {
+                var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Movement/" + item.Item1 + ".asset");
+                using var so = Edit(movement);
+                P(so.FindProperty("steps").GetArrayElementAtIndex(0), "duration").floatValue = item.Item2;
+                Apply(so);
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Stage3ThreeWaySlowEntry] Saved 3 former five-way presets as three-way, preserving GUID references; left entry durations 1.4->2.8 / 1.5->3 seconds (half speed). Other movement, shot speed and firing counts unchanged.");
+        }
+
+        [MenuItem("Tools/Stage3/Set Wind Three Way Speed Four")]
+        static void SetWindThreeWaySpeedFour()
+        {
+            var bullet = BossBullet("3_Wind_NormalSpeed4", new InfiniteMovementConfig(Vector3.left * 4f));
+            int entriesUpdated = 0;
+            foreach (string name in new[] { "3_Wind_Fan3", "3_Phase7_FanLeft3", "3_Phase7_FanUpLeft3",
+                         "3_Phase8_NWayDownLeft3", "3_Phase8_NWayDownLeft3_Narrow" })
+            {
+                var attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/" + name + ".asset");
+                using var so = Edit(attack);
+                var phases = P(so.FindProperty("attackTimeline"), "phases");
+                for (int p = 0; p < phases.arraySize; p++)
+                {
+                    var entries = P(phases.GetArrayElementAtIndex(p), "entries");
+                    for (int e = 0; e < entries.arraySize; e++)
+                    {
+                        var entry = entries.GetArrayElementAtIndex(e);
+                        var signal = P(entry, "signal");
+                        if (signal.managedReferenceValue is not NWaySignal || P(signal, "wayCount").intValue != 3)
+                            throw new InvalidOperationException("Expected three-way attack: " + name);
+                        P(entry, "bulletMovementOverride").objectReferenceValue = bullet;
+                        entriesUpdated++;
+                    }
+                }
+                Apply(so);
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Stage3ThreeWaySpeed] Saved {entriesUpdated} three-way attacks with shared initial speed 4. Default bullet prefab, parabolas, wind and firing timing unchanged.");
+        }
+
+        [MenuItem("Tools/Stage3/Set Wind Three Way Two Volleys")]
+        static void ReduceWindShotDensity()
+        {
+            var attacks = new HashSet<AttackPreset>();
+            for (int number = 6; number <= 8; number++)
+            {
+                var builder = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + $"Way/3_Phase{number}.asset");
+                using var so = new SerializedObject(builder);
+                var tracks = so.FindProperty("enemySpawnTracks");
+                for (int i = 0; i < tracks.arraySize; i++)
+                {
+                    var clips = P(tracks.GetArrayElementAtIndex(i), "clips");
+                    for (int j = 0; j < clips.arraySize; j++)
+                        if (P(clips.GetArrayElementAtIndex(j), "attackOverride").objectReferenceValue is AttackPreset attack)
+                            attacks.Add(attack);
+                }
+            }
+            // 画面外の並行弾など、3way以外の攻撃は変更しない。
+            attacks.RemoveWhere(attack =>
+            {
+                using var so = new SerializedObject(attack);
+                var phases = P(so.FindProperty("attackTimeline"), "phases");
+                if (phases.arraySize != 1) return true;
+                var entries = P(phases.GetArrayElementAtIndex(0), "entries");
+                if (entries.arraySize != 1) return true;
+                var signal = P(entries.GetArrayElementAtIndex(0), "signal");
+                return signal.managedReferenceValue is not NWaySignal || P(signal, "wayCount").intValue != 3;
+            });
+            // この調整は、出現Clipから直接参照する単一攻撃の連射プリセットに限定する。
+            foreach (var attack in attacks)
+            {
+                using var so = new SerializedObject(attack);
+                var phases = P(so.FindProperty("attackTimeline"), "phases");
+                if (phases.arraySize != 1) throw new InvalidOperationException("Expected one attack phase: " + attack.name);
+                var phase = phases.GetArrayElementAtIndex(0);
+                var entries = P(phase, "entries");
+                if (!P(phase, "loop").boolValue || entries.arraySize != 1 ||
+                    P(entries.GetArrayElementAtIndex(0), "time").floatValue != 0f ||
+                    P(entries.GetArrayElementAtIndex(0), "signal").managedReferenceValue is PresetAttackSignal)
+                    throw new InvalidOperationException("Expected one looping shot: " + attack.name);
+            }
+            int updated = 0;
+            foreach (var attack in attacks)
+            {
+                using var so = Edit(attack);
+                var phase = P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0);
+                var entry = P(phase, "entries").GetArrayElementAtIndex(0);
+                var signal = P(entry, "signal");
+                if (signal.managedReferenceValue is not NWaySignal || P(signal, "wayCount").intValue != 3) continue;
+                int expected = 2;
+                float interval = P(phase, "cycleDuration").floatValue;
+                float start = P(phase, "loopStart").floatValue;
+                float end = Mathf.Round((start + interval * (expected - 1) + 0.1f) * 10f) / 10f;
+                P(phase, "cycleDuration").floatValue = interval;
+                // 最終弾の直後で終える。境界の浮動小数点誤差で1回欠けないよう0.1秒余裕を置く。
+                P(phase, "loopEnd").floatValue = end;
+                Apply(so);
+                var timeline = attack.CreateTimeline();
+                timeline.InitializeProviders(() => new Vector3(-6f, 0f, 0f), () => new Vector3(4f, 0f, 0f), () => Quaternion.identity);
+                timeline.Initialize();
+                int actual = 0;
+                using var subscription = timeline.OnAttackTiming.Subscribe(_ => actual++);
+                try { timeline.Update(end + 1f); }
+                finally { timeline.Dispose(); }
+                if (actual != expected) throw new Exception($"{attack.name}: expected {expected} shots, got {actual}");
+                updated++;
+                Debug.Log($"[Stage3WindDensity] {attack.name}: {actual} volleys, interval {interval:0.0}s, first {start:0.0}s, last {start + interval * (expected - 1):0.0}s.");
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Stage3WindDensity] Saved and verified {updated} three-way presets: 2 volleys. Initial speed, intervals and parabolas unchanged.");
+        }
+
+        [MenuItem("Tools/Stage3/Add Phase Seven And Eight Wind Parallel")]
+        static void AddWayWindParallel()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            var camera = Camera.main;
+            if (camera == null) throw new InvalidOperationException("Open Battle scene first");
+            ScreenBoundsCache.Initialize(camera);
+            var bullet = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "3_Bullet_WindPurple.prefab")?.GetComponent<BulletEntityPresenter>();
+            var movement = WindParallelWaitingMovement();
+            if (bullet == null || movement == null) throw new InvalidOperationException("Boss wind bullet assets are missing");
+
+            // 既存の敵の攻撃機能を、非表示・接触なしの画面外発射元として使う。
+            string emitterPath = Prefabs + "3_WindParallelEmitter.prefab";
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(emitterPath) == null &&
+                !AssetDatabase.CopyAsset(Prefabs + "3_Enemy_pink.prefab", emitterPath))
+                throw new InvalidOperationException("Cannot copy emitter template");
+            var root = PrefabUtility.LoadPrefabContents(emitterPath);
+            try
+            {
+                root.name = "3_WindParallelEmitter";
+                root.transform.position = new Vector3(20f, 0f, 0f);
+                foreach (var renderer in root.GetComponentsInChildren<SpriteRenderer>(true)) renderer.enabled = false;
+                foreach (var collider in root.GetComponentsInChildren<Collider2D>(true)) collider.enabled = false;
+                foreach (var body in root.GetComponentsInChildren<Rigidbody2D>(true)) body.simulated = false;
+                var enemy = root.GetComponent<EnemyEntityPresenter>();
+                using var so = Edit(enemy);
+                so.FindProperty("contactDamage").intValue = 0;
+                so.FindProperty("lifetime").floatValue = 15f;
+                so.FindProperty("movementPreset").objectReferenceValue = null;
+                var steps = so.FindProperty("movementSteps");
+                steps.arraySize = 1;
+                steps.GetArrayElementAtIndex(0).managedReferenceValue = new InfiniteMovementConfig(Vector3.zero);
+                so.FindProperty("attackPreset").objectReferenceValue = null;
+                so.FindProperty("attackTimeline").FindPropertyRelative("phases").arraySize = 0;
+                P(so.FindProperty("deathAttackEntry"), "signal").managedReferenceValue = null;
+                var pool = root.GetComponentsInChildren<BulletPool>(true).First();
+                using (var poolSo = Edit(pool))
+                {
+                    poolSo.FindProperty("bulletPrefab").objectReferenceValue = bullet;
+                    Apply(poolSo);
+                }
+                var pools = so.FindProperty("bulletPools");
+                pools.GetArrayElementAtIndex(0).objectReferenceValue = pool;
+                Apply(so);
+                PrefabUtility.SaveAsPrefabAsset(root, emitterPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            var emitter = AssetDatabase.LoadAssetAtPath<GameObject>(emitterPath);
+
+            for (int number = 7; number <= 8; number++)
+            {
+                float[] times = number == 7 ? new[] { 3f, 7f, 11f } : new[] { 2.5f, 6f, 9.5f, 13f };
+                float[] centers = number == 7 ? new[] { -5.5f, 0f, 5.5f } : new[] { 5.5f, -2f, 2f, -5.5f };
+                var entries = new List<AttackTimelineEntry>();
+                for (int set = 0; set < times.Length; set++)
+                    foreach (float lane in new[] { -2f, 0f, 2f })
+                        entries.Add(BossEntry(times[set], new NWaySignal(1, 0f), 0, movement,
+                            new ScreenEdgeDirectionConfig(centers[set] + lane, 0f, 2.4f)));
+                var attack = BossAttack($"3_Phase{number}_WindParallel", entries.ToArray());
+                using (var so = Edit(attack))
+                {
+                    var list = P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0).FindPropertyRelative("entries");
+                    for (int i = 0; i < list.arraySize; i++)
+                    {
+                        P(P(list.GetArrayElementAtIndex(i), "directionProvider"), "angularSpeed").floatValue = 0f;
+                        P(P(list.GetArrayElementAtIndex(i), "signal"), "startDelay").floatValue = 0f;
+                    }
+                    Apply(so);
+                }
+                ValidateWayWindParallel(attack, times, centers);
+                var builder = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + $"Way/3_Phase{number}.asset");
+                using (var so = Edit(builder))
+                {
+                    var tracks = so.FindProperty("enemySpawnTracks");
+                    var track = Enumerable.Range(0, tracks.arraySize).Select(tracks.GetArrayElementAtIndex)
+                        .First(t => P(t, "trackName").stringValue == "EnemySpawn");
+                    var clips = P(track, "clips");
+                    int index = -1;
+                    for (int i = 0; i < clips.arraySize; i++)
+                        if (P(clips.GetArrayElementAtIndex(i), "prefab").objectReferenceValue == emitter) index = i;
+                    if (index < 0) { index = clips.arraySize; clips.arraySize++; }
+                    var clip = clips.GetArrayElementAtIndex(index);
+                    P(clip, "time").doubleValue = 0d;
+                    P(clip, "spawnPosition").vector3Value = new Vector3(20f, 0f, 0f);
+                    P(clip, "prefab").objectReferenceValue = emitter;
+                    P(clip, "attackOverride").objectReferenceValue = attack;
+                    P(clip, "movementOverride").objectReferenceValue = null;
+                    P(clip, "bulletMovementOverride").objectReferenceValue = null;
+                    Apply(so);
+                }
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Stage3WayWindParallel] Saved Phase7: 3 sets / 9 purple bullets; Phase8: 4 sets / 12. Zero authored velocity, wind-only movement, spacing 2, edge-centered origin, Up wind. Invisible noncolliding emitter expires at 15s; existing enemies and boss unchanged.");
+        }
+
+        static void ValidateWayWindParallel(AttackPreset preset, float[] times, float[] centers)
+        {
+            try
+            {
+                TestWind(WindDirection.Up);
+                var timeline = preset.CreateTimeline();
+                timeline.InitializeProviders(() => Vector3.zero, () => new Vector3(20f, 0f), () => Quaternion.identity);
+                timeline.Initialize();
+                int count = 0;
+                float clock = 0f;
+                using var listener = timeline.OnAttackTiming.Subscribe(ev =>
+                {
+                    int set = count / 3, lane = count % 3;
+                    var expected = new Vector2(centers[set] + (lane - 1) * 2f, ScreenBoundsCache.MinY);
+                    if (ev.Type != AttackEventType.Bullet || ev.SourceIndex != 0 || ev.SpawnSpace != AttackSpawnSpace.World ||
+                        ev.Directions.Count != 1 || Vector2.Distance(ev.Directions[0], Vector2.up) > 0.001f ||
+                        Vector2.Distance(ev.SpawnOffsets[0], expected) > 0.001f || Mathf.Abs(clock - times[set]) > 0.02f ||
+                        Mathf.Abs(ev.GetStartDelayAt(0)) > 0.001f ||
+                        expected.x < ScreenBoundsCache.MinX || expected.x > ScreenBoundsCache.MaxX)
+                        throw new Exception("Invalid wind parallel event: " + preset.name);
+                    CheckParallelWaitingMovement(ev);
+                    count++;
+                });
+                try
+                {
+                    for (int i = 1; i <= 1400; i++) { clock = i * 0.01f; timeline.Update(0.01f); }
+                    if (count != times.Length * 3) throw new Exception("Wrong parallel bullet count: " + preset.name);
+                }
+                finally { timeline.Dispose(); }
+                Debug.Log($"[Stage3WayWindParallel] Verified {preset.name}: {times.Length} sets / {count} bullets, timing, spacing, edge origins and wind-only movement.");
+            }
+            finally { BattleWind.Reset(); }
+        }
+
+        static MovementPreset WindParallelWaitingMovement()
+        {
+            string path = Data + "Bullet/3_Wind_ParallelWindOnly.asset";
+            string oldPath = Data + "Bullet/3_Wind_ParallelWait1_5Speed1_5.asset";
+            if (AssetDatabase.LoadAssetAtPath<MovementPreset>(path) == null &&
+                AssetDatabase.LoadAssetAtPath<MovementPreset>(oldPath) != null)
+            {
+                string error = AssetDatabase.MoveAsset(oldPath, path);
+                if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
+            }
+            var asset = Asset<MovementPreset>(path);
+            using var so = Edit(asset);
+            var steps = so.FindProperty("steps");
+            steps.arraySize = 1;
+            steps.GetArrayElementAtIndex(0).managedReferenceValue = new InfiniteMovementConfig(Vector3.zero);
+            Apply(so);
+            return asset;
+        }
+
+        static void CheckParallelWaitingMovement(AttackEvent ev)
+        {
+            if (Mathf.Abs(ev.GetStartDelayAt(0)) > 0.0001f || ev.BulletMovementOverride == null)
+                throw new Exception("Wind-only movement must use movement steps without Start Delay");
+            using var so = new SerializedObject(ev.BulletMovementOverride);
+            var steps = so.FindProperty("steps");
+            if (steps.arraySize != 1 || steps.GetArrayElementAtIndex(0).managedReferenceValue is not InfiniteMovementConfig ||
+                P(steps.GetArrayElementAtIndex(0), "velocity").vector3Value.sqrMagnitude > 0.0000001f)
+                throw new Exception("Expected zero authored velocity indefinitely; wind alone moves the bullet");
+        }
+
+        [MenuItem("Tools/Stage3/Restore Boss Wind Parallel Motion")]
+        static void RestoreBossWindParallelMotion()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            if (Camera.main == null) throw new InvalidOperationException("Open Battle scene first");
+            ScreenBoundsCache.Initialize(Camera.main);
+            var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/3_Boss_WindSpeed1_5.asset");
+            var attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Boss_WindParallel.asset");
+            using (var so = Edit(attack))
+            {
+                var entries = P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0).FindPropertyRelative("entries");
+                for (int i = 0; i < entries.arraySize; i++)
+                {
+                    var entry = entries.GetArrayElementAtIndex(i);
+                    P(entry, "signal").managedReferenceValue = new SingleBulletSignal();
+                    P(entry, "bulletMovementOverride").objectReferenceValue = movement;
+                    var direction = P(entry, "directionProvider");
+                    P(direction, "edgeInset").floatValue = -0.15f;
+                    P(direction, "verticalMargin").floatValue = 1.4f;
+                }
+                Apply(so);
+            }
+            AssetDatabase.SaveAssets();
+            ValidateWindParallel(attack);
+            ValidateWayWindParallel(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset"),
+                new[] { 3f, 7f, 11f }, new[] { -5.5f, 0f, 5.5f });
+            ValidateWayWindParallel(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase8_WindParallel.asset"),
+                new[] { 2.5f, 6f, 9.5f, 13f }, new[] { 5.5f, -2f, 2f, -5.5f });
+            Debug.Log("[Stage3BossWindRestore] Restored boss-only parallel motion: immediate initial speed 1.5 along wind, edge inset -0.15 and sweep margin 1.4. Phase7/8 remain wind-only; shared leaf visuals and collider untouched.");
+        }
+
+        [MenuItem("Tools/Stage3/Set Wind Parallel Edge Warning")]
+        static void ConfigureWindParallelEdgeWarning()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            if (Camera.main == null) throw new InvalidOperationException("Open Battle scene first");
+            ScreenBoundsCache.Initialize(Camera.main);
+            var waitingMovement = WindParallelWaitingMovement();
+            foreach (string name in new[] { "3_Phase7_WindParallel", "3_Phase8_WindParallel" })
+            {
+                var attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/" + name + ".asset");
+                if (attack == null) continue;
+                using var so = Edit(attack);
+                var entries = P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0).FindPropertyRelative("entries");
+                for (int i = 0; i < entries.arraySize; i++)
+                {
+                    var entry = entries.GetArrayElementAtIndex(i);
+                    var direction = P(entry, "directionProvider");
+                    if (direction.managedReferenceValue is not ScreenEdgeDirectionConfig)
+                        throw new InvalidOperationException("Expected screen-edge origin: " + name);
+                    // 自走速度は常に0。開始遅延を使わず、生成直後から風だけで動かす。
+                    P(entry, "signal").managedReferenceValue = new NWaySignal(1, 0f);
+                    P(P(entry, "signal"), "startDelay").floatValue = 0f;
+                    P(entry, "bulletMovementOverride").objectReferenceValue = waitingMovement;
+                    P(direction, "edgeInset").floatValue = 0f;
+                    P(direction, "verticalMargin").floatValue = 2.4f;
+                }
+                Apply(so);
+            }
+            AssetDatabase.SaveAssets();
+            ValidateWindParallel(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Boss_WindParallel.asset"));
+            var phase7 = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset");
+            var phase8 = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase8_WindParallel.asset");
+            if (phase7 != null) ValidateWayWindParallel(phase7, new[] { 3f, 7f, 11f }, new[] { -5.5f, 0f, 5.5f });
+            if (phase8 != null) ValidateWayWindParallel(phase8, new[] { 2.5f, 6f, 9.5f, 13f }, new[] { 5.5f, -2f, 2f, -5.5f });
+            try
+            {
+                foreach (var wind in new[] { WindDirection.Up, WindDirection.Down, WindDirection.Left, WindDirection.Right })
+                {
+                    TestWind(wind);
+                    Vector2 velocity = Vector2.zero, position = Vector2.zero;
+                    for (int i = 0; i < 1200; i++) BattleWind.IntegrateBullet(Vector2.zero, 0.01f, ref velocity, ref position);
+                    if (Vector2.Dot(position, BattleWind.Vector) <= 0f || Vector2.Dot(velocity, BattleWind.Vector) <= 0f)
+                        throw new Exception("Expected wind-only drift throughout bullet lifetime: " + wind);
+                }
+            }
+            finally { BattleWind.Reset(); }
+            Debug.Log("[Stage3ParallelWarning] Saved Phase7/8: edge-centered spawn, zero authored velocity indefinitely; wind-only movement. Verified 12s drift in all 4 directions. Counts and spacing unchanged; boss motion preserved.");
         }
 
         static void RoundPhaseSpawnTimes()
@@ -789,6 +1294,141 @@ namespace Project.Editor
             Selection.activeObject = sequence;
         }
 
+        [MenuItem("Tools/Stage3/Set Wind Leaf Circle Collider")]
+        static void ConfigureWindLeafCircleCollider()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            string path = Prefabs + "3_Bullet_WindPurple.prefab";
+            var root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                SetWindLeafCircleCollider(root);
+                PrefabUtility.SaveAsPrefabAsset(root, path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            var saved = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var circle = saved.GetComponent<CircleCollider2D>();
+            if (saved.GetComponent<BoxCollider2D>() != null || circle == null || !circle.isTrigger ||
+                Mathf.Abs(circle.radius - 0.79f) > 0.0001f ||
+                Vector2.Distance(circle.offset, saved.transform.Find("SpinningVisual").localPosition) > 0.0001f)
+                throw new Exception("Wind leaf circle collider validation failed");
+            Debug.Log("[Stage3WindLeafCollider] Saved shared boss/Phase7/Phase8 prefab: CircleCollider2D radius 0.79, centered on leaf ring, about 90% of visible ring radius. BoxCollider2D removed. Existing scale and visual settings preserved.");
+        }
+
+        static void SetWindLeafCircleCollider(GameObject root)
+        {
+            var circle = root.GetComponent<CircleCollider2D>();
+            if (circle == null) circle = root.AddComponent<CircleCollider2D>();
+            // EntityViewBaseのCollider2D依存を満たしてから既存の形状を取り除く。
+            foreach (var box in root.GetComponents<BoxCollider2D>()) DestroyImmediate(box);
+            circle.isTrigger = true;
+            circle.radius = 0.79f; // 輪の外径1.76に対して、当たり判定の直径を約90%にする。
+            circle.offset = root.transform.Find("SpinningVisual").localPosition;
+        }
+
+        [MenuItem("Tools/Stage3/Set Wind Parallel Leaf Visual")]
+        static void ConfigureWindParallelLeafVisual()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            const string imagePath = "Assets/Project/Textures/Enemies/Stage3/Bullet_wind_leaf.png";
+            AssetDatabase.ImportAsset(imagePath);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(imagePath);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            // 可視部分570pxを旧画像の880px / 500PPUと同じ大きさにする。
+            importer.spritePixelsPerUnit = 570f / (880f / 500f);
+            importer.filterMode = FilterMode.Point;
+            importer.mipmapEnabled = false;
+            importer.alphaIsTransparency = true;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            var textureSettings = new TextureImporterSettings();
+            importer.ReadTextureSettings(textureSettings);
+            textureSettings.spriteAlignment = (int)SpriteAlignment.Custom;
+            textureSettings.spritePivot = new Vector2(390f / 720f, 375f / 720f);
+            importer.SetTextureSettings(textureSettings);
+            importer.SaveAndReimport();
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(imagePath);
+
+            string clipPath = Prefabs + "3_WindLeafSpin.anim";
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(clipPath);
+            if (clip == null)
+            {
+                clip = new AnimationClip { name = "3_WindLeafSpin" };
+                AssetDatabase.CreateAsset(clip, clipPath);
+            }
+            clip.frameRate = 60f;
+            var binding = EditorCurveBinding.FloatCurve("", typeof(Transform), "localEulerAnglesRaw.z");
+            AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Linear(0f, 0f, 1f, 360f));
+            var clipSettings = AnimationUtility.GetAnimationClipSettings(clip);
+            clipSettings.loopTime = true;
+            AnimationUtility.SetAnimationClipSettings(clip, clipSettings);
+            EditorUtility.SetDirty(clip);
+            string controllerPath = Prefabs + "3_WindLeafSpin.controller";
+            var controller = AssetDatabase.LoadAssetAtPath<UnityEditor.Animations.AnimatorController>(controllerPath);
+            if (controller == null)
+                controller = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPathWithClip(controllerPath, clip);
+            var state = controller.layers[0].stateMachine.defaultState;
+            state.motion = clip;
+            state.speed = 1f;
+            EditorUtility.SetDirty(controller);
+
+            string bulletPath = Prefabs + "3_Bullet_WindPurple.prefab";
+            var root = PrefabUtility.LoadPrefabContents(bulletPath);
+            try
+            {
+                var rootRenderer = root.GetComponent<SpriteRenderer>();
+                var visual = root.transform.Find("SpinningVisual");
+                if (visual == null)
+                {
+                    visual = new GameObject("SpinningVisual").transform;
+                    visual.SetParent(root.transform, false);
+                }
+                visual.localPosition = new Vector3(0f, 0.08f, 0f);
+                visual.localRotation = Quaternion.identity;
+                visual.localScale = Vector3.one;
+                visual.gameObject.layer = root.layer;
+                var renderer = visual.GetComponent<SpriteRenderer>();
+                if (renderer == null) renderer = visual.gameObject.AddComponent<SpriteRenderer>();
+                EditorUtility.CopySerialized(rootRenderer, renderer);
+                renderer.sprite = sprite;
+                renderer.enabled = true;
+                rootRenderer.enabled = false;
+                rootRenderer.sprite = null;
+                var animator = visual.GetComponent<Animator>();
+                if (animator == null) animator = visual.gameObject.AddComponent<Animator>();
+                animator.runtimeAnimatorController = controller;
+                animator.applyRootMotion = false;
+                animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                var presenter = root.GetComponent<BulletEntityPresenter>();
+                using (var so = Edit(presenter))
+                {
+                    so.FindProperty("spriteRenderer").objectReferenceValue = renderer;
+                    var steps = so.FindProperty("movementSteps");
+                    steps.arraySize = 1;
+                    steps.GetArrayElementAtIndex(0).managedReferenceValue = new InfiniteMovementConfig(Vector3.zero);
+                    Apply(so);
+                }
+                using (var so = Edit(root.GetComponent<Project.Scenes.Battle.Scripts.View.Entity.BulletEntityView>()))
+                {
+                    so.FindProperty("spriteRenderer").objectReferenceValue = renderer;
+                    Apply(so);
+                }
+                // 風が制御する親の位置・回転とは独立した子の自転を検証する。
+                foreach (float time in new[] { 0.25f, 0.5f, 0.75f, 1f })
+                {
+                    clip.SampleAnimation(visual.gameObject, time);
+                    if (Quaternion.Angle(visual.localRotation, Quaternion.Euler(0f, 0f, 360f * time)) > 0.01f)
+                        throw new Exception("Wind leaf must rotate once per second");
+                }
+                visual.localRotation = Quaternion.identity;
+                SetWindLeafCircleCollider(root);
+                PrefabUtility.SaveAsPrefabAsset(root, bulletPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Stage3WindLeaf] Saved shared boss/Phase7/Phase8 bullet: untitled_50 leaf texture, preserved visible size, circle collider radius 0.79, 360 degrees per second on child visual, zero authored velocity. Quarter-turn animation samples verified.");
+        }
+
         static void UpdateWindParallel()
         {
             const string imagePath = "Assets/Project/Textures/Enemies/Stage3/Bullet_wind_purple.png";
@@ -814,8 +1454,11 @@ namespace Project.Editor
                 bulletRoot.name = "3_Bullet_WindPurple";
                 bulletRoot.GetComponent<SpriteRenderer>().sprite = sprite;
                 var collider = bulletRoot.GetComponent<BoxCollider2D>();
-                collider.size = new Vector2(0.83f, 0.83f);
-                collider.offset = new Vector2(0f, 0.08f);
+                if (collider != null)
+                {
+                    collider.size = new Vector2(0.83f, 0.83f);
+                    collider.offset = new Vector2(0f, 0.08f);
+                }
                 var bulletSo = Edit(bulletRoot.GetComponent<BulletEntityPresenter>());
                 var steps = bulletSo.FindProperty("movementSteps");
                 steps.arraySize = 1;
@@ -850,14 +1493,16 @@ namespace Project.Editor
 
             MoveAttackIfNeeded("3_Boss_EdgeRight", "3_Boss_WindParallel");
             MoveAttackIfNeeded("3_Boss_EdgeLeft", "3_Boss_WindParallelRightWind");
-            var movement = BossBullet("3_Boss_WindSpeed1_5", new InfiniteMovementConfig(Vector3.left * 1.5f));
+            var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/3_Boss_WindSpeed1_5.asset");
             var parallel = BossAttack("3_Boss_WindParallel", new[] { -2f, 0f, 2f }
                 .Select(offset => BossEntry(0f, new SingleBulletSignal(), 2, movement,
                     new ScreenEdgeDirectionConfig(offset, -0.15f, 1.4f))).ToArray());
             // 右風用の既存参照も、同じ並行弾設定を辿るようにする。
             BossAttack("3_Boss_WindParallelRightWind", BossEntry(0f, new PresetAttackSignal(parallel, 1, 1f)));
             AssetDatabase.SaveAssets();
-            ValidateWindParallel(parallel);
+            ConfigureWindParallelEdgeWarning();
+            if (System.IO.File.Exists("Assets/Project/Textures/Enemies/Stage3/Bullet_wind_leaf.png"))
+                ConfigureWindParallelLeafVisual();
             Selection.activeObject = parallel;
         }
 
@@ -890,9 +1535,13 @@ namespace Project.Editor
                 : new Vector2(direction.x > 0f ? ScreenBoundsCache.MinX - 0.15f : ScreenBoundsCache.MaxX + 0.15f,
                     Mathf.Lerp(ScreenBoundsCache.MinY + 1.4f, ScreenBoundsCache.MaxY - 1.4f, wave) + offset);
             if (Vector2.Distance(ev.SpawnOffsets[0], expected) > 0.0001f) throw new Exception("Parallel lane position changed");
+            if (Mathf.Abs(ev.GetStartDelayAt(0)) > 0.0001f || ev.BulletMovementOverride == null)
+                throw new Exception("Boss parallel bullets must launch immediately");
             using var so = new SerializedObject(ev.BulletMovementOverride);
-            float speed = P(so.FindProperty("steps").GetArrayElementAtIndex(0), "velocity").vector3Value.magnitude;
-            if (Mathf.Abs(speed - 1.5f) > 0.0001f) throw new Exception("Wind bullet speed must be 1.5");
+            var steps = so.FindProperty("steps");
+            if (steps.arraySize != 1 || steps.GetArrayElementAtIndex(0).managedReferenceValue is not InfiniteMovementConfig ||
+                Mathf.Abs(P(steps.GetArrayElementAtIndex(0), "velocity").vector3Value.magnitude - 1.5f) > 0.0001f)
+                throw new Exception("Expected boss parallel bullet initial speed 1.5");
         }
 
         static void ValidateWindParallel(AttackPreset preset)
@@ -932,7 +1581,7 @@ namespace Project.Editor
                         finally { attack.Dispose(); }
                     }
                 }
-                Debug.Log("[Stage3WindParallel] All 4 directions and 3 strong presets passed: 7 volleys of 3 parallel bullets, outside origin, spacing 2.0 and initial speed 1.5.");
+                Debug.Log("[Stage3WindParallel] All 4 directions and 3 strong presets passed: 7 volleys of 3 parallel bullets, original offscreen origin, immediate initial speed 1.5 along wind, spacing 2.0.");
             }
             finally { BattleWind.Reset(); }
         }
