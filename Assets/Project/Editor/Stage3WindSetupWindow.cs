@@ -91,29 +91,29 @@ namespace Project.Editor
             scroll = EditorGUILayout.BeginScrollView(scroll);
             using (new EditorGUI.DisabledScope(Application.isPlaying))
             {
-                if (GUILayout.Button("Phase6〜8の放物弾を下辺基準に・出現Xを分散して保存", GUILayout.Height(28)))
+                if (GUILayout.Button("Phase6〜7の放物弾を下辺基準に・出現Xを分散して保存", GUILayout.Height(28)))
                 {
                     try { ConfigureBottomVerticesAndSpawnX(); result = "放物弾の頂点を下辺＋0.35（風補正なし）、敵の出現Xを9.4〜12.4へ分散して保存しました。"; }
                     catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
                 }
-                if (GUILayout.Button("Phase6〜8の3wayを2回発射にして保存", GUILayout.Height(28)))
+                if (GUILayout.Button("Phase6〜7の3wayを2回発射にして保存", GUILayout.Height(28)))
                 {
                     try { ReduceWindShotDensity(); result = "3way：1.6秒間隔で2回。保存・発射回数の確認完了。"; }
                     catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
                 }
-                if (GUILayout.Button("Phase6から確認再生（自機HP補助）")) StartWayPreview(5);
-                if (GUILayout.Button("Phase7・8を上風の配置・攻撃へ更新して保存", GUILayout.Height(28)))
+                if (GUILayout.Button("Phase5.5から風の導入を確認再生（自機HP補助）")) StartWayPreviewAt("5.5");
+                if (GUILayout.Button("Phase6から確認再生（自機HP補助）")) StartWayPreviewAt("6");
+                if (GUILayout.Button("統合したPhase7の配置・攻撃設定を保存", GUILayout.Height(28)))
                 {
-                    try { ConfigurePhase7And8(); result = "Phase7:下側16/20体、Phase8:各所24体。両方Up固定で保存しました。"; }
+                    try { ConfigurePhase7And8(); result = "Phase7の統合設定を保存しました。"; }
                     catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
                 }
-                if (GUILayout.Button("Phase7から確認再生（自機HP補助）")) StartWayPreview(6);
-                if (GUILayout.Button("Phase8から確認再生（自機HP補助）")) StartWayPreview(7);
+                if (GUILayout.Button("Phase7から確認再生（自機HP補助）")) StartWayPreviewAt("7");
             }
             using (new EditorGUI.DisabledScope(Application.isPlaying))
-                if (GUILayout.Button("Phase1〜8の出現秒数を小数第1位へ丸めて保存"))
+                if (GUILayout.Button("Phase1〜7の出現秒数を小数第1位へ丸めて保存"))
                 {
-                    try { RoundPhaseSpawnTimes(); result = "Phase1〜8の出現秒数を小数第1位に揃えました。"; }
+                    try { RoundPhaseSpawnTimes(); result = "Phase1〜7の出現秒数を小数第1位に揃えました。"; }
                     catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
                 }
             EditorGUILayout.LabelField("強化後の風に沿う並行弾", EditorStyles.boldLabel);
@@ -146,8 +146,8 @@ namespace Project.Editor
                 }
             }
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Phase6〜8・本ボスの試作", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("Phase1〜5は保持します。Phase6〜8、専用プリセット、Stage3Boss、3_Tatsumiを作成・更新します。\n風：Phase6〜8は上固定。Phase7は下側中心、Phase8は各所から左下N-way＋下向き放物弾。\nボス：HP1000、半分で強化。7秒ごとに放物弾／N-wayを交互に使用。", MessageType.Info);
+            EditorGUILayout.LabelField("Phase6〜7・本ボスの試作", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("Phase6〜7、専用プリセット、Stage3Boss、3_Tatsumiを作成・更新します。\n道中：中ボス→Phase5.5で風の導入→Phase6→統合したPhase7（26体）。風は上固定。\nボス：HP1000、残り30%で強化。7秒ごとに放物弾／N-wayを交互に使用。", MessageType.Info);
             bossSprite = (Sprite)EditorGUILayout.ObjectField("ボス画像（仮差替可）", bossSprite, typeof(Sprite), false);
             armSprite = (Sprite)EditorGUILayout.ObjectField("腕上げ画像（任意）", armSprite, typeof(Sprite), false);
             EditorGUILayout.HelpBox("通常画像：Downloads/untitled_8.png\n合図画像：Downloads/untitled_14.png\nステージ2のボスを基にHP表示・強化・撃破演出を継承しています。", MessageType.Info);
@@ -178,7 +178,7 @@ namespace Project.Editor
                     catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
                 }
             using (new EditorGUI.DisabledScope(Application.isPlaying || bossSprite == null))
-                if (GUILayout.Button("Phase6〜8 とボスを作成・保存", GUILayout.Height(36)))
+                if (GUILayout.Button("Phase6〜7 とボスを作成・保存", GUILayout.Height(36)))
                 {
                     try { Build(); result = "作成完了。参照と風の数値チェック成功。詳細はConsole。"; }
                     catch (Exception ex) { result = ex.Message; Debug.LogException(ex); }
@@ -187,14 +187,7 @@ namespace Project.Editor
             using (new EditorGUI.DisabledScope(Application.isPlaying))
                 if (GUILayout.Button("Phase6から道中を確認再生"))
                 {
-                    var initializer = FindFirstObjectByType<DebugRuntimeModelInitializer>();
-                    if (initializer == null) throw new InvalidOperationException("Open Battle scene first");
-                    var init = new SerializedObject(initializer);
-                    init.FindProperty("stageNumber").intValue = 3;
-                    init.FindProperty("situation").enumValueIndex = (int)BattleSituation.Way;
-                    init.FindProperty("startPhaseIndex").intValue = 5;
-                    init.ApplyModifiedProperties();
-                    EditorApplication.isPlaying = true;
+                    StartWayPreviewAt("6");
                 }
             EditorGUILayout.EndScrollView();
         }
@@ -218,6 +211,20 @@ namespace Project.Editor
                 if (GUILayout.Button("撃破演出を確認")) boss.Model.TakeDamage(boss.Model.MaxHp);
             }
             Repaint();
+        }
+
+        [MenuItem("Tools/Stage3/Preview Wind Introduction")]
+        static void PreviewWindIntroduction()
+        {
+            var window = GetWindow<Stage3WindSetupWindow>("Stage3 風ステージ作成");
+            window.StartWayPreviewAt("5.5");
+        }
+
+        void StartWayPreviewAt(string phaseId)
+        {
+            var phases = AssetDatabase.LoadAssetAtPath<BattleSequenceAsset>(Data + "Way/Stage3Way.asset").SequenceGroups[0].Phases;
+            int index = Enumerable.Range(0, phases.Count).First(i => phases[i].PhaseId == phaseId);
+            StartWayPreview(index);
         }
 
         void StartWayPreview(int phaseIndex)
@@ -353,7 +360,7 @@ namespace Project.Editor
             var movementSo = Edit(movement);
             var steps = movementSo.FindProperty("steps");
             steps.arraySize = 1;
-            steps.GetArrayElementAtIndex(0).managedReferenceValue = new VertexParabolaMovementConfig(new Vector2(-7.5f, sign * 3.8f), 8f);
+            steps.GetArrayElementAtIndex(0).managedReferenceValue = new VertexParabolaMovementConfig(new Vector2(-7.5f, sign * 3.8f), 7f);
             Apply(movementSo);
             var attack = Asset<AttackPreset>(Data + "Attack/" + name + ".asset", Data + "Attack/3_Phase4_ShowerDown.asset");
             var so = Edit(attack);
@@ -436,24 +443,25 @@ namespace Project.Editor
 
         static void ConfigurePhase7And8()
         {
+            if (HasMergedPhase7()) { RevisePhaseTwoAndWindSequence(); return; }
             var advance = WindFormationMovement("3_Wind_AdvanceHold", -8f, 4.5f, Vector3.zero);
             var back = WindFormationMovement("3_Wind_BackHold", -4.4f, 4.5f, Vector3.zero);
             var rise = WindFormationMovement("3_Wind_RiseAndExit", -6.3f, 1.7f, new Vector3(-1.8f, 1.3f));
             var dip = WindFormationMovement("3_Wind_DipAndExit", -5.7f, 1.7f, new Vector3(-2.2f, -0.8f));
             var slow = BossBullet("3_Wind_NormalSpeed4", new InfiniteMovementConfig(Vector3.left * 4f));
             var fast = slow;
-            var lowDown = BossBullet("3_Phase7_ParabolaDown", new VertexParabolaMovementConfig(new Vector2(-5f, -1.6f), 5.5f));
-            var lowUp = BossBullet("3_Phase7_ParabolaUp", new VertexParabolaMovementConfig(new Vector2(-6f, 2.6f), 5f));
-            var deep = BossBullet("3_Phase8_ParabolaDownDeep", new VertexParabolaMovementConfig(new Vector2(-5.5f, -3.4f), 6.5f));
-            var shallow = BossBullet("3_Phase8_ParabolaDownShallow", new VertexParabolaMovementConfig(new Vector2(-6f, -1.8f), 5.8f));
+            var lowDown = BossBullet("3_Phase7_ParabolaDown", new VertexParabolaMovementConfig(new Vector2(-5f, -1.6f), 7f));
+            var lowUp = BossBullet("3_Phase7_ParabolaUp", new VertexParabolaMovementConfig(new Vector2(-6f, 2.6f), 7f));
+            var deep = BossBullet("3_Phase7_ParabolaDownDeep", new VertexParabolaMovementConfig(new Vector2(-5.5f, -3.4f), 7f));
+            var shallow = BossBullet("3_Phase7_ParabolaDownShallow", new VertexParabolaMovementConfig(new Vector2(-6f, -1.8f), 7f));
             var fanLeft = WindFormationAttack("3_Phase7_FanLeft3", 3, 12f, new Vector2(-1f, -0.2f), slow, 1.1f);
             var fanUp = WindFormationAttack("3_Phase7_FanUpLeft3", 3, 18f, new Vector2(-1f, 0.25f), slow, 0.9f);
-            var fanDown3 = WindFormationAttack("3_Phase8_NWayDownLeft3", 3, 15f, new Vector2(-1f, -0.8f), fast, 0.9f);
-            var fanDown5 = WindFormationAttack("3_Phase8_NWayDownLeft3_Narrow", 3, 12f, new Vector2(-1f, -1f), fast, 1.2f);
+            var fanDown3 = WindFormationAttack("3_Phase7_NWayDownLeft3", 3, 15f, new Vector2(-1f, -0.8f), fast, 0.9f);
+            var fanDown5 = WindFormationAttack("3_Phase7_NWayDownLeft3_Narrow", 3, 12f, new Vector2(-1f, -1f), fast, 1.2f);
             var shotLowDown = WindFormationAttack("3_Phase7_ParabolaDown", 1, 0f, Vector2.left, lowDown, 0.6f, true);
             var shotLowUp = WindFormationAttack("3_Phase7_ParabolaUp", 1, 0f, Vector2.left, lowUp, 0.7f, true);
-            var shotDeep = WindFormationAttack("3_Phase8_ParabolaDownDeep", 1, 0f, Vector2.left, deep, 0.6f, true);
-            var shotShallow = WindFormationAttack("3_Phase8_ParabolaDownShallow", 1, 0f, Vector2.left, shallow, 0.7f, true);
+            var shotDeep = WindFormationAttack("3_Phase7_ParabolaDownDeep", 1, 0f, Vector2.left, deep, 0.6f, true);
+            var shotShallow = WindFormationAttack("3_Phase7_ParabolaDownShallow", 1, 0f, Vector2.left, shallow, 0.7f, true);
             var blue = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "3_Enemy_skyblue.prefab");
             var pink = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "3_Enemy_pink.prefab");
             var movements = new[] { advance, back, rise, dip };
@@ -517,6 +525,331 @@ namespace Project.Editor
             Debug.Log("[Stage3WindFormations] Saved Phase7: 20 enemies (16 lower), Phase8: 24 scattered enemies; both Up wind. New Attack/Movement/Bullet presets only; Phase1–6 and boss unchanged.");
         }
 
+        static bool HasMergedPhase7() =>
+            AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + "Way/3_Phase7.asset")?.TotalEnemySpawnCount == 27;
+
+        [MenuItem("Tools/Stage3/Organize Merged Phase Seven")]
+        static void OrganizeMergedPhaseSeven()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            if (!HasMergedPhase7()) throw new InvalidOperationException("Merge Phase7 and Phase8 first");
+            var sequence = AssetDatabase.LoadAssetAtPath<BattleSequenceAsset>(Data + "Way/Stage3Way.asset");
+            if (sequence.SequenceGroups.SelectMany(g => g.Phases).Any(p => p.PhaseId == "8"))
+                throw new InvalidOperationException("Phase8 is still in the active sequence");
+            foreach (string folder in new[] { "Attack", "Bullet" })
+                foreach (string suffix in new[] { "NWayDownLeft3", "NWayDownLeft3_Narrow", "ParabolaDownDeep", "ParabolaDownShallow" })
+                {
+                    string oldPath = Data + folder + "/3_Phase8_" + suffix + ".asset";
+                    if (AssetDatabase.LoadMainAssetAtPath(oldPath) == null) continue;
+                    string error = AssetDatabase.MoveAsset(oldPath, Data + folder + "/3_Phase7_" + suffix + ".asset");
+                    if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
+                }
+            const string archive = "Assets/Project/DeprecatedResources/Stage3BeforeMerge";
+            if (!AssetDatabase.IsValidFolder(archive))
+                AssetDatabase.CreateFolder("Assets/Project/DeprecatedResources", "Stage3BeforeMerge");
+            foreach (var item in new[] { ("Way/3_Phase8.asset", "Phase8_Obsolete.asset"),
+                         ("Attack/3_Phase8_WindParallel.asset", "Phase8_WindParallel_Obsolete.asset") })
+            {
+                if (AssetDatabase.LoadMainAssetAtPath(Data + item.Item1) == null) continue;
+                string error = AssetDatabase.MoveAsset(Data + item.Item1, archive + "/" + item.Item2);
+                if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
+            }
+            AssetDatabase.SaveAssets();
+            Selection.activeObject = sequence;
+            Debug.Log("[Stage3MergedPhase7] Active progression ends at Phase7. Renamed merged attack/bullet presets from Phase8 to Phase7 with GUIDs preserved; moved unused Phase8 wave and leaf attack to DeprecatedResources/Stage3BeforeMerge. No active Phase8 remains in DataStore/Stage3.");
+        }
+
+        [MenuItem("Tools/Stage3/Set Boss Parabola Vertices")]
+        static void SetBossParabolaVertices()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            foreach (var item in new[] { ("3_Boss_ParabolaUp", 2.6f), ("3_Boss_ParabolaDown", -2.6f) })
+            {
+                var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/" + item.Item1 + ".asset");
+                using var so = Edit(movement);
+                var step = so.FindProperty("steps").GetArrayElementAtIndex(0);
+                if (step.managedReferenceValue is not VertexParabolaMovementConfig)
+                    throw new InvalidOperationException("Expected boss parabola movement: " + item.Item1);
+                Vector2 vertex = P(step, "vertex").vector2Value;
+                vertex.y = item.Item2;
+                P(step, "vertex").vector2Value = vertex;
+                Apply(so);
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Stage3BossParabolaTune] Set normal/strong boss parabola base relative vertex Y +2.6/-2.6. Speed, X, vertex oscillation, wind and shot counts preserved.");
+        }
+
+        [MenuItem("Tools/Stage3/Set Way Parabola Seven Aimed Two")]
+        static void SetWayParabolaSevenAimedTwo()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            foreach (var pair in new[] { ("3_Phase2_AimedSpeed5", "3_AimedSpeed2") })
+            {
+                string oldPath = Data + "Bullet/" + pair.Item1 + ".asset";
+                string newPath = Data + "Bullet/" + pair.Item2 + ".asset";
+                if (AssetDatabase.LoadAssetAtPath<MovementPreset>(oldPath) == null) continue;
+                string error = AssetDatabase.MoveAsset(oldPath, newPath);
+                if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
+            }
+            string[] names = { "3_Phase1", "ParabolaUp", "ParabolaSuperDown", "ParabolaSuperUp",
+                "3_Wind_ShowerDown", "3_Wind_ShowerUp", "3_Phase7_ParabolaDown", "3_Phase7_ParabolaUp",
+                "3_Phase7_ParabolaDownDeep", "3_Phase7_ParabolaDownShallow", "3_AimedSpeed2" };
+            foreach (string name in names)
+            {
+                var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/" + name + ".asset");
+                if (movement == null) throw new InvalidOperationException("Missing way bullet preset: " + name);
+                using var so = Edit(movement);
+                var steps = so.FindProperty("steps");
+                if (steps.arraySize != 1) throw new InvalidOperationException("Expected one bullet movement step: " + name);
+                var step = steps.GetArrayElementAtIndex(0);
+                if (step.managedReferenceValue is VertexParabolaMovementConfig)
+                    P(step, "initialSpeed").floatValue = 7f;
+                else if (step.managedReferenceValue is InfiniteMovementConfig)
+                {
+                    Vector3 velocity = P(step, "velocity").vector3Value;
+                    if (velocity == Vector3.zero) throw new InvalidOperationException("Do not change wind-only bullet speed");
+                    P(step, "velocity").vector3Value = velocity.normalized * 2f;
+                }
+                else throw new InvalidOperationException("Unexpected bullet movement: " + name);
+                Apply(so);
+            }
+            // 中ボス後のPhase6/7の通常弾は初速4。Phase2の自機狙い2とは分ける。
+            using (var so = Edit(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Wind_Fan3.asset")))
+            {
+                var entry = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries").GetArrayElementAtIndex(0);
+                P(entry, "bulletMovementOverride").objectReferenceValue = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/3_Wind_NormalSpeed4.asset");
+                Apply(so);
+            }
+            foreach (string name in new[] { "3_MidBoss_blue", "3_MidBoss_red" })
+            {
+                string path = Prefabs + name + ".prefab";
+                var root = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    using var so = Edit(root.GetComponent<TwinParabolaMidBossController>());
+                    so.FindProperty("parabolaSpeed").floatValue = 7f;
+                    so.FindProperty("aimedShotSpeed").floatValue = 2f;
+                    Apply(so);
+                    PrefabUtility.SaveAsPrefabAsset(root, path);
+                }
+                finally { PrefabUtility.UnloadPrefabContents(root); }
+            }
+            AssetDatabase.SaveAssets();
+            foreach (string name in names)
+            {
+                using var so = new SerializedObject(AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/" + name + ".asset"));
+                var step = so.FindProperty("steps").GetArrayElementAtIndex(0);
+                float speed = step.managedReferenceValue is VertexParabolaMovementConfig
+                    ? P(step, "initialSpeed").floatValue : P(step, "velocity").vector3Value.magnitude;
+                float expected = step.managedReferenceValue is VertexParabolaMovementConfig ? 7f : 2f;
+                if (Mathf.Abs(speed - expected) > 0.0001f) throw new Exception("Incorrect way bullet speed: " + name);
+            }
+            foreach (string name in new[] { "3_MidBoss_blue", "3_MidBoss_red" })
+            {
+                using var so = new SerializedObject(AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + name + ".prefab").GetComponent<TwinParabolaMidBossController>());
+                if (so.FindProperty("parabolaSpeed").floatValue != 7f || so.FindProperty("aimedShotSpeed").floatValue != 2f)
+                    throw new Exception("Incorrect midboss bullet speed: " + name);
+            }
+            Debug.Log("[Stage3WaySpeeds] Saved and verified Phase1–7 including both midbosses: parabola initial speed 7, early aimed initial speed 2, Phase6/7 normal initial speed 4. Wind-only leaf settings and main boss unchanged.");
+        }
+
+        [MenuItem("Tools/Stage3/Revise Phase Two And Wind Sequence")]
+        static void RevisePhaseTwoAndWindSequence()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            if (Camera.main == null) throw new InvalidOperationException("Open Battle scene first");
+            ScreenBoundsCache.Initialize(Camera.main);
+            var aimedMovement = BossBullet("3_AimedSpeed2", new InfiniteMovementConfig(Vector3.left * 2f));
+            var aimed = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase2.asset");
+            using (var so = Edit(aimed))
+            {
+                var entry = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries").GetArrayElementAtIndex(0);
+                P(entry, "bulletMovementOverride").objectReferenceValue = aimedMovement;
+                Apply(so);
+            }
+            var lowerParabola = Asset<AttackPreset>(Data + "Attack/3_Phase2_LowerParabola.asset", Data + "Attack/3_Phase1.asset");
+            using (var so = Edit(lowerParabola))
+            {
+                var entry = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries").GetArrayElementAtIndex(0);
+                P(entry, "bulletMovementOverride").objectReferenceValue = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/ParabolaUp.asset");
+                Apply(so);
+            }
+            var blue = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "3_Enemy_skyblue.prefab");
+            var pink = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "3_Enemy_pink.prefab");
+            var phase2 = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + "Way/3_Phase2.asset");
+            using (var so = Edit(phase2))
+            {
+                var clips = P(so.FindProperty("enemySpawnTracks").GetArrayElementAtIndex(0), "clips");
+                if (clips.arraySize != 8 && clips.arraySize != 12) throw new Exception("Unexpected Phase2 formation; review before replacing it");
+                clips.arraySize = 12;
+                var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Movement/3_Phase1.asset");
+                for (int wave = 0; wave < 2; wave++)
+                    for (int slot = 0; slot < 2; slot++)
+                        SetRevisionSpawn(clips.GetArrayElementAtIndex(8 + wave * 2 + slot),
+                            (wave == 0 ? 2d : 8.5d) + slot * 0.5d,
+                            new Vector3(10f, slot == 0 ? -2.7f - wave * 0.2f : -3.5f, 0f),
+                            slot == 0 ? blue : pink, movement, slot == 0 ? lowerParabola : aimed);
+                Apply(so);
+            }
+
+            var breakBuilder = Asset<BattleTimelineBuilderAsset>(Data + "Way/3_Phase5_5.asset");
+            var phase7 = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + "Way/3_Phase7.asset");
+            var phase8 = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + "Way/3_Phase8.asset");
+            // 設定の再適用で統合済みデータを再び倍増させない。
+            if (phase7.TotalEnemySpawnCount != 27)
+            {
+                if (phase7.TotalEnemySpawnCount != 21 || phase8.TotalEnemySpawnCount != 25)
+                    throw new Exception("Unexpected Phase7/8 formations; review before merging them");
+                var sources = new List<(double time, Vector3 position, GameObject prefab, MovementPreset movement, AttackPreset attack)>();
+                using var source7 = new SerializedObject(phase7);
+                using var source8 = new SerializedObject(phase8);
+                var clips7 = P(source7.FindProperty("enemySpawnTracks").GetArrayElementAtIndex(0), "clips");
+                var clips8 = P(source8.FindProperty("enemySpawnTracks").GetArrayElementAtIndex(0), "clips");
+                void AddSource(SerializedProperty clip)
+                {
+                    sources.Add((Math.Round(sources.Count * 16.1d / 25d, 1), P(clip, "spawnPosition").vector3Value,
+                        (GameObject)P(clip, "prefab").objectReferenceValue, (MovementPreset)P(clip, "movementOverride").objectReferenceValue,
+                        (AttackPreset)P(clip, "attackOverride").objectReferenceValue));
+                }
+                int[][] accents = { new[] { 1 }, new[] { 2, 3 }, new[] { 7 }, new[] { 8, 9 } };
+                for (int wave = 0; wave < 4; wave++)
+                {
+                    for (int slot = 0; slot < 5; slot++) AddSource(clips7.GetArrayElementAtIndex(wave * 5 + slot));
+                    foreach (int index in accents[wave]) AddSource(clips8.GetArrayElementAtIndex(index));
+                }
+                using var target = Edit(phase7);
+                var clips = P(target.FindProperty("enemySpawnTracks").GetArrayElementAtIndex(0), "clips");
+                clips.arraySize = 27;
+                for (int i = 0; i < sources.Count; i++)
+                {
+                    var source = sources[i];
+                    SetRevisionSpawn(clips.GetArrayElementAtIndex(i), source.time, source.position, source.prefab, source.movement, source.attack);
+                }
+                SetRevisionSpawn(clips.GetArrayElementAtIndex(26), 0d, new Vector3(20f, 0f),
+                    AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "3_WindParallelEmitter.prefab"), null,
+                    AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset"));
+                Apply(target);
+            }
+            // 発射元の寿命15秒は維持し、最後のセットだけ遅れて出すために発射元を1.5秒遅らせる。
+            using (var so = Edit(phase7))
+            {
+                var clips = P(so.FindProperty("enemySpawnTracks").GetArrayElementAtIndex(0), "clips");
+                P(clips.GetArrayElementAtIndex(26), "time").doubleValue = 1.5d;
+                Apply(so);
+            }
+            var parallel = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset");
+            using (var so = Edit(parallel))
+            {
+                var entries = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries");
+                entries.arraySize = 12;
+                float[] times = { 1.5f, 5.8f, 10.1f, 14.4f }; // フェーズ内では3.0/7.3/11.6/15.9秒。
+                float[] centers = { -5.5f, 0f, 5.5f, -2f };
+                var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/3_Wind_ParallelWindOnly.asset");
+                for (int i = 0; i < entries.arraySize; i++)
+                {
+                    var entry = entries.GetArrayElementAtIndex(i);
+                    P(entry, "time").floatValue = times[i / 3];
+                    P(entry, "signal").managedReferenceValue = new NWaySignal(1, 0f);
+                    P(entry, "sourceIndexProvider").managedReferenceValue = new ConstantSourceIndex(0);
+                    P(entry, "rotationProvider").managedReferenceValue = new FixedRotationConfig();
+                    P(entry, "directionProvider").managedReferenceValue = new ScreenEdgeDirectionConfig(centers[i / 3] + (i % 3 - 1) * 2f, 0f, 2.4f);
+                    P(P(entry, "directionProvider"), "angularSpeed").floatValue = 0f;
+                    P(entry, "bulletMovementOverride").objectReferenceValue = movement;
+                }
+                Apply(so);
+            }
+            var sequence = AssetDatabase.LoadAssetAtPath<BattleSequenceAsset>(Data + "Way/Stage3Way.asset");
+            using (var so = Edit(sequence))
+            {
+                var phases = P(so.FindProperty("sequenceGroups").GetArrayElementAtIndex(0), "phases");
+                // 先頭1〜5を保持し、後半を5.5→6→7にする。Phase8のアセットは参照を外すだけ。
+                phases.arraySize = 8;
+                string[] ids = { "5.5", "6", "7" };
+                for (int i = 0; i < 3; i++)
+                {
+                    var phase = phases.GetArrayElementAtIndex(5 + i);
+                    P(phase, "phaseId").stringValue = ids[i];
+                    P(phase, "timelineBuilder").objectReferenceValue = i == 0 ? breakBuilder :
+                        AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + $"Way/3_Phase{ids[i]}.asset");
+                    P(phase, "timelineBuilderStrong").objectReferenceValue = null;
+                    P(phase, "exitConditionConfig").managedReferenceValue = i == 0
+                        ? (IExitConditionConfig)new TimeLimitExitConditionConfig(4f) : new AllEnemiesDefeatedExitConditionConfig();
+                    P(phase, "overrideWind").boolValue = true;
+                    var wind = P(phase, "wind");
+                    Wind(wind, WindDirection.Up);
+                    if (i == 0)
+                    {
+                        var intervals = P(wind, "intervals");
+                        intervals.InsertArrayElementAtIndex(0);
+                        P(intervals.GetArrayElementAtIndex(0), "direction").enumValueIndex = (int)WindDirection.None;
+                        P(intervals.GetArrayElementAtIndex(0), "seconds").floatValue = 1.5f;
+                        // 上風は次のPhase6まで継続。4秒で退出するため、このフェーズ内の有風時間は2.5秒。
+                        P(intervals.GetArrayElementAtIndex(1), "seconds").floatValue = 3600f;
+                    }
+                }
+                Apply(so);
+            }
+            AssetDatabase.SaveAssets();
+            ValidateRevisedWay(sequence, phase2, phase7, breakBuilder);
+            Selection.activeObject = sequence;
+            Debug.Log("[Stage3WayRevision] Saved Phase2: aimed speed 2, two lower parabola/aimed pairs (12 enemies total). Sequence 1,2,3,4,5,5.5,6,7. Phase5.5: no enemies, calm 1.5s then Up wind 2.5s. Merged Phase7: 26 enemies over 16.1s plus 4 leaf sets at 3/7.3/11.6/15.9s; old Phase8 removed from progression. Boss settings unchanged.");
+        }
+
+        static void SetRevisionSpawn(SerializedProperty clip, double time, Vector3 position, GameObject prefab, MovementPreset movement, AttackPreset attack)
+        {
+            P(clip, "time").doubleValue = time;
+            P(clip, "spawnPosition").vector3Value = position;
+            P(clip, "prefab").objectReferenceValue = prefab;
+            P(clip, "movementOverride").objectReferenceValue = movement;
+            P(clip, "attackOverride").objectReferenceValue = attack;
+            P(clip, "bulletMovementOverride").objectReferenceValue = null;
+        }
+
+        static void ValidateRevisedWay(BattleSequenceAsset sequence, BattleTimelineBuilderAsset phase2,
+            BattleTimelineBuilderAsset phase7, BattleTimelineBuilderAsset breakBuilder)
+        {
+            var phases = sequence.SequenceGroups[0].Phases;
+            if (string.Join(",", phases.Select(p => p.PhaseId)) != "1,2,3,4,5,5.5,6,7" ||
+                phase2.TotalEnemySpawnCount != 12 || phase7.TotalEnemySpawnCount != 27 || breakBuilder.TotalEnemySpawnCount != 0 ||
+                phases[4].ExitConditionConfig is not AllEnemiesDefeatedExitConditionConfig ||
+                phases[5].ExitConditionConfig is not TimeLimitExitConditionConfig ||
+                phases[6].WindOverride.intervals[0].direction != WindDirection.Up ||
+                phases[7].WindOverride.intervals[0].direction != WindDirection.Up)
+                throw new Exception("Revised stage sequence or enemy count is incorrect");
+            using (var so = new SerializedObject(sequence))
+            {
+                var rest = P(so.FindProperty("sequenceGroups").GetArrayElementAtIndex(0), "phases").GetArrayElementAtIndex(5);
+                if (Mathf.Abs(P(P(rest, "exitConditionConfig"), "timeLimitSeconds").floatValue - 4f) > 0.0001f)
+                    throw new Exception("Phase5.5 must last exactly 4 seconds");
+            }
+            try
+            {
+                BattleWind.Begin(phases[5].WindOverride);
+                if (BattleWind.Direction != WindDirection.None) throw new Exception("Phase5.5 must start calm");
+                BattleWind.Tick(1.49f);
+                if (BattleWind.Direction != WindDirection.None) throw new Exception("Wind started too early");
+                BattleWind.Tick(0.02f);
+                if (BattleWind.Direction != WindDirection.Up) throw new Exception("Wind did not start after 1.5s");
+                BattleWind.Tick(2.49f);
+                if (BattleWind.Direction != WindDirection.Up) throw new Exception("Wind must stay Up through the handoff");
+            }
+            finally { BattleWind.Reset(); }
+            var phase7Attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset");
+            ValidateWayWindParallel(phase7Attack, new[] { 1.5f, 5.8f, 10.1f, 14.4f }, new[] { -5.5f, 0f, 5.5f, -2f });
+            // 実際のTimeline生成でも、新しい出現Clipが欠けないことを確認する。
+            foreach (var builder in new[] { phase2, breakBuilder, phase7 })
+            {
+                var timeline = builder.BuildTimeline();
+                try
+                {
+                    int markers = timeline.GetOutputTracks().Sum(track => track.GetMarkers().Count());
+                    if (markers != builder.TotalEnemySpawnCount) throw new Exception("Spawn marker count mismatch: " + builder.name);
+                }
+                finally { DestroyImmediate(timeline); }
+            }
+            Debug.Log("[Stage3WayRevision] Verified progression, calm/Up wind boundaries and 4s break, enemy counts, runtime spawn markers and 12 wind-only leaf bullets.");
+        }
+
         [MenuItem("Tools/Stage3/Set Bottom Vertices And Spread X")]
         static void ConfigureBottomVerticesAndSpawnX()
         {
@@ -525,7 +858,7 @@ namespace Project.Editor
             ScreenBoundsCache.Initialize(camera);
             var bullets = new HashSet<MovementPreset>();
             float[] spawnX = { 9.4f, 11.2f, 10f, 12.4f, 10.6f, 11.8f };
-            for (int number = 6; number <= 8; number++)
+            for (int number = 6; number <= 7; number++)
             {
                 var builder = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + $"Way/3_Phase{number}.asset");
                 using var so = Edit(builder);
@@ -598,7 +931,7 @@ namespace Project.Editor
         static void SpreadWindEnemiesAndVerticesLeft()
         {
             foreach (var item in new[] { ("3_Wind_ShowerDown", -6f), ("3_Phase7_ParabolaDown", -5.5f),
-                         ("3_Phase8_ParabolaDownDeep", -6f) })
+                         ("3_Phase7_ParabolaDownDeep", -6f) })
             {
                 var asset = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/" + item.Item1 + ".asset");
                 using var so = Edit(asset);
@@ -627,7 +960,7 @@ namespace Project.Editor
         {
             foreach (var item in new[] { ("3_Wind_Fan5", "3_Wind_Fan3"),
                          ("3_Phase7_FanLeft5", "3_Phase7_FanLeft3"),
-                         ("3_Phase8_NWayDownLeft5", "3_Phase8_NWayDownLeft3_Narrow") })
+                         ("3_Phase8_NWayDownLeft5", "3_Phase7_NWayDownLeft3_Narrow") })
             {
                 string oldPath = Data + "Attack/" + item.Item1 + ".asset";
                 string newPath = Data + "Attack/" + item.Item2 + ".asset";
@@ -664,15 +997,28 @@ namespace Project.Editor
             Debug.Log("[Stage3ThreeWaySlowEntry] Saved 3 former five-way presets as three-way, preserving GUID references; left entry durations 1.4->2.8 / 1.5->3 seconds (half speed). Other movement, shot speed and firing counts unchanged.");
         }
 
-        [MenuItem("Tools/Stage3/Set Wind Three Way Speed Four")]
-        static void SetWindThreeWaySpeedFour()
+        [MenuItem("Tools/Stage3/Set Wind Three Way Speeds")]
+        static void SetWindThreeWaySpeeds()
         {
+            if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            string oldPath = Data + "Bullet/3_Wind_NormalSpeed2.asset";
+            string newPath = Data + "Bullet/3_Wind_NormalSpeed4.asset";
+            if (AssetDatabase.LoadAssetAtPath<MovementPreset>(oldPath) != null &&
+                AssetDatabase.LoadAssetAtPath<MovementPreset>(newPath) == null)
+            {
+                string error = AssetDatabase.MoveAsset(oldPath, newPath);
+                if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
+            }
             var bullet = BossBullet("3_Wind_NormalSpeed4", new InfiniteMovementConfig(Vector3.left * 4f));
             int entriesUpdated = 0;
             foreach (string name in new[] { "3_Wind_Fan3", "3_Phase7_FanLeft3", "3_Phase7_FanUpLeft3",
-                         "3_Phase8_NWayDownLeft3", "3_Phase8_NWayDownLeft3_Narrow" })
+                         "3_Phase7_NWayDownLeft3", "3_Phase7_NWayDownLeft3_Narrow" })
             {
                 var attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/" + name + ".asset");
+                // 統合後の改名整理が未実施でも、現在参照している元Phase8のプリセットを調整する。
+                if (attack == null && name.StartsWith("3_Phase7_NWay"))
+                    attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/" + name.Replace("3_Phase7_", "3_Phase8_") + ".asset");
+                if (attack == null) throw new InvalidOperationException("Missing three-way attack: " + name);
                 using var so = Edit(attack);
                 var phases = P(so.FindProperty("attackTimeline"), "phases");
                 for (int p = 0; p < phases.arraySize; p++)
@@ -691,14 +1037,14 @@ namespace Project.Editor
                 Apply(so);
             }
             AssetDatabase.SaveAssets();
-            Debug.Log($"[Stage3ThreeWaySpeed] Saved {entriesUpdated} three-way attacks with shared initial speed 4. Default bullet prefab, parabolas, wind and firing timing unchanged.");
+            Debug.Log($"[Stage3ThreeWaySpeed] Saved {entriesUpdated} three-way attacks: aimed and fixed initial speed 4 throughout Phase6/7. Phase2 aimed speed 2, midboss, directions, shot counts, parabola speed 7, leaf wind-only motion and main boss unchanged.");
         }
 
         [MenuItem("Tools/Stage3/Set Wind Three Way Two Volleys")]
         static void ReduceWindShotDensity()
         {
             var attacks = new HashSet<AttackPreset>();
-            for (int number = 6; number <= 8; number++)
+            for (int number = 6; number <= 7; number++)
             {
                 var builder = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + $"Way/3_Phase{number}.asset");
                 using var so = new SerializedObject(builder);
@@ -770,6 +1116,7 @@ namespace Project.Editor
         static void AddWayWindParallel()
         {
             if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
+            if (HasMergedPhase7()) { RevisePhaseTwoAndWindSequence(); return; }
             var camera = Camera.main;
             if (camera == null) throw new InvalidOperationException("Open Battle scene first");
             ScreenBoundsCache.Initialize(camera);
@@ -861,6 +1208,16 @@ namespace Project.Editor
             Debug.Log("[Stage3WayWindParallel] Saved Phase7: 3 sets / 9 purple bullets; Phase8: 4 sets / 12. Zero authored velocity, wind-only movement, spacing 2, edge-centered origin, Up wind. Invisible noncolliding emitter expires at 15s; existing enemies and boss unchanged.");
         }
 
+        static void ValidateCurrentPhase7WindParallel()
+        {
+            var attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset");
+            if (attack == null) return;
+            using var so = new SerializedObject(attack);
+            bool merged = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries").arraySize == 12;
+            ValidateWayWindParallel(attack, merged ? new[] { 1.5f, 5.8f, 10.1f, 14.4f } : new[] { 3f, 7f, 11f },
+                merged ? new[] { -5.5f, 0f, 5.5f, -2f } : new[] { -5.5f, 0f, 5.5f });
+        }
+
         static void ValidateWayWindParallel(AttackPreset preset, float[] times, float[] centers)
         {
             try
@@ -886,7 +1243,8 @@ namespace Project.Editor
                 });
                 try
                 {
-                    for (int i = 1; i <= 1400; i++) { clock = i * 0.01f; timeline.Update(0.01f); }
+                    int frames = Mathf.CeilToInt((times.Max() + 1f) * 100f);
+                    for (int i = 1; i <= frames; i++) { clock = i * 0.01f; timeline.Update(0.01f); }
                     if (count != times.Length * 3) throw new Exception("Wrong parallel bullet count: " + preset.name);
                 }
                 finally { timeline.Dispose(); }
@@ -949,9 +1307,9 @@ namespace Project.Editor
             }
             AssetDatabase.SaveAssets();
             ValidateWindParallel(attack);
-            ValidateWayWindParallel(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset"),
-                new[] { 3f, 7f, 11f }, new[] { -5.5f, 0f, 5.5f });
-            ValidateWayWindParallel(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase8_WindParallel.asset"),
+            ValidateCurrentPhase7WindParallel();
+            var oldPhase8 = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase8_WindParallel.asset");
+            if (oldPhase8 != null) ValidateWayWindParallel(oldPhase8,
                 new[] { 2.5f, 6f, 9.5f, 13f }, new[] { 5.5f, -2f, 2f, -5.5f });
             Debug.Log("[Stage3BossWindRestore] Restored boss-only parallel motion: immediate initial speed 1.5 along wind, edge inset -0.15 and sweep margin 1.4. Phase7/8 remain wind-only; shared leaf visuals and collider untouched.");
         }
@@ -988,7 +1346,7 @@ namespace Project.Editor
             ValidateWindParallel(AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Boss_WindParallel.asset"));
             var phase7 = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset");
             var phase8 = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase8_WindParallel.asset");
-            if (phase7 != null) ValidateWayWindParallel(phase7, new[] { 3f, 7f, 11f }, new[] { -5.5f, 0f, 5.5f });
+            if (phase7 != null) ValidateCurrentPhase7WindParallel();
             if (phase8 != null) ValidateWayWindParallel(phase8, new[] { 2.5f, 6f, 9.5f, 13f }, new[] { 5.5f, -2f, 2f, -5.5f });
             try
             {
@@ -1008,7 +1366,7 @@ namespace Project.Editor
         static void RoundPhaseSpawnTimes()
         {
             int changed = 0;
-            for (int number = 1; number <= 8; number++)
+            for (int number = 1; number <= 7; number++)
             {
                 var asset = AssetDatabase.LoadAssetAtPath<BattleTimelineBuilderAsset>(Data + $"Way/3_Phase{number}.asset");
                 if (asset == null) continue;
@@ -1046,6 +1404,7 @@ namespace Project.Editor
 
         static void UpdateWay()
         {
+            if (HasMergedPhase7()) { RevisePhaseTwoAndWindSequence(); return; }
             var asset = AssetDatabase.LoadAssetAtPath<BattleSequenceAsset>(Data + "Way/Stage3Way.asset");
             var so = Edit(asset);
             var phases = P(so.FindProperty("sequenceGroups").GetArrayElementAtIndex(0), "phases");
@@ -1089,7 +1448,7 @@ namespace Project.Editor
                 var boss = root.GetComponent<BossEntityPresenter>();
                 var bossSo = Edit(boss);
                 bossSo.FindProperty("maxHp").intValue = 1000;
-                bossSo.FindProperty("strongHpRatio").floatValue = 0.5f;
+                bossSo.FindProperty("strongHpRatio").floatValue = 0.3f;
                 bossSo.FindProperty("enemySpawnPrefabs").arraySize = 0;
                 var pools = root.GetComponentsInChildren<BulletPool>(true);
                 if (pools.Length < 2) throw new InvalidOperationException("Boss template needs two bullet pools");
