@@ -13,18 +13,22 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] float radius = 0f;
         [SerializeField, Tooltip("弾を生成してから移動を開始するまでの待機秒数。0で即座に移動開始")]
         float startDelay = 0f;
+        [SerializeField, Tooltip("全体の回転オフセット（度数法）。正の値で反時計回りに回転する")]
+        float rotationOffset = 0f;
 
-        public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle, radius = radius, startDelay = startDelay };
+        public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle, radius = radius, startDelay = startDelay, rotationOffset = rotationOffset };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
             var baseDirection = directionProvider.GetDirection();
             var directions = new List<Vector2>(wayCount);
-            float baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg;
+            // rotationOffset を基準角に加算し、全方向をまとめて回転させる
+            float baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg + rotationOffset;
 
             if (wayCount == 1)
             {
-                directions.Add(baseDirection);
+                float singleRad = baseAngle * Mathf.Deg2Rad;
+                directions.Add(new Vector2(Mathf.Cos(singleRad), Mathf.Sin(singleRad)));
             }
             else if (wayCount % 2 == 1)
             {
