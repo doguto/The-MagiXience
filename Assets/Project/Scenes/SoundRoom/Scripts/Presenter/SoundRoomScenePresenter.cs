@@ -109,6 +109,7 @@ namespace Project.Scenes.SoundRoom.Scripts.Presenter
 
             var model = bgmModels[index];
             soundManager.PlayBGMAsync(model.SceneType, model.BgmType).Forget();
+            soundRoomView.SetPlayingTrack(index);
             AutoAdvanceAsync(index, playbackCts.Token).Forget();
         }
 

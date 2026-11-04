@@ -19,6 +19,12 @@ namespace Project.Scenes.SoundRoom.Scripts.View
         [Tooltip("ステージ番号ごとのカード画像。Element0=黒カード, 1〜6=各ステージ, 7=EX")]
         [SerializeField] List<Sprite> cardSpritesByStage;
 
+        [Header("Playing Pointer")]
+        [Tooltip("再生中の曲のカードに表示するポインタ。カードの子に付け替えてスクロールに追従させる")]
+        [SerializeField] GameObject playingPointer;
+        [Tooltip("カード中心からのポインタの位置(カードのローカル座標)")]
+        [SerializeField] Vector2 playingPointerOffset;
+
         [Header("Description")]
         [SerializeField] TMP_Text descriptionTitleText;
         [SerializeField] TMP_Text descriptionText;
@@ -33,6 +39,8 @@ namespace Project.Scenes.SoundRoom.Scripts.View
         public void Init(int trackCount)
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
+            // 何も再生していない間はポインタを出さない
+            if (playingPointer != null) playingPointer.SetActive(false);
 
             // データより多いカードは非表示にし、表示するカードだけをスクロールの管理下に置く
             var visibleCount = Mathf.Min(trackCount, trackButtons.Count);
@@ -76,6 +84,17 @@ namespace Project.Scenes.SoundRoom.Scripts.View
             if (cardRenderer == null) return;
 
             cardRenderer.sprite = cardSpritesByStage[cardStageNumber];
+        }
+
+        // 再生中の曲のカードへポインタを移す
+        public void SetPlayingTrack(int index)
+        {
+            if (playingPointer == null || index < 0 || index >= trackButtons.Count) return;
+
+            var pointerTransform = playingPointer.transform;
+            pointerTransform.SetParent(trackButtons[index].transform, false);
+            pointerTransform.localPosition = new Vector3(playingPointerOffset.x, playingPointerOffset.y, pointerTransform.localPosition.z);
+            playingPointer.SetActive(true);
         }
 
         public void SetDescription(string title, string description)
