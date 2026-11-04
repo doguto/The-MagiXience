@@ -9,6 +9,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         readonly ReactiveProperty<bool> isSneaking = new(false);
         readonly ReactiveProperty<float> chargeTime = new(0f);
         readonly ReactiveProperty<bool> isInvincible = new(false);
+        readonly Subject<Unit> onDamaged = new();
 
         readonly CompositeDisposable invincibilityDisposables = new();
 
@@ -30,6 +31,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         public IObservable<bool> IsChargeCompleteChanged =>
             chargeTime.Select(t => t >= ChargeThreshold).DistinctUntilChanged();
         public IReadOnlyReactiveProperty<bool> IsInvincible => isInvincible;
+        // 実際にダメージを受けた瞬間に通知する（無敵中の被弾や0ダメージでは通知しない）。致死ダメージでも通知する
+        public IObservable<Unit> OnDamaged => onDamaged;
         // バトル中に一度でも被弾したか。ノーダメージクリア判定に使用し、Retryでもリセットしない
         public bool HasTakenDamage { get; private set; }
 
@@ -85,8 +88,12 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
         {
             if (isInvincible.Value) return;
 
+            if (!IsAlive) return;
+
             if (damage > 0) HasTakenDamage = true;
             TakeDamage(damage);
+
+            if (damage > 0) onDamaged.OnNext(Unit.Default);
 
             if (IsAlive)
             {
@@ -118,6 +125,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             isSneaking?.Dispose();
             chargeTime?.Dispose();
             isInvincible?.Dispose();
+            onDamaged?.Dispose();
             invincibilityDisposables?.Dispose();
         }
     }
