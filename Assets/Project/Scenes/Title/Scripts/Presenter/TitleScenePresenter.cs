@@ -38,6 +38,12 @@ namespace Project.Scenes.Title.Scripts.Presenter
                 soundManager.PlaySEAsync(SeType.Click).Forget();
                 await StartGame(x);
             }).AddTo(this);
+            titleMenuView.OnPressedSoundRoom.SubscribeBlocking(async _ =>
+            {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
+                titleModelRepository.Refresh();
+                await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.SoundRoom, gameObject.scene.name);
+            }).AddTo(this);
             titleMenuView.OnPressedOption.Subscribe(async _ =>
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();

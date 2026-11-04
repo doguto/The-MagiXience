@@ -25,16 +25,14 @@ namespace Project.Scenes.StageList.Scripts.View
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
 
-            var maxScrollIndex = 0;
+            // 未解放のカードはinteractable=falseになり、ScrollableButtonListのフォーカス移動先から外れる
             for (var i = 0; i < simpleButtons.Count; i++)
             {
                 var isOpened = i < isOpenedList.Count && isOpenedList[i];
-                if (isOpened) maxScrollIndex = i;
                 simpleButtons[i].Init(isOpened, i == 0 && isOpened);
                 simpleButtons[i].OnFocusedEvent.Subscribe(PublishOnButtonChanged).AddTo(this);
                 simpleButtons[i].OnPressed.Subscribe(PublishOnButtonPressed).AddTo(this);
             }
-            scrollableButtonList.SetMaxScrollIndex(maxScrollIndex);
 
             // 全ステージ解放後(EXに挑戦可能になってから)のみ、端で上下を押したら反対側の端へ回り込む
             var isAllOpened = simpleButtons.TrueForAll(b => b.interactable);

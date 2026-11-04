@@ -21,6 +21,13 @@ namespace Project.Scripts.Repository.ModelRepository
             seData = LoadSeData();
         }
 
+        // BgmDataの登録順で全曲のModelを返す（サウンドルームの曲一覧用）。
+        // AudioClipは読み込まないため、キャッシュには載せない
+        public IReadOnlyList<BgmModel> CreateAllBgmModels()
+        {
+            return bgmData.ConvertAll(x => new BgmModel(x));
+        }
+
         public BgmModel GetBgmModel(SceneType sceneType, BgmType bgmType = BgmType.Default)
         {
             var bgmModel = bgmModels.Find(x => x.BgmData.bgmType == bgmType && x.BgmData.sceneType == sceneType);
