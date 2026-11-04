@@ -32,6 +32,7 @@ namespace Project.Scenes.Global.Scripts.Presenter
 
         // 画面のアスペクト比は16:9に固定する。
         // ウィンドウサイズは補正せず、カメラのViewport Rectで16:9の描画領域を作り、余白は黒帯にする。
+        // ※ バトルの画面端を計算する ScreenBoundsCache も同じ値を前提にしているため、変更時は合わせて修正すること。
         const float TargetAspect = 16f / 9f;
 
         // 黒帯を塗りつぶす全画面のカメラ。Viewport Rectの補正対象から除外する。
