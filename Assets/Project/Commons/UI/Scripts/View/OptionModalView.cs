@@ -21,6 +21,8 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] Slider seSlider;
         [SerializeField] TMP_Text bgmValueText;
         [SerializeField] TMP_Text seValueText;
+        [SerializeField] VolumeGaugeView bgmGauge;
+        [SerializeField] VolumeGaugeView seGauge;
 
         const int CtrlStep = 10;
 
@@ -65,6 +67,7 @@ namespace Project.Commons.UI.Scripts.View
                 {
                     var value = Mathf.RoundToInt(v);
                     bgmValueText.text = value.ToString();
+                    bgmGauge.SetValue(value);
                     onBgmValueChanged.OnNext(value);
                 })
                 .AddTo(this);
@@ -74,6 +77,7 @@ namespace Project.Commons.UI.Scripts.View
                 {
                     var value = Mathf.RoundToInt(v);
                     seValueText.text = value.ToString();
+                    seGauge.SetValue(value);
                     onSeValueChanged.OnNext(value);
                 })
                 .AddTo(this);
@@ -113,12 +117,14 @@ namespace Project.Commons.UI.Scripts.View
         {
             bgmSlider.SetValueWithoutNotify(value);
             bgmValueText.text = value.ToString();
+            bgmGauge.SetValue(value);
         }
 
         public void SetSeValueWithoutNotify(int value)
         {
             seSlider.SetValueWithoutNotify(value);
             seValueText.text = value.ToString();
+            seGauge.SetValue(value);
         }
     }
 }
