@@ -34,8 +34,9 @@ namespace Project.Scenes.SoundRoom.Scripts.View
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
 
-            // データより多いカードは非表示にし、スクロールもそこまでに制限する
+            // データより多いカードは非表示にし、表示するカードだけをスクロールの管理下に置く
             var visibleCount = Mathf.Min(trackCount, trackButtons.Count);
+            var visibleButtons = new List<MovableButton>(visibleCount);
             for (var i = 0; i < trackButtons.Count; i++)
             {
                 var index = i;
@@ -46,8 +47,9 @@ namespace Project.Scenes.SoundRoom.Scripts.View
                 trackButtons[i].Init(isOpened: true, isFocused: i == 0);
                 trackButtons[i].OnFocusedEvent.Subscribe(_ => onTrackFocused.OnNext(index)).AddTo(this);
                 trackButtons[i].OnPressed.Subscribe(_ => onTrackPressed.OnNext(index)).AddTo(this);
+                visibleButtons.Add(trackButtons[i].GetComponent<MovableButton>());
             }
-            scrollableButtonList.SetMaxScrollIndex(Mathf.Max(visibleCount - 1, 0));
+            scrollableButtonList.SetButtons(visibleButtons);
             // ステージ選択と同様、端で上下を押したら反対側の端へ回り込む
             scrollableButtonList.SetLoop(true);
         }
