@@ -197,7 +197,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (gameOverModalForRetry != null)
             {
                 gameOverModalForRetry.OnRetryRequested
-                                     .Subscribe(_ => Retry())
+                                     .Subscribe(_ => Retry(isContinue: true))
                                      .AddTo(disposables);
                 gameOverModalForRetry.OnTitleRequested
                                      .Subscribe(_ => ReturnToTitle())
@@ -207,8 +207,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var pauseModalForRetry = globalScenePresenter?.PauseModalPresenter;
             if (pauseModalForRetry != null)
             {
+                // ポーズからのリトライはコンティニュー扱いにしない（体力増加なし）
                 pauseModalForRetry.OnRetryRequested
-                                  .Subscribe(_ => Retry())
+                                  .Subscribe(_ => Retry(isContinue: false))
                                   .AddTo(disposables);
                 pauseModalForRetry.OnTitleRequested
                                   .Subscribe(_ => ReturnToTitle())
@@ -216,7 +217,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void Retry()
+        // isContinue: ゲームオーバーからのリトライ(コンティニュー)ならtrue。
+        //             trueの場合のみコンティニュー回数を進め、最大HPを増加させる。
+        void Retry(bool isContinue)
         {
             phaseStateMachine.Stop();
             playerPresenter?.CancelCharge();
@@ -261,8 +264,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             pendingScenarioCallback = null;
 
             playerPresenter?.Retry();
-            // コンティニュー回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
-            continueCount++;
+            // コンティニュー時のみ回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
+            if (isContinue) continueCount++;
             ApplyPlayerMaxHp();
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
