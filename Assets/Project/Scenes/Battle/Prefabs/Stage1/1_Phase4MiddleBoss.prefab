@@ -62,7 +62,7 @@ GameObject:
   - component: {fileID: 8344881561022020887}
   - component: {fileID: 4966291700737868264}
   m_Layer: 7
-  m_Name: Phase4MiddleBoss
+  m_Name: 1_Phase4MiddleBoss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -96,8 +96,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf80193700a244280b080240bcb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 200
+  maxHp: 150
   contactDamage: 5
+  onlyChargeDamageable: 0
   lifetime: 0
   movementPreset: {fileID: 0}
   movementSteps:
@@ -119,57 +120,80 @@ MonoBehaviour:
         signal:
           rid: 8577112587349262556
         directionProvider:
-          rid: 8577112587349262557
+          rid: 2878396149664055650
         rotationProvider:
           rid: 1000
         sourceIndexProvider:
           rid: 1001
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 0.75
         signal:
           rid: 8577112587349262559
         directionProvider:
-          rid: 8577112587349262560
+          rid: 2878396149664055663
         rotationProvider:
           rid: 1002
         sourceIndexProvider:
           rid: 1003
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 1.5
         signal:
           rid: 8577112587349262561
         directionProvider:
-          rid: 8577112587349262562
+          rid: 2878396149664055668
         rotationProvider:
           rid: 1004
         sourceIndexProvider:
           rid: 1005
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 2.25
         signal:
           rid: 8577112587349262563
         directionProvider:
-          rid: 8577112587349262564
+          rid: 2878396149664055677
         rotationProvider:
           rid: 1006
         sourceIndexProvider:
           rid: 1007
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 3
         signal:
           rid: 8577112587349262565
         directionProvider:
-          rid: 8577112587349262566
+          rid: 2878396149664055686
         rotationProvider:
           rid: 1008
         sourceIndexProvider:
           rid: 1009
         seType: 0
+        bulletMovementOverride: {fileID: 0}
+      nextPhaseTrigger:
+        rid: -2
+  deathAttackEntry:
+    time: 0
+    signal:
+      rid: -2
+    directionProvider:
+      rid: 1010
+    rotationProvider:
+      rid: 1011
+    sourceIndexProvider:
+      rid: 1012
+    seType: 0
+    bulletMovementOverride: {fileID: 0}
+  damageFlashInterval: 0.05
+  damageFlashDuration: 0.2
   view: {fileID: 5041210401996759946}
   spriteRenderer: {fileID: 6449588308833420115}
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 1000
       type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data: 
@@ -205,6 +229,32 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
+    - rid: 1010
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1011
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1012
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 2878396149664055650
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 2878396149664055663
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 2878396149664055668
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 2878396149664055677
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 2878396149664055686
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
     - rid: 8577112587349262553
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -244,48 +294,38 @@ MonoBehaviour:
     - rid: 8577112587349262556
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 12
+        wayCount: 13
         spreadAngle: 30
-    - rid: 8577112587349262557
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
+        radius: 0
+        startDelay: 0
     - rid: 8577112587349262559
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 12
+        wayCount: 13
         spreadAngle: 30
-    - rid: 8577112587349262560
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 1}
+        radius: 0
+        startDelay: 0
     - rid: 8577112587349262561
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 12
+        wayCount: 13
         spreadAngle: 30
-    - rid: 8577112587349262562
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
+        radius: 0
+        startDelay: 0
     - rid: 8577112587349262563
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 12
+        wayCount: 13
         spreadAngle: 30
-    - rid: 8577112587349262564
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 1}
+        radius: 0
+        startDelay: 0
     - rid: 8577112587349262565
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 12
+        wayCount: 13
         spreadAngle: 30
-    - rid: 8577112587349262566
-      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        direction: {x: -1, y: 0}
+        radius: 0
+        startDelay: 0
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
