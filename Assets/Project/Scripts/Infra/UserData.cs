@@ -23,7 +23,7 @@ namespace Project.Scripts.Infra
 
         public UserData()
         {
-            clearedStageNumber = 0;
+            clearedStageNumber = 4;
             keyConfigData = new KeyConfigData();
             bgmVolume = DefaultVolume;
             seVolume = DefaultVolume;
