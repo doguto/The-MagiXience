@@ -25,6 +25,7 @@ MonoBehaviour:
       overrideWind: 0
       wind:
         enabled: 0
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals: []
         bulletAcceleration: 3
@@ -39,6 +40,7 @@ MonoBehaviour:
       overrideWind: 0
       wind:
         enabled: 0
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals: []
         bulletAcceleration: 3
@@ -53,6 +55,7 @@ MonoBehaviour:
       overrideWind: 0
       wind:
         enabled: 0
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals: []
         bulletAcceleration: 3
@@ -67,6 +70,7 @@ MonoBehaviour:
       overrideWind: 0
       wind:
         enabled: 0
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals: []
         bulletAcceleration: 3
@@ -81,20 +85,41 @@ MonoBehaviour:
       overrideWind: 0
       wind:
         enabled: 0
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals: []
         bulletAcceleration: 3
         bulletDrag: 0.6
       interludeBuilderOverride: {fileID: 0}
       interludeTimeLimitOverride: 0
+    - phaseId: 5.5
+      timelineBuilder: {fileID: 11400000, guid: 1b2fcbfcb410e33498c8ab25014d6374, type: 2}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: 1906880891417002302
+      overrideWind: 1
+      wind:
+        enabled: 1
+        startSe: 12
+        playerSpeedRatio: 0.2
+        intervals:
+        - direction: 0
+          seconds: 1.5
+        - direction: 1
+          seconds: 3600
+        bulletAcceleration: 2
+        bulletDrag: 0.25
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
     - phaseId: 6
       timelineBuilder: {fileID: 11400000, guid: 50e861567ad3d164da9b66e45a4e43fe, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 1906880873211363414
+        rid: 1906880891417002303
       overrideWind: 1
       wind:
         enabled: 1
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals:
         - direction: 1
@@ -107,26 +132,11 @@ MonoBehaviour:
       timelineBuilder: {fileID: 11400000, guid: 99b397807908e1e438efbb65527afbc8, type: 2}
       timelineBuilderStrong: {fileID: 0}
       exitConditionConfig:
-        rid: 1906880873211363415
+        rid: 1906880891417002304
       overrideWind: 1
       wind:
         enabled: 1
-        playerSpeedRatio: 0.2
-        intervals:
-        - direction: 1
-          seconds: 3600
-        bulletAcceleration: 2
-        bulletDrag: 0.25
-      interludeBuilderOverride: {fileID: 0}
-      interludeTimeLimitOverride: 0
-    - phaseId: 8
-      timelineBuilder: {fileID: 11400000, guid: 2464c822042667d429e79a925b5ecc48, type: 2}
-      timelineBuilderStrong: {fileID: 0}
-      exitConditionConfig:
-        rid: 1906880873211363416
-      overrideWind: 1
-      wind:
-        enabled: 1
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals:
         - direction: 1
@@ -145,6 +155,7 @@ MonoBehaviour:
       overrideWind: 0
       wind:
         enabled: 0
+        startSe: 0
         playerSpeedRatio: 0.2
         intervals: []
         bulletAcceleration: 3
@@ -154,6 +165,7 @@ MonoBehaviour:
     endBossHpPercent: 0
   wind:
     enabled: 0
+    startSe: 0
     playerSpeedRatio: 0.2
     intervals: []
     bulletAcceleration: 3
@@ -164,13 +176,14 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 1906880873211363414
+    - rid: 1906880891417002302
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 4
+    - rid: 1906880891417002303
       type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data: 
-    - rid: 1906880873211363415
-      type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data: 
-    - rid: 1906880873211363416
+    - rid: 1906880891417002304
       type: {class: AllEnemiesDefeatedExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data: 
     - rid: 5417143486211424451

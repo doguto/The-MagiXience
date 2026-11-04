@@ -18,10 +18,19 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField, Tooltip("この攻撃の弾のMovement Stepsを置き換える。敵の出現Clipの指定より優先。Noneなら出現Clip、次に弾Prefabの設定を使う。")]
         public MovementPreset bulletMovementOverride;
 
-        public AttackEvent CreateEvent(MovementPreset inheritedBulletMovement = null)
+        public AttackEvent CreateEvent(MovementPreset inheritedBulletMovement = null, float attackTime = 0f)
         {
+            if (directionProvider is IAttackTimeDirectionProvider timed) timed.SetAttackTime(attackTime);
             var ev = signal.CreateEvent(directionProvider, rotationProvider, sourceIndexProvider?.Get() ?? 0, seType);
-            return ev.WithBulletMovementOverride(bulletMovementOverride != null ? bulletMovementOverride : inheritedBulletMovement);
+            var preset = bulletMovementOverride != null ? bulletMovementOverride : inheritedBulletMovement;
+            ev = ev.WithBulletMovementOverride(preset);
+            // Signal自身が指定した軌道は従来通り最優先にする。
+            if (ev.Type == AttackEventType.Bullet && ev.BulletMovement == null && preset != null)
+            {
+                var movement = preset.SampleForAttackTime(attackTime);
+                if (movement != null) ev = ev.WithBulletMovement(movement);
+            }
+            return ev;
         }
 
         public AttackTimelineEntry DeepCopy()

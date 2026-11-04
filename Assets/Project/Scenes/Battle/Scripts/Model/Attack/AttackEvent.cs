@@ -113,6 +113,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public AttackEvent WithBulletMovementOverride(MovementPreset preset)
             => new(Type, Directions, SourceIndex, SpawnOffsets, SeType, Rotations, MovementOverride, SpawnSpace, Range, Duration, Width, StartDelay, StartDelays, SpawnDelays, MovementStep, BulletMovement, Enabled, SpawnAlongMovementPath, preset);
 
+        public AttackEvent WithBulletMovement(IMovementStep movement)
+            => new(Type, Directions, SourceIndex, SpawnOffsets, SeType, Rotations, MovementOverride, SpawnSpace, Range, Duration, Width, StartDelay, StartDelays, SpawnDelays, MovementStep, movement, Enabled, SpawnAlongMovementPath, BulletMovementOverride);
+
         public static AttackEvent Single(Vector2 direction, Quaternion rotation, int sourceIndex = 0, SeType seType = SeType.None) => new(AttackEventType.Bullet, new[] { direction }, sourceIndex, seType: seType, rotations: new[] { Normalize(rotation) });
 
         public static AttackEvent Spawn(Vector2 direction, Quaternion rotation, int sourceIndex, Vector2 spawnOffset, SeType seType = SeType.None, MovementPreset movementOverride = null, float width = 0f) => new(AttackEventType.EnemySpawn, new[] { direction }, sourceIndex, new[] { spawnOffset }, seType, new[] { Normalize(rotation) }, movementOverride, width: width);

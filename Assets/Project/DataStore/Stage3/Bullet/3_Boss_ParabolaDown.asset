@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64b9647a954bcc2449a82e872e90b0d2, type: 3}
+  m_Name: 3_Boss_ParabolaDown
+  m_EditorClassIdentifier: 
+  steps:
+  - rid: 1906880873211363423
+  references:
+    version: 2
+    RefIds:
+    - rid: 1906880873211363423
+      type: {class: VertexParabolaMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        orientation: 0
+        vertex: {x: -5.5, y: -2.6}
+        initialSpeed: 8
+        isRelative: 1
+        oscillateVertex: 1
+        vertexAmplitude: {x: 2.5, y: -1.2}
+        vertexAngularSpeed: {x: 1.5, y: 0.8}
+        attackTimeOffset: 0.9

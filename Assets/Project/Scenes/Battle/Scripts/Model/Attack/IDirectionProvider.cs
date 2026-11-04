@@ -10,4 +10,14 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         Vector2 GetDirection();
         IDirectionProvider Clone();
     }
+
+    public interface IAttackTimeDirectionProvider
+    {
+        void SetAttackTime(float attackTime);
+    }
+
+    public interface IAttackOriginProvider
+    {
+        Vector2 GetOrigin();
+    }
 }

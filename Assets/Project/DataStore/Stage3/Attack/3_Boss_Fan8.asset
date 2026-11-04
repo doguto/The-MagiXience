@@ -10,26 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
-  m_Name: 3_Wind_Fan5
+  m_Name: 3_Boss_Fan8
   m_EditorClassIdentifier: 
   attackTimeline:
     phases:
-    - loop: 1
-      loopStart: 1.5
-      loopEnd: 5.4
-      cycleDuration: 0.8
+    - loop: 0
+      loopStart: 0
+      loopEnd: 5
+      cycleDuration: 2
       entries:
       - time: 0
         signal:
-          rid: 3310600516686315667
+          rid: 1906880873211363438
         directionProvider:
-          rid: 1906880873211363409
+          rid: 1906880873211363439
         rotationProvider:
-          rid: 3310600516686315672
+          rid: 1906880873211363440
         sourceIndexProvider:
-          rid: 5417143641239191639
+          rid: 1906880873211363441
         seType: 0
-        bulletMovementOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 11400000, guid: ca9a80a60ac94924d88a1bf69cc5b283, type: 2}
       nextPhaseTrigger:
         rid: -2
   references:
@@ -37,21 +37,21 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 1906880873211363409
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 3310600516686315667
+    - rid: 1906880873211363438
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 5
-        spreadAngle: 20
-        radius: 0.5
+        wayCount: 9
+        spreadAngle: 45
+        radius: 0
         startDelay: 0
-    - rid: 3310600516686315672
+    - rid: 1906880873211363439
+      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1906880873211363440
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
-    - rid: 5417143641239191639
+    - rid: 1906880873211363441
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
