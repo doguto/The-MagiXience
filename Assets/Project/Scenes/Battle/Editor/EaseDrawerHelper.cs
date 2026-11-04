@@ -9,10 +9,16 @@ using UnityEngine;
 namespace Project.Editor
 {
     /// <summary>
-    /// Ease ドロップダウン + CustomCurve の描画を共有するヘルパー。
+    /// Ease ドロップダウン、CustomCurve、読み取り専用グラフの描画を共有するヘルパー。
     /// </summary>
     internal static class EaseDrawerHelper
     {
+        internal const float PreviewHeight = 130f;
+        internal static float PreviewLayoutHeight => PreviewHeight + EditorGUIUtility.standardVerticalSpacing;
+
+        const int PreviewSampleCount = 128;
+        static readonly Vector3[] PreviewPoints = new Vector3[PreviewSampleCount + 1];
+
         static string[] _displayNames;
         static int[] _easeValues;
 
@@ -93,9 +99,13 @@ namespace Project.Editor
 
             var easeValue = property.FindPropertyRelative("easeValue");
             int currentIndex = Array.IndexOf(_easeValues, easeValue.intValue);
-            if (currentIndex < 0) currentIndex = 0;
+            bool wasMixed = EditorGUI.showMixedValue;
+            EditorGUI.showMixedValue = easeValue.hasMultipleDifferentValues;
+            EditorGUI.BeginChangeCheck();
             int newIndex = EditorGUI.Popup(lineRect, "Ease", currentIndex, _displayNames);
-            easeValue.intValue = _easeValues[newIndex];
+            if (EditorGUI.EndChangeCheck())
+                easeValue.intValue = _easeValues[newIndex];
+            EditorGUI.showMixedValue = wasMixed;
             lineRect = NextLine(lineRect);
 
             if (easeValue.intValue == TweenMovementConfig.CustomCurveValue)
@@ -119,7 +129,106 @@ namespace Project.Editor
                 lineRect = NextLine(lineRect);
             }
 
+            DrawEasePreview(new Rect(lineRect.x, lineRect.y, lineRect.width, PreviewHeight), property);
+            lineRect.y += PreviewLayoutHeight;
             return lineRect;
+        }
+
+        static void DrawEasePreview(Rect rect, SerializedProperty property)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+
+            rect = EditorGUI.IndentedRect(rect);
+            var easeValue = property.FindPropertyRelative("easeValue");
+            bool mixed = easeValue.hasMultipleDifferentValues;
+            AnimationCurve curve = null;
+            if (easeValue.intValue == TweenMovementConfig.CustomCurveValue)
+            {
+                var presetProperty = property.FindPropertyRelative("curvePreset");
+                mixed |= presetProperty.hasMultipleDifferentValues;
+                if (presetProperty.objectReferenceValue is EaseCurvePreset preset)
+                {
+                    curve = preset.Curve;
+                }
+                else
+                {
+                    var curveProperty = property.FindPropertyRelative("customCurve");
+                    mixed |= curveProperty.hasMultipleDifferentValues;
+                    curve = curveProperty.animationCurveValue;
+                }
+            }
+
+            if (mixed)
+            {
+                EditorGUI.HelpBox(rect, "異なるEaseが選択されています。1つ選択するとグラフを表示します。", MessageType.Info);
+                return;
+            }
+
+            float min = 0f;
+            float max = 1f;
+            for (int i = 0; i <= PreviewSampleCount; i++)
+            {
+                float t = i / (float)PreviewSampleCount;
+                // 実際のTweenと同じDOTweenの評価を使い、0～1の外側も保持する。
+                float value = curve != null
+                    ? DOVirtual.EasedValue(0f, 1f, t, curve)
+                    : DOVirtual.EasedValue(0f, 1f, t, (Ease)easeValue.intValue,
+                        DOTween.defaultEaseOvershootOrAmplitude, DOTween.defaultEasePeriod);
+                if (float.IsNaN(value) || float.IsInfinity(value))
+                {
+                    EditorGUI.HelpBox(rect, "カーブに表示できない値が含まれています。", MessageType.Warning);
+                    return;
+                }
+                PreviewPoints[i] = new Vector3(t, value, 0f);
+                min = Mathf.Min(min, value);
+                max = Mathf.Max(max, value);
+            }
+
+            float padding = (max - min) * 0.08f;
+            min -= padding;
+            max += padding;
+
+            float labelHeight = EditorGUIUtility.singleLineHeight;
+            var plot = new Rect(rect.x + 36f, rect.y + labelHeight,
+                Mathf.Max(1f, rect.width - 42f), rect.height - labelHeight * 2f);
+            GUI.Label(new Rect(rect.x, rect.y, rect.width, labelHeight), "進行度（%）", EditorStyles.miniLabel);
+            EditorGUI.DrawRect(plot, EditorGUIUtility.isProSkin
+                ? new Color(0.12f, 0.12f, 0.12f) : new Color(0.9f, 0.9f, 0.9f));
+
+            var gridColor = EditorGUIUtility.isProSkin
+                ? new Color(1f, 1f, 1f, 0.18f) : new Color(0f, 0f, 0f, 0.18f);
+            for (int i = 0; i <= 2; i++)
+            {
+                float fraction = i * 0.5f;
+                float y = plot.yMax - Mathf.InverseLerp(min, max, fraction) * plot.height;
+                EditorGUI.DrawRect(new Rect(plot.x, y, plot.width, 1f), gridColor);
+                EditorGUI.DrawRect(new Rect(plot.x + fraction * (plot.width - 1f), plot.y, 1f, plot.height), gridColor);
+                GUI.Label(new Rect(rect.x, y - labelHeight * 0.5f, 34f, labelHeight),
+                    (fraction * 100f).ToString("0"), EditorStyles.miniLabel);
+            }
+
+            for (int i = 0; i <= PreviewSampleCount; i++)
+            {
+                var sample = PreviewPoints[i];
+                PreviewPoints[i] = new Vector3(plot.x + sample.x * plot.width,
+                    plot.yMax - Mathf.InverseLerp(min, max, sample.y) * plot.height, 0f);
+            }
+
+            var previousColor = Handles.color;
+            try
+            {
+                Handles.color = EditorGUIUtility.isProSkin
+                    ? new Color(0.3f, 0.85f, 1f) : new Color(0f, 0.4f, 0.7f);
+                Handles.DrawAAPolyLine(2f, PreviewPoints);
+            }
+            finally
+            {
+                Handles.color = previousColor;
+            }
+
+            GUI.Label(new Rect(plot.x, plot.yMax, 30f, labelHeight), "0", EditorStyles.miniLabel);
+            GUI.Label(new Rect(plot.xMax - 24f, plot.yMax, 24f, labelHeight), "100", EditorStyles.miniLabel);
+            GUI.Label(new Rect(plot.center.x - 28f, plot.yMax, 64f, labelHeight), "時間（%）", EditorStyles.miniLabel);
         }
 
         internal static Rect NextLine(Rect rect)

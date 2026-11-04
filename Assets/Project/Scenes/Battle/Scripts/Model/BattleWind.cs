@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Model
 {
-    public enum WindDirection { None, Up, Down, Left }
+    public enum WindDirection { None, Up, Down, Left, Right }
 
     [Serializable]
     public class WindInterval
@@ -20,6 +20,10 @@ namespace Project.Scenes.Battle.Scripts.Model
         public bool enabled;
         [Range(0f, 1f)] public float playerSpeedRatio = 0.2f;
         public List<WindInterval> intervals = new();
+        [Min(0f), Tooltip("敵弾に与える風の加速度（ワールド単位/秒²）")]
+        public float bulletAcceleration = 3f;
+        [Min(0f), Tooltip("敵弾の速度に比例する抵抗係数（1/秒）。直進弾の終端速度は加速度÷この値。0なら抵抗なし")]
+        public float bulletDrag = 0.6f;
     }
 
     // One active battle sequence owns this state. Bullets take a snapshot at launch.
@@ -36,6 +40,8 @@ namespace Project.Scenes.Battle.Scripts.Model
         public static WindDirection Direction => Enabled ? ProjectileDirection : WindDirection.None;
         public static Vector2 Vector => ToVector(Direction);
         public static float PlayerSpeedRatio => Enabled ? Mathf.Clamp01(settings.playerSpeedRatio) : 0f;
+        public static float BulletAcceleration => Enabled ? Mathf.Max(0f, settings.bulletAcceleration) : 0f;
+        public static float BulletDrag => Enabled ? Mathf.Max(0f, settings.bulletDrag) : 0f;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void Reset() { settings = null; index = 0; remaining = 0f; }
@@ -63,10 +69,37 @@ namespace Project.Scenes.Battle.Scripts.Model
             WindDirection.Up => Vector2.up,
             WindDirection.Down => Vector2.down,
             WindDirection.Left => Vector2.left,
+            WindDirection.Right => Vector2.right,
             _ => Vector2.zero
         };
 
         public static Vector2 PlayerVelocity(Vector2 input, float currentSpeed)
             => (input + Vector * PlayerSpeedRatio) * currentSpeed;
+
+        // Integrate the correction to an existing trajectory, without changing its movement preset.
+        // The analytic solution is stable even when drag * deltaTime is large.
+        public static void IntegrateBullet(Vector2 authoredVelocity, float deltaTime,
+            ref Vector2 velocityCorrection, ref Vector2 positionCorrection)
+        {
+            if (deltaTime <= 0f) return;
+            if (Direction == WindDirection.None)
+            {
+                velocityCorrection = Vector2.zero;
+                return;
+            }
+            var acceleration = Vector * BulletAcceleration;
+            float drag = BulletDrag;
+            if (drag < 0.00001f)
+            {
+                positionCorrection += velocityCorrection * deltaTime + acceleration * (0.5f * deltaTime * deltaTime);
+                velocityCorrection += acceleration * deltaTime;
+                return;
+            }
+            var terminalCorrection = acceleration / drag - authoredVelocity;
+            float decay = Mathf.Exp(-drag * deltaTime);
+            positionCorrection += terminalCorrection * deltaTime +
+                (velocityCorrection - terminalCorrection) * ((1f - decay) / drag);
+            velocityCorrection = terminalCorrection + (velocityCorrection - terminalCorrection) * decay;
+        }
     }
 }

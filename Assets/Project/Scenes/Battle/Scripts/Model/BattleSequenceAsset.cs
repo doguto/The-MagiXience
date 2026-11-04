@@ -60,6 +60,10 @@ namespace Project.Scenes.Battle.Scripts.Model
         [SerializeField] BattleTimelineBuilderAsset timelineBuilderStrong;
         [SerializeReference, SubclassSelector]
         IExitConditionConfig exitConditionConfig = new TimeLimitExitConditionConfig();
+        [Header("Phase Wind")]
+        [SerializeField, Tooltip("このフェーズだけ風を上書きする。開始時に先頭の風向きから再生し、次のフェーズでは道中・ボス全体の設定に戻す。")]
+        bool overrideWind;
+        [SerializeField] BattleWindSettings wind = new();
         [Tooltip("randomPickグループで、このフェーズの直後に挟むinterludeのTimelineBuilderを差し替える。未設定ならグループ共通のものを使う")]
         [SerializeField] BattleTimelineBuilderAsset interludeBuilderOverride;
         [Tooltip("interludeBuilderOverride 使用時の終了時間(秒)。0ならグループ共通のinterludeの終了条件を使う")]
@@ -69,6 +73,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         public BattleTimelineBuilderAsset TimelineBuilder => timelineBuilder;
         public BattleTimelineBuilderAsset TimelineBuilderStrong => timelineBuilderStrong;
         public IExitConditionConfig ExitConditionConfig => exitConditionConfig;
+        public BattleWindSettings WindOverride => overrideWind ? wind : null;
         public BattleTimelineBuilderAsset InterludeBuilderOverride => interludeBuilderOverride;
         public float InterludeTimeLimitOverride => interludeTimeLimitOverride;
 

@@ -22,6 +22,17 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
         [SerializeField, Min(0.01f), Tooltip("発射時の速さ（ワールド単位/秒）。軌道を保ったまま速さを変更できます。飛行中は等速ではありません。")]
         float initialSpeed = 5f;
 
+        public VertexParabolaMovementConfig() { }
+
+        /// <summary>発射ごとに頂点を決める攻撃用。共有プリセットは変更しない。</summary>
+        public VertexParabolaMovementConfig(Vector2 vertexOffset, float speed,
+            ParabolaOrientation orientation = ParabolaOrientation.Vertical)
+        {
+            vertex = vertexOffset;
+            initialSpeed = speed;
+            this.orientation = orientation;
+        }
+
         public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)
         {
             Vector2 start = target.position;
