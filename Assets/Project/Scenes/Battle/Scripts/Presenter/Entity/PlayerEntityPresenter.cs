@@ -98,6 +98,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.Reset();
             view.ResetDamageFlash();
+            view.ResetDamageOverlay();
             view.ResetChargeFlash();
             view.EnterRun();
             view.UpdatePosition(initialPosition);
@@ -130,6 +131,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.CurrentHp
                  .Subscribe(hp => view.SetHpRatio((float)hp / model.MaxHp))
+                 .AddTo(disposables);
+
+            model.OnDamaged
+                 .Subscribe(_ => view.PlayDamageOverlay())
                  .AddTo(disposables);
 
             model.IsInvincible

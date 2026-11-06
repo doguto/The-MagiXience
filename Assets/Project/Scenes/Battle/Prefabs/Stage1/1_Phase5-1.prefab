@@ -100,7 +100,7 @@ MonoBehaviour:
   contactDamage: 5
   onlyChargeDamageable: 0
   lifetime: 0
-  movementPreset: {fileID: 11400000, guid: 3a5838bae51477c4a833ec24fc6f9e4e, type: 2}
+  movementPreset: {fileID: 11400000, guid: eaf6ef9099786e8429fc6f1852de0642, type: 2}
   movementSteps:
   - rid: 8577112580335075430
   - rid: 8577112580335075461
@@ -121,22 +121,13 @@ MonoBehaviour:
         signal:
           rid: 8577112587349262617
         directionProvider:
-          rid: 8577112587349262582
+          rid: 2878396149664055636
         rotationProvider:
           rid: 1000
         sourceIndexProvider:
           rid: 1001
         seType: 0
-      - time: 3
-        signal:
-          rid: 8577112587349262618
-        directionProvider:
-          rid: 8577112587349262592
-        rotationProvider:
-          rid: 1002
-        sourceIndexProvider:
-          rid: 1003
-        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: 9ce875ae92ba0994cad39705ccf83ec3, type: 2}
       nextPhaseTrigger:
         rid: -2
   deathAttackEntry:
@@ -150,6 +141,7 @@ MonoBehaviour:
     sourceIndexProvider:
       rid: 1006
     seType: 0
+    bulletMovementOverride: {fileID: 0}
   damageFlashInterval: 0.05
   damageFlashDuration: 0.2
   view: {fileID: 5041210401996759946}
@@ -166,13 +158,6 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 1002
-      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 1003
-      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        index: 0
     - rid: 1004
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -184,6 +169,10 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
+    - rid: 2878396149664055636
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
     - rid: 8577112580335075430
       type: {class: PathMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -258,24 +247,13 @@ MonoBehaviour:
           m_RotationOrder: 4
         curvePreset: {fileID: 0}
         isRelative: 0
-    - rid: 8577112587349262582
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
-    - rid: 8577112587349262592
-      type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
     - rid: 8577112587349262617
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 5
+        wayCount: 7
         spreadAngle: 22.5
-        radius: 0
-    - rid: 8577112587349262618
-      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data:
-        wayCount: 5
-        spreadAngle: 22.5
-        radius: 0
+        radius: 0.5
+        startDelay: 0
 --- !u!114 &5041210401996759946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,7 +312,7 @@ SpriteRenderer:
   m_SortingLayerID: 254900173
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: -6886211784984959920, guid: b7b0dc7bcb8544247b12309ab0d9e33a, type: 3}
+  m_Sprite: {fileID: -2925090225333556751, guid: ec726f8213d71e845a381307a8e7e20a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

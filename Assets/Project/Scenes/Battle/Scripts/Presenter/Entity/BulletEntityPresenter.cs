@@ -33,6 +33,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Awake()
         {
+            // プール再利用時に上書きされる前の、Prefab本来の回転を保持しておく
+            baseRotation = transform.rotation;
+
             // Rigidbody2Dを持たないColliderは静的コライダー扱いとなり、Transformで動かすたびに
             // ブロードフェーズへの再登録が発生して重い。移動する弾はKinematicとして扱わせる。
             if (!TryGetComponent<Rigidbody2D>(out _))
@@ -61,6 +64,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Vector3 previousAuthoredPosition;
         Vector2 windVelocityCorrection;
         Vector2 windPositionCorrection;
+        Quaternion baseRotation = Quaternion.identity;
         readonly IMovementStep[] movementOverrideBuffer = new IMovementStep[1];
         readonly CompositeDisposable disposables = new();
 
@@ -73,7 +77,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null, bool affectedByWind = true)
         {
             pool = objectPool;
-            var resolvedRotation = rotation == default ? Quaternion.identity : rotation;
+            // 渡された回転はPrefab本来の回転に対するオフセットとして加算する
+            var offsetRotation = rotation == default ? Quaternion.identity : rotation;
+            var resolvedRotation = offsetRotation * baseRotation;
             transform.SetPositionAndRotation(position, resolvedRotation);
 
             travelOrigin = position;

@@ -14,6 +14,7 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] Vector2 pointerOffset = new(-1f, 0f);
 
         Transform myTransform;
+        Canvas rootCanvas;
 
         void Awake()
         {
@@ -44,13 +45,26 @@ namespace Project.Commons.UI.Scripts.View
 
         void OnButtonFocused()
         {
+            // pointerOffsetはCanvas座標系での値
+            var offset = GetRootCanvasTransform().TransformVector(pointerOffset);
             var pos = myTransform.position;
             pointer.transform.position = new Vector3(
-                pos.x + pointerOffset.x,
-                pos.y + pointerOffset.y,
+                pos.x + offset.x,
+                pos.y + offset.y,
                 pos.z
             );
             pointer.SetActive(true);
+        }
+
+        Transform GetRootCanvasTransform()
+        {
+            if (rootCanvas == null)
+            {
+                var canvas = GetComponentInParent<Canvas>(true);
+                rootCanvas = canvas != null ? canvas.rootCanvas : null;
+            }
+
+            return rootCanvas != null ? rootCanvas.transform : myTransform.root;
         }
     }
 }
