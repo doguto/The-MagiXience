@@ -45,6 +45,13 @@ namespace Project.Editor
             if (state == PlayModeStateChange.ExitingEditMode)
             {
                 EnsureGlobalSceneLoaded();
+                // Play前のシーン退避時にシーンを跨ぐ参照エラーが出るため外す
+                GlobalCameraCanvas.SetCamera(null);
+            }
+            else if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                // Play中のカメラ参照が残ると、シーン復元中のCanvasがEdit側のカメラを壊す
+                GlobalCameraCanvas.SetCamera(null);
             }
             else if (state == PlayModeStateChange.EnteredEditMode)
             {
