@@ -17,6 +17,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Tooltip("空の場合はシーンからBossEntityPresenterを自動検索する")]
         [SerializeField] BossEntityPresenter bossPresenter;
 
+        [Tooltip("ボスへ転送するダメージに掛ける係数（1で等倍）")]
+        [Min(0f)]
+        [SerializeField] float damageMultiplier = 1f;
+
         IDisposable subscription;
 
         // Awakeでの生成順に依存しないよう、全Presenterのmodel生成(Awake)が終わったStartで購読を開始する。
@@ -55,10 +59,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                     int delta = previousHp - hp;
                     previousHp = hp;
 
-                    // 減少時のみ、その差分をボスへ転送する（回復・リセットは無視）
+                    // 減少時のみ、その差分に係数を掛けてボスへ転送する（回復・リセットは無視）
                     if (delta > 0 && bossModel.IsAlive)
                     {
-                        bossModel.TakeDamage(delta);
+                        bossModel.TakeDamage(Mathf.FloorToInt(delta * damageMultiplier));
                     }
                 });
         }
