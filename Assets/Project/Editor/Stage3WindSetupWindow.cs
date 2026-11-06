@@ -9,6 +9,7 @@ using Project.Scenes.Battle.Scripts.Model.Attack;
 using Project.Scenes.Battle.Scripts.Model.ExitCondition;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scenes.Global.Scripts.Presenter;
 using Project.Scripts.Infra;
 using Project.Commons.Debugger.Scripts.Presenter;
 using Project.Scripts.Model;
@@ -695,8 +696,7 @@ namespace Project.Editor
         static void RevisePhaseTwoAndWindSequence()
         {
             if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
-            if (Camera.main == null) throw new InvalidOperationException("Open Battle scene first");
-            ScreenBoundsCache.Initialize(Camera.main);
+            ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
             var aimedMovement = BossBullet("3_AimedSpeed4", new InfiniteMovementConfig(Vector3.left * 4f));
             var aimed = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase2.asset");
             using (var so = Edit(aimed))
@@ -891,9 +891,7 @@ namespace Project.Editor
         [MenuItem("Tools/Stage3/Set Bottom Vertices And Spread X")]
         static void ConfigureBottomVerticesAndSpawnX()
         {
-            var camera = Camera.main;
-            if (camera == null) throw new InvalidOperationException("Open Battle scene with its Main Camera first");
-            ScreenBoundsCache.Initialize(camera);
+            ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
             var bullets = new HashSet<MovementPreset>();
             float[] spawnX = { 9.4f, 11.2f, 10f, 12.4f, 10.6f, 11.8f };
             for (int number = 6; number <= 7; number++)
@@ -1155,9 +1153,7 @@ namespace Project.Editor
         {
             if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
             if (HasMergedPhase7()) { RevisePhaseTwoAndWindSequence(); return; }
-            var camera = Camera.main;
-            if (camera == null) throw new InvalidOperationException("Open Battle scene first");
-            ScreenBoundsCache.Initialize(camera);
+            ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
             var bullet = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "3_Bullet_WindPurple.prefab")?.GetComponent<BulletEntityPresenter>();
             var movement = WindParallelWaitingMovement();
             if (bullet == null || movement == null) throw new InvalidOperationException("Boss wind bullet assets are missing");
@@ -1325,8 +1321,7 @@ namespace Project.Editor
         static void RestoreBossWindParallelMotion()
         {
             if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
-            if (Camera.main == null) throw new InvalidOperationException("Open Battle scene first");
-            ScreenBoundsCache.Initialize(Camera.main);
+            ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
             var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/3_Boss_WindSpeed1_5.asset");
             var attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Boss_WindParallel.asset");
             using (var so = Edit(attack))
@@ -1356,8 +1351,7 @@ namespace Project.Editor
         static void ConfigureWindParallelEdgeWarning()
         {
             if (Application.isPlaying) throw new InvalidOperationException("Stop Play mode first");
-            if (Camera.main == null) throw new InvalidOperationException("Open Battle scene first");
-            ScreenBoundsCache.Initialize(Camera.main);
+            ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
             var waitingMovement = WindParallelWaitingMovement();
             foreach (string name in new[] { "3_Phase7_WindParallel", "3_Phase8_WindParallel" })
             {
