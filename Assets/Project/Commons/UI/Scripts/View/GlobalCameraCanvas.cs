@@ -1,13 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Project.Commons.UI.Scripts.View
 {
     // Globalシーンのカメラを、別シーンのCanvasにも割り当てる。
+    // Edit中もGame Viewを正しく表示するため、ExecuteAlwaysで登録する(カメラはEditorスクリプトから設定する)。
+    [ExecuteAlways]
     [RequireComponent(typeof(Canvas))]
     public class GlobalCameraCanvas : MonoBehaviour
     {
-        static readonly List<GlobalCameraCanvas> pendingCanvases = new();
+        static readonly List<GlobalCameraCanvas> activeCanvases = new();
         static Camera globalCamera;
 
         Canvas canvas;
@@ -15,47 +18,46 @@ namespace Project.Commons.UI.Scripts.View
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStatics()
         {
-            pendingCanvases.Clear();
+            activeCanvases.Clear();
             globalCamera = null;
         }
 
         public static void SetCamera(Camera camera)
         {
             globalCamera = camera;
-            if (globalCamera == null) return;
-
-            foreach (var pending in pendingCanvases)
+            foreach (var target in activeCanvases)
             {
-                if (pending != null) pending.Apply();
+                if (target != null) target.Apply(globalCamera);
             }
-            pendingCanvases.Clear();
         }
 
-        void Awake()
+        public static void SetCameraInScene(Scene scene, Camera camera)
         {
-            canvas = GetComponent<Canvas>();
+            foreach (var target in activeCanvases)
+            {
+                if (target != null && target.gameObject.scene == scene) target.Apply(camera);
+            }
         }
 
         void OnEnable()
         {
-            if (globalCamera != null)
-            {
-                Apply();
-            }
-            else if (!pendingCanvases.Contains(this))
-            {
-                pendingCanvases.Add(this);
-            }
+#if UNITY_EDITOR
+            // Prefab編集中のCanvasにシーンのカメラを入れると、Prefabに保存できない参照が混ざる
+            if (UnityEditor.SceneManagement.EditorSceneManager.IsPreviewScene(gameObject.scene)) return;
+#endif
+            if (!activeCanvases.Contains(this)) activeCanvases.Add(this);
+            if (globalCamera != null) Apply(globalCamera);
         }
 
         void OnDisable()
         {
-            pendingCanvases.Remove(this);
+            activeCanvases.Remove(this);
         }
 
-        void Apply()
+        void Apply(Camera camera)
         {
-            canvas.worldCamera = globalCamera;
+            if (canvas == null) canvas = GetComponent<Canvas>();
+            if (canvas.worldCamera != camera) canvas.worldCamera = camera;
         }
     }
 }

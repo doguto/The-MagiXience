@@ -21,38 +21,9 @@ namespace Project.Editor
             EditorSceneManager.sceneOpened += OnSceneOpened;
             EditorApplication.delayCall += EnsureGlobalSceneLoadedInEditMode;
 
-            // GlobalCameraCanvasはRuntimeでしかカメラを割り当てないため、Edit中はここで割り当てる。
-            // シーンを跨ぐ参照は保存できないので、保存の間だけ外す。
-            EditorApplication.hierarchyChanged += AssignCameraToCanvasesInEditMode;
-            EditorSceneManager.sceneSaving += (scene, _) => SetCanvasCamera(scene, null);
-            EditorSceneManager.sceneSaved += _ => AssignCameraToCanvasesInEditMode();
-        }
-
-        static void AssignCameraToCanvasesInEditMode()
-        {
-            if (Application.isBatchMode) return;
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-
-            var camera = FindGlobalCamera();
-            if (camera == null) return;
-
-            for (var i = 0; i < SceneManager.sceneCount; i++)
-            {
-                SetCanvasCamera(SceneManager.GetSceneAt(i), camera);
-            }
-        }
-
-        static void SetCanvasCamera(Scene scene, Camera camera)
-        {
-            if (!scene.isLoaded) return;
-            foreach (var root in scene.GetRootGameObjects())
-            {
-                foreach (var target in root.GetComponentsInChildren<GlobalCameraCanvas>(true))
-                {
-                    var canvas = target.GetComponent<Canvas>();
-                    if (canvas.worldCamera != camera) canvas.worldCamera = camera;
-                }
-            }
+            // シーンを跨ぐ参照は保存できないので、保存の間だけCanvasのカメラを外す。
+            EditorSceneManager.sceneSaving += (scene, _) => GlobalCameraCanvas.SetCameraInScene(scene, null);
+            EditorSceneManager.sceneSaved += scene => GlobalCameraCanvas.SetCameraInScene(scene, FindGlobalCamera());
         }
 
         static Camera FindGlobalCamera()
@@ -71,8 +42,14 @@ namespace Project.Editor
 
         static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            if (state != PlayModeStateChange.ExitingEditMode) return;
-            EnsureGlobalSceneLoaded();
+            if (state == PlayModeStateChange.ExitingEditMode)
+            {
+                EnsureGlobalSceneLoaded();
+            }
+            else if (state == PlayModeStateChange.EnteredEditMode)
+            {
+                EditorApplication.delayCall += EnsureGlobalSceneLoadedInEditMode;
+            }
         }
 
         static void OnSceneOpened(Scene scene, OpenSceneMode mode)
@@ -89,7 +66,7 @@ namespace Project.Editor
             // 未保存の新規シーンには付与しない
             if (string.IsNullOrEmpty(SceneManager.GetActiveScene().path)) return;
             EnsureGlobalSceneLoaded();
-            AssignCameraToCanvasesInEditMode();
+            GlobalCameraCanvas.SetCamera(FindGlobalCamera());
         }
 
         static void EnsureGlobalSceneLoaded()
