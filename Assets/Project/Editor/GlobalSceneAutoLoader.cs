@@ -46,6 +46,11 @@ namespace Project.Editor
             {
                 EnsureGlobalSceneLoaded();
             }
+            else if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                // Play中のカメラ参照が残ると、シーン復元中のCanvasがEdit側のカメラを壊す
+                GlobalCameraCanvas.SetCamera(null);
+            }
             else if (state == PlayModeStateChange.EnteredEditMode)
             {
                 EditorApplication.delayCall += EnsureGlobalSceneLoadedInEditMode;
