@@ -53,6 +53,14 @@ namespace Project.Scripts.Model
             UserData.textSpeed = UserData.ClampTextSpeed(textSpeed);
         }
 
+        public bool IsMashSkipEnabled => UserData.isMashSkipEnabled;
+
+        // メモリ上に反映する。永続化はSave()を別途呼ぶ。
+        public void SetMashSkipEnabled(bool isEnabled)
+        {
+            UserData.isMashSkipEnabled = isEnabled;
+        }
+
         public void StageClear(int stageNumber, StageClearRank rank)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);

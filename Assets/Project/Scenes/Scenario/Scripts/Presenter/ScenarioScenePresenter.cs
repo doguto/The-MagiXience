@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using UniRx;
 using Project.Scenes.Battle.Scripts.Presenter;
@@ -17,6 +18,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
     public class ScenarioScenePresenter : MonoBehaviour
     {
         [SerializeField] ScenarioView scenarioView;
+        [SerializeField] SkipConfirmModalPresenter skipConfirmModalPresenter;
+
+        [Header("Mash Skip")]
+        [SerializeField] int mashPressCount = 2;
+        [SerializeField] float mashWindowSeconds = 0.5f;
 
         ScenarioModel scenarioModel;
         GlobalScenePresenter globalScenePresenter;
@@ -39,6 +45,13 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         bool isTypeWriterEnabled;
         float? typeWriterSpeed;
 
+        readonly Queue<float> pressTimes = new();
+        // 確認モーダルで「スキップしない」を選んだシナリオでは再度確認しない
+        bool isMashDetectionSuppressed;
+        bool isSkipping;
+        // モーダルの決定入力と同フレームのUISubmitMessageで会話が進まないようにする
+        int modalClosedFrame = -1;
+
         public IObservable<Unit> OnScenarioCompleted => scenarioCompleted;
 
         void Start()
@@ -49,8 +62,15 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
             MessageBroker.Default.Receive<UISubmitMessage>()
                          .Where(_ => !IsPaused())
-                         .Subscribe(_ => OnPressNext())
+                         .Subscribe(_ => OnSubmit())
                          .AddTo(disposables);
+
+            if (skipConfirmModalPresenter != null)
+            {
+                skipConfirmModalPresenter.OnSelected
+                                         .Subscribe(OnSkipConfirmSelected)
+                                         .AddTo(disposables);
+            }
 
             // 初回実行
             ExecuteSteps();
@@ -63,9 +83,94 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 && globalScenePresenter.PauseModalPresenter.IsOpen;
         }
 
+        bool IsSkipConfirmOpen => skipConfirmModalPresenter != null && skipConfirmModalPresenter.IsOpen;
+
+        void OnSubmit()
+        {
+            if (isCompleted || isSkipping) return;
+            if (IsSkipConfirmOpen || Time.frameCount == modalClosedFrame) return;
+
+            if (DetectMash())
+            {
+                OnMashDetected();
+                return;
+            }
+
+            OnPressNext();
+        }
+
+        bool DetectMash()
+        {
+            if (isMashDetectionSuppressed) return false;
+
+            pressTimes.Enqueue(Time.unscaledTime);
+            while (pressTimes.Count > mashPressCount) pressTimes.Dequeue();
+            if (pressTimes.Count < mashPressCount) return false;
+
+            if (Time.unscaledTime - pressTimes.Peek() > mashWindowSeconds) return false;
+
+            pressTimes.Clear();
+            return true;
+        }
+
+        void OnMashDetected()
+        {
+            if (UserModelRepository.Instance.Get().IsMashSkipEnabled)
+            {
+                Skip();
+                return;
+            }
+
+            if (skipConfirmModalPresenter == null)
+            {
+                Debug.LogWarning("[ScenarioScenePresenter] SkipConfirmModalPresenter is not assigned. Skip confirmation skipped.");
+                return;
+            }
+
+            autoAdvanceTimer.Disposable = null;
+            skipConfirmModalPresenter.Open();
+        }
+
+        void OnSkipConfirmSelected(SkipConfirmResult result)
+        {
+            modalClosedFrame = Time.frameCount;
+
+            switch (result)
+            {
+                case SkipConfirmResult.EnableMashSkip:
+                    var userModel = UserModelRepository.Instance.Get();
+                    userModel.SetMashSkipEnabled(true);
+                    userModel.Save();
+                    Skip();
+                    break;
+                case SkipConfirmResult.SkipOnce:
+                    Skip();
+                    break;
+                case SkipConfirmResult.Cancel:
+                    isMashDetectionSuppressed = true;
+                    // モーダル表示中に破棄した自動送りを再開する
+                    if (!scenarioView.IsTyping) StartAutoAdvanceTimerIfEnabled();
+                    break;
+            }
+        }
+
+        // メッセージ表示のみ飛ばし、ボス出現やBGM切替などのコマンドは実行したまま末尾まで進める
+        void Skip()
+        {
+            if (isCompleted || isSkipping) return;
+            isSkipping = true;
+            autoAdvanceTimer.Disposable = null;
+
+            Debug.Log("[ScenarioScenePresenter] Scenario skip requested.");
+
+            scenarioModel.Next();
+            ExecuteSteps();
+        }
+
         void OnPressNext()
         {
             if (isCompleted) return;
+            if (IsSkipConfirmOpen) return;
 
             // 文字送り中なら全文を表示するだけで、次の会話には進まない
             if (scenarioView.IsTyping)
@@ -91,6 +196,12 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 scenarioView.LogCommand(step.function, step.args);
 
                 // memo: 将来ルビ表示コマンド作るかも
+
+                if (isSkipping && (step.function == "ShowCastMessage" || step.function == "ShowMessage"))
+                {
+                    scenarioModel.Next();
+                    continue;
+                }
 
                 // メッセージ表示系コマンドの場合はループを抜けて待機
                 if (step.function == "ShowCastMessage")

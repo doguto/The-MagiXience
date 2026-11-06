@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Project.Scripts.Extensions.Message;
 using TMPro;
 using UniRx;
 using UniRx.Triggers;
@@ -13,35 +12,36 @@ namespace Project.Commons.UI.Scripts.View
     public class OptionModalView: MonoBehaviour
     {
         [SerializeField] SimpleButton cancelButton;
-        [SerializeField] SimpleButton saveButton;
         [SerializeField] List<SimpleButton> keyConfigButtons;
 
         [Header("Volume")]
-        [SerializeField] Slider bgmSlider;
-        [SerializeField] Slider seSlider;
+        [SerializeField] VolumeGaugeSelectable bgmVolume;
+        [SerializeField] VolumeGaugeSelectable seVolume;
         [SerializeField] TMP_Text bgmValueText;
         [SerializeField] TMP_Text seValueText;
 
-        const int CtrlStep = 10;
-
-        bool isCtrlPressed;
+        [Header("Scenario")]
+        [SerializeField] Toggle mashSkipToggle;
+        // 有効な側を囲む枠
+        [SerializeField] GameObject mashSkipOnFrame;
+        [SerializeField] GameObject mashSkipOffFrame;
 
         readonly Subject<int> onBgmValueChanged = new();
         readonly Subject<int> onSeValueChanged = new();
 
         public IObservable<Unit> OnPressedCancel => cancelButton.OnPressed;
-        public IObservable<Unit> OnPressedSave => saveButton.OnPressed;
 
-        // スライダー操作・キー操作いずれでも値が変化したら発火する(0-100)。
+        // キー操作で値が変化したら発火する(0-100)。
         public IObservable<int> OnBgmValueChanged => onBgmValueChanged;
         public IObservable<int> OnSeValueChanged => onSeValueChanged;
+        public IObservable<bool> OnMashSkipChanged => mashSkipToggle.OnValueChangedAsObservable().Skip(1);
 
-        // SeスライダーがEventSystemで選択された/選択解除されたタイミングで発火する。
-        public IObservable<BaseEventData> OnSeSliderSelected =>
-            seSlider.OnSelectAsObservable();
-        public IObservable<BaseEventData> OnSeSliderDeselected =>
-            seSlider.OnDeselectAsObservable();
-        
+        // SE音量がEventSystemで選択された/選択解除されたタイミングで発火する。
+        public IObservable<BaseEventData> OnSeVolumeSelected =>
+            seVolume.OnSelectAsObservable();
+        public IObservable<BaseEventData> OnSeVolumeDeselected =>
+            seVolume.OnDeselectAsObservable();
+
         public IObservable<Unit> OnPressedKeyConfig(int i)
         {
             return keyConfigButtons[i].OnPressed;
@@ -50,7 +50,6 @@ namespace Project.Commons.UI.Scripts.View
         public void InitStart()
         {
             cancelButton.Init(isFocused: true);
-            saveButton.Init();
             foreach (var keyConfigButton in keyConfigButtons)
             {
                 keyConfigButton.Init();
@@ -59,66 +58,59 @@ namespace Project.Commons.UI.Scripts.View
 
         void Awake()
         {
-            // スライダー(マウス操作・後述のキー操作によるvalue変更)の値変化を購読する。
-            bgmSlider.OnValueChangedAsObservable()
-                .Subscribe(v =>
+            bgmVolume.OnValueChanged
+                .Subscribe(value =>
                 {
-                    var value = Mathf.RoundToInt(v);
                     bgmValueText.text = value.ToString();
                     onBgmValueChanged.OnNext(value);
                 })
                 .AddTo(this);
 
-            seSlider.OnValueChangedAsObservable()
-                .Subscribe(v =>
+            seVolume.OnValueChanged
+                .Subscribe(value =>
                 {
-                    var value = Mathf.RoundToInt(v);
                     seValueText.text = value.ToString();
                     onSeValueChanged.OnNext(value);
                 })
                 .AddTo(this);
 
-            // Ctrl+左右キーでは変化量を10にする。
-            MessageBroker.Default.Receive<UICtrlMessage>()
-                .Subscribe(message => isCtrlPressed = message.isPressed)
-                .AddTo(this);
-            BindCtrlStep(bgmSlider);
-            BindCtrlStep(seSlider);
-        }
-
-        // Slider標準のOnMove(±1)の後に呼ばれるため、Ctrl押下中は残りの±9を加算して±10にする。
-        // 端で標準の±1が効かなかった場合もClampで端に留まる。
-        void BindCtrlStep(Slider slider)
-        {
-            slider.OnMoveAsObservable()
-                .Where(_ => isCtrlPressed)
+            // 左右キーでON/OFFを切り替える(左:ON 右:OFF)
+            mashSkipToggle.OnMoveAsObservable()
                 .Subscribe(e =>
                 {
-                    var sign = e.moveDir switch
-                    {
-                        MoveDirection.Right => 1,
-                        MoveDirection.Left => -1,
-                        _ => 0
-                    };
-                    if (slider.direction == Slider.Direction.RightToLeft) sign = -sign;
-                    if (sign == 0) return;
-
-                    slider.value = Mathf.Clamp(slider.value + sign * (CtrlStep - 1), slider.minValue, slider.maxValue);
+                    if (e.moveDir == MoveDirection.Left) mashSkipToggle.isOn = true;
+                    else if (e.moveDir == MoveDirection.Right) mashSkipToggle.isOn = false;
                 })
+                .AddTo(this);
+
+            mashSkipToggle.OnValueChangedAsObservable()
+                .Subscribe(UpdateMashSkipFrame)
                 .AddTo(this);
         }
 
-        // 通知を発火せずにスライダー・テキストへ値を反映する(初期化・外部反映用)。
+        void UpdateMashSkipFrame(bool isOn)
+        {
+            if (mashSkipOnFrame != null) mashSkipOnFrame.SetActive(isOn);
+            if (mashSkipOffFrame != null) mashSkipOffFrame.SetActive(!isOn);
+        }
+
+        // 通知を発火せずにゲージ・テキストへ値を反映する(初期化・外部反映用)。
         public void SetBgmValueWithoutNotify(int value)
         {
-            bgmSlider.SetValueWithoutNotify(value);
-            bgmValueText.text = value.ToString();
+            bgmVolume.SetValueWithoutNotify(value);
+            bgmValueText.text = bgmVolume.Value.ToString();
         }
 
         public void SetSeValueWithoutNotify(int value)
         {
-            seSlider.SetValueWithoutNotify(value);
-            seValueText.text = value.ToString();
+            seVolume.SetValueWithoutNotify(value);
+            seValueText.text = seVolume.Value.ToString();
+        }
+
+        public void SetMashSkipWithoutNotify(bool isEnabled)
+        {
+            mashSkipToggle.SetIsOnWithoutNotify(isEnabled);
+            UpdateMashSkipFrame(isEnabled);
         }
     }
 }

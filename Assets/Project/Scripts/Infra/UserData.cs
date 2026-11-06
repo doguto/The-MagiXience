@@ -20,6 +20,8 @@ namespace Project.Scripts.Infra
         public float textSpeed;
         // ステージごとの最高クリアランク(index=ステージ番号-1)。値はStageClearRankのint値
         public int[] stageClearRanks;
+        // シナリオで連打したとき確認なしでスキップするか
+        public bool isMashSkipEnabled;
 
         public UserData()
         {
@@ -30,6 +32,7 @@ namespace Project.Scripts.Infra
             hasEnteredStage1 = false;
             textSpeed = DefaultTextSpeed;
             stageClearRanks = new int[0];
+            isMashSkipEnabled = false;
         }
 
         // 読み込んだ値を正常な範囲へ補正する。不正なJSON(欠損・型不一致)はJsonUtilityにより
