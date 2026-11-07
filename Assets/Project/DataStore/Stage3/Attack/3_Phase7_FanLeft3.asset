@@ -15,8 +15,8 @@ MonoBehaviour:
   attackTimeline:
     phases:
     - loop: 1
-      loopStart: 1.6
-      loopEnd: 3.3
+      loopStart: 1.9
+      loopEnd: 3.6
       cycleDuration: 1.6
       entries:
       - time: 0
@@ -41,9 +41,10 @@ MonoBehaviour:
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         wayCount: 3
-        spreadAngle: 12
+        spreadAngle: 35
         radius: 0
         startDelay: 0
+        rotationOffset: 0
     - rid: 1906880873211363613
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
