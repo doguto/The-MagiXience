@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using UnityEngine;
@@ -12,7 +11,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Role / Bullet Pools")]
         [SerializeField, Tooltip("青はON（最初は上）、赤はOFF（最初は下）")]
         bool isBlue = true;
-        [SerializeField] BulletPool normalBulletPool;
         [SerializeField] BulletPool parabolaBulletPool;
         [SerializeField, Min(1)] int bulletDamage = 10;
 
@@ -34,7 +32,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float sweepingShowerDuration = 6f;
         [SerializeField, Min(0.1f)] float resetDuration = 1.2f;
 
-        [Header("Parabola / Yellow Shot")]
+        [Header("Parabola")]
         [SerializeField, Min(0.05f)] float shotInterval = 0.25f;
         [SerializeField, Min(0.1f)] float parabolaSpeed = 8f;
         [SerializeField] float normalVertexX = -6f;
@@ -45,16 +43,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float sweepEndX = 4f;
         [SerializeField, Min(0.05f), Tooltip("行動3で右側へ撃つときの頂点と画面端の間隔（ワールド単位）")]
         float sweepEdgeMargin = 0.2f;
-        [SerializeField, Min(0.1f)] float aimedShotSpeed = 6f;
         [SerializeField, Min(0.1f)] float vertexScreenMargin = 0.7f;
 
         EnemyEntityPresenter enemy;
-        Transform player;
         Vector3 spawnPosition;
         float elapsed;
         float halfHeight;
         long nextShot;
-        int nextAimedCycle;
 
         float CycleDuration => diagonalDuration + returnToRightDuration + doubleShowerDuration
             + gatherDuration + sweepingShowerDuration + resetDuration;
@@ -65,7 +60,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             foreach (var pool in GetComponentsInChildren<BulletPool>(true))
             {
-                if (pool.name == "LinearBulletPool") normalBulletPool = pool;
                 if (pool.name == "ParabolaBulletPool") parabolaBulletPool = pool;
             }
         }
@@ -86,11 +80,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void Start()
         {
             enemy = GetComponent<EnemyEntityPresenter>();
-            player = PlayerPositionReference.Transform;
-            if (normalBulletPool == null || parabolaBulletPool == null) FindPools();
-            if (normalBulletPool == null || parabolaBulletPool == null)
+            if (parabolaBulletPool == null) FindPools();
+            if (parabolaBulletPool == null)
             {
-                Debug.LogError("[TwinParabolaMidBoss] Assign normal and parabola bullet pools.", this);
+                Debug.LogError("[TwinParabolaMidBoss] Assign parabola bullet pool.", this);
                 enabled = false;
                 return;
             }
@@ -110,13 +103,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             float attackTime = elapsed - entranceDuration;
-            // フレーム落ちでも中央通過の黄色弾を飛ばさない。各周回・各ボスにつき1発。
-            while (nextAimedCycle * CycleDuration + diagonalDuration * 0.5f <= attackTime)
-            {
-                SetPosition(PositionAt(diagonalDuration * 0.5f));
-                FireAimedShot();
-                nextAimedCycle++;
-            }
             // 発射位置も予定時刻から算出し、移動と攻撃を同じ時計で合わせる。
             while ((nextShot + 0.5) * shotInterval <= attackTime)
             {
@@ -202,28 +188,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (Mathf.Abs(vertexX) < 0.01f || Mathf.Abs(vertexY) < 0.01f) return;
             parabolaBulletPool.SpawnBullet(bulletDamage, parabolaBulletPool.transform.position,
                 movementOverride: new VertexParabolaMovementConfig(new Vector2(vertexX, vertexY), parabolaSpeed));
-        }
-
-        void FireAimedShot()
-        {
-            if (player == null) player = PlayerPositionReference.Transform;
-            Vector3 origin = normalBulletPool.transform.position;
-            Vector2 direction = player != null ? (Vector2)(player.position - origin).normalized : Vector2.left;
-            normalBulletPool.SpawnBullet(bulletDamage, origin, direction,
-                movementOverride: new ConstantVelocity(direction * aimedShotSpeed));
-        }
-
-        sealed class ConstantVelocity : IMovementStep
-        {
-            readonly Vector2 velocity;
-            public ConstantVelocity(Vector2 velocity) => this.velocity = velocity;
-
-            public Tween Play(Transform target, Vector2 direction, Animator animator)
-            {
-                Vector3 start = target.position;
-                return DOVirtual.Float(0f, 999999f, 999999f,
-                    time => target.position = start + (Vector3)(velocity * time)).SetEase(Ease.Linear);
-            }
         }
     }
 }

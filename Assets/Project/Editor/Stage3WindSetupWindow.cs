@@ -661,19 +661,6 @@ namespace Project.Editor
                 else throw new InvalidOperationException("Unexpected bullet movement: " + name);
                 Apply(so);
             }
-            foreach (string name in new[] { "3_MidBoss_blue", "3_MidBoss_red" })
-            {
-                string path = Prefabs + name + ".prefab";
-                var root = PrefabUtility.LoadPrefabContents(path);
-                try
-                {
-                    using var so = Edit(root.GetComponent<TwinParabolaMidBossController>());
-                    so.FindProperty("aimedShotSpeed").floatValue = 4f;
-                    Apply(so);
-                    PrefabUtility.SaveAsPrefabAsset(root, path);
-                }
-                finally { PrefabUtility.UnloadPrefabContents(root); }
-            }
             AssetDatabase.SaveAssets();
             foreach (string name in names)
             {
@@ -683,13 +670,7 @@ namespace Project.Editor
                 float expected = 4f;
                 if (Mathf.Abs(speed - expected) > 0.0001f) throw new Exception("Incorrect way bullet speed: " + name);
             }
-            foreach (string name in new[] { "3_MidBoss_blue", "3_MidBoss_red" })
-            {
-                using var so = new SerializedObject(AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + name + ".prefab").GetComponent<TwinParabolaMidBossController>());
-                if (so.FindProperty("aimedShotSpeed").floatValue != 4f)
-                    throw new Exception("Incorrect midboss bullet speed: " + name);
-            }
-            Debug.Log("[Stage3WaySpeeds] Saved and verified Phase1–5 aimed initial speed 4: Phase2 pink enemies and both Phase5 midbosses. Renamed aimed movement preset with GUID preserved. Parabolas, later phases and main boss unchanged.");
+            Debug.Log("[Stage3WaySpeeds] Saved and verified Phase1–5 aimed initial speed 4: Phase2 pink enemies. Renamed aimed movement preset with GUID preserved. Parabolas, later phases and main boss unchanged.");
         }
 
         [MenuItem("Tools/Stage3/Revise Phase Two And Wind Sequence")]
