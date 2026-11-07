@@ -44,10 +44,13 @@ MonoBehaviour:
         spreadAngle: 30
         radius: 0.5
         startDelay: 0
+        rotationOffset: 0
     - rid: 3310600516686315672
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
     - rid: 9205483267810394374
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+      data:
+        maxUpAngle: 60
+        maxDownAngle: 60
