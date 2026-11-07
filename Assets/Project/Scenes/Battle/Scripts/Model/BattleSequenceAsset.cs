@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Timeline;
+using UnityEngine.Serialization;
 using Project.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.ExitCondition;
 using Project.Scenes.Battle.Scripts.Model.Movement;
@@ -92,8 +92,8 @@ namespace Project.Scenes.Battle.Scripts.Model
         {
             if (group.Interlude == null) return null;
 
-            return picked.InterludeBuilderOverride != null
-                ? group.Interlude.WithTimelineBuilder(picked.InterludeBuilderOverride, picked.InterludeTimeLimitOverride)
+            return picked.InterludeActionOverride != null
+                ? group.Interlude.WithActionAsset(picked.InterludeActionOverride, picked.InterludeTimeLimitOverride)
                 : group.Interlude;
         }
 
@@ -123,32 +123,30 @@ namespace Project.Scenes.Battle.Scripts.Model
     public class BattlePhaseDefinition
     {
         [SerializeField] string phaseId;
-        [Header("Timeline")]
-        [SerializeField] BattleTimelineBuilderAsset timelineBuilder;
-        [SerializeField] BattleTimelineBuilderAsset timelineBuilderStrong;
+        [FormerlySerializedAs("timelineBuilder")]
+        [SerializeField] PhaseActionAsset actionAsset;
         [SerializeReference, SubclassSelector]
         IExitConditionConfig exitConditionConfig = new TimeLimitExitConditionConfig();
-        [Tooltip("randomPickグループで、このフェーズの直後に挟むinterludeのTimelineBuilderを差し替える。未設定ならグループ共通のものを使う")]
-        [SerializeField] BattleTimelineBuilderAsset interludeBuilderOverride;
-        [Tooltip("interludeBuilderOverride 使用時の終了時間(秒)。0ならグループ共通のinterludeの終了条件を使う")]
+        [Tooltip("randomPickグループで、このフェーズの直後に挟むinterludeのアクションを差し替える。未設定ならグループ共通のものを使う")]
+        [FormerlySerializedAs("interludeBuilderOverride")]
+        [SerializeField] PhaseActionAsset interludeActionOverride;
+        [Tooltip("interludeActionOverride 使用時の終了時間(秒)。0ならグループ共通のinterludeの終了条件を使う")]
         [SerializeField, Min(0f)] float interludeTimeLimitOverride;
 
         public string PhaseId => phaseId;
-        public BattleTimelineBuilderAsset TimelineBuilder => timelineBuilder;
-        public BattleTimelineBuilderAsset TimelineBuilderStrong => timelineBuilderStrong;
+        public PhaseActionAsset ActionAsset => actionAsset;
         public IExitConditionConfig ExitConditionConfig => exitConditionConfig;
-        public BattleTimelineBuilderAsset InterludeBuilderOverride => interludeBuilderOverride;
+        public PhaseActionAsset InterludeActionOverride => interludeActionOverride;
         public float InterludeTimeLimitOverride => interludeTimeLimitOverride;
 
         /// <summary>
-        /// TimelineBuilderを差し替えた浅いコピーを返す（Strong版は使わない）。
+        /// アクションを差し替えた浅いコピーを返す。
         /// timeLimitSeconds が0より大きければ、終了条件も時間制限に差し替える。
         /// </summary>
-        public BattlePhaseDefinition WithTimelineBuilder(BattleTimelineBuilderAsset builder, float timeLimitSeconds = 0f)
+        public BattlePhaseDefinition WithActionAsset(PhaseActionAsset asset, float timeLimitSeconds = 0f)
         {
             var copy = (BattlePhaseDefinition)MemberwiseClone();
-            copy.timelineBuilder = builder;
-            copy.timelineBuilderStrong = null;
+            copy.actionAsset = asset;
             if (timeLimitSeconds > 0f)
             {
                 copy.exitConditionConfig = new TimeLimitExitConditionConfig(timeLimitSeconds);
@@ -156,20 +154,10 @@ namespace Project.Scenes.Battle.Scripts.Model
             return copy;
         }
 
-        // LoopPhaseNode の終了条件の監視用。Timeline を持たない
+        // LoopPhaseNode の終了条件の監視用。アクションを持たない
         public static BattlePhaseDefinition ForCondition(string phaseId, IExitConditionConfig config)
         {
             return new BattlePhaseDefinition { phaseId = phaseId, exitConditionConfig = config };
-        }
-
-        public TimelineAsset CreateTimeline()
-        {
-            return timelineBuilder ? timelineBuilder.BuildTimeline() : null;
-        }
-
-        public TimelineAsset CreateTimelineStrong()
-        {
-            return timelineBuilderStrong ? timelineBuilderStrong.BuildTimeline() : null;
         }
     }
 
@@ -183,7 +171,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         [Header("Random Pick")]
         [Tooltip("true の場合、phases を候補として1周ごとに1つをランダム選択する（順番には進まない）")]
         [SerializeField] bool randomPick;
-        [Tooltip("randomPick 時、選択したフェーズの直後に毎回挟むフェーズ（原点復帰など）。timelineBuilder が未設定なら挟まない")]
+        [Tooltip("randomPick 時、選択したフェーズの直後に毎回挟むフェーズ（原点復帰など）。actionAsset が未設定なら挟まない")]
         [SerializeField] BattlePhaseDefinition interlude;
         [Tooltip("randomPick 時、ボスのHPがこの割合(%)以下になったらグループを抜ける。0 = HPでは抜けない（loopCountのみ）")]
         [SerializeField, Range(0f, 100f)] float endBossHpPercent;
@@ -193,6 +181,6 @@ namespace Project.Scenes.Battle.Scripts.Model
         public IReadOnlyList<BattlePhaseDefinition> Phases => phases;
         public bool RandomPick => randomPick;
         public float EndBossHpPercent => endBossHpPercent;
-        public BattlePhaseDefinition Interlude => interlude != null && interlude.TimelineBuilder != null ? interlude : null;
+        public BattlePhaseDefinition Interlude => interlude != null && interlude.ActionAsset != null ? interlude : null;
     }
 }

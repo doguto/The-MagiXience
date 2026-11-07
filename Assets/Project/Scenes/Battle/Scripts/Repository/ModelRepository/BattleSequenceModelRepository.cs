@@ -44,7 +44,7 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
             }
 
             return new BattleSequenceModel(
-                asset.Situation, asset.BuildRootNode(), CreatePhaseModel, CreateConditionWatcher,
+                asset.Situation, asset.BuildRootNode(), CreatePhaseModel, CreateConditionWatcher, () => getBossModel?.Invoke(),
                 asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement, asset.Wind);
         }
 

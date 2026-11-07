@@ -23,8 +23,8 @@ namespace Project.Scenes.Battle.Scripts.Model.PhaseNode
             get
             {
                 if (phase == null) return "(empty)";
-                if (phase.TimelineBuilder != null) return phase.TimelineBuilder.name;
-                return string.IsNullOrEmpty(phase.PhaseId) ? "(no timeline)" : phase.PhaseId;
+                if (phase.ActionAsset != null) return phase.ActionAsset.name;
+                return string.IsNullOrEmpty(phase.PhaseId) ? "(no action)" : phase.PhaseId;
             }
         }
 

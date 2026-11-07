@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Model.ExitCondition;
 
 namespace Project.Scenes.Battle.Scripts.Model.PhaseNode
@@ -9,13 +10,17 @@ namespace Project.Scenes.Battle.Scripts.Model.PhaseNode
     {
         readonly Func<IExitConditionConfig, BattlePhaseModelBase> watcherFactory;
         readonly Action interruptCurrentPhase;
+        readonly Func<EntityBase> getBossModel;
         readonly Dictionary<RandomPhaseNode, int> lastPickedIndices = new();
 
-        public PhaseNodeContext(Func<IExitConditionConfig, BattlePhaseModelBase> watcherFactory, Action interruptCurrentPhase)
+        public PhaseNodeContext(Func<IExitConditionConfig, BattlePhaseModelBase> watcherFactory, Action interruptCurrentPhase, Func<EntityBase> getBossModel = null)
         {
             this.watcherFactory = watcherFactory;
             this.interruptCurrentPhase = interruptCurrentPhase;
+            this.getBossModel = getBossModel;
         }
+
+        public EntityBase BossModel => getBossModel?.Invoke();
 
         public BattlePhaseModelBase CreateWatcher(IExitConditionConfig config) => watcherFactory?.Invoke(config);
 

@@ -1,23 +1,19 @@
 using UnityEngine;
-using UnityEngine.Playables;
-using UnityEngine.Timeline;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scenes.Battle.Scripts.View;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
     /// <summary>
-    /// BulletClearSignalを受け取り、シーン上の全BulletEntityPresenterをプールに返却し、
+    /// シーン上の全BulletEntityPresenterをプールに返却し、
     /// 全EnemyEntityPresenterを破壊するレシーバー。
     /// ビームの予告線・本体は敵として数えないためEnemyEntityPresenterを持たないので、弾と一緒に個別に破壊する
     /// </summary>
-    public class BulletClearReceiver : MonoBehaviour, INotificationReceiver
+    public class BulletClearReceiver : MonoBehaviour
     {
-        public void OnNotify(Playable origin, INotification notification, object context)
+        // フェーズの BulletClearAction から呼ばれる
+        public void ClearAll()
         {
-            if (notification is not SignalEmitter emitter) return;
-            if (emitter.asset is not Model.BulletClearSignal) return;
-
             ClearAllBullets();
             ClearAllEnemies();
         }

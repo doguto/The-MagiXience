@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Model.ExitCondition;
 using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.Model.PhaseNode;
@@ -13,6 +14,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         readonly IPhaseNode root;
         readonly Func<BattlePhaseDefinition, BattlePhaseModelBase> phaseFactory;
         readonly Func<IExitConditionConfig, BattlePhaseModelBase> watcherFactory;
+        readonly Func<EntityBase> getBossModel;
         readonly List<BattlePhaseModelBase> allCreatedPhases = new();
 
         IEnumerator<BattlePhaseDefinition> enumerator;
@@ -26,6 +28,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             IPhaseNode root,
             Func<BattlePhaseDefinition, BattlePhaseModelBase> phaseFactory,
             Func<IExitConditionConfig, BattlePhaseModelBase> watcherFactory,
+            Func<EntityBase> getBossModel,
             GameObject bossPrefab = null,
             Vector3 bossSpawnPosition = default,
             IReadOnlyList<IMovementStep> bossEntranceMovement = null,
@@ -35,6 +38,7 @@ namespace Project.Scenes.Battle.Scripts.Model
             this.root = root;
             this.phaseFactory = phaseFactory;
             this.watcherFactory = watcherFactory;
+            this.getBossModel = getBossModel;
             BossPrefab = bossPrefab;
             BossSpawnPosition = bossSpawnPosition;
             BossEntranceMovement = bossEntranceMovement;
@@ -70,7 +74,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         {
             if (root == null) return null;
 
-            var context = new PhaseNodeContext(watcherFactory, InterruptCurrentPhase);
+            var context = new PhaseNodeContext(watcherFactory, InterruptCurrentPhase, getBossModel);
             var definitions = root is SequencePhaseNode sequence
                 ? sequence.Enumerate(context, startIndex)
                 : root.Enumerate(context);

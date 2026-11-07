@@ -54,7 +54,7 @@ namespace Project.Scenes.Battle.Scripts.Model.PhaseNode
                                 exitRequested = true;
                                 if (interrupt) context.InterruptCurrentPhase();
                             });
-                        watcher.Enter(null);
+                        watcher.Enter();
                     }
                 }
 

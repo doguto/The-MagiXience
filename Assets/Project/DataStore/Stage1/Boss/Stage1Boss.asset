@@ -13,33 +13,13 @@ MonoBehaviour:
   m_Name: Stage1Boss
   m_EditorClassIdentifier: 
   situation: 1
-  sequenceGroups:
-  - loop: 0
-    loopCount: 1
-    phases:
-    - phaseId: 1
-      timelineBuilder: {fileID: 11400000, guid: 3d55fdb72303a6a4495266c7cfb38f34, type: 2}
-      timelineBuilderStrong: {fileID: 0}
-      exitConditionConfig:
-        rid: 8577112795563163648
-  - loop: 1
-    loopCount: 0
-    phases:
-    - phaseId: 1
-      timelineBuilder: {fileID: 11400000, guid: 1807408860171b44ca0aba800ad0c938, type: 2}
-      timelineBuilderStrong: {fileID: 11400000, guid: 2d9fdfe7dd9e679429d45279cd076495, type: 2}
-      exitConditionConfig:
-        rid: 8577112795563163722
-    - phaseId: 1
-      timelineBuilder: {fileID: 11400000, guid: 89af6930b4760d64dad546cdd1435347, type: 2}
-      timelineBuilderStrong: {fileID: 11400000, guid: 2f1dfd144aa77bc45b9c90f366ccfda6, type: 2}
-      exitConditionConfig:
-        rid: 8577112795563163720
-    - phaseId: 1
-      timelineBuilder: {fileID: 11400000, guid: 91da80da818552b47b385e96b8540f98, type: 2}
-      timelineBuilderStrong: {fileID: 11400000, guid: 422c2a9d7f51113499d8fae1c4524d85, type: 2}
-      exitConditionConfig:
-        rid: 8577112795563163721
+  sequenceGroups: []
+  root:
+    rid: 8540147769746653535
+  wind:
+    enabled: 0
+    playerSpeedRatio: 0.2
+    intervals: []
   bossPrefab: {fileID: 5806677969891141097, guid: c0649156baeca8740b78c7a7fc736c8a, type: 3}
   bossSpawnPosition: {x: 10, y: 0, z: 0}
   bossEntranceMovement:
@@ -47,6 +27,160 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8540147769746653531
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 1263874
+    - rid: 8540147769746653532
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 2976121
+    - rid: 8540147769746653533
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 3897391
+    - rid: 8540147769746653535
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653536
+        - rid: 8540147769746653537
+    - rid: 8540147769746653536
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          actionAsset: {fileID: 11400000, guid: 3d55fdb72303a6a4495266c7cfb38f34, type: 2}
+          exitConditionConfig:
+            rid: 8577112795563163648
+          interludeActionOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653537
+      type: {class: LoopPhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        child:
+          rid: 8540147769746653539
+        loopCount: 0
+        exitCondition:
+          rid: -2
+        interrupt: 0
+    - rid: 8540147769746653539
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653540
+        - rid: 8540147769746653541
+        - rid: 8540147769746653542
+    - rid: 8540147769746653540
+      type: {class: BranchPhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        condition:
+          rid: 8540147769746653543
+        whenTrue:
+          rid: 8540147769746653544
+        whenFalse:
+          rid: 8540147769746653545
+    - rid: 8540147769746653541
+      type: {class: BranchPhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        condition:
+          rid: 8540147769746653546
+        whenTrue:
+          rid: 8540147769746653547
+        whenFalse:
+          rid: 8540147769746653548
+    - rid: 8540147769746653542
+      type: {class: BranchPhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        condition:
+          rid: 8540147769746653549
+        whenTrue:
+          rid: 8540147769746653550
+        whenFalse:
+          rid: 8540147769746653551
+    - rid: 8540147769746653543
+      type: {class: BossStrongCondition, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data: 
+    - rid: 8540147769746653544
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          actionAsset: {fileID: 11400000, guid: 2d9fdfe7dd9e679429d45279cd076495, type: 2}
+          exitConditionConfig:
+            rid: 8540147769746653552
+          interludeActionOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653545
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          actionAsset: {fileID: 11400000, guid: 1807408860171b44ca0aba800ad0c938, type: 2}
+          exitConditionConfig:
+            rid: 8540147769746653531
+          interludeActionOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653546
+      type: {class: BossStrongCondition, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data: 
+    - rid: 8540147769746653547
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          actionAsset: {fileID: 11400000, guid: 2f1dfd144aa77bc45b9c90f366ccfda6, type: 2}
+          exitConditionConfig:
+            rid: 8540147769746653554
+          interludeActionOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653548
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          actionAsset: {fileID: 11400000, guid: 89af6930b4760d64dad546cdd1435347, type: 2}
+          exitConditionConfig:
+            rid: 8540147769746653532
+          interludeActionOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653549
+      type: {class: BossStrongCondition, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data: 
+    - rid: 8540147769746653550
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          actionAsset: {fileID: 11400000, guid: 422c2a9d7f51113499d8fae1c4524d85, type: 2}
+          exitConditionConfig:
+            rid: 8540147769746653556
+          interludeActionOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653551
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          actionAsset: {fileID: 11400000, guid: 91da80da818552b47b385e96b8540f98, type: 2}
+          exitConditionConfig:
+            rid: 8540147769746653533
+          interludeActionOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653552
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 1263874
+    - rid: 8540147769746653554
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 2976121
+    - rid: 8540147769746653556
+      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        thresholdSamples: 3897391
     - rid: 8577112454036455607
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
@@ -83,15 +217,3 @@ MonoBehaviour:
       type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
         thresholdSamples: 422391
-    - rid: 8577112795563163720
-      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        thresholdSamples: 2976121
-    - rid: 8577112795563163721
-      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        thresholdSamples: 3897391
-    - rid: 8577112795563163722
-      type: {class: BgmPositionExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
-      data:
-        thresholdSamples: 1263874

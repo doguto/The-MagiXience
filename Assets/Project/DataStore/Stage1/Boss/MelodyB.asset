@@ -12,15 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e9eb2c7bf1b4174a965e674148ccd2f, type: 3}
   m_Name: MelodyB
   m_EditorClassIdentifier: 
-  signalTracks: []
-  animationTracks: []
-  activationTracks: []
-  audioTracks: []
-  controlTracks: []
-  enemySpawnTracks: []
-  bulletClearTracks:
-  - trackName: BulletClear
-    clips:
-    - time: 0
-  bossAttackPreset: {fileID: 11400000, guid: ba7705ae495834e4e98cc9f3a88f48fe, type: 2}
-  bossMovementPreset: {fileID: 11400000, guid: 384db2a15ae041f4297dd11383423f9a, type: 2}
+  actions:
+  - rid: 8540147769746653503
+  - rid: 8540147769746653504
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147769746653503
+      type: {class: BossAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        attackPreset: {fileID: 11400000, guid: ba7705ae495834e4e98cc9f3a88f48fe, type: 2}
+        movementPreset: {fileID: 11400000, guid: 384db2a15ae041f4297dd11383423f9a, type: 2}
+        enterStrongMode: 0
+    - rid: 8540147769746653504
+      type: {class: BulletClearAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 0
