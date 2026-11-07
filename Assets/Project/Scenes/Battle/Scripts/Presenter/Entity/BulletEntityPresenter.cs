@@ -24,6 +24,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField, Tooltip("弾のライフタイム（秒）。0以下で無制限")]
         float lifetime = 5f;
+        [SerializeField, Min(0f), Tooltip("風の影響の倍率。0で影響なし、1で標準、1より大きいと標準より強く流される")]
+        float windInfluence = 1f;
 
         void Reset()
         {
@@ -203,7 +205,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 var authoredPosition = authoredMovementTarget.position;
                 var velocity = (Vector2)(authoredPosition - previousAuthoredPosition) / Time.deltaTime;
                 BattleWind.IntegrateBullet(velocity, Time.deltaTime, ref windVelocityCorrection, ref windPositionCorrection);
-                transform.SetPositionAndRotation(authoredPosition + (Vector3)windPositionCorrection, authoredMovementTarget.rotation);
+                // 加速度側に掛けると抵抗で本来の速度まで打ち消されるため、積分後の補正量に掛ける
+                transform.SetPositionAndRotation(authoredPosition + (Vector3)(windPositionCorrection * windInfluence), authoredMovementTarget.rotation);
                 previousAuthoredPosition = authoredPosition;
             }
 
