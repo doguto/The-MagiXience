@@ -39,7 +39,9 @@ MonoBehaviour:
       type: {class: , ns: , asm: }
     - rid: 1906880873211363409
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+      data:
+        maxUpAngle: 60
+        maxDownAngle: 60
     - rid: 3310600516686315667
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -47,6 +49,7 @@ MonoBehaviour:
         spreadAngle: 20
         radius: 0.5
         startDelay: 0
+        rotationOffset: 0
     - rid: 3310600516686315672
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -54,4 +57,4 @@ MonoBehaviour:
     - rid: 5417143641239191639
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        index: 0
+        index: 2
