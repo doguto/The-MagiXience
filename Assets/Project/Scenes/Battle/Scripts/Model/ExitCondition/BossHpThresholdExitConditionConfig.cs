@@ -9,6 +9,13 @@ namespace Project.Scenes.Battle.Scripts.Model.ExitCondition
     {
         [SerializeField, Range(0f, 100f)] float hpThresholdPercent = 50f;
 
+        public BossHpThresholdExitConditionConfig() { }
+
+        public BossHpThresholdExitConditionConfig(float hpThresholdPercent)
+        {
+            this.hpThresholdPercent = hpThresholdPercent;
+        }
+
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
         {
             return new BossHpThresholdBattlePhaseModel(definition, hpThresholdPercent / 100f, getBossModel);

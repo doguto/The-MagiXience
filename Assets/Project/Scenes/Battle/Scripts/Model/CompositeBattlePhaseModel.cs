@@ -29,7 +29,7 @@ namespace Project.Scenes.Battle.Scripts.Model
 
             foreach (var inner in innerModels)
             {
-                inner.Enter(Director);
+                inner.Enter();
 
                 inner.OnExitPhase
                     .Take(1)

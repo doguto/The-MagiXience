@@ -9,6 +9,7 @@ using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Model.Attack;
 using Project.Scenes.Battle.Scripts.Model.Movement;
+using Project.Scenes.Battle.Scripts.Model.PhaseAction;
 using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scripts.Extensions;
@@ -166,24 +167,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 });
         }
 
-        public void OnPhaseStarted(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder)
+        public void OnPhaseStarted(BossAction action)
         {
-            if (builder == null)
-            {
-                ApplyAttackTimeline(null);
-                currentPhaseMovementSteps = null;
-                StartMovementSequence(null);
-                return;
-            }
+            var attackPreset = action?.AttackPreset;
+            ApplyAttackTimeline(attackPreset != null ? attackPreset.CreateTimeline() : null);
 
-            var attackPreset = builder.BossAttackPreset;
-            var attackTimeline = attackPreset != null
-                ? attackPreset.CreateTimeline()
-                : null;
-            ApplyAttackTimeline(attackTimeline);
-
-            currentPhaseMovementSteps = builder.BossMovementPreset != null
-                ? builder.BossMovementPreset.Steps
+            currentPhaseMovementSteps = action?.MovementPreset != null
+                ? action.MovementPreset.Steps
                 : null;
             StartMovementSequence(currentPhaseMovementSteps);
         }

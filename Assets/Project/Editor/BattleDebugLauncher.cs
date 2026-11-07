@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Project.Commons.Debugger.Scripts.Presenter;
 using Project.Scenes.Battle.Scripts.Model;
+using Project.Scenes.Battle.Scripts.Model.PhaseNode;
 using Project.Scripts.Infra;
 using Project.Scripts.Model;
 using UnityEditor;
@@ -173,15 +174,22 @@ namespace Project.Editor
             }
         }
 
-        // シーケンス内の全グループを平坦化し、TimelineBuilderアセット名をそのままラベルにする。
-        // Popupの選択値は「実行順の通し番号」なので、ラベルが重複していても選択自体は破綻しない。
+        // root 直下の子をラベルにする。開始位置は root 直下の子単位で指定する。
+        // Popupの選択値は「並び順の番号」なので、ラベルが重複していても選択自体は破綻しない。
         static string[] BuildPhaseLabels(BattleSequenceAsset sequenceAsset)
         {
             var labels = new List<string>();
+            var root = sequenceAsset.BuildRootNode();
 
-            foreach (var group in sequenceAsset.SequenceGroups)
-            foreach (var phase in group.Phases)
-                labels.Add(phase.TimelineBuilder != null ? phase.TimelineBuilder.name : "(no timeline)");
+            if (root is SequencePhaseNode sequence)
+            {
+                foreach (var child in sequence.Children)
+                    labels.Add(child != null ? child.Label : "(empty)");
+            }
+            else if (root != null)
+            {
+                labels.Add(root.Label);
+            }
 
             return labels.ToArray();
         }

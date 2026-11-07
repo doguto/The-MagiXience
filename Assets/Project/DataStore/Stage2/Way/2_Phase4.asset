@@ -12,19 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e9eb2c7bf1b4174a965e674148ccd2f, type: 3}
   m_Name: 2_Phase4
   m_EditorClassIdentifier: 
-  signalTracks: []
-  animationTracks: []
-  activationTracks: []
-  audioTracks: []
-  controlTracks: []
-  enemySpawnTracks:
-  - trackName: EnemySpawn
-    clips:
-    - time: 0
-      spawnPosition: {x: 10, y: 0, z: 0}
-      prefab: {fileID: 8647684210669646231, guid: 37e28616ac705cc45b77ecef95bd48df, type: 3}
-      movementOverride: {fileID: 0}
-      attackOverride: {fileID: 0}
-  bulletClearTracks: []
-  bossAttackPreset: {fileID: 0}
-  bossMovementPreset: {fileID: 0}
+  actions:
+  - rid: 8540147769746653492
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147769746653492
+      type: {class: EnemySpawnAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 0
+        spawnPosition: {x: 10, y: 0, z: 0}
+        prefab: {fileID: 8647684210669646231, guid: 37e28616ac705cc45b77ecef95bd48df, type: 3}
+        movementOverride: {fileID: 0}
+        attackOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 0}
