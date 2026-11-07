@@ -96,6 +96,12 @@ MonoBehaviour:
       interludeBuilderOverride: {fileID: 0}
       interludeTimeLimitOverride: 0
     endBossHpPercent: 0
+  root:
+    rid: 8540147769746653258
+  wind:
+    enabled: 0
+    playerSpeedRatio: 0.2
+    intervals: []
   bossPrefab: {fileID: 5846423284816155308, guid: 2547cec9d2b889841984267e5a4822ec, type: 3}
   bossSpawnPosition: {x: 10, y: 0, z: 0}
   bossEntranceMovement:
@@ -201,6 +207,299 @@ MonoBehaviour:
       type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
       data:
         hpThresholdPercent: 40
+    - rid: 8540147769746653258
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653259
+        - rid: 8540147769746653260
+        - rid: 8540147769746653261
+        - rid: 8540147769746653262
+    - rid: 8540147769746653259
+      type: {class: LoopPhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        child:
+          rid: 8540147769746653263
+        loopCount: 0
+        exitCondition:
+          rid: 8540147769746653264
+        interrupt: 1
+    - rid: 8540147769746653260
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: ReturnHome
+          timelineBuilder: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653265
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653261
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: CrossBeam
+          timelineBuilder: {fileID: 11400000, guid: 0a7fab46d82bc604aac8a5a8375ab26f, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653266
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653262
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: BeamStorm
+          timelineBuilder: {fileID: 11400000, guid: 1ca7996f69e26324fac2a81eb83dc61b, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653267
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653263
+      type: {class: RandomPhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653268
+        - rid: 8540147769746653269
+        - rid: 8540147769746653270
+        - rid: 8540147769746653271
+        - rid: 8540147769746653272
+        - rid: 8540147769746653273
+        noRepeat: 1
+    - rid: 8540147769746653264
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 40
+    - rid: 8540147769746653265
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1.2
+    - rid: 8540147769746653266
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 5
+    - rid: 8540147769746653267
+      type: {class: BossHpThresholdExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        hpThresholdPercent: 0
+    - rid: 8540147769746653268
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653274
+        - rid: 8540147769746653275
+    - rid: 8540147769746653269
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653276
+        - rid: 8540147769746653277
+    - rid: 8540147769746653270
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653278
+        - rid: 8540147769746653279
+    - rid: 8540147769746653271
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653280
+        - rid: 8540147769746653281
+    - rid: 8540147769746653272
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653282
+        - rid: 8540147769746653283
+    - rid: 8540147769746653273
+      type: {class: SequencePhaseNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        children:
+        - rid: 8540147769746653284
+        - rid: 8540147769746653285
+    - rid: 8540147769746653274
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 1
+          timelineBuilder: {fileID: 11400000, guid: 87ea8837b6bf7e44d9411ae89d3b99db, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653286
+          interludeBuilderOverride: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          interludeTimeLimitOverride: 1
+    - rid: 8540147769746653275
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: ReturnHome
+          timelineBuilder: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653287
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653276
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: MoveShot
+          timelineBuilder: {fileID: 11400000, guid: baca08b56fd72f84ebbd81e90120fe91, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653288
+          interludeBuilderOverride: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          interludeTimeLimitOverride: 1
+    - rid: 8540147769746653277
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: ReturnHome
+          timelineBuilder: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653289
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653278
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: 2
+          timelineBuilder: {fileID: 11400000, guid: 2719945ec5dbed5479780ddaf52a8ed8, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653290
+          interludeBuilderOverride: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          interludeTimeLimitOverride: 1
+    - rid: 8540147769746653279
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: ReturnHome
+          timelineBuilder: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653291
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653280
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: Line3
+          timelineBuilder: {fileID: 11400000, guid: 1d899fd61a2789f44b8eae7176167472, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653292
+          interludeBuilderOverride: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          interludeTimeLimitOverride: 1.2
+    - rid: 8540147769746653281
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: ReturnHome
+          timelineBuilder: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653293
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653282
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: MoveUp
+          timelineBuilder: {fileID: 11400000, guid: a8f967202e3e37943a53299c759425f1, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653294
+          interludeBuilderOverride: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          interludeTimeLimitOverride: 1.2
+    - rid: 8540147769746653283
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: ReturnHome
+          timelineBuilder: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653295
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653284
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: MoveDown
+          timelineBuilder: {fileID: 11400000, guid: e4b010cdd168ebe4eab7440384ea90f9, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653296
+          interludeBuilderOverride: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          interludeTimeLimitOverride: 1.2
+    - rid: 8540147769746653285
+      type: {class: PhaseLeafNode, ns: Project.Scenes.Battle.Scripts.Model.PhaseNode, asm: Model}
+      data:
+        phase:
+          phaseId: ReturnHome
+          timelineBuilder: {fileID: 11400000, guid: 697bff9b30600944985d4e8546726f75, type: 2}
+          timelineBuilderStrong: {fileID: 0}
+          exitConditionConfig:
+            rid: 8540147769746653297
+          interludeBuilderOverride: {fileID: 0}
+          interludeTimeLimitOverride: 0
+    - rid: 8540147769746653286
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 4
+    - rid: 8540147769746653287
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1
+    - rid: 8540147769746653288
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 3.2
+    - rid: 8540147769746653289
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1
+    - rid: 8540147769746653290
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 2.5
+    - rid: 8540147769746653291
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1
+    - rid: 8540147769746653292
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 4.2
+    - rid: 8540147769746653293
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1.2
+    - rid: 8540147769746653294
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1
+    - rid: 8540147769746653295
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1.2
+    - rid: 8540147769746653296
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1
+    - rid: 8540147769746653297
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 1.2
     - rid: 8577112454036455607
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:

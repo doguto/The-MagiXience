@@ -43,44 +43,21 @@ namespace Project.Scenes.Battle.Scripts.Repository.ModelRepository
                 cache[address] = asset;
             }
 
-            var groups = BuildGroups(asset);
-
             return new BattleSequenceModel(
-                asset.Situation, groups, CreatePhaseModel,
+                asset.Situation, asset.BuildRootNode(), CreatePhaseModel, CreateConditionWatcher,
                 asset.BossPrefab, asset.BossSpawnPosition, asset.BossEntranceMovement, asset.Wind);
-        }
-
-        List<SequenceGroupRuntime> BuildGroups(BattleSequenceAsset asset)
-        {
-            var groups = new List<SequenceGroupRuntime>(asset.SequenceGroups.Count);
-            foreach (var sg in asset.SequenceGroups)
-            {
-                groups.Add(new SequenceGroupRuntime(
-                    sg.Loop, sg.LoopCount, sg.Phases, sg.RandomPick, sg.Interlude,
-                    CreateBossHpEndCondition(sg.EndBossHpPercent)));
-            }
-            return groups;
-        }
-
-        // HPが閾値以下になったかを返す判定。閾値0（無効）の場合は null。
-        Func<bool> CreateBossHpEndCondition(float hpPercent)
-        {
-            if (hpPercent <= 0f)
-            {
-                return null;
-            }
-
-            return () =>
-            {
-                var boss = getBossModel?.Invoke();
-                return boss != null && boss.CurrentHp.Value <= Mathf.CeilToInt(boss.MaxHp * hpPercent / 100f);
-            };
         }
 
         public BattlePhaseModelBase CreatePhaseModel(BattlePhaseDefinition definition)
         {
             InjectDependencies(definition.ExitConditionConfig);
             return definition.ExitConditionConfig.CreatePhaseModel(definition, enemyTracker, getBossModel);
+        }
+
+        // LoopPhaseNode の終了条件を監視するためのモデル。Timeline は再生されない
+        BattlePhaseModelBase CreateConditionWatcher(IExitConditionConfig config)
+        {
+            return CreatePhaseModel(BattlePhaseDefinition.ForCondition("LoopExitCondition", config));
         }
 
         void InjectDependencies(IExitConditionConfig config)

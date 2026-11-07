@@ -14,6 +14,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         bool isTimelineResolved;
         TimelineAsset resolvedTimelineStrong;
         bool isTimelineStrongResolved;
+        bool isDisposed;
 
         protected BattlePhaseModelBase(BattlePhaseDefinition definition)
         {
@@ -84,8 +85,16 @@ namespace Project.Scenes.Battle.Scripts.Model
             exitSubject.OnNext(Unit.Default);
         }
 
+        // LoopPhaseNode の interrupt から呼ばれる。破棄済みなら何もしない
+        public void ForceComplete()
+        {
+            if (isDisposed) return;
+            CompletePhase();
+        }
+
         public virtual void Dispose()
         {
+            isDisposed = true;
             Disposables.Dispose();
             exitSubject.Dispose();
 

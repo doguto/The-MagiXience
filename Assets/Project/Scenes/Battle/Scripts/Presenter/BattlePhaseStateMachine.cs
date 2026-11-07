@@ -161,6 +161,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // 先に enumerator を破棄して Loop の終了条件の監視を止め、破棄済みフェーズへの interrupt を防ぐ
+            sequence.Dispose();
+
             foreach (var phase in sequence.AllCreatedPhases)
             {
                 phase.Dispose();

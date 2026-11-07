@@ -407,7 +407,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var targetSequence = startSituation == BattleSituation.Boss ? bossSequence : waySequence;
             if (targetSequence == null) return;
 
-            targetSequence.SetStartPhaseByFlatIndex(startPhaseIndex);
+            targetSequence.SetStartIndex(startPhaseIndex);
             Debug.Log($"[BattleScenePresenter] Debug start phase index {startPhaseIndex} applied to {startSituation} sequence.", this);
         }
 #endif
