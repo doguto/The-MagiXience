@@ -97,7 +97,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 59
-  contactDamage: 15
+  contactDamage: 30
   onlyChargeDamageable: 1
   lifetime: 0
   movementPreset: {fileID: 0}
@@ -127,6 +127,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410795
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 0.15
         signal:
           rid: 5211421576021410796
@@ -137,6 +138,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410799
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 0.3
         signal:
           rid: 5211421576021410800
@@ -147,6 +149,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410803
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 0.45
         signal:
           rid: 5211421576021410804
@@ -157,6 +160,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410807
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 0.6
         signal:
           rid: 5211421576021410808
@@ -167,6 +171,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410811
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 0.75
         signal:
           rid: 5211421576021410812
@@ -177,6 +182,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410815
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 1.05
         signal:
           rid: 5211421599096111104
@@ -187,6 +193,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421599096111107
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 1.2
         signal:
           rid: 5211421599096111108
@@ -197,6 +204,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421599096111111
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 1.35
         signal:
           rid: 5211421599096111112
@@ -207,6 +215,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421599096111115
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 1.5
         signal:
           rid: 5211421599096111116
@@ -217,6 +226,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421599096111119
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 1.65
         signal:
           rid: 5211421599096111120
@@ -227,6 +237,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421599096111123
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       - time: 1.8
         signal:
           rid: 5211421599096111124
@@ -237,6 +248,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421599096111127
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       nextPhaseTrigger:
         rid: -2
   deathAttackEntry:
@@ -250,6 +262,7 @@ MonoBehaviour:
     sourceIndexProvider:
       rid: 1002
     seType: 0
+    bulletMovementOverride: {fileID: 0}
   damageFlashInterval: 0.05
   damageFlashDuration: 0.2
   view: {fileID: 5041210401996759946}
@@ -312,6 +325,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421576021410793
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -329,6 +344,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421576021410797
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -346,6 +363,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421576021410801
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -363,6 +382,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421576021410805
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -380,6 +401,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421576021410809
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -397,6 +420,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421576021410813
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -414,6 +439,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421599096111105
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -431,6 +458,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421599096111109
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -448,6 +477,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421599096111113
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -465,6 +496,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421599096111117
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -482,6 +515,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421599096111121
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
@@ -499,6 +534,8 @@ MonoBehaviour:
         wayCount: 15
         spreadAngle: 12
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421599096111125
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
