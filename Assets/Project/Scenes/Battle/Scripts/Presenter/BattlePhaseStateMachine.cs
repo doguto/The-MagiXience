@@ -33,18 +33,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         SoundManagerPresenter windSoundManager;
 
-        void Update()
-        {
-            var previousDirection = BattleWind.Direction;
-            BattleWind.Tick(Time.deltaTime);
-            if (previousDirection != WindDirection.None || BattleWind.Direction == WindDirection.None ||
-                BattleWind.StartSe == SeType.None) return;
-
-            if (!windSoundManager)
-                windSoundManager = FindFirstObjectByType<SoundManagerPresenter>();
-            windSoundManager?.PlaySE(BattleWind.StartSe);
-        }
-
         public void PlaySequence(BattleSequenceModel sequence)
         {
             if (sequence == null)

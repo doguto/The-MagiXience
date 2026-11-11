@@ -164,6 +164,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Tooltip("この Prefab を動かすツリー。未指定なら Prefab に設定された旧来の動き")] BehaviorTreeAsset behavior;
         [SerializeField] List<TreeParameter> overrides = new();
         [SerializeField, Tooltip("撃つ敵がいなければワールド座標、いればその位置からの相対")] Vector2 position;
+        [SerializeField, Tooltip("撃つ敵がいてもワールド座標で出す")] bool worldSpace;
         [SerializeReference, SubclassSelector] SpawnLayout layout = new SingleLayout();
         [SerializeReference, SubclassSelector] RotationSource rotation;
         [SerializeReference, SubclassSelector] DirectionSource direction;
@@ -190,7 +191,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var spawner = ctx.Services.Spawner;
             if (spawner == null) return;
 
-            var e = new EmitContext(ctx, position);
+            var e = worldSpace ? new EmitContext(new BattleContext(ctx.World), position) : new EmitContext(ctx, position);
             var dir = direction?.GetDirection(e) ?? Vector2.left;
             var baseRot = rotation?.GetRotation(e) ?? Quaternion.identity;
             var z = ctx.Self != null ? ctx.Self.Body.Position.z : 0f;

@@ -7,7 +7,9 @@ using UnityEngine.SceneManagement;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
-using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
+using Project.Scenes.Battle.Scripts.BehaviorTree;
+using Project.Scenes.Battle.Scripts.Runtime;
+using UnityEngine.AddressableAssets;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
@@ -20,7 +22,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 {
     public class BattleScenePresenter : MonoPresenter
     {
-        [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField] EnemyTracker enemyTracker;
         [SerializeField] BackgroundPresenter backgroundPresenter;
         [SerializeField] BulletClearReceiver bulletClearReceiver;
@@ -30,13 +31,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [Tooltip("コンティニュー回数に応じたPlayerの最大HP。index=コンティニュー回数（0=初回）。回数がテーブル長を超えた場合は末尾の値を使用する。")]
         [SerializeField] int[] continueHpTable = { 100 };
 
-        BattleSequenceModelRepository sequenceModelRepository;
+        BattleClock battleClock;
+        BattleFlow flow;
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
 
         StageModel stageModel;
-        BattleSequenceModel waySequence;
-        BattleSequenceModel bossSequence;
+        BattleStageAsset wayStage;
+        BattleStageAsset bossStage;
         readonly BattleBackgroundModel backgroundModel = new();
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
@@ -60,10 +62,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void Awake()
         {
-            sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
-            sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
-            sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
-            phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
+            battleClock = GetComponent<BattleClock>() ?? gameObject.AddComponent<BattleClock>();
+            flow = new BattleFlow(battleClock, enemyTracker, bulletClearReceiver,
+                () => soundManager != null ? soundManager.BgmAudioSource : null,
+                se => soundManager?.PlaySE(se));
             ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
@@ -80,16 +82,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void StartBattle()
         {
             base.Start();
-
-            if (!phaseStateMachine)
-            {
-                Debug.LogError("BattlePhaseStateMachine is not assigned.", this);
-                return;
-            }
-
-            phaseStateMachine.OnSequenceCompleted
-                             .Subscribe(HandleSequenceCompleted)
-                             .AddTo(disposables);
 
             SubscribeToPauseInput();
 
@@ -222,7 +214,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         //             trueの場合のみコンティニュー回数を進め、最大HPを増加させる。
         void Retry(bool isContinue)
         {
-            phaseStateMachine.Stop();
+            flow.Stop();
             playerPresenter?.CancelCharge();
 
             // シナリオ遷移待ち中のDelayや、シーンロード待ちハンドラ・購読をすべて解除
@@ -241,7 +233,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             bossDisposables.Dispose();
             bossDisposables = new CompositeDisposable();
-            phaseStateMachine.SetTimelineResolver(null);
 
             if (bossPresenter != null)
             {
@@ -275,24 +266,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             hasResumedPlayerAnimationOnBoss = false;
 
             var startSituation = RuntimeModelRepository.Get().CurrentSituation;
-            if (startSituation == BattleSituation.Boss && bossSequence != null)
+            if (startSituation == BattleSituation.Boss && bossStage != null)
             {
                 backgroundPresenter?.ResetScroll(false);
                 SpawnBoss();
                 PlayBgmForSituation(BattleSituation.Boss);
-                phaseStateMachine.PlaySequence(bossSequence);
+                StartBossSequence();
             }
-            else if (waySequence != null)
+            else if (wayStage != null)
             {
                 backgroundPresenter?.ResetScroll(true);
                 PlayBgmForSituation(BattleSituation.Way);
-                phaseStateMachine.PlaySequence(waySequence);
+                StartWaySequence();
             }
         }
 
         async void ReturnToTitle()
         {
-            phaseStateMachine.Stop();
+            flow.Stop();
             playerPresenter?.CancelCharge();
 
             sequenceTransitionCts?.Cancel();
@@ -347,25 +338,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             ApplyPlayerMaxHp();
             playerPresenter?.SubscribeToAttackInput();
 
-            waySequence = LoadSequence(stageModel.WaySequenceAddress);
-            bossSequence = LoadSequence(stageModel.BossSequenceAddress);
+            wayStage = LoadStage(stageModel.WaySequenceAddress);
+            bossStage = LoadStage(stageModel.BossSequenceAddress);
 
             var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            ApplyDebugStartPhase(startSituation);
-#endif
-
-            if (startSituation == BattleSituation.Boss && bossSequence != null)
+            if (startSituation == BattleSituation.Boss && bossStage != null)
             {
                 SpawnBoss();
                 PlayBgmForSituation(BattleSituation.Boss);
-                phaseStateMachine.PlaySequence(bossSequence);
+                StartBossSequence();
             }
-            else if (waySequence != null)
+            else if (wayStage != null)
             {
                 PlayBgmForSituation(BattleSituation.Way);
-                phaseStateMachine.PlaySequence(waySequence);
+                StartWaySequence();
             }
             else
             {
@@ -396,21 +383,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             return Mathf.RoundToInt((nextHp - baseHp) * 100f / baseHp);
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // デバッグ起動で指定された開始フェーズを、起動対象のシーケンスにのみ適用する。
-        // Way から Boss へ遷移した場合、Boss 側は常に先頭から再生される。
-        void ApplyDebugStartPhase(BattleSituation startSituation)
-        {
-            var startPhaseIndex = RuntimeModelRepository.Instance.Get().DebugStartPhaseIndex;
-            if (startPhaseIndex <= 0) return;
 
-            var targetSequence = startSituation == BattleSituation.Boss ? bossSequence : waySequence;
-            if (targetSequence == null) return;
-
-            targetSequence.SetStartPhaseByFlatIndex(startPhaseIndex);
-            Debug.Log($"[BattleScenePresenter] Debug start phase index {startPhaseIndex} applied to {startSituation} sequence.", this);
-        }
-#endif
 
         public void PlayBossBgm()
         {
@@ -453,22 +426,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        BattleSequenceModel LoadSequence(string address)
+        static BattleStageAsset LoadStage(string address)
         {
-            if (string.IsNullOrEmpty(address))
-            {
-                return null;
-            }
+            if (string.IsNullOrEmpty(address)) return null;
 
             try
             {
-                return sequenceModelRepository.Load(address);
+                return Addressables.LoadAssetAsync<BattleStageAsset>(address).WaitForCompletion();
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to load phase sequence from {address}: {e.Message}", this);
+                Debug.LogError($"[BattleScenePresenter] Failed to load battle stage. address={address} error={e.Message}");
                 return null;
             }
+        }
+
+        void StartWaySequence()
+        {
+            flow.StartStageTree(wayStage.Tree, () => HandleSequenceCompleted(BattleSituation.Way));
         }
 
         async void HandleSequenceCompleted(BattleSituation situation)
@@ -493,7 +468,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 // 制作中のステージは道中（中ボスを含む）だけでも再生できる。
                 // 本ボス未設定ならボス前シナリオへ進めず、ステージクリア扱いにもせずここで終了する。
-                if (bossSequence == null)
+                if (bossStage == null)
                 {
                     Debug.Log("[BattleScenePresenter] 道中完了。本ボスのシーケンスは未設定のため、ボス戦への移行を停止します。", this);
                     return;
@@ -583,13 +558,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            if (bossSequence == null || bossSequence.BossPrefab == null)
+            if (bossStage == null || bossStage.BossPrefab == null)
             {
-                Debug.LogWarning("[BattleScenePresenter] BossPrefab is not configured in boss sequence.", this);
+                Debug.LogWarning("[BattleScenePresenter] BossPrefab is not configured in boss stage.", this);
                 return;
             }
 
-            var instance = Instantiate(bossSequence.BossPrefab, bossSequence.BossSpawnPosition, Quaternion.identity);
+            var instance = Instantiate(bossStage.BossPrefab, bossStage.BossSpawnPosition, Quaternion.identity);
             bossPresenter = instance.GetComponent<BossEntityPresenter>();
 
             if (bossPresenter == null)
@@ -601,36 +576,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             playerPresenter?.FreezeRunAnimation();
             hasResumedPlayerAnimationOnBoss = false;
 
-            phaseStateMachine.SetTimelineResolver(phase =>
-            {
-                if (ShouldUseStrongAttack(phase))
-                {
-                    return phase.ResolveTimelineStrong();
-                }
-                return phase.ResolveTimeline();
-            });
-            phaseStateMachine.OnPhaseStarted
-                             .Subscribe(phase =>
-                             {
-                                 if (!hasResumedPlayerAnimationOnBoss)
-                                 {
-                                     hasResumedPlayerAnimationOnBoss = true;
-                                     playerPresenter?.UnfreezeRunAnimation();
-                                 }
-
-                                 bool useStrong = ShouldUseStrongAttack(phase);
-                                 if (useStrong)
-                                 {
-                                     bossPresenter.Model.EnterStrongMode();
-                                 }
-                                 var builder = useStrong ? phase.BuilderStrong : phase.Builder;
-                                 bossPresenter.OnPhaseStarted(phase, builder);
-                             })
-                             .AddTo(bossDisposables);
-
             bossPresenter.OnDeath
                          .Take(1)
-                         .Subscribe(_ => phaseStateMachine.Stop())
+                         .Subscribe(_ => flow.World?.Services.Boss?.Stop())
                          .AddTo(bossDisposables);
 
             bossPresenter.OnDeathSequenceCompleted
@@ -638,30 +586,32 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                          .Subscribe(_ => HandleSequenceCompleted(BattleSituation.Boss))
                          .AddTo(bossDisposables);
 
-            bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);
+            flow.PlayEntrance(bossPresenter.transform, bossStage.BossEntrance);
 
             backgroundPresenter?.StartDeceleration();
 
-            Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
-        }
-
-        bool ShouldUseStrongAttack(BattlePhaseModelBase phase)
-        {
-            if (phase.BuilderStrong == null || bossPresenter?.Model == null) return false;
-            return bossPresenter.Model.ShouldUseStrongAttack;
+            Debug.Log($"[BattleScenePresenter] Boss spawned at {bossStage.BossSpawnPosition}", this);
         }
 
         void StartBossSequence()
         {
-            if (bossSequence == null)
+            if (bossStage == null)
             {
-                Debug.LogError("Boss sequence is not configured.", this);
+                Debug.LogError("Boss stage is not configured.", this);
                 return;
             }
 
             // シナリオ明けにプレイヤーとボスが重なっていても即被弾しないよう、少しの間ボスの当たり判定を切る
             bossPresenter?.DisableColliderOnEntry();
-            phaseStateMachine.PlaySequence(bossSequence);
+
+            if (!hasResumedPlayerAnimationOnBoss)
+            {
+                hasResumedPlayerAnimationOnBoss = true;
+                playerPresenter?.UnfreezeRunAnimation();
+            }
+
+            if (bossPresenter != null) flow.StartBossTree(bossPresenter.gameObject, bossStage.BossTree);
+            if (bossStage.Tree != null) flow.StartStageTree(bossStage.Tree, null);
         }
 
         // クリアしたステージの次のステージを開放する。
@@ -693,7 +643,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             OpenNextStage(stageModel);
 
             // 次のステージをロードせず、To be continued画面を経由してステージ選択画面へ遷移する
-            phaseStateMachine.Stop();
+            flow.Stop();
 
             // BGMの切り替え・StageListへの遷移・Battleシーンの破棄はDemoClearScenePresenterが行う
             await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
@@ -728,7 +678,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             bossDisposables.Dispose();
             battleCompleted.Dispose();
             backgroundModel.Dispose();
-            phaseStateMachine?.Stop();
+            flow?.Stop();
         }
     }
 }

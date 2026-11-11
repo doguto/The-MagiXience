@@ -129,5 +129,10 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public BulletClearReceiver Clearer { get; set; }
         public BattleActor Boss { get; set; }
         public Action<SeType> PlaySe { get; set; }
+        public UnityEngine.AudioSource BgmSource { get; set; }
+
+        // PhaseMarker ノードが通知するフェーズの区切り (進行ゲージなどが購読する)
+        public event Action<string> PhaseStarted;
+        public void NotifyPhase(string phaseId) => PhaseStarted?.Invoke(phaseId);
     }
 }
