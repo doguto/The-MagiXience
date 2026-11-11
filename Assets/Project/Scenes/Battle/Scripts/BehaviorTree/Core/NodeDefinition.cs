@@ -23,6 +23,13 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         public void RegenerateGuid() => guid = System.Guid.NewGuid().ToString("N");
 
+        public INode Create(BuildScope scope)
+        {
+            var node = Build(scope);
+            if (node is Node n && n.DebugGuid == null) n.DebugGuid = guid;
+            return node;
+        }
+
         public abstract INode Build(BuildScope scope);
 
         public virtual NodeChildCapacity ChildCapacity => NodeChildCapacity.None;
@@ -56,7 +63,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             foreach (var child in children)
             {
                 if (child == null) continue;
-                result.Add(child.Build(scope));
+                result.Add(child.Create(scope));
             }
             return result.ToArray();
         }
@@ -76,7 +83,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             child = newChildren.Count > 0 ? newChildren[0] : null;
         }
 
-        protected INode BuildChild(BuildScope scope) => child?.Build(scope) ?? new SucceedNode();
+        protected INode BuildChild(BuildScope scope) => child?.Create(scope) ?? new SucceedNode();
     }
 
     [Serializable]

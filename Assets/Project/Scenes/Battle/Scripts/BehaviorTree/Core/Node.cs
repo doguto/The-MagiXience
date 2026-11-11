@@ -18,9 +18,13 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public abstract class Node : INode
     {
         public bool IsActive { get; private set; }
+        public string DebugGuid { get; internal set; }
 
         public NodeStatus Tick(BattleContext ctx)
         {
+#if UNITY_EDITOR
+            if (DebugGuid != null) BehaviorTreeDebug.MarkTicked(DebugGuid);
+#endif
             if (!IsActive)
             {
                 IsActive = true;

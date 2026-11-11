@@ -7,23 +7,24 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable]
     public sealed class TimelineNodeDefinition : CompositeNodeDefinition
     {
-        [SerializeField, Tooltip("子の並び順に対応する開始フレーム。不足分は0")]
-        List<BtInt> startFrames = new();
         [SerializeField, Tooltip("0より大きければ、このフレーム数経過した時点で完了する(実行中の子は中断)。0なら全ての子の完了を待つ")]
         BtInt duration;
 
-        public List<BtInt> StartFrames => startFrames;
+        public BtInt Duration
+        {
+            get => duration;
+            set => duration = value;
+        }
 
         public override INode Build(BuildScope scope)
         {
             var children = BuildChildren(scope);
-            var starts = new int[children.Length];
-            for (var i = 0; i < starts.Length; i++) starts[i] = i < startFrames.Count ? Mathf.Max(0, startFrames[i].Resolve(scope)) : 0;
-            return new TimelineNode(children, starts, duration.Resolve(scope));
+            return new TimelineNode(children, new int[children.Length], Mathf.Max(0, duration.Resolve(scope)));
         }
     }
 
-    // 子ごとに開始フレームを指定して並列実行する。弾幕の「t=Nf で発射」を書くためのノード。
+    // 子を並列実行し、duration 指定時はその長さで打ち切る。子の開始時刻は Delay デコレータで指定する。
+    // 攻撃パターンの 1 周期をこのノードで表すと、移動と攻撃の周期を同じ duration で揃えられる。
     public sealed class TimelineNode : Node
     {
         readonly INode[] children;

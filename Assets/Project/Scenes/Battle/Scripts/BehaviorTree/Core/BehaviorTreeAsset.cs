@@ -23,7 +23,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public INode Build(BuildScope parentScope = null, IReadOnlyList<TreeParameter> overrides = null)
         {
             var scope = BuildScope.Enter(parentScope, this, overrides);
-            return root?.Build(scope) ?? new SucceedNode();
+            return root?.Create(scope) ?? new SucceedNode();
         }
     }
 }
