@@ -262,6 +262,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             SubscribeAttackTiming();
         }
 
+        // BehaviorTree で動かす場合に、Prefab に設定された旧来の移動・攻撃・死亡時攻撃を止める
+        public void DetachLegacyBehaviour()
+        {
+            StopMovement();
+            attackTimingSubscription?.Dispose();
+            attackTimingSubscription = null;
+            model?.AttackStrategy?.Dispose();
+            model?.SetAttackStrategy(null);
+            deathAttackEntry = null;
+        }
+
         void SubscribeAttackTiming()
         {
             attackTimingSubscription?.Dispose();

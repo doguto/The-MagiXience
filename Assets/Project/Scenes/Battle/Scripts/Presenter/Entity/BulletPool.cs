@@ -37,7 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             return bullet;
         }
 
-        static IObjectPool<BulletEntityPresenter> GetOrCreateSharedPool(BulletEntityPresenter prefab, int defaultCapacity, int maxSize)
+        public static IObjectPool<BulletEntityPresenter> GetOrCreateSharedPool(BulletEntityPresenter prefab, int defaultCapacity = 20, int maxSize = 100)
         {
             if (!isSceneHookRegistered)
             {

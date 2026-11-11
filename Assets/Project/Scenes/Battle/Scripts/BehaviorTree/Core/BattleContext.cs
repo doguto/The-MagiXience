@@ -1,24 +1,31 @@
 using System;
+using Project.Scenes.Battle.Scripts.Runtime;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
+    // ツリー 1 本ぶんの実行文脈。World は全ツリーで共有し、Self はそのツリーを持つ敵/ボス (ステージ進行なら null)。
     public sealed class BattleContext
     {
-        public const int FramesPerSecond = 60;
+        public const int FramesPerSecond = BattleWorld.FramesPerSecond;
 
-        public BattleContext(int seed, Func<float> bgmTimeProvider = null)
+        public BattleContext(BattleWorld world, BattleActor self = null)
         {
-            Random = new Random(seed);
-            this.bgmTimeProvider = bgmTimeProvider;
+            World = world ?? throw new ArgumentNullException(nameof(world));
+            Self = self;
         }
 
-        readonly Func<float> bgmTimeProvider;
+        public BattleContext(int seed, Func<float> bgmTimeProvider = null) : this(new BattleWorld(seed, bgmTimeProvider))
+        {
+        }
 
-        public int Frame { get; private set; }
-        public Random Random { get; }
-        public float BgmTime => bgmTimeProvider?.Invoke() ?? 0f;
+        public BattleWorld World { get; }
+        public BattleActor Self { get; }
+        public int Frame => World.Frame;
+        public Random Random => World.Random;
+        public float BgmTime => World.BgmTime;
+        public BattleServices Services => World.Services;
 
-        internal void AdvanceFrame() => Frame++;
+        internal void AdvanceFrame() => World.AdvanceFrame();
 
         public static int SecondsToFrames(float seconds) => (int)Math.Round(seconds * FramesPerSecond);
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
@@ -9,15 +10,16 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         readonly INode root;
         readonly BattleContext context;
 
-        public BehaviorTreeRunner(BehaviorTreeAsset asset, BattleContext context)
+        public BehaviorTreeRunner(BehaviorTreeAsset asset, BattleContext context, IReadOnlyList<TreeParameter> overrides = null)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
             this.context = context;
-            root = asset.Build();
+            root = asset.Build(null, overrides);
             Name = asset.name;
         }
 
         public string Name { get; }
+        public BattleContext Context => context;
         public NodeStatus? Result { get; private set; }
         public bool IsFinished => Result.HasValue;
         public event Action<NodeStatus> Finished;

@@ -71,12 +71,42 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
+        public bool IsActive => !isInPool && model != null && model.IsAlive;
+        public float WindInfluence => windInfluence;
 
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>
         /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
         /// <param name="movementOverride">この弾に限り使う移動ステップ。nullならPrefab側のmovementStepsを使う(従来動作)</param>
         /// <param name="movementPresetOverride">この弾に限り使うMovement Stepsのプリセット。movementOverrideが指定されていればそちらを優先する</param>
         public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null, bool affectedByWind = true)
+        {
+            var resolvedRotation = Setup(damage, position, direction, objectPool, isPlayerBullet, rotation, range);
+            simulateWind = affectedByWind && BattleWind.Enabled;
+            if (simulateWind)
+            {
+                if (authoredMovementTarget == null)
+                {
+                    var proxy = new GameObject("Bullet authored trajectory");
+                    proxy.hideFlags = HideFlags.HideInHierarchy;
+                    authoredMovementTarget = proxy.transform;
+                }
+                authoredMovementTarget.SetPositionAndRotation(position, resolvedRotation);
+                authoredMovementTarget.localScale = transform.lossyScale;
+                previousAuthoredPosition = position;
+            }
+            StartMovementSequence(direction, startDelay, movementOverride, movementPresetOverride);
+        }
+
+        // BulletSystem が位置を毎フレーム与える弾として初期化する (自前の移動・風処理は行わない)
+        public Quaternion InitializeDriven(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, Quaternion rotation, float range, bool isPlayerBullet = false)
+        {
+            var resolvedRotation = Setup(damage, position, direction, objectPool, isPlayerBullet, rotation, range);
+            simulateWind = false;
+            StopMovement();
+            return resolvedRotation;
+        }
+
+        Quaternion Setup(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet, Quaternion rotation, float range)
         {
             pool = objectPool;
             // 渡された回転はPrefab本来の回転に対するオフセットとして加算する
@@ -99,22 +129,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             isInPool = false;
-            simulateWind = affectedByWind && BattleWind.Enabled;
             movementStarted = false;
             windVelocityCorrection = windPositionCorrection = Vector2.zero;
-            if (simulateWind)
-            {
-                if (authoredMovementTarget == null)
-                {
-                    var proxy = new GameObject("Bullet authored trajectory");
-                    proxy.hideFlags = HideFlags.HideInHierarchy;
-                    authoredMovementTarget = proxy.transform;
-                }
-                authoredMovementTarget.SetPositionAndRotation(position, resolvedRotation);
-                authoredMovementTarget.localScale = transform.lossyScale;
-                previousAuthoredPosition = position;
-            }
-            StartMovementSequence(direction, startDelay, movementOverride, movementPresetOverride);
 
             view.ResetView();
 
@@ -122,6 +138,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             // 回転しても外接円に収まるようextentsの長さを使う。
             screenMargin = spriteRenderer.bounds.extents.magnitude + 0.1f;
             lifetimeElapsed = 0f;
+            return resolvedRotation;
         }
 
         void StartMovementSequence(Vector2 direction, float startDelay, IMovementStep movementOverride, MovementPreset movementPresetOverride)
