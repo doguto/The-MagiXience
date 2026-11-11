@@ -287,6 +287,27 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             return null;
         }
 
+        // パラメータを参照している値欄を含むノードを選択して表示する
+        public void SelectNodesUsingParameter(string parameterName)
+        {
+            if (asset == null || serializedObject == null) return;
+            serializedObject.Update();
+            var refs = ParameterUtility.FindReferencePaths(serializedObject, parameterName);
+            var paths = CollectPropertyPaths(serializedObject);
+
+            ClearSelection();
+            foreach (var (def, view) in views)
+            {
+                if (!paths.TryGetValue(def, out var nodePath)) continue;
+                var prefix = nodePath + ".";
+                // 子ノード配下の参照は子自身に属するので除外する
+                var own = refs.Any(r => r.StartsWith(prefix) && !paths.Any(kv => kv.Key != def && kv.Value.StartsWith(prefix) && r.StartsWith(kv.Value + ".")));
+                if (own) AddToSelection(view);
+            }
+
+            if (selection.Count > 0) FrameSelection();
+        }
+
         public void RefreshRuntimeState()
         {
             foreach (var (def, view) in views)

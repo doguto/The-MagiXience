@@ -323,3 +323,226 @@
     font-size: 11px;
     white-space: normal;
 }
+
+/* ---------- Parameters panel ---------- */
+
+.bt-params {
+    min-width: 200px;
+    background-color: #25272b;
+    border-left-width: 1px;
+    border-left-color: #3a3c42;
+}
+
+.bt-params__header {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 8px 4px 10px;
+}
+
+.bt-params__header #title {
+    flex-grow: 1;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #9aa0aa;
+    -unity-font-style: bold;
+}
+
+.bt-params__add {
+    width: 22px;
+    height: 20px;
+    margin: 0;
+    font-size: 14px;
+    -unity-font-style: bold;
+    border-radius: 4px;
+}
+
+.bt-params__list {
+    flex-grow: 1;
+}
+
+.bt-params__row {
+    margin: 3px 8px;
+    padding: 4px 6px 6px 6px;
+    border-radius: 6px;
+    background-color: #2f3136;
+    border-width: 1px;
+    border-color: #383a40;
+    border-left-width: 3px;
+}
+
+.bt-params__row--int { border-left-color: #4f8cff; }
+.bt-params__row--float { border-left-color: #3ecf8e; }
+.bt-params__row--bool { border-left-color: #f0a33a; }
+.bt-params__row--vector2 { border-left-color: #c678dd; }
+.bt-params__row--object { border-left-color: #e06c9f; }
+
+.bt-params__row-top,
+.bt-params__row-bottom {
+    flex-direction: row;
+    align-items: center;
+}
+
+.bt-params__handle {
+    color: #6b6f78;
+    width: 14px;
+    -unity-text-align: middle-center;
+    cursor: move-arrow;
+}
+
+.bt-params__handle:hover {
+    color: #e3e5e9;
+}
+
+.bt-params__name {
+    flex-grow: 1;
+    margin: 0 4px 0 2px;
+}
+
+.bt-params__name #unity-text-input {
+    -unity-font-style: bold;
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.bt-params__name:focus #unity-text-input,
+.bt-params__name #unity-text-input:hover {
+    background-color: #1e1f22;
+    border-color: #4ea1ff;
+}
+
+.bt-params__kind {
+    font-size: 10px;
+    color: #9aa0aa;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background-color: #3a3d44;
+    cursor: move-arrow;
+}
+
+.bt-params__remove {
+    width: 18px;
+    height: 18px;
+    margin: 0 0 0 4px;
+    padding: 0;
+    background-color: transparent;
+    border-width: 0;
+    color: #8a8f99;
+}
+
+.bt-params__remove:hover {
+    color: #ff6b6b;
+}
+
+.bt-params__value {
+    flex-grow: 1;
+    margin-left: 16px;
+}
+
+.bt-params__value .unity-base-field__label {
+    display: none;
+}
+
+.bt-params__usage {
+    margin: 0 0 0 6px;
+    padding: 0 6px;
+    height: 18px;
+    font-size: 10px;
+    border-radius: 9px;
+    background-color: #3a4a66;
+    border-width: 0;
+    color: #cfe0ff;
+}
+
+.bt-params__usage--unused {
+    background-color: #3a3d44;
+    color: #8a8f99;
+}
+
+.bt-params__empty,
+.bt-params__hint {
+    padding: 8px 10px;
+    color: #8a8f99;
+    font-size: 11px;
+    white-space: normal;
+}
+
+.bt-params__hint {
+    border-top-width: 1px;
+    border-top-color: #3a3c42;
+}
+
+/* ---------- Value field (BtXxx) ---------- */
+
+.bt-value {
+    flex-direction: row;
+    align-items: center;
+    margin: 1px 3px 1px 3px;
+    border-radius: 4px;
+}
+
+.bt-value__label {
+    min-width: 70px;
+    color: #a9aeb7;
+    padding-left: 1px;
+}
+
+.bt-value__field {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.bt-value__field .unity-base-field__label {
+    display: none;
+}
+
+.bt-value__chip {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    height: 18px;
+    padding-left: 8px;
+    border-radius: 9px;
+    background-color: #5a2e48;
+    border-width: 1px;
+    border-color: #e06c9f;
+}
+
+.bt-value__chip--missing {
+    background-color: #5a2a2a;
+    border-color: #ff6b6b;
+}
+
+.bt-value__chip-label {
+    flex-grow: 1;
+    color: #ffd6e8;
+    -unity-font-style: bold;
+    font-size: 11px;
+}
+
+.bt-value__chip-remove {
+    width: 16px;
+    height: 16px;
+    margin: 0 1px 0 0;
+    padding: 0;
+    border-radius: 8px;
+    border-width: 0;
+    background-color: transparent;
+    color: #ffd6e8;
+}
+
+.bt-value__chip-remove:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.bt-value__menu {
+    width: 18px;
+    height: 18px;
+    margin: 0 0 0 2px;
+    padding: 0;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+.bt-value--drop {
+    background-color: rgba(224, 108, 159, 0.25);
+}

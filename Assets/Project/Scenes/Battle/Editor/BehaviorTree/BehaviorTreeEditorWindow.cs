@@ -14,6 +14,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         Label titleLabel;
         ObjectField assetField;
         NodePaletteView palette;
+        ParameterPanelView parameterPanel;
 
         [MenuItem("Window/Battle/Behavior Tree Editor")]
         public static void OpenEmpty() => Open(null);
@@ -55,9 +56,17 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             palette.SetAssetProvider(() => asset);
             split.Add(palette);
 
+            var rightSplit = new TwoPaneSplitView(1, 250, TwoPaneSplitViewOrientation.Horizontal) { viewDataKey = "bt-editor-split-right" };
             graphView = new BehaviorTreeGraphView(this);
             graphView.style.flexGrow = 1;
-            split.Add(graphView);
+            rightSplit.Add(graphView);
+
+            parameterPanel = new ParameterPanelView();
+            parameterPanel.UsageClicked += name => graphView.SelectNodesUsingParameter(name);
+            parameterPanel.Changed += () => graphView.Reload();
+            rightSplit.Add(parameterPanel);
+
+            split.Add(rightSplit);
             rootVisualElement.Add(split);
 
             var styleSheet = BehaviorTreeGraphView.LoadStyleSheet();
@@ -72,7 +81,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             Undo.undoRedoPerformed -= OnUndoRedo;
         }
 
-        void OnUndoRedo() => graphView?.Reload();
+        void OnUndoRedo()
+        {
+            graphView?.Reload();
+            parameterPanel?.Rebuild();
+        }
 
         void SetAsset(BehaviorTreeAsset target)
         {
@@ -80,6 +93,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             assetField?.SetValueWithoutNotify(asset);
             if (titleLabel != null) titleLabel.text = asset ? AssetDatabase.GetAssetPath(asset) : "(no asset)";
             graphView?.Load(asset);
+            parameterPanel?.SetAsset(asset);
             palette?.Rebuild();
         }
 
