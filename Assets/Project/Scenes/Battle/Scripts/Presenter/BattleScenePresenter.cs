@@ -659,6 +659,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // シナリオ明けにプレイヤーとボスが重なっていても即被弾しないよう、少しの間ボスの当たり判定を切る
+            bossPresenter?.DisableColliderOnEntry();
             phaseStateMachine.PlaySequence(bossSequence);
         }
 

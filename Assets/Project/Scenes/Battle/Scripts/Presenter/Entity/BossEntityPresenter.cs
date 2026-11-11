@@ -24,6 +24,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] int contactDamage = 20;
         [SerializeField, Range(0f, 1f)] float strongHpRatio = 0.5f;
         [SerializeField, Range(0f, 1f)] float overflowDamageMultiplier = 0f;
+        [Tooltip("シナリオ→ボス戦突入直後、ボスのColliderを無効化して接触ダメージを防ぐ秒数")]
+        [SerializeField, Min(0f)] float entryColliderDisableSeconds = 1f;
 
         [Header("Attack")]
         [SerializeField] BulletPool[] bulletPools;
@@ -482,6 +484,26 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (enemySpawnPrefabs == null || enemySpawnPrefabs.Length == 0) return null;
             if (index < 0 || index >= enemySpawnPrefabs.Length) return enemySpawnPrefabs[0];
             return enemySpawnPrefabs[index];
+        }
+
+        /// <summary>
+        /// ボス戦突入直後の接触ダメージを防ぐため、一定時間ボスのColliderを無効化する。
+        /// 無効化中はプレイヤーの弾も当たらない。撃破・破棄された場合は再有効化しない。
+        /// </summary>
+        public void DisableColliderOnEntry()
+        {
+            if (entryColliderDisableSeconds <= 0f) return;
+            var col = GetComponent<Collider2D>();
+            if (col == null) return;
+            DisableColliderTemporarilyAsync(col, entryColliderDisableSeconds, aliveCts.Token).Forget();
+        }
+
+        async UniTaskVoid DisableColliderTemporarilyAsync(Collider2D col, float seconds, CancellationToken ct)
+        {
+            col.enabled = false;
+            if (await UniTask.Delay(TimeSpan.FromSeconds(seconds), cancellationToken: ct).SuppressCancellationThrow()) return;
+            if (col == null || model == null || !model.IsAlive) return;
+            col.enabled = true;
         }
 
         void HandleDeath()
