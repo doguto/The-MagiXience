@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    [Serializable]
+    [Serializable, NodeInfo("指定フレーム待ってから子を実行する")]
     public sealed class DelayNodeDefinition : DecoratorNodeDefinition
     {
         [SerializeField, Tooltip("子を開始するまでの待機フレーム数")] BtInt frames;
@@ -14,13 +14,13 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             new SequenceNode(new[] { new WaitNode(Mathf.Max(0, frames.Resolve(scope))), BuildChild(scope) });
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("子の Success / Failure を反転する")]
     public sealed class InverterNodeDefinition : DecoratorNodeDefinition
     {
         public override INode Build(BuildScope scope) => new MapResultNode(BuildChild(scope), s => s == NodeStatus.Success ? NodeStatus.Failure : NodeStatus.Success);
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("子の結果に関わらず Success を返す")]
     public sealed class ForceSuccessNodeDefinition : DecoratorNodeDefinition
     {
         public override INode Build(BuildScope scope) => new MapResultNode(BuildChild(scope), _ => NodeStatus.Success);

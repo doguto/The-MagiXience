@@ -2,7 +2,7 @@ using System;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    [Serializable]
+    [Serializable, NodeInfo("子を左から順に実行する。子が Failure なら中断して Failure")]
     public sealed class SequenceNodeDefinition : CompositeNodeDefinition
     {
         public override INode Build(BuildScope scope) => new SequenceNode(BuildChildren(scope));
@@ -35,7 +35,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("子を左から順に試し、最初に Success した時点で Success")]
     public sealed class SelectorNodeDefinition : CompositeNodeDefinition
     {
         public override INode Build(BuildScope scope) => new SelectorNode(BuildChildren(scope));

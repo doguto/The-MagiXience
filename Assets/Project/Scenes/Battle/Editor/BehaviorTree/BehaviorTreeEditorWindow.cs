@@ -13,6 +13,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         BehaviorTreeGraphView graphView;
         Label titleLabel;
         ObjectField assetField;
+        NodePaletteView palette;
 
         [MenuItem("Window/Battle/Behavior Tree Editor")]
         public static void OpenEmpty() => Open(null);
@@ -47,9 +48,20 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             toolbar.Add(titleLabel);
             rootVisualElement.Add(toolbar);
 
+            var split = new TwoPaneSplitView(0, 230, TwoPaneSplitViewOrientation.Horizontal) { viewDataKey = "bt-editor-split" };
+            split.style.flexGrow = 1;
+
+            palette = new NodePaletteView();
+            palette.SetAssetProvider(() => asset);
+            split.Add(palette);
+
             graphView = new BehaviorTreeGraphView(this);
             graphView.style.flexGrow = 1;
-            rootVisualElement.Add(graphView);
+            split.Add(graphView);
+            rootVisualElement.Add(split);
+
+            var styleSheet = BehaviorTreeGraphView.LoadStyleSheet();
+            if (styleSheet != null) rootVisualElement.styleSheets.Add(styleSheet);
 
             Undo.undoRedoPerformed += OnUndoRedo;
             SetAsset(asset);
@@ -68,7 +80,10 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             assetField?.SetValueWithoutNotify(asset);
             if (titleLabel != null) titleLabel.text = asset ? AssetDatabase.GetAssetPath(asset) : "(no asset)";
             graphView?.Load(asset);
+            palette?.Rebuild();
         }
+
+        void OnProjectChange() => palette?.Rebuild();
 
         void OnInspectorUpdate()
         {

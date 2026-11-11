@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    [Serializable]
+    [Serializable, NodeInfo("子を同時に実行し、Duration で打ち切る。開始時刻は子側の Delay で指定")]
     public sealed class TimelineNodeDefinition : CompositeNodeDefinition
     {
         [SerializeField, Tooltip("0より大きければ、このフレーム数経過した時点で完了する(実行中の子は中断)。0なら全ての子の完了を待つ")]

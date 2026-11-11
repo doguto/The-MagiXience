@@ -149,7 +149,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("条件を判定し、成立なら Success・不成立なら Failure")]
     public sealed class CheckConditionNodeDefinition : ActionNodeDefinition
     {
         [SerializeReference, SubclassSelector] ConditionDefinition condition;
@@ -163,7 +163,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("条件が成立するまで待機する")]
     public sealed class WaitUntilNodeDefinition : ActionNodeDefinition
     {
         [SerializeReference, SubclassSelector] ConditionDefinition condition;

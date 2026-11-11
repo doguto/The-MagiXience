@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    [Serializable]
+    [Serializable, NodeInfo("開始時に子を1つ抽選して実行する")]
     public sealed class RandomNodeDefinition : CompositeNodeDefinition
     {
         [SerializeField, Tooltip("子の並び順に対応する重み。不足分は1として扱う")]

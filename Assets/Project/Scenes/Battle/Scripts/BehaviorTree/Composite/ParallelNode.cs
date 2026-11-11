@@ -9,7 +9,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         RequireOne,
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("全ての子を同時に実行する。終了条件は Policy で選択")]
     public sealed class ParallelNodeDefinition : CompositeNodeDefinition
     {
         [SerializeField, Tooltip("RequireAll: 全て成功で完了 / RequireOne: どれか1つ成功で残りを中断して完了")]

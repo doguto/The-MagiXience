@@ -10,7 +10,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [Tooltip("子の完了後は何もせず条件成立を待つ")] Hold,
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("条件が成立した瞬間に子を中断して完了する。毎フレーム子より先に判定")]
     public sealed class UntilNodeDefinition : DecoratorNodeDefinition
     {
         [SerializeReference, SubclassSelector] ConditionDefinition condition;

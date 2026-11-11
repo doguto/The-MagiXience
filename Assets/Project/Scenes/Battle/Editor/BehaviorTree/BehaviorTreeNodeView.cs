@@ -26,6 +26,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             viewDataKey = definition.Guid;
             AddToClassList("bt-node");
             AddToClassList("bt-node--" + CategoryKey(definition));
+            tooltip = NodeCatalog.Description(definition.GetType());
 
             Input = CreatePort(Direction.Input, Port.Capacity.Single);
             mainContainer.Insert(0, PortRow(Input, "bt-port-row--in"));
@@ -187,14 +188,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             return field;
         }
 
-        static string CategoryKey(NodeDefinition definition) => definition switch
-        {
-            SubTreeNodeDefinition => "subtree",
-            CompositeNodeDefinition => "composite",
-            DecoratorNodeDefinition => "decorator",
-            CheckConditionNodeDefinition or WaitUntilNodeDefinition => "condition",
-            _ => "action",
-        };
+        static string CategoryKey(NodeDefinition definition) => NodeCatalog.CategoryKey(definition);
 
         static string CategoryLabel(NodeDefinition definition) => CategoryKey(definition).ToUpperInvariant();
 

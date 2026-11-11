@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    [Serializable]
+    [Serializable, NodeInfo("子を指定回数繰り返す。0 で無限")]
     public sealed class LoopNodeDefinition : DecoratorNodeDefinition
     {
         [SerializeField, Tooltip("0 = 無限")] BtInt count;

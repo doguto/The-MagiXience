@@ -22,7 +22,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected override void OnExit(BattleContext ctx) => exit?.Invoke(ctx);
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("指定フレーム待機する (60f = 1秒)")]
     public sealed class WaitNodeDefinition : ActionNodeDefinition
     {
         [SerializeField, Tooltip("待機フレーム数(60 = 1秒)")] BtInt frames;
@@ -56,7 +56,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("コンソールにログを出力する (デバッグ用)")]
     public sealed class LogNodeDefinition : ActionNodeDefinition
     {
         [SerializeField] string message;
@@ -74,7 +74,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
     }
 
-    [Serializable]
+    [Serializable, NodeInfo("別の BehaviorTree を実行する。パラメータを上書きできる")]
     public sealed class SubTreeNodeDefinition : ActionNodeDefinition
     {
         [SerializeField] BehaviorTreeAsset tree;

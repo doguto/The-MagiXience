@@ -222,3 +222,99 @@
 .bt-graph .edge:hover {
     --edge-color: #c8ccd4;
 }
+
+/* ---------- Drop target ---------- */
+
+.bt-node.bt-drop-target #node-border {
+    border-color: #3ecf8e;
+    border-width: 2px;
+    background-color: #2f3a34;
+}
+
+/* ---------- Palette ---------- */
+
+.bt-palette {
+    min-width: 180px;
+    background-color: #25272b;
+    border-right-width: 1px;
+    border-right-color: #3a3c42;
+}
+
+.bt-palette__header {
+    padding: 8px 10px 4px 10px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #9aa0aa;
+    -unity-font-style: bold;
+}
+
+.bt-palette__search {
+    margin: 2px 8px 6px 8px;
+    width: auto;
+}
+
+.bt-palette__scroll {
+    flex-grow: 1;
+}
+
+.bt-palette__group {
+    margin: 2px 4px 4px 4px;
+}
+
+.bt-palette__group > Toggle {
+    margin-left: 2px;
+}
+
+.bt-palette__group > Toggle Label {
+    -unity-font-style: bold;
+    color: #d6d9de;
+}
+
+.bt-palette__group > #unity-content {
+    margin-left: 4px;
+}
+
+.bt-palette__item {
+    flex-direction: row;
+    align-items: center;
+    height: 26px;
+    margin: 1px 4px 1px 0;
+    padding: 0 8px 0 6px;
+    border-radius: 5px;
+    background-color: #2f3136;
+    border-width: 1px;
+    border-color: #383a40;
+}
+
+.bt-palette__item:hover {
+    background-color: #3a3d44;
+    border-color: #5a5e67;
+}
+
+.bt-palette__item:active {
+    background-color: #44474e;
+}
+
+.bt-palette__accent {
+    height: 14px;
+    width: 3px;
+    margin-right: 8px;
+}
+
+.bt-palette__item-label {
+    color: #e3e5e9;
+    font-size: 12px;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bt-palette__description {
+    padding: 8px 10px;
+    min-height: 64px;
+    border-top-width: 1px;
+    border-top-color: #3a3c42;
+    color: #a9aeb7;
+    font-size: 11px;
+    white-space: normal;
+}

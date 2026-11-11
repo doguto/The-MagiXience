@@ -60,6 +60,80 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             serializeGraphElements = SerializeForCopy;
             canPasteSerializedData = data => asset != null && !string.IsNullOrEmpty(data);
             unserializeAndPaste = Paste;
+
+            RegisterCallback<DragUpdatedEvent>(OnDragUpdated);
+            RegisterCallback<DragPerformEvent>(OnDragPerform);
+            RegisterCallback<DragLeaveEvent>(_ => SetDropTarget(null));
+            RegisterCallback<DragExitedEvent>(_ => SetDropTarget(null));
+        }
+
+        BehaviorTreeNodeView dropTarget;
+
+        static bool TryGetDraggedItem(out Type nodeType, out BehaviorTreeAsset subTree)
+        {
+            nodeType = DragAndDrop.GetGenericData(NodePaletteView.NodeTypeKey) as Type;
+            subTree = DragAndDrop.GetGenericData(NodePaletteView.SubTreeKey) as BehaviorTreeAsset;
+            if (nodeType == null && subTree == null)
+            {
+                subTree = DragAndDrop.objectReferences.OfType<BehaviorTreeAsset>().FirstOrDefault();
+            }
+            return nodeType != null || subTree != null;
+        }
+
+        void OnDragUpdated(DragUpdatedEvent evt)
+        {
+            if (asset == null || !TryGetDraggedItem(out _, out var subTree) || subTree == asset)
+            {
+                SetDropTarget(null);
+                return;
+            }
+
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            SetDropTarget(FindParentCandidate(evt.mousePosition));
+            evt.StopPropagation();
+        }
+
+        void OnDragPerform(DragPerformEvent evt)
+        {
+            var parent = dropTarget;
+            SetDropTarget(null);
+            if (asset == null || !TryGetDraggedItem(out var nodeType, out var subTree) || subTree == asset) return;
+
+            DragAndDrop.AcceptDrag();
+            var localPos = contentViewContainer.WorldToLocal(evt.mousePosition);
+
+            NodeDefinition def;
+            if (nodeType != null)
+            {
+                def = (NodeDefinition)Activator.CreateInstance(nodeType);
+            }
+            else
+            {
+                def = new SubTreeNodeDefinition { Tree = subTree };
+            }
+
+            CreateNode(def, localPos, parent);
+            evt.StopPropagation();
+        }
+
+        // ドロップ位置にある、子を受け付けられるノード(またはルート)
+        BehaviorTreeNodeView FindParentCandidate(Vector2 worldMouse)
+        {
+            foreach (var view in views.Values.Append(rootView))
+            {
+                if (view == null || view.Output == null) continue;
+                if (!view.worldBound.Contains(worldMouse)) continue;
+                return view;
+            }
+            return null;
+        }
+
+        void SetDropTarget(BehaviorTreeNodeView target)
+        {
+            if (dropTarget == target) return;
+            dropTarget?.RemoveFromClassList("bt-drop-target");
+            dropTarget = target;
+            dropTarget?.AddToClassList("bt-drop-target");
         }
 
         public void Load(BehaviorTreeAsset target)
@@ -196,7 +270,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             return new Vector2(w, h);
         }
 
-        static StyleSheet LoadStyleSheet()
+        public static StyleSheet LoadStyleSheet()
         {
             foreach (var guid in AssetDatabase.FindAssets("BehaviorTreeEditor t:StyleSheet"))
             {
@@ -387,16 +461,63 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         void CreateNodeAtScreenPosition(Type type, Vector2 screenPosition)
         {
             if (asset == null) return;
-
             var windowPos = screenPosition - window.position.position;
             var localPos = contentViewContainer.WorldToLocal(windowPos);
+            CreateNode((NodeDefinition)Activator.CreateInstance(type), localPos, null);
+        }
+
+        // parent を指定した場合はその最後の子として接続し、親の下に配置する
+        void CreateNode(NodeDefinition def, Vector2 localPos, BehaviorTreeNodeView parent)
+        {
             Undo.RecordObject(asset, "Create Behavior Tree Node");
-            var def = (NodeDefinition)Activator.CreateInstance(type);
             def.GraphPosition = localPos;
-            if (asset.Root == null) asset.Root = def;
-            else asset.DetachedNodes.Add(def);
+
+            if (parent != null && parent.IsRoot)
+            {
+                if (asset.Root != null) asset.DetachedNodes.Add(asset.Root);
+                asset.Root = def;
+                def.GraphPosition = BelowOf(parent, null);
+            }
+            else if (parent != null)
+            {
+                var children = parent.Definition.Children.Where(c => c != null).ToList();
+                if (parent.Definition.ChildCapacity == NodeChildCapacity.Single)
+                {
+                    asset.DetachedNodes.AddRange(children);
+                    children.Clear();
+                }
+                def.GraphPosition = BelowOf(parent, children.LastOrDefault());
+                children.Add(def);
+                parent.Definition.SetChildren(children);
+            }
+            else if (asset.Root == null)
+            {
+                asset.Root = def;
+            }
+            else
+            {
+                asset.DetachedNodes.Add(def);
+            }
+
             EditorUtility.SetDirty(asset);
             Reload();
+            if (views.TryGetValue(def, out var created))
+            {
+                ClearSelection();
+                AddToSelection(created);
+            }
+        }
+
+        // 親の真下、既存の子がいればその右隣
+        Vector2 BelowOf(BehaviorTreeNodeView parent, NodeDefinition lastChild)
+        {
+            var p = parent.GetPosition();
+            var y = p.y + SizeOf(parent).y + VerticalGap;
+            if (lastChild != null && views.TryGetValue(lastChild, out var lastView))
+            {
+                return new Vector2(lastChild.GraphPosition.x + SizeOf(lastView).x + HorizontalGap, lastChild.GraphPosition.y);
+            }
+            return new Vector2(p.x, y);
         }
 
         string SerializeForCopy(IEnumerable<GraphElement> elements)
