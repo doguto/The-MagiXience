@@ -126,6 +126,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: -2
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       nextPhaseTrigger:
         rid: -2
   deathAttackEntry:
@@ -139,6 +140,7 @@ MonoBehaviour:
     sourceIndexProvider:
       rid: 1002
     seType: 0
+    bulletMovementOverride: {fileID: 0}
   damageFlashInterval: 0.05
   damageFlashDuration: 0.2
   view: {fileID: 5041210401996759946}
@@ -164,7 +166,9 @@ MonoBehaviour:
       data: 
     - rid: 2259957373586636937
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+      data:
+        maxUpAngle: 60
+        maxDownAngle: 60
     - rid: 2259957373586636942
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
