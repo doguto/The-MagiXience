@@ -54,6 +54,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         // コンティニュー回数。バトルシーン内でのみ保持し、シーン遷移でリセットされる。
         int continueCount;
+        // 通しプレイ用: このステージ開始時点のコンティニュー回数とHP。
+        // クリア評価はこのステージ内のコンティニュー有無で判定し、ポーズからのリトライ時はこのHPに戻す。
+        int stageStartContinueCount;
+        int stageStartHp;
         CancellationTokenSource sequenceTransitionCts;
         IDisposable scenarioCompletedSubscription;
         IDisposable tutorialClosedSubscription;
@@ -268,6 +272,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // コンティニュー時のみ回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
             if (isContinue) continueCount++;
             ApplyPlayerMaxHp();
+            // 通しプレイ中のポーズからのリトライは、全回復させずステージ開始時のHPに戻す
+            if (!isContinue && RuntimeModelRepository.Get().IsRushMode && stageStartHp > 0)
+            {
+                playerPresenter?.SetCurrentHp(stageStartHp);
+            }
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
 
@@ -344,7 +353,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             backgroundModel.SetStage(stageModel.BackgroundAddress);
             backgroundPresenter?.Initialize(backgroundModel);
             playerPresenter?.Initialize();
-            ApplyPlayerMaxHp();
+            ApplyRushCarryOver();
             playerPresenter?.SubscribeToAttackInput();
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
@@ -381,6 +390,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             var index = Mathf.Clamp(continueCount, 0, continueHpTable.Length - 1);
             playerPresenter.SetMaxHp(continueHpTable[index]);
+        }
+
+        // 最大HPを適用し、通しプレイ中なら前のステージから体力とコンティニュー回数を引き継ぐ。
+        void ApplyRushCarryOver()
+        {
+            var runtimeModel = RuntimeModelRepository.Get();
+            if (runtimeModel.IsRushMode) continueCount = runtimeModel.RushContinueCount;
+            stageStartContinueCount = continueCount;
+
+            ApplyPlayerMaxHp();
+
+            if (playerPresenter == null) return;
+            if (runtimeModel.IsRushMode && runtimeModel.RushCarryHp > 0)
+            {
+                playerPresenter.SetCurrentHp(runtimeModel.RushCarryHp);
+            }
+            stageStartHp = playerPresenter.CurrentHp;
         }
 
         // 次回リトライ時の最大HPが、初期HP(テーブル先頭)から何%増加しているかを返す。
@@ -680,7 +706,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         StageClearRank ResolveClearRank()
         {
-            if (continueCount > 0) return StageClearRank.Normal;
+            // 通しプレイで前のステージから持ち越した回数は含めず、このステージ内のコンティニューのみで判定する
+            if (continueCount - stageStartContinueCount > 0) return StageClearRank.Normal;
             if (playerPresenter != null && playerPresenter.HasTakenDamage) return StageClearRank.NoContinue;
             return StageClearRank.NoDamage;
         }
@@ -690,12 +717,66 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             stageModel?.Clear(ResolveClearRank());
             OpenNextStage(stageModel);
 
+            if (RuntimeModelRepository.Get().IsRushMode)
+            {
+                ProceedRush();
+                return;
+            }
+
             // 次のステージをロードせず、To be continued画面を経由してステージ選択画面へ遷移する
             phaseStateMachine.Stop();
 
             // BGMの切り替え・StageListへの遷移・Battleシーンの破棄はDemoClearScenePresenterが行う
             await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
+        }
+
+        // 通しプレイ: 体力を引き継いで次のステージのBattleを読み込み直す。次のステージがなければタイトルへ戻る。
+        void ProceedRush()
+        {
+            phaseStateMachine.Stop();
+            playerPresenter?.CancelCharge();
+
+            var runtimeModel = RuntimeModelRepository.Get();
+            var navigator = globalScenePresenter.SceneNavigator;
+
+            // シナリオ終了時に AdvanceToNextSequence で CurrentStageType が進んでいる場合があるため、
+            // クリアしたステージ番号から次のステージを明示的に決める
+            var nextStage = ResolveNextRushStage(stageModel);
+            if (nextStage == null)
+            {
+                Debug.Log("[BattleScenePresenter] 通しプレイ完了。タイトルへ戻ります。", this);
+                runtimeModel.ExitStage();
+                navigator.NavigateTo(SceneRouterModel.Title, gameObject.scene.name).Forget();
+                return;
+            }
+
+            var currentHp = playerPresenter != null ? playerPresenter.CurrentHp : 0;
+            runtimeModel.SaveRushCarryOver(currentHp, continueCount);
+            runtimeModel.CurrentStageType = nextStage.BattleStageType;
+            runtimeModel.CurrentSituation = BattleSituation.Way;
+
+            Debug.Log($"[BattleScenePresenter] 通しプレイ: Stage {nextStage.StageNumber} へ進みます (HP {currentHp}).", this);
+            // このシーン自体がアンロードされるため await しない（SceneNavigator は常駐オブジェクト）
+            navigator.Reload(SceneRouterModel.Battle).Forget();
+        }
+
+        static StageModel ResolveNextRushStage(StageModel clearedStage)
+        {
+            if (clearedStage == null) return null;
+
+            try
+            {
+                var next = StageModelRepository.Instance.GetByStageNumber(clearedStage.StageNumber + 1);
+                if (next.BattleStageType == BattleStageType.Null) return null;
+                if (string.IsNullOrEmpty(next.WaySequenceAddress)) return null;
+                return next;
+            }
+            catch (Exception)
+            {
+                // 次のステージデータが存在しない
+                return null;
+            }
         }
 
         void OnDestroy()

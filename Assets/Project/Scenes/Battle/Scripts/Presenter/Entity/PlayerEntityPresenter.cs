@@ -326,6 +326,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             model.SetMaxHpAndRefill(newMaxHp);
         }
 
+        public int CurrentHp => model.CurrentHp.Value;
+
+        // 現在HPを設定する（1〜最大HPに丸める）。通しプレイでの体力引き継ぎに使用する。
+        public void SetCurrentHp(int hp)
+        {
+            model.SetCurrentHpClamped(hp);
+        }
+
         public void SetColliderActive(bool active)
         {
             var col = GetComponent<Collider2D>();

@@ -32,6 +32,15 @@ namespace Project.Scenes.Title.Scripts.Presenter
             base.Start();
             titleMenuView.InitStart();
 
+            // タイトルに戻ってきた時点で通しプレイは終了扱いにする
+            RuntimeModelRepository.Get().ExitRush();
+
+            titleMenuView.OnPressedRush.SubscribeBlocking(async _ =>
+            {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
+                await StartRush();
+            }).AddTo(this);
+
             // titleMenuView.OnPressedStartMain.Subscribe(_ => { StartMain(_).Forget(); });
             titleMenuView.OnPressedStart.SubscribeBlocking(async x =>
             {
@@ -75,6 +84,16 @@ namespace Project.Scenes.Title.Scripts.Presenter
             var runtimeModel = RuntimeModelRepository.Get();
             runtimeModel.CurrentStageType = BattleStageType.Stage1;
             runtimeModel.CurrentSituation = BattleSituation.Way;
+
+            await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, gameObject.scene.name);
+        }
+
+        // 通しプレイ: 1面道中から開始し、クリアごとに体力を引き継いで次の面へ進む
+        async UniTask StartRush()
+        {
+            titleModelRepository.Refresh();
+
+            RuntimeModelRepository.Get().StartRush(BattleStageType.Stage1);
 
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, gameObject.scene.name);
         }

@@ -12,6 +12,7 @@ namespace Project.Scenes.Title.Scripts.View
         [SerializeField] CanvasGroup buttonList;
         [SerializeField] SimpleButton startMainButton;
         [SerializeField] SimpleButton stageSelectButton;
+        [SerializeField] SimpleButton rushButton;
         [SerializeField] SimpleButton soundRoomButton;
         [SerializeField] SimpleButton configButton;
         [SerializeField] SimpleButton exitButton;
@@ -21,6 +22,7 @@ namespace Project.Scenes.Title.Scripts.View
 
         // public IObservable<Unit> OnPressedStartMain => startMainButton.OnPressed;
         public IObservable<Unit> OnPressedStart => stageSelectButton.OnPressed;
+        public IObservable<Unit> OnPressedRush => rushButton.OnPressed;
         public IObservable<Unit> OnPressedSoundRoom => soundRoomButton.OnPressed;
         public IObservable<Unit> OnPressedOption => configButton.OnPressed;
         public IObservable<Unit> OnPressedExit => exitButton.OnPressed;
@@ -35,6 +37,7 @@ namespace Project.Scenes.Title.Scripts.View
         {
             // startMainButton.Init(isFocused: true);
             stageSelectButton.Init(isFocused: true);
+            rushButton.Init();
             soundRoomButton.Init();
             configButton.Init();
             exitButton.Init();

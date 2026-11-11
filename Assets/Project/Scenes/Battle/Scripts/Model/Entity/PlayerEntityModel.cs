@@ -75,6 +75,12 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             ResetHp();
         }
 
+        // 現在HPを直接設定する（1〜MaxHpに丸める）。通しプレイでの体力引き継ぎに使用する。
+        public void SetCurrentHpClamped(int hp)
+        {
+            SetCurrentHp(Mathf.Clamp(hp, 1, MaxHp));
+        }
+
         public void Reset()
         {
             ResetHp();
