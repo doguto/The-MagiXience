@@ -34,11 +34,6 @@ namespace Project.Commons.UI.Scripts.Presenter
             {
                 Close();
             }).AddTo(this);
-            optionModalView.OnPressedSave.Subscribe(_ =>
-            {
-                soundManager.PlaySEAsync(SeType.Click).Forget();
-                //TODO saveする
-            }).AddTo(this);
 
             // 音量が変化したら即座にサウンドへ反映し、メモリ上のUserDataにも保持する。
             // 永続化(UserData.jsonへの書き込み)はモーダルを閉じたタイミングで行う。
@@ -52,12 +47,14 @@ namespace Project.Commons.UI.Scripts.Presenter
                 soundManager.SetSEVolume(volume);
                 userModel.SetVolume(userModel.BgmVolume, volume);
             }).AddTo(this);
-            
-            optionModalView.OnSeSliderSelected.Subscribe(_ =>
+
+            optionModalView.OnMashSkipChanged.Subscribe(userModel.SetMashSkipEnabled).AddTo(this);
+
+            optionModalView.OnSeVolumeSelected.Subscribe(_ =>
             {
                 soundManager.PlayLoopSE(SeType.Charge);
             }).AddTo(this);
-            optionModalView.OnSeSliderDeselected.Subscribe(_ =>
+            optionModalView.OnSeVolumeDeselected.Subscribe(_ =>
             {
                 soundManager.StopLoopSE();
             }).AddTo(this);
@@ -76,6 +73,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             // 現在のUserDataの音量をスライダーへ反映する(通知を発火させずに初期化)。
             optionModalView.SetBgmValueWithoutNotify(userModel.BgmVolume);
             optionModalView.SetSeValueWithoutNotify(userModel.SeVolume);
+            optionModalView.SetMashSkipWithoutNotify(userModel.IsMashSkipEnabled);
         }
 
         public void Close()

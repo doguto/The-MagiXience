@@ -1,6 +1,7 @@
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Project.Commons.UI.Scripts.View
@@ -41,6 +42,16 @@ namespace Project.Commons.UI.Scripts.View
             {
                 Debug.LogWarning("[PointerAddon] button も selectable も設定されていません", this);
             }
+
+            // 購読前(モーダル表示直後のInit)にフォーカスされていた場合も位置を合わせる
+            if (IsCurrentlyFocused()) OnButtonFocused();
+        }
+
+        bool IsCurrentlyFocused()
+        {
+            if (button != null) return button.IsFocused;
+            if (selectable == null || EventSystem.current == null) return false;
+            return EventSystem.current.currentSelectedGameObject == selectable.gameObject;
         }
 
         void OnButtonFocused()

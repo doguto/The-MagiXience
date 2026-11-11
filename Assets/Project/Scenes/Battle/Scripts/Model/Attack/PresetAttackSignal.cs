@@ -17,6 +17,15 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         public int LoopCount => loopCount;
         public float CycleDuration => cycleDuration;
 
+        public PresetAttackSignal() { }
+        public PresetAttackSignal(AttackPreset preset, int repeatCount, float interval)
+        {
+            this.preset = preset;
+            loop = repeatCount > 1;
+            loopCount = repeatCount;
+            cycleDuration = interval;
+        }
+
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
             // PresetSignalは直接CreateEventされない。AttackTimeline側で展開される。

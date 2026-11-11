@@ -5,6 +5,8 @@ using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
+using Project.Scripts.Extensions;
+using Project.Scenes.Global.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -29,7 +31,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         public void SetTimelineResolver(Func<BattlePhaseModelBase, TimelineAsset> resolver)
             => timelineResolver = resolver;
 
-        void Update() => BattleWind.Tick(Time.deltaTime);
+        SoundManagerPresenter windSoundManager;
+
+        void Update()
+        {
+            var previousDirection = BattleWind.Direction;
+            BattleWind.Tick(Time.deltaTime);
+            if (previousDirection != WindDirection.None || BattleWind.Direction == WindDirection.None ||
+                BattleWind.StartSe == SeType.None) return;
+
+            if (!windSoundManager)
+                windSoundManager = FindFirstObjectByType<SoundManagerPresenter>();
+            windSoundManager?.PlaySE(BattleWind.StartSe);
+        }
 
         public void PlaySequence(BattleSequenceModel sequence)
         {
@@ -86,6 +100,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 activePhase = null;
                 return;
             }
+
+            // フェーズ専用の風は入場時から開始する。未指定の既存フェーズ間では時計を維持する。
+            if (nextPhase.WindOverride != null)
+                BattleWind.Begin(nextPhase.WindOverride);
+            else if (activePhase?.WindOverride != null)
+                BattleWind.Begin(activeSequence.Wind);
 
             activePhase = nextPhase;
 

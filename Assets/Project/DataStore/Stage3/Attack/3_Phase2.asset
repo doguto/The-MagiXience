@@ -29,7 +29,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: -2
         seType: 0
-        bulletMovementOverride: {fileID: 11400000, guid: 66c128e96a254fc468ef35f050f40449, type: 2}
+        bulletMovementOverride: {fileID: 11400000, guid: 12585113a11317043a7d046f3d4e8329, type: 2}
       nextPhaseTrigger:
         rid: -2
   references:
@@ -44,10 +44,13 @@ MonoBehaviour:
         spreadAngle: 30
         radius: 0.5
         startDelay: 0
+        rotationOffset: 0
     - rid: 3310600516686315672
       type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         degrees: 0
     - rid: 9205483267810394374
       type: {class: AimDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
-      data: 
+      data:
+        maxUpAngle: 60
+        maxDownAngle: 60

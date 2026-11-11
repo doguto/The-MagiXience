@@ -24,6 +24,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField, Tooltip("弾のライフタイム（秒）。0以下で無制限")]
         float lifetime = 5f;
+        [SerializeField, Min(0f), Tooltip("風の影響の倍率。0で影響なし、1で標準、1より大きいと標準より強く流される")]
+        float windInfluence = 1f;
 
         void Reset()
         {
@@ -58,6 +60,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float screenMargin;
         bool isInPool;
         bool hasRuntimeKinematicBody;
+        Transform authoredMovementTarget;
+        bool simulateWind;
+        bool movementStarted;
+        Vector3 previousAuthoredPosition;
+        Vector2 windVelocityCorrection;
+        Vector2 windPositionCorrection;
         Quaternion baseRotation = Quaternion.identity;
         readonly IMovementStep[] movementOverrideBuffer = new IMovementStep[1];
         readonly CompositeDisposable disposables = new();
@@ -68,7 +76,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
         /// <param name="movementOverride">この弾に限り使う移動ステップ。nullならPrefab側のmovementStepsを使う(従来動作)</param>
         /// <param name="movementPresetOverride">この弾に限り使うMovement Stepsのプリセット。movementOverrideが指定されていればそちらを優先する</param>
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null)
+        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null, bool affectedByWind = true)
         {
             pool = objectPool;
             // 渡された回転はPrefab本来の回転に対するオフセットとして加算する
@@ -91,6 +99,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             isInPool = false;
+            simulateWind = affectedByWind && BattleWind.Enabled;
+            movementStarted = false;
+            windVelocityCorrection = windPositionCorrection = Vector2.zero;
+            if (simulateWind)
+            {
+                if (authoredMovementTarget == null)
+                {
+                    var proxy = new GameObject("Bullet authored trajectory");
+                    proxy.hideFlags = HideFlags.HideInHierarchy;
+                    authoredMovementTarget = proxy.transform;
+                }
+                authoredMovementTarget.SetPositionAndRotation(position, resolvedRotation);
+                authoredMovementTarget.localScale = transform.lossyScale;
+                previousAuthoredPosition = position;
+            }
             StartMovementSequence(direction, startDelay, movementOverride, movementPresetOverride);
 
             view.ResetView();
@@ -136,7 +159,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
                 try
                 {
-                    currentTween = step.Play(transform, direction, null);
+                    movementStarted = true;
+                    currentTween = step.Play(simulateWind ? authoredMovementTarget : transform, direction, null);
                     if (currentTween == null)
                     {
                         // Let Initialize finish before returning an invalid movement to the pool.
@@ -172,9 +196,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 .AddTo(disposables);
         }
 
-        void Update()
+        void LateUpdate()
         {
-            if (model == null || !model.IsAlive) return;
+            if (isInPool || model == null || !model.IsAlive) return;
+
+            if (simulateWind && movementStarted && Time.deltaTime > 0f)
+            {
+                var authoredPosition = authoredMovementTarget.position;
+                var velocity = (Vector2)(authoredPosition - previousAuthoredPosition) / Time.deltaTime;
+                BattleWind.IntegrateBullet(velocity, Time.deltaTime, ref windVelocityCorrection, ref windPositionCorrection);
+                // 加速度側に掛けると抵抗で本来の速度まで打ち消されるため、積分後の補正量に掛ける
+                transform.SetPositionAndRotation(authoredPosition + (Vector3)(windPositionCorrection * windInfluence), authoredMovementTarget.rotation);
+                previousAuthoredPosition = authoredPosition;
+            }
 
             if (lifetime > 0f)
             {
@@ -255,6 +289,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             StopMovement();
+            if (authoredMovementTarget != null) Destroy(authoredMovementTarget.gameObject);
             disposables.Dispose();
             model?.Dispose();
         }
