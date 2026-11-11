@@ -68,6 +68,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public static implicit operator BtFloat(float v) => new(v);
+
+        public override string ToString() => string.IsNullOrEmpty(param) ? value.ToString("0.##") : "$" + param;
     }
 
     [Serializable]
@@ -89,6 +91,10 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public static implicit operator BtInt(int v) => new(v);
+
+        public override string ToString() => string.IsNullOrEmpty(param) ? value.ToString() : "$" + param;
+
+        public string ToFrameString() => string.IsNullOrEmpty(param) ? $"{value}f ({value / (float)BattleContext.FramesPerSecond:0.##}s)" : "$" + param;
     }
 
     [Serializable]

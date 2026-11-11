@@ -1,0 +1,224 @@
+.bt-graph {
+    background-color: #1e1f22;
+}
+
+.bt-graph GridBackground {
+    --grid-background-color: #1e1f22;
+    --line-color: rgba(255, 255, 255, 0.04);
+    --thick-line-color: rgba(255, 255, 255, 0.08);
+    --spacing: 20;
+}
+
+/* ---------- Node card ---------- */
+
+.bt-node {
+    min-width: 200px;
+    max-width: 280px;
+}
+
+.bt-node #node-border {
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #3a3c42;
+    background-color: #2b2d31;
+    overflow: visible;
+}
+
+.bt-node:hover #node-border {
+    border-color: #6b6f78;
+}
+
+.bt-node:checked #node-border,
+.bt-node:selected #node-border {
+    border-color: #4ea1ff;
+    border-width: 2px;
+}
+
+.bt-node #selection-border {
+    border-radius: 8px;
+}
+
+.bt-node.bt-running #node-border {
+    border-color: #ffd23f;
+    border-width: 2px;
+}
+
+/* 既定のタイトル/入出力欄は使わない */
+.bt-node #title,
+.bt-node #top {
+    display: none;
+}
+
+.bt-node #contents {
+    background-color: transparent;
+}
+
+.bt-node #collapsible-area {
+    background-color: transparent;
+}
+
+/* ---------- Ports ---------- */
+
+.bt-port-row {
+    flex-direction: row;
+    justify-content: center;
+    height: 14px;
+}
+
+.bt-port-row--in {
+    margin-top: -7px;
+}
+
+.bt-port-row--out {
+    margin-bottom: -7px;
+}
+
+.bt-port-row Port {
+    height: 14px;
+    width: 24px;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+}
+
+.bt-port-row Port #type {
+    display: none;
+}
+
+.bt-port-row Port #connector {
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    border-width: 2px;
+    border-color: #8a8f99;
+    background-color: #2b2d31;
+}
+
+.bt-port-row Port:hover #connector {
+    border-color: #ffffff;
+}
+
+/* ---------- Header ---------- */
+
+.bt-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 10px 6px 10px;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+
+.bt-accent {
+    width: 4px;
+    height: 26px;
+    border-radius: 2px;
+    margin-right: 8px;
+}
+
+.bt-header-texts {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.bt-category {
+    font-size: 9px;
+    color: #9aa0aa;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.bt-title {
+    font-size: 14px;
+    color: #f0f2f5;
+    -unity-font-style: bold;
+}
+
+.bt-order {
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: #44474e;
+    color: #e8eaee;
+    font-size: 11px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-left: 6px;
+}
+
+.bt-summary {
+    padding: 0 10px 6px 22px;
+    color: #c9cdd4;
+    font-size: 12px;
+    white-space: normal;
+}
+
+.bt-comment {
+    margin: 0 10px 6px 10px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background-color: #3b3524;
+    color: #e8d9a8;
+    font-size: 11px;
+    white-space: normal;
+}
+
+/* ---------- Body ---------- */
+
+.bt-body {
+    border-top-width: 1px;
+    border-top-color: #3a3c42;
+    padding: 4px 6px 8px 6px;
+}
+
+.bt-body .unity-base-field__label {
+    min-width: 70px;
+    color: #a9aeb7;
+}
+
+/* ---------- Category colors ---------- */
+
+.bt-node--composite .bt-accent { background-color: #4f8cff; }
+.bt-node--decorator .bt-accent { background-color: #f0a33a; }
+.bt-node--action .bt-accent { background-color: #3ecf8e; }
+.bt-node--condition .bt-accent { background-color: #c678dd; }
+.bt-node--subtree .bt-accent { background-color: #e06c9f; }
+
+.bt-node--composite .bt-category { color: #7eaaff; }
+.bt-node--decorator .bt-category { color: #f5bd6e; }
+.bt-node--action .bt-category { color: #6fe0ae; }
+.bt-node--condition .bt-category { color: #d79be8; }
+.bt-node--subtree .bt-category { color: #ee96bc; }
+
+/* ---------- Root ---------- */
+
+.bt-node--root {
+    min-width: 110px;
+}
+
+.bt-node--root #node-border {
+    border-radius: 18px;
+    background-color: #3a2a2a;
+    border-color: #a04848;
+}
+
+.bt-node--root .bt-header {
+    justify-content: center;
+    padding: 8px 16px 8px 16px;
+}
+
+.bt-node--root .bt-title {
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+}
+
+/* ---------- Edges ---------- */
+
+.bt-graph .edge {
+    --edge-width: 3;
+    --edge-color: #8a8f99;
+    --selected-edge-color: #4ea1ff;
+}
+
+.bt-graph .edge:hover {
+    --edge-color: #c8ccd4;
+}

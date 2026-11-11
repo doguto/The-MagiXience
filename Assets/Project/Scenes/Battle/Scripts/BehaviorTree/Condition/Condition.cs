@@ -15,6 +15,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public abstract class ConditionDefinition
     {
         public abstract ICondition Build(BuildScope scope);
+
+        public virtual string Summary => GetType().Name.Replace("ConditionDefinition", "");
     }
 
     public sealed class ConstantCondition : ICondition
@@ -45,6 +47,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeField, Tooltip("Reset からの経過フレーム数")] BtInt frames;
 
+        public override string Summary => "経過 " + frames.ToFrameString();
+
         public override ICondition Build(BuildScope scope)
         {
             var target = frames.Resolve(scope);
@@ -57,6 +61,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class BgmReachedConditionDefinition : ConditionDefinition
     {
         [SerializeField, Tooltip("BGM の再生位置(秒)。ループを含む累計時刻で判定する")] BtFloat seconds;
+
+        public override string Summary => $"BGM {seconds}s 到達";
 
         public override ICondition Build(BuildScope scope)
         {
@@ -71,6 +77,15 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeReference, SubclassSelector] List<ConditionDefinition> conditions = new();
 
         public override ICondition Build(BuildScope scope) => new CompositeCondition(BuildAll(conditions, scope), true);
+
+        public override string Summary => Join(conditions, " かつ ");
+
+        internal static string Join(List<ConditionDefinition> defs, string sep)
+        {
+            var parts = new List<string>();
+            foreach (var d in defs) parts.Add(d?.Summary ?? "?");
+            return parts.Count == 0 ? "(空)" : "(" + string.Join(sep, parts) + ")";
+        }
 
         internal static ICondition[] BuildAll(List<ConditionDefinition> defs, BuildScope scope)
         {
@@ -89,6 +104,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeReference, SubclassSelector] List<ConditionDefinition> conditions = new();
 
         public override ICondition Build(BuildScope scope) => new CompositeCondition(AndConditionDefinition.BuildAll(conditions, scope), false);
+
+        public override string Summary => AndConditionDefinition.Join(conditions, " または ");
     }
 
     [Serializable]
@@ -101,6 +118,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var inner = condition?.Build(scope) ?? new ConstantCondition(false);
             return new DelegateCondition(ctx => !inner.Evaluate(ctx), inner.Reset);
         }
+
+        public override string Summary => "NOT " + (condition?.Summary ?? "?");
     }
 
     public sealed class CompositeCondition : ICondition
@@ -135,6 +154,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeReference, SubclassSelector] ConditionDefinition condition;
 
+        public override string Summary => "判定: " + (condition?.Summary ?? "(未設定)");
+
         public override INode Build(BuildScope scope)
         {
             var cond = condition?.Build(scope) ?? new ConstantCondition(true);
@@ -146,6 +167,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class WaitUntilNodeDefinition : ActionNodeDefinition
     {
         [SerializeReference, SubclassSelector] ConditionDefinition condition;
+
+        public override string Summary => "待機: " + (condition?.Summary ?? "(未設定)");
 
         public override INode Build(BuildScope scope)
         {

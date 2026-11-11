@@ -19,6 +19,16 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         SerializedObject serializedObject;
         BehaviorTreeNodeView rootView;
         bool isReloading;
+        readonly MiniMap miniMap;
+
+        public void ToggleMiniMap() =>
+            miniMap.style.display = miniMap.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
+
+        public void FrameWholeGraph()
+        {
+            ClearSelection();
+            FrameAll();
+        }
 
         public BehaviorTreeGraphView(EditorWindow window)
         {
@@ -28,9 +38,18 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
 
+            AddToClassList("bt-graph");
+            var styleSheet = LoadStyleSheet();
+            if (styleSheet != null) styleSheets.Add(styleSheet);
+
             var grid = new GridBackground();
             Insert(0, grid);
             grid.StretchToParentSize();
+
+            miniMap = new MiniMap { anchored = true };
+            miniMap.SetPosition(new Rect(10, 10, 200, 140));
+            miniMap.style.display = DisplayStyle.None;
+            Add(miniMap);
 
             searchProvider = ScriptableObject.CreateInstance<NodeSearchWindowProvider>();
             searchProvider.hideFlags = HideFlags.HideAndDontSave;
@@ -47,7 +66,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             asset = target;
             Reload();
-            schedule.Execute(() => FrameAll());
+            schedule.Execute(FrameWholeGraph).ExecuteLater(50);
         }
 
         public void Reload()
@@ -93,6 +112,99 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 }
             }
             isReloading = false;
+            RefreshOrderBadges();
+        }
+
+        void RefreshOrderBadges()
+        {
+            foreach (var view in views.Values) view.SetOrder(0);
+            foreach (var def in views.Keys)
+            {
+                if (def.ChildCapacity != NodeChildCapacity.Multiple) continue;
+                var order = 1;
+                foreach (var child in def.Children)
+                {
+                    if (child != null && views.TryGetValue(child, out var childView)) childView.SetOrder(order++);
+                }
+            }
+        }
+
+        const float HorizontalGap = 40f;
+        const float VerticalGap = 70f;
+
+        // ルートから下向きに、子の部分木の幅を確保しながら整列する
+        public void AutoLayout()
+        {
+            if (asset?.Root == null || !views.ContainsKey(asset.Root)) return;
+
+            Undo.RecordObject(asset, "Auto Layout Behavior Tree");
+            var rootSize = SizeOf(rootView);
+            var rootPos = new Vector2(-rootSize.x / 2f, 0f);
+            rootView.SetPosition(new Rect(rootPos, rootSize));
+            Place(asset.Root, 0f, rootSize.y + VerticalGap);
+
+            var detachedX = SubtreeWidth(asset.Root) / 2f + HorizontalGap * 3f;
+            foreach (var detached in asset.DetachedNodes)
+            {
+                if (detached == null || !views.ContainsKey(detached)) continue;
+                var w = SubtreeWidth(detached);
+                Place(detached, detachedX + w / 2f, rootSize.y + VerticalGap);
+                detachedX += w + HorizontalGap * 2f;
+            }
+
+            EditorUtility.SetDirty(asset);
+            RefreshOrderBadges();
+            schedule.Execute(FrameWholeGraph).ExecuteLater(50);
+        }
+
+        void Place(NodeDefinition def, float centerX, float y)
+        {
+            var view = views[def];
+            var size = SizeOf(view);
+            var pos = new Vector2(centerX - size.x / 2f, y);
+            def.GraphPosition = pos;
+            view.SetPosition(new Rect(pos, size));
+
+            var children = def.Children.Where(c => c != null && views.ContainsKey(c)).ToList();
+            if (children.Count == 0) return;
+
+            var widths = children.Select(SubtreeWidth).ToList();
+            var total = widths.Sum() + HorizontalGap * (children.Count - 1);
+            var x = centerX - total / 2f;
+            var childY = y + size.y + VerticalGap;
+            for (var i = 0; i < children.Count; i++)
+            {
+                Place(children[i], x + widths[i] / 2f, childY);
+                x += widths[i] + HorizontalGap;
+            }
+        }
+
+        float SubtreeWidth(NodeDefinition def)
+        {
+            var own = SizeOf(views[def]).x;
+            var children = def.Children.Where(c => c != null && views.ContainsKey(c)).ToList();
+            if (children.Count == 0) return own;
+            var sum = children.Sum(SubtreeWidth) + HorizontalGap * (children.Count - 1);
+            return Mathf.Max(own, sum);
+        }
+
+        static Vector2 SizeOf(GraphElement element)
+        {
+            var r = element.layout;
+            var w = float.IsNaN(r.width) || r.width < 1f ? 220f : r.width;
+            var h = float.IsNaN(r.height) || r.height < 1f ? 80f : r.height;
+            return new Vector2(w, h);
+        }
+
+        static StyleSheet LoadStyleSheet()
+        {
+            foreach (var guid in AssetDatabase.FindAssets("BehaviorTreeEditor t:StyleSheet"))
+            {
+                var sheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath(guid));
+                if (sheet != null) return sheet;
+            }
+            Debug.LogWarning("[BehaviorTreeEditor] BehaviorTreeEditor.uss not found.");
+            return null;
         }
 
         public void RefreshRuntimeState()
@@ -186,6 +298,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                     view.Definition.GraphPosition = view.GetPosition().position;
                 }
                 SortAllChildrenByPosition();
+                RefreshOrderBadges();
             }
 
             EditorUtility.SetDirty(asset);

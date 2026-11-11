@@ -1,20 +1,19 @@
+using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Project.Scenes.Battle.Editor.BehaviorTree
 {
     public class BehaviorTreeNodeView : UnityEditor.Experimental.GraphView.Node
     {
-        static readonly Color CompositeColor = new(0.25f, 0.42f, 0.65f);
-        static readonly Color DecoratorColor = new(0.55f, 0.38f, 0.18f);
-        static readonly Color ActionColor = new(0.22f, 0.5f, 0.3f);
-        static readonly Color SubTreeColor = new(0.5f, 0.28f, 0.55f);
-        static readonly Color RootColor = new(0.45f, 0.15f, 0.15f);
-        static readonly Color ActiveBorder = new(1f, 0.85f, 0.2f);
+        static readonly HashSet<string> HiddenFields = new() { "guid", "graphPosition", "children", "child", "comment" };
+
+        readonly Label orderBadge;
+        readonly Label summaryLabel;
+        readonly Label commentLabel;
 
         public NodeDefinition Definition { get; }
         public bool IsRoot { get; }
@@ -24,24 +23,41 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public BehaviorTreeNodeView(NodeDefinition definition, SerializedProperty property)
         {
             Definition = definition;
-            title = DisplayName(definition.GetType());
             viewDataKey = definition.Guid;
-            style.minWidth = 180;
+            AddToClassList("bt-node");
+            AddToClassList("bt-node--" + CategoryKey(definition));
 
-            Input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Single, typeof(bool));
-            Input.portName = "";
-            inputContainer.Add(Input);
+            Input = CreatePort(Direction.Input, Port.Capacity.Single);
+            mainContainer.Insert(0, PortRow(Input, "bt-port-row--in"));
+
+            var header = new VisualElement();
+            header.AddToClassList("bt-header");
+            header.Add(Accent());
+            var texts = new VisualElement();
+            texts.AddToClassList("bt-header-texts");
+            texts.Add(StyledLabel(CategoryLabel(definition), "bt-category"));
+            texts.Add(StyledLabel(DisplayName(definition.GetType()), "bt-title"));
+            header.Add(texts);
+            orderBadge = StyledLabel("", "bt-order");
+            orderBadge.style.display = DisplayStyle.None;
+            header.Add(orderBadge);
+            mainContainer.Insert(1, header);
+
+            summaryLabel = StyledLabel("", "bt-summary");
+            mainContainer.Insert(2, summaryLabel);
+            commentLabel = StyledLabel("", "bt-comment");
+            mainContainer.Insert(3, commentLabel);
+
+            BuildFields(property);
 
             if (definition.ChildCapacity != NodeChildCapacity.None)
             {
                 var capacity = definition.ChildCapacity == NodeChildCapacity.Multiple ? Port.Capacity.Multi : Port.Capacity.Single;
-                Output = InstantiatePort(Orientation.Vertical, Direction.Output, capacity, typeof(bool));
-                Output.portName = "";
-                outputContainer.Add(Output);
+                Output = CreatePort(Direction.Output, capacity);
+                mainContainer.Add(PortRow(Output, "bt-port-row--out"));
             }
 
-            titleContainer.style.backgroundColor = CategoryColor(definition);
-            BuildFields(property);
+            RefreshTexts();
             RefreshExpandedState();
             RefreshPorts();
         }
@@ -50,58 +66,137 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public BehaviorTreeNodeView()
         {
             IsRoot = true;
-            title = "Root";
             viewDataKey = "__root__";
             capabilities &= ~(Capabilities.Deletable | Capabilities.Copiable);
-            Output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Single, typeof(bool));
-            Output.portName = "";
-            outputContainer.Add(Output);
-            titleContainer.style.backgroundColor = RootColor;
+            AddToClassList("bt-node");
+            AddToClassList("bt-node--root");
+
+            var header = new VisualElement();
+            header.AddToClassList("bt-header");
+            header.Add(StyledLabel("START", "bt-title"));
+            mainContainer.Insert(0, header);
+
+            Output = CreatePort(Direction.Output, Port.Capacity.Single);
+            mainContainer.Add(PortRow(Output, "bt-port-row--out"));
             RefreshExpandedState();
             RefreshPorts();
         }
 
-        public void SetRuntimeActive(bool active)
+        public void SetOrder(int order)
         {
-            var color = active ? ActiveBorder : Color.clear;
-            var width = active ? 2f : 0f;
-            mainContainer.style.borderTopColor = color;
-            mainContainer.style.borderBottomColor = color;
-            mainContainer.style.borderLeftColor = color;
-            mainContainer.style.borderRightColor = color;
-            mainContainer.style.borderTopWidth = width;
-            mainContainer.style.borderBottomWidth = width;
-            mainContainer.style.borderLeftWidth = width;
-            mainContainer.style.borderRightWidth = width;
+            if (orderBadge == null) return;
+            orderBadge.text = order.ToString();
+            orderBadge.style.display = order > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
+        public void SetRuntimeActive(bool active) => EnableInClassList("bt-running", active);
+
+        public void RefreshTexts()
+        {
+            if (Definition == null) return;
+
+            var summary = Definition.Summary;
+            summaryLabel.text = summary ?? "";
+            summaryLabel.style.display = string.IsNullOrEmpty(summary) ? DisplayStyle.None : DisplayStyle.Flex;
+
+            var comment = Definition.Comment;
+            commentLabel.text = comment ?? "";
+            commentLabel.style.display = string.IsNullOrEmpty(comment) ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+
+        Port CreatePort(Direction direction, Port.Capacity capacity)
+        {
+            var port = InstantiatePort(Orientation.Vertical, direction, capacity, typeof(bool));
+            port.portName = "";
+            return port;
+        }
+
+        static VisualElement PortRow(Port port, string modifier)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("bt-port-row");
+            row.AddToClassList(modifier);
+            row.Add(port);
+            return row;
+        }
+
+        static VisualElement Accent()
+        {
+            var accent = new VisualElement();
+            accent.AddToClassList("bt-accent");
+            return accent;
+        }
+
+        static Label StyledLabel(string text, string className)
+        {
+            var label = new Label(text);
+            label.AddToClassList(className);
+            return label;
+        }
+
+        // 子ノード配列が HideInInspector のため NextVisible では中に入れない。Next で直下のフィールドを列挙する。
         void BuildFields(SerializedProperty property)
         {
             if (property == null) return;
 
-            var container = new VisualElement { style = { paddingLeft = 4, paddingRight = 4, paddingBottom = 4, backgroundColor = new Color(0.22f, 0.22f, 0.22f, 0.95f) } };
+            var body = new VisualElement();
+            body.AddToClassList("bt-body");
+
+            var fields = new List<SerializedProperty>();
             var it = property.Copy();
             var end = it.GetEndProperty();
-            var enterChildren = true;
-            while (it.NextVisible(enterChildren) && !SerializedProperty.EqualContents(it, end))
+            var depth = property.depth + 1;
+            if (it.Next(true))
             {
-                enterChildren = false;
-                var field = new PropertyField(it.Copy());
-                field.Bind(property.serializedObject);
-                container.Add(field);
+                do
+                {
+                    if (SerializedProperty.EqualContents(it, end)) break;
+                    if (it.depth != depth) continue;
+                    fields.Add(it.Copy());
+                } while (it.Next(false));
             }
 
-            if (container.childCount > 0) extensionContainer.Add(container);
-            expanded = true;
+            SerializedProperty commentProp = null;
+            foreach (var field in fields)
+            {
+                if (field.name == "comment")
+                {
+                    commentProp = field;
+                    continue;
+                }
+                if (HiddenFields.Contains(field.name)) continue;
+                body.Add(BindField(field));
+            }
+
+            if (commentProp != null)
+            {
+                var foldout = new Foldout { text = "Comment", value = !string.IsNullOrEmpty(commentProp.stringValue) };
+                foldout.Add(BindField(commentProp));
+                body.Add(foldout);
+            }
+
+            if (body.childCount == 0) return;
+            mainContainer.Add(body);
         }
 
-        static Color CategoryColor(NodeDefinition definition) => definition switch
+        PropertyField BindField(SerializedProperty prop)
         {
-            SubTreeNodeDefinition => SubTreeColor,
-            CompositeNodeDefinition => CompositeColor,
-            DecoratorNodeDefinition => DecoratorColor,
-            _ => ActionColor,
+            var field = new PropertyField(prop.Copy());
+            field.Bind(prop.serializedObject);
+            field.RegisterValueChangeCallback(_ => RefreshTexts());
+            return field;
+        }
+
+        static string CategoryKey(NodeDefinition definition) => definition switch
+        {
+            SubTreeNodeDefinition => "subtree",
+            CompositeNodeDefinition => "composite",
+            DecoratorNodeDefinition => "decorator",
+            CheckConditionNodeDefinition or WaitUntilNodeDefinition => "condition",
+            _ => "action",
         };
+
+        static string CategoryLabel(NodeDefinition definition) => CategoryKey(definition).ToUpperInvariant();
 
         public static string DisplayName(System.Type type)
         {

@@ -21,6 +21,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var children = BuildChildren(scope);
             return new TimelineNode(children, new int[children.Length], Mathf.Max(0, duration.Resolve(scope)));
         }
+
+        public override string Summary => duration.value == 0 && string.IsNullOrEmpty(duration.param) ? "全ての子の完了まで" : "長さ " + duration.ToFrameString();
     }
 
     // 子を並列実行し、duration 指定時はその長さで打ち切る。子の開始時刻は Delay デコレータで指定する。

@@ -12,6 +12,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Tooltip("直前に選んだ子を連続で選ばない")]
         bool avoidRepeat = true;
 
+        public override string Summary => avoidRepeat ? "1つ抽選 (連続回避)" : "1つ抽選";
+
         public override INode Build(BuildScope scope)
         {
             var children = BuildChildren(scope);

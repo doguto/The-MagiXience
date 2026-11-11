@@ -22,6 +22,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public override INode Build(BuildScope scope) => new ParallelNode(BuildChildren(scope), policy);
+
+        public override string Summary => policy == ParallelPolicy.RequireAll ? "全て完了で終了" : "どれか1つ完了で終了";
     }
 
     public sealed class ParallelNode : Node

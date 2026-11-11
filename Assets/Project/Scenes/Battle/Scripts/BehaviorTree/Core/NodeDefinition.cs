@@ -32,6 +32,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         public abstract INode Build(BuildScope scope);
 
+        // エディタのノード上に表示する一行要約
+        public virtual string Summary => null;
+
         public virtual NodeChildCapacity ChildCapacity => NodeChildCapacity.None;
         public virtual IReadOnlyList<NodeDefinition> Children => Array.Empty<NodeDefinition>();
         public virtual void SetChildren(IList<NodeDefinition> children) { }

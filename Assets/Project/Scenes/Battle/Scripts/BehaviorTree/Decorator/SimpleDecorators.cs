@@ -8,6 +8,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeField, Tooltip("子を開始するまでの待機フレーム数")] BtInt frames;
 
+        public override string Summary => "+" + frames.ToFrameString();
+
         public override INode Build(BuildScope scope) =>
             new SequenceNode(new[] { new WaitNode(Mathf.Max(0, frames.Resolve(scope))), BuildChild(scope) });
     }

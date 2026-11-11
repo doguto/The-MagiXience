@@ -34,6 +34,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public override INode Build(BuildScope scope) => new WaitNode(Mathf.Max(0, frames.Resolve(scope)));
+
+        public override string Summary => frames.ToFrameString();
     }
 
     // 開始フレーム f から数えて f + frames のフレームで Success。0 なら即 Success。
@@ -59,6 +61,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeField] string message;
 
+        public override string Summary => message;
+
         public override INode Build(BuildScope scope)
         {
             var text = message;
@@ -83,6 +87,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public List<TreeParameter> Overrides => overrides;
+
+        public override string Summary => tree ? tree.name + (overrides.Count > 0 ? $"  ({overrides.Count} override)" : "") : "(未設定)";
 
         public override INode Build(BuildScope scope)
         {

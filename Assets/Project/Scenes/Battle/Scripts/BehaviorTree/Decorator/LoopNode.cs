@@ -15,6 +15,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public override INode Build(BuildScope scope) => new LoopNode(BuildChild(scope), Mathf.Max(0, count.Resolve(scope)));
+
+        public override string Summary => count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞ 無限" : "× " + count;
     }
 
     // 子を指定回数繰り返す。子が Failure を返したら Failure。

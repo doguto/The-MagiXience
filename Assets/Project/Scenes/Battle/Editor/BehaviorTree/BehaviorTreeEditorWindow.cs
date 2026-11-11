@@ -12,6 +12,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         [SerializeField] BehaviorTreeAsset asset;
         BehaviorTreeGraphView graphView;
         Label titleLabel;
+        ObjectField assetField;
 
         [MenuItem("Window/Battle/Behavior Tree Editor")]
         public static void OpenEmpty() => Open(null);
@@ -34,11 +35,13 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         void CreateGUI()
         {
             var toolbar = new Toolbar();
-            var assetField = new ObjectField { objectType = typeof(BehaviorTreeAsset), allowSceneObjects = false, value = asset };
+            assetField = new ObjectField { objectType = typeof(BehaviorTreeAsset), allowSceneObjects = false, value = asset };
             assetField.style.minWidth = 240;
             assetField.RegisterValueChangedCallback(e => SetAsset(e.newValue as BehaviorTreeAsset));
             toolbar.Add(assetField);
-            toolbar.Add(new ToolbarButton(() => graphView?.FrameAll()) { text = "Frame All" });
+            toolbar.Add(new ToolbarButton(() => graphView?.AutoLayout()) { text = "Auto Layout" });
+            toolbar.Add(new ToolbarButton(() => graphView?.FrameWholeGraph()) { text = "Frame All" });
+            toolbar.Add(new ToolbarButton(() => graphView?.ToggleMiniMap()) { text = "MiniMap" });
             toolbar.Add(new ToolbarButton(() => graphView?.Reload()) { text = "Reload" });
             titleLabel = new Label { style = { unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 8 } };
             toolbar.Add(titleLabel);
@@ -62,6 +65,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         void SetAsset(BehaviorTreeAsset target)
         {
             asset = target;
+            assetField?.SetValueWithoutNotify(asset);
             if (titleLabel != null) titleLabel.text = asset ? AssetDatabase.GetAssetPath(asset) : "(no asset)";
             graphView?.Load(asset);
         }

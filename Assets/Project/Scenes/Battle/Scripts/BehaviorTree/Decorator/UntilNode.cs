@@ -28,6 +28,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             set => onChildCompleted = value;
         }
 
+        public override string Summary => (condition?.Summary ?? "(条件未設定)") + (onChildCompleted == UntilChildCompletion.Finish ? "" : $"  [{onChildCompleted}]");
+
         public override INode Build(BuildScope scope)
         {
             var cond = condition?.Build(scope) ?? new ConstantCondition(false);
