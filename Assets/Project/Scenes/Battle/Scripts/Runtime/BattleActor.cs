@@ -13,6 +13,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     {
         BehaviorTreeRunner runner;
         bool destroyed;
+        MotionSequence movement;
+        IReadOnlyList<MotionStep> movementSteps;
+        bool registered;
 
         public BattleWorld World { get; private set; }
         public EnemyEntityModel Model { get; private set; }
@@ -24,12 +27,27 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public float AttackTime => (World.Frame - StartFrame) * BattleWorld.DeltaTime;
         public bool IsAlive => !destroyed && this != null && (Model == null || Model.IsAlive);
 
-        public bool IsFinished => !IsAlive || runner == null || runner.IsFinished;
+        public bool IsFinished => !IsAlive || ((runner == null || runner.IsFinished) && (movement == null || movement.IsFinished));
+
+        // ツリーとは独立して流し続ける移動。continueIfSame なら同じ移動が再生中のとき作り直さない
+        public void SetMovement(IReadOnlyList<MotionStep> steps, bool continueIfSame = false)
+        {
+            if (continueIfSame && ReferenceEquals(steps, movementSteps) && movement != null && !movement.IsFinished) return;
+            movement?.Stop();
+            movementSteps = steps;
+            movement = steps == null || steps.Count == 0 ? null
+                : new MotionSequence(steps, Body, new MotionLaunch { AttackTime = AttackTime });
+        }
+
+        // ツリーが最初に動く前に呼ばれる。付与先の部品 (進行ゲージなど) が購読の準備に使う
+        public static event System.Action<BattleActor> Attached;
 
         public static BattleActor Attach(GameObject target, BattleWorld world, BehaviorTreeAsset tree, IReadOnlyList<TreeParameter> overrides = null)
         {
-            var actor = target.GetComponent<BattleActor>() ?? target.AddComponent<BattleActor>();
+            var actor = target.GetComponent<BattleActor>();
+            if (actor == null) actor = target.AddComponent<BattleActor>();
             actor.Setup(world, tree, overrides);
+            Attached?.Invoke(actor);
             return actor;
         }
 
@@ -44,7 +62,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
             runner?.Stop();
             runner = tree != null ? new BehaviorTreeRunner(tree, new BattleContext(world, this), overrides) : null;
-            if (runner != null) world.Register(this);
+            if (registered) return;
+            registered = true;
+            world.Register(this);
         }
 
         public void BattleTick()
@@ -54,15 +74,22 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 runner?.Stop();
                 return;
             }
-            runner.Tick();
+            movement?.Tick(BattleWorld.DeltaTime);
+            if (runner != null && !runner.IsFinished) runner.Tick();
         }
 
-        public void Stop() => runner?.Stop();
+        public void Stop()
+        {
+            runner?.Stop();
+            movement?.Stop();
+            movement = null;
+        }
 
         void OnDestroy()
         {
             destroyed = true;
             runner?.Stop();
+            movement?.Stop();
         }
     }
 }

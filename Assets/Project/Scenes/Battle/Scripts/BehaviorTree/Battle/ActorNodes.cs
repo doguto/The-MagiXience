@@ -55,6 +55,23 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
     }
 
+    [Serializable, NodeInfo("この敵の移動を差し替える。移動はツリーと独立して流れ続け、このノードはすぐ完了する", "Action/Move")]
+    public sealed class SetMovementNodeDefinition : ActionNodeDefinition
+    {
+        [SerializeField, Tooltip("指定するとインラインより優先")] MotionPreset preset;
+        [SerializeReference, SubclassSelector] List<MotionStep> steps = new();
+        [SerializeField, Tooltip("同じ移動が再生中ならやり直さない (フェーズをまたいで続く移動)")] bool continueIfSame;
+
+        public IReadOnlyList<MotionStep> Steps => preset != null ? preset.Steps : steps;
+        public override string Summary => preset != null ? preset.name : steps.Count == 0 ? "移動を止める" : steps.Count == 1 ? steps[0]?.Summary : $"{steps.Count} ステップ";
+
+        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        {
+            ctx.Self?.SetMovement(Steps, continueIfSame);
+            return NodeStatus.Success;
+        });
+    }
+
     [Serializable, NodeInfo("この敵の無敵を切り替える", "Action/Actor")]
     public sealed class SetInvincibleNodeDefinition : ActionNodeDefinition
     {

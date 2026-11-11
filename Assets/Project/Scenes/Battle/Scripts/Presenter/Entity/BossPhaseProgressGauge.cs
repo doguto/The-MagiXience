@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 using Project.Scripts.Presenter;
+using Project.Scenes.Battle.Scripts.Runtime;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
@@ -26,7 +27,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                  + "ループしない場合は配列長以上の値を設定。")]
         [SerializeField] int loopBackIndex = 1;
 
-        BattlePhaseStateMachine phaseStateMachine;
+        // ボスのツリーはシナリオ明けに付与されるため、見つかった時点でフェーズ通知を購読する
+        BattleActor actor;
+        BattleServices subscribedServices;
 
         int phaseIndex = -1;
         int phaseStartThreshold;
@@ -41,25 +44,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             base.Start();
 
-            phaseStateMachine = FindFirstObjectByType<BattlePhaseStateMachine>();
-            if (phaseStateMachine == null)
-            {
-                Debug.LogWarning("[BossPhaseProgressGauge] BattlePhaseStateMachine not found in scene.", this);
-                SetVisible(false);
-                return;
-            }
-
-            phaseStateMachine.OnPhaseStarted
-                .Subscribe(_ => OnPhaseStarted())
-                .AddTo(disposables);
-            
-            SetVisible(false); 
-            // DebugRuntimeModelInitializerを使ってBossから開始した場合は初回phaseStateMachineのフラグを取り逃がすのでここで回収
-            if (RuntimeModelRepository.Get().CurrentSituation == BattleSituation.Boss)
-            {
-                OnPhaseStarted();
-            }
+            SetVisible(false);
+            BattleActor.Attached += OnActorAttached;
         }
+
+        void OnActorAttached(BattleActor attached)
+        {
+            if (attached == null || !transform.IsChildOf(attached.transform)) return;
+            actor = attached;
+            var services = actor.World?.Services;
+            if (services == null || services == subscribedServices) return;
+
+            if (subscribedServices != null) subscribedServices.PhaseStarted -= HandlePhaseStarted;
+            subscribedServices = services;
+            subscribedServices.PhaseStarted += HandlePhaseStarted;
+        }
+
+        void HandlePhaseStarted(string phaseId) => OnPhaseStarted();
 
         void OnPhaseStarted()
         {
@@ -141,6 +142,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
+            BattleActor.Attached -= OnActorAttached;
+            if (subscribedServices != null) subscribedServices.PhaseStarted -= HandlePhaseStarted;
             disposables.Dispose();
         }
     }

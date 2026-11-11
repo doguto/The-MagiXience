@@ -1,0 +1,157 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S1_1_Phase1A-1
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147870824923705
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147870824923705
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9af52e16f32c482da30d050ce40fc3ee
+        graphPosition: {x: 115, y: 150}
+        comment: 
+        children:
+        - rid: 8540147870824923706
+        - rid: 8540147870824923707
+    - rid: 8540147870824923706
+      type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 92ab54caf3c844619d6906d58afde486
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        preset: {fileID: 0}
+        steps:
+        - rid: 8540147870824923708
+        - rid: 8540147870824923709
+        - rid: 8540147870824923710
+        continueIfSame: 0
+    - rid: 8540147870824923707
+      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a1dbed6975f34f3eb5ea694ae2ff7230
+        graphPosition: {x: 230, y: 300}
+        comment: Phase 0
+        child:
+          rid: 8540147870824923711
+        condition:
+          rid: 8540147870824923712
+        onChildCompleted: 0
+    - rid: 8540147870824923708
+      type: {class: PathMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        waypoints:
+        - {x: 2.56, y: -1.5, z: 0}
+        duration: 2.5
+        shape: 0
+        ease:
+          easeValue: 3
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8540147870824923709
+      type: {class: WaitMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        duration: 1
+        invincible: 0
+    - rid: 8540147870824923710
+      type: {class: PathMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        waypoints:
+        - {x: 0, y: -1.3, z: 0}
+        - {x: -7, y: 0, z: 0}
+        - {x: -14, y: 1.3, z: 0}
+        duration: 4
+        shape: 0
+        ease:
+          easeValue: 2
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 8540147870824923711
+      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 890acc8c00a24058bbf0a08555588916
+        graphPosition: {x: 230, y: 450}
+        comment: 
+        child:
+          rid: 8540147870824923713
+        count:
+          value: 0
+          param: 
+    - rid: 8540147870824923712
+      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        frames:
+          value: 301
+          param: 
+    - rid: 8540147870824923713
+      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d887e43c9ce840719898a8a9512538e5
+        graphPosition: {x: 230, y: 600}
+        comment: 
+        children: []
+        duration:
+          value: 120
+          param: 

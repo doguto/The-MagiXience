@@ -43,6 +43,15 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     }
 
     [Serializable]
+    public sealed class ConstantConditionDefinition : ConditionDefinition
+    {
+        [SerializeField] bool value;
+
+        public override ICondition Build(BuildScope scope) => new ConstantCondition(value);
+        public override string Summary => value ? "常に成立" : "成立しない";
+    }
+
+    [Serializable]
     public sealed class FrameElapsedConditionDefinition : ConditionDefinition
     {
         [SerializeField, Tooltip("Reset からの経過フレーム数")] BtInt frames;
