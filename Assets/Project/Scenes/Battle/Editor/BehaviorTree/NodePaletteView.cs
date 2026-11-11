@@ -23,10 +23,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             AddToClassList("bt-palette");
 
-            var header = new Label("NODES");
-            header.AddToClassList("bt-palette__header");
-            Add(header);
-
             searchField = new ToolbarSearchField();
             searchField.AddToClassList("bt-palette__search");
             searchField.RegisterValueChangedCallback(_ => Rebuild());
@@ -36,7 +32,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             scroll.AddToClassList("bt-palette__scroll");
             Add(scroll);
 
-            descriptionLabel = new Label("ノードにカーソルを合わせると説明を表示します。\nキャンバスへドラッグして配置、既存ノードの上に落とすと子として接続します。");
+            descriptionLabel = new Label("");
             descriptionLabel.AddToClassList("bt-palette__description");
             Add(descriptionLabel);
 
@@ -101,8 +97,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             item.AddToClassList("bt-node--" + categoryKey);
 
             var accent = new VisualElement();
-            accent.AddToClassList("bt-accent");
-            accent.AddToClassList("bt-palette__accent");
+            accent.AddToClassList("bt-marker");
             item.Add(accent);
 
             var label = new Label(name);

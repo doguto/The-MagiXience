@@ -11,16 +11,15 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
     {
         static readonly HashSet<string> HiddenFields = new() { "guid", "graphPosition", "children", "child", "comment" };
 
-        readonly Label orderBadge;
+        readonly Label orderLabel;
         readonly Label summaryLabel;
-        readonly Label commentLabel;
+        readonly System.Action<Port, UnityEngine.Vector2> onDropOutsidePort;
+        VisualElement commentRow;
 
         public NodeDefinition Definition { get; }
         public bool IsRoot { get; }
         public Port Input { get; }
         public Port Output { get; }
-
-        readonly System.Action<Port, UnityEngine.Vector2> onDropOutsidePort;
 
         public BehaviorTreeNodeView(NodeDefinition definition, SerializedProperty property, System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
         {
@@ -28,31 +27,28 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             Definition = definition;
             viewDataKey = definition.Guid;
             AddToClassList("bt-node");
-            AddToClassList("bt-node--" + CategoryKey(definition));
+            AddToClassList("bt-node--" + NodeCatalog.CategoryKey(definition));
             tooltip = NodeCatalog.Description(definition.GetType());
 
             Input = CreatePort(Direction.Input, Port.Capacity.Single);
-            mainContainer.Insert(0, PortRow(Input, "bt-port-row--in"));
+            mainContainer.Add(PortRow(Input, "bt-port-row--in"));
 
             var header = new VisualElement();
             header.AddToClassList("bt-header");
-            header.Add(Accent());
-            var texts = new VisualElement();
-            texts.AddToClassList("bt-header-texts");
-            texts.Add(StyledLabel(CategoryLabel(definition), "bt-category"));
-            texts.Add(StyledLabel(DisplayName(definition.GetType()), "bt-title"));
-            header.Add(texts);
-            orderBadge = StyledLabel("", "bt-order");
-            orderBadge.style.display = DisplayStyle.None;
-            header.Add(orderBadge);
-            mainContainer.Insert(1, header);
+            var marker = new VisualElement();
+            marker.AddToClassList("bt-marker");
+            header.Add(marker);
+            header.Add(StyledLabel(DisplayName(definition.GetType()), "bt-title"));
+            orderLabel = StyledLabel("", "bt-order");
+            header.Add(orderLabel);
+            mainContainer.Add(header);
 
+            var body = new VisualElement();
+            body.AddToClassList("bt-body");
+            BuildFields(property, body);
             summaryLabel = StyledLabel("", "bt-summary");
-            mainContainer.Insert(2, summaryLabel);
-            commentLabel = StyledLabel("", "bt-comment");
-            mainContainer.Insert(3, commentLabel);
-
-            BuildFields(property);
+            body.Add(summaryLabel);
+            mainContainer.Add(body);
 
             if (definition.ChildCapacity != NodeChildCapacity.None)
             {
@@ -78,8 +74,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             var header = new VisualElement();
             header.AddToClassList("bt-header");
-            header.Add(StyledLabel("START", "bt-title"));
-            mainContainer.Insert(0, header);
+            header.Add(StyledLabel("Start", "bt-title"));
+            mainContainer.Add(header);
 
             Output = CreatePort(Direction.Output, Port.Capacity.Single);
             mainContainer.Add(PortRow(Output, "bt-port-row--out"));
@@ -87,11 +83,22 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             RefreshPorts();
         }
 
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            if (!IsRoot && commentRow != null)
+            {
+                var visible = commentRow.resolvedStyle.display != DisplayStyle.None;
+                evt.menu.AppendAction(visible ? "Hide Comment" : "Edit Comment", _ =>
+                {
+                    commentRow.style.display = visible ? DisplayStyle.None : DisplayStyle.Flex;
+                });
+            }
+            base.BuildContextualMenu(evt);
+        }
+
         public void SetOrder(int order)
         {
-            if (orderBadge == null) return;
-            orderBadge.text = order.ToString();
-            orderBadge.style.display = order > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            if (orderLabel != null) orderLabel.text = order > 0 ? order.ToString() : "";
         }
 
         public void SetRuntimeActive(bool active) => EnableInClassList("bt-running", active);
@@ -99,20 +106,13 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public void RefreshTexts()
         {
             if (Definition == null) return;
-
             var summary = Definition.Summary;
             summaryLabel.text = summary ?? "";
             summaryLabel.style.display = string.IsNullOrEmpty(summary) ? DisplayStyle.None : DisplayStyle.Flex;
-
-            var comment = Definition.Comment;
-            commentLabel.text = comment ?? "";
-            commentLabel.style.display = string.IsNullOrEmpty(comment) ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
-        Port CreatePort(Direction direction, Port.Capacity capacity)
-        {
-            return BehaviorTreePort.Create(direction, capacity, onDropOutsidePort);
-        }
+        Port CreatePort(Direction direction, Port.Capacity capacity) =>
+            BehaviorTreePort.Create(direction, capacity, onDropOutsidePort);
 
         static VisualElement PortRow(Port port, string modifier)
         {
@@ -123,13 +123,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             return row;
         }
 
-        static VisualElement Accent()
-        {
-            var accent = new VisualElement();
-            accent.AddToClassList("bt-accent");
-            return accent;
-        }
-
         static Label StyledLabel(string text, string className)
         {
             var label = new Label(text);
@@ -138,12 +131,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         }
 
         // 子ノード配列が HideInInspector のため NextVisible では中に入れない。Next で直下のフィールドを列挙する。
-        void BuildFields(SerializedProperty property)
+        void BuildFields(SerializedProperty property, VisualElement body)
         {
             if (property == null) return;
-
-            var body = new VisualElement();
-            body.AddToClassList("bt-body");
 
             var fields = new List<SerializedProperty>();
             var it = property.Copy();
@@ -171,15 +161,14 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 body.Add(BindField(field));
             }
 
+            // コメントは書かれている時だけ表示し、空なら右クリックの Edit Comment で出す
             if (commentProp != null)
             {
-                var foldout = new Foldout { text = "Comment", value = !string.IsNullOrEmpty(commentProp.stringValue) };
-                foldout.Add(BindField(commentProp));
-                body.Add(foldout);
+                commentRow = BindField(commentProp);
+                commentRow.AddToClassList("bt-comment");
+                commentRow.style.display = string.IsNullOrEmpty(commentProp.stringValue) ? DisplayStyle.None : DisplayStyle.Flex;
+                body.Add(commentRow);
             }
-
-            if (body.childCount == 0) return;
-            mainContainer.Add(body);
         }
 
         PropertyField BindField(SerializedProperty prop)
@@ -189,10 +178,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             field.RegisterValueChangeCallback(_ => RefreshTexts());
             return field;
         }
-
-        static string CategoryKey(NodeDefinition definition) => NodeCatalog.CategoryKey(definition);
-
-        static string CategoryLabel(NodeDefinition definition) => CategoryKey(definition).ToUpperInvariant();
 
         public static string DisplayName(System.Type type)
         {

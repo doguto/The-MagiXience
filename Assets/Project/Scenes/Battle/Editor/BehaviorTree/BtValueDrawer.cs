@@ -38,15 +38,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             valueField.BindProperty(valueProp);
             row.Add(valueField);
 
-            var chip = new VisualElement();
-            chip.AddToClassList("bt-value__chip");
-            var chipLabel = new Label();
-            chipLabel.AddToClassList("bt-value__chip-label");
-            chip.Add(chipLabel);
-            var unbind = new Button { text = "×", tooltip = "固定値に戻す" };
-            unbind.AddToClassList("bt-value__chip-remove");
-            chip.Add(unbind);
-            row.Add(chip);
+            var boundLabel = new Label();
+            boundLabel.AddToClassList("bt-value__bound");
+            row.Add(boundLabel);
 
             var menuButton = new Button { text = "▾", tooltip = "パラメータに結びつける" };
             menuButton.AddToClassList("bt-value__menu");
@@ -59,16 +53,16 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 if (Prop() == null) return;
                 var param = CurrentParam();
-                var bound = !string.IsNullOrEmpty(param);
-                valueField.style.display = bound ? DisplayStyle.None : DisplayStyle.Flex;
-                chip.style.display = bound ? DisplayStyle.Flex : DisplayStyle.None;
-                if (!bound) return;
+                var isBound = !string.IsNullOrEmpty(param);
+                valueField.style.display = isBound ? DisplayStyle.None : DisplayStyle.Flex;
+                boundLabel.style.display = isBound ? DisplayStyle.Flex : DisplayStyle.None;
+                if (!isBound) return;
 
                 var declared = ParameterUtility.Find(so, param);
                 var valid = declared != null && accepted.Contains((TreeParameterKind)declared.FindPropertyRelative("kind").enumValueIndex);
-                chipLabel.text = (valid ? "⛓ " : "⚠ ") + param;
-                chip.EnableInClassList("bt-value__chip--missing", !valid);
-                chip.tooltip = valid ? $"パラメータ '{param}' を参照" : $"パラメータ '{param}' が未宣言、または型が合いません";
+                boundLabel.text = param;
+                boundLabel.EnableInClassList("bt-value__bound--missing", !valid);
+                boundLabel.tooltip = valid ? $"パラメータ '{param}' を参照" : $"パラメータ '{param}' が未宣言、または型が合いません";
             }
 
             void Bind(string name)
@@ -79,14 +73,12 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 Refresh();
             }
 
-            unbind.clicked += () => Bind("");
-
             menuButton.clicked += () =>
             {
                 so.Update();
                 var menu = new GenericMenu();
                 var current = CurrentParam();
-                menu.AddItem(new GUIContent("固定値"), string.IsNullOrEmpty(current), () => Bind(""));
+                menu.AddItem(new GUIContent("固定値を使う"), string.IsNullOrEmpty(current), () => Bind(""));
                 menu.AddSeparator("");
 
                 var any = false;

@@ -7,14 +7,18 @@ using UnityEngine.UIElements;
 
 namespace Project.Scenes.Battle.Editor.BehaviorTree
 {
-    // 右ペインのパラメータ一覧。追加・改名・既定値の編集、使用箇所の表示、値欄へのドラッグ元を兼ねる。
+    // 右ペインのパラメータ一覧 (Shader Graph の Blackboard 相当)。
+    // 行: 名前 / 型 / 既定値。行のドラッグで値欄に結びつけ、右クリックで削除。
     public class ParameterPanelView : VisualElement
     {
-        readonly ScrollView list;
-        readonly Label emptyLabel;
+        readonly Label titleLabel;
+        readonly VisualElement list;
+        readonly Label footer;
+        readonly Button selectUsagesButton;
         BehaviorTreeAsset asset;
         SerializedObject serializedObject;
         int lastArraySize = -1;
+        string selectedName;
 
         public event Action<string> UsageClicked;
         public event Action Changed;
@@ -25,29 +29,47 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             var header = new VisualElement();
             header.AddToClassList("bt-params__header");
-            header.Add(new Label("PARAMETERS") { name = "title" });
+            var titles = new VisualElement { style = { flexGrow = 1 } };
+            titleLabel = new Label();
+            titleLabel.AddToClassList("bt-params__title");
+            titles.Add(titleLabel);
+            var subtitle = new Label("Parameters");
+            subtitle.AddToClassList("bt-params__subtitle");
+            titles.Add(subtitle);
+            header.Add(titles);
             var addButton = new Button(ShowAddMenu) { text = "+", tooltip = "パラメータを追加" };
             addButton.AddToClassList("bt-params__add");
             header.Add(addButton);
             Add(header);
 
-            list = new ScrollView(ScrollViewMode.Vertical);
-            list.AddToClassList("bt-params__list");
-            Add(list);
+            var columns = new VisualElement();
+            columns.AddToClassList("bt-params__columns");
+            columns.Add(new Label("Name") { name = "name" });
+            columns.Add(new Label("Type") { name = "type" });
+            columns.Add(new Label("Default") { name = "value" });
+            Add(columns);
 
-            emptyLabel = new Label("パラメータはまだありません。\n+ から追加すると、ノードの値をこのツリーの引数にできます。\nSubTree で呼ぶ側から値を上書きできます。");
-            emptyLabel.AddToClassList("bt-params__empty");
-            Add(emptyLabel);
+            var scroll = new ScrollView(ScrollViewMode.Vertical);
+            scroll.AddToClassList("bt-params__scroll");
+            list = scroll.contentContainer;
+            Add(scroll);
 
-            var hint = new Label("行をノードの値欄へドラッグすると結びつけます。");
-            hint.AddToClassList("bt-params__hint");
-            Add(hint);
+            var footerRow = new VisualElement();
+            footerRow.AddToClassList("bt-params__footer");
+            footer = new Label();
+            footer.AddToClassList("bt-params__footer-text");
+            footerRow.Add(footer);
+            selectUsagesButton = new Button(() => { if (selectedName != null) UsageClicked?.Invoke(selectedName); }) { text = "Select" };
+            selectUsagesButton.AddToClassList("bt-params__select");
+            footerRow.Add(selectUsagesButton);
+            Add(footerRow);
         }
 
         public void SetAsset(BehaviorTreeAsset target)
         {
             asset = target;
             serializedObject = asset ? new SerializedObject(asset) : null;
+            selectedName = null;
             this.Unbind();
             if (serializedObject != null)
             {
@@ -61,16 +83,17 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             serializedObject.Update();
             var size = serializedObject.FindProperty("parameters").arraySize;
             if (size != lastArraySize) Rebuild();
-            else RefreshUsages();
+            else RefreshFooter();
         }
 
         public void Rebuild()
         {
             list.Clear();
+            titleLabel.text = asset ? asset.name : "-";
             if (serializedObject == null)
             {
-                emptyLabel.style.display = DisplayStyle.None;
                 lastArraySize = -1;
+                RefreshFooter();
                 return;
             }
 
@@ -81,80 +104,78 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 list.Add(CreateRow(array.GetArrayElementAtIndex(i), i));
             }
-            emptyLabel.style.display = array.arraySize == 0 ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (array.arraySize == 0)
+            {
+                var empty = new Label("No parameters");
+                empty.AddToClassList("bt-params__empty");
+                list.Add(empty);
+            }
+            RefreshFooter();
         }
 
-        void RefreshUsages()
+        void RefreshFooter()
         {
-            foreach (var row in list.Children())
+            if (serializedObject == null || string.IsNullOrEmpty(selectedName) || ParameterUtility.Find(serializedObject, selectedName) == null)
             {
-                if (row.userData is not string name) continue;
-                var usage = row.Q<Button>(className: "bt-params__usage");
-                if (usage != null) SetUsageText(usage, ParameterUtility.CountUsages(serializedObject, name));
+                footer.text = "";
+                selectUsagesButton.style.display = DisplayStyle.None;
+                return;
             }
+
+            var count = ParameterUtility.CountUsages(serializedObject, selectedName);
+            footer.text = count == 0 ? $"{selectedName} — 未使用" : $"{selectedName} — {count} 箇所で使用";
+            selectUsagesButton.style.display = count == 0 ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         VisualElement CreateRow(SerializedProperty parameter, int index)
         {
             var nameProp = parameter.FindPropertyRelative("name");
-            var kindProp = parameter.FindPropertyRelative("kind");
-            var kind = (TreeParameterKind)kindProp.enumValueIndex;
+            var kind = (TreeParameterKind)parameter.FindPropertyRelative("kind").enumValueIndex;
+            var name = nameProp.stringValue;
 
-            var row = new VisualElement { userData = nameProp.stringValue };
+            var row = new VisualElement { userData = name };
             row.AddToClassList("bt-params__row");
-            row.AddToClassList("bt-params__row--" + kind.ToString().ToLowerInvariant());
+            row.EnableInClassList("bt-params__row--selected", name == selectedName);
 
-            var top = new VisualElement();
-            top.AddToClassList("bt-params__row-top");
-
-            var handle = new Label("⋮⋮") { tooltip = "ドラッグしてノードの値欄に結びつける" };
-            handle.AddToClassList("bt-params__handle");
-            top.Add(handle);
-
-            var nameField = new TextField { value = nameProp.stringValue, isDelayed = true };
+            var nameField = new TextField { value = name, isDelayed = true };
             nameField.AddToClassList("bt-params__name");
             nameField.RegisterValueChangedCallback(e => RenameParameter(index, e.previousValue, e.newValue));
-            top.Add(nameField);
+            row.Add(nameField);
 
             var kindLabel = new Label(ParameterUtility.KindLabel(kind));
             kindLabel.AddToClassList("bt-params__kind");
-            top.Add(kindLabel);
-
-            var remove = new Button(() => RemoveParameter(index)) { text = "×", tooltip = "削除" };
-            remove.AddToClassList("bt-params__remove");
-            top.Add(remove);
-            row.Add(top);
-
-            var bottom = new VisualElement();
-            bottom.AddToClassList("bt-params__row-bottom");
+            row.Add(kindLabel);
 
             var valueProp = parameter.FindPropertyRelative(ParameterUtility.ValuePropertyName(kind));
-            var valueField = new PropertyField(valueProp, "") { tooltip = "既定値 (SubTree で上書きされない場合の値)" };
+            var valueField = new PropertyField(valueProp, "");
             valueField.AddToClassList("bt-params__value");
             valueField.BindProperty(valueProp);
-            bottom.Add(valueField);
+            row.Add(valueField);
 
-            var usage = new Button(() => UsageClicked?.Invoke(nameProp.stringValue)) { tooltip = "使用しているノードを選択" };
-            usage.AddToClassList("bt-params__usage");
-            SetUsageText(usage, ParameterUtility.CountUsages(serializedObject, nameProp.stringValue));
-            bottom.Add(usage);
-            row.Add(bottom);
+            row.RegisterCallback<PointerDownEvent>(e =>
+            {
+                if (e.button != 0) return;
+                selectedName = name;
+                foreach (var r in list.Children()) r.EnableInClassList("bt-params__row--selected", Equals(r.userData, name));
+                RefreshFooter();
+            }, TrickleDown.TrickleDown);
 
-            RegisterDragSource(handle, nameProp.stringValue, kind);
-            RegisterDragSource(kindLabel, nameProp.stringValue, kind);
+            row.AddManipulator(new ContextualMenuManipulator(evt =>
+            {
+                evt.menu.AppendAction("Select Usages", _ => UsageClicked?.Invoke(name));
+                evt.menu.AppendAction("Delete", _ => RemoveParameter(index));
+            }));
+
+            RegisterDragSource(kindLabel, name, kind);
             return row;
-        }
-
-        static void SetUsageText(Button usage, int count)
-        {
-            usage.text = count + " use";
-            usage.EnableInClassList("bt-params__usage--unused", count == 0);
         }
 
         static void RegisterDragSource(VisualElement element, string name, TreeParameterKind kind)
         {
             var pressed = false;
             var start = Vector2.zero;
+            element.tooltip = "ドラッグしてノードの値欄に結びつける";
             element.RegisterCallback<PointerDownEvent>(e =>
             {
                 if (e.button != 0) return;
@@ -168,7 +189,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 DragAndDrop.PrepareStartDrag();
                 DragAndDrop.SetGenericData(ParameterUtility.DragKey, new ParameterUtility.DragPayload { Name = name, Kind = kind });
                 DragAndDrop.objectReferences = Array.Empty<UnityEngine.Object>();
-                DragAndDrop.StartDrag("$" + name);
+                DragAndDrop.StartDrag(name);
             });
             element.RegisterCallback<PointerUpEvent>(_ => pressed = false);
         }
@@ -183,11 +204,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 menu.AddItem(new GUIContent(kind.ToString()), false, () =>
                 {
                     serializedObject.Update();
-                    ParameterUtility.Add(serializedObject, k.ToString().ToLowerInvariant(), k);
+                    var created = ParameterUtility.Add(serializedObject, k.ToString().ToLowerInvariant(), k);
+                    selectedName = created.FindPropertyRelative("name").stringValue;
                     serializedObject.ApplyModifiedProperties();
                     Rebuild();
                     Changed?.Invoke();
-                    schedule.Execute(() => list.Query<TextField>(className: "bt-params__name").Last()?.Q("unity-text-input")?.Focus());
                 });
             }
             menu.ShowAsContext();
@@ -214,6 +235,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             p.FindPropertyRelative("name").stringValue = newName;
             ParameterUtility.Rename(serializedObject, oldName, newName);
             serializedObject.ApplyModifiedProperties();
+            if (selectedName == oldName) selectedName = newName;
             Rebuild();
             Changed?.Invoke();
         }
@@ -236,6 +258,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             }
             array.DeleteArrayElementAtIndex(index);
             serializedObject.ApplyModifiedProperties();
+            if (selectedName == name) selectedName = null;
             Rebuild();
             Changed?.Invoke();
         }

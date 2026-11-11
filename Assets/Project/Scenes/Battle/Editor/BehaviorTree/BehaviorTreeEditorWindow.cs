@@ -38,14 +38,16 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             var toolbar = new Toolbar();
             assetField = new ObjectField { objectType = typeof(BehaviorTreeAsset), allowSceneObjects = false, value = asset };
-            assetField.style.minWidth = 240;
+            assetField.style.width = 260;
             assetField.RegisterValueChangedCallback(e => SetAsset(e.newValue as BehaviorTreeAsset));
             toolbar.Add(assetField);
             toolbar.Add(new ToolbarButton(() => graphView?.AutoLayout()) { text = "Auto Layout" });
             toolbar.Add(new ToolbarButton(() => graphView?.FrameWholeGraph()) { text = "Frame All" });
+            var blackboardToggle = new ToolbarToggle { text = "Blackboard", value = true };
+            toolbar.Add(blackboardToggle);
             toolbar.Add(new ToolbarButton(() => graphView?.ToggleMiniMap()) { text = "MiniMap" });
-            toolbar.Add(new ToolbarButton(() => graphView?.Reload()) { text = "Reload" });
-            titleLabel = new Label { style = { unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 8 } };
+            toolbar.Add(new ToolbarSpacer { flex = true });
+            titleLabel = new Label { style = { unityTextAlign = TextAnchor.MiddleRight, marginRight = 8, color = new Color(0.55f, 0.55f, 0.55f) } };
             toolbar.Add(titleLabel);
             rootVisualElement.Add(toolbar);
 
@@ -67,6 +69,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             rightSplit.Add(parameterPanel);
 
             split.Add(rightSplit);
+            blackboardToggle.RegisterValueChangedCallback(e =>
+            {
+                if (e.newValue) rightSplit.UnCollapse();
+                else rightSplit.CollapseChild(1);
+            });
             rootVisualElement.Add(split);
 
             var styleSheet = BehaviorTreeGraphView.LoadStyleSheet();
