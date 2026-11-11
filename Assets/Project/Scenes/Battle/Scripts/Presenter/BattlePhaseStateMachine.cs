@@ -1,8 +1,6 @@
 using System;
 using UniRx;
 using UnityEngine;
-using UnityEngine.Playables;
-using UnityEngine.Timeline;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 
@@ -10,8 +8,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 {
     public class BattlePhaseStateMachine : MonoBehaviour
     {
-        [SerializeField] PlayableDirector playableDirector;
-        [SerializeField] BattleTimelineBindingMap bindingMap;
+        [SerializeField] EnemySpawnReceiver enemySpawnReceiver;
+        [SerializeField] BulletClearReceiver bulletClearReceiver;
 
         readonly Subject<BattlePhaseModelBase> phaseStarted = new();
         readonly Subject<BattleSituation> sequenceCompleted = new();
@@ -21,15 +19,33 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         // 直前に終了したフェーズ。そのフェーズのOnExitPhase通知の最中に破棄しないよう、次の遷移まで破棄を遅らせる
         BattlePhaseModelBase exitedPhase;
         IDisposable exitSubscription;
-        Func<BattlePhaseModelBase, TimelineAsset> timelineResolver;
+        PhaseActionRunner actionRunner;
 
         public IObservable<BattlePhaseModelBase> OnPhaseStarted => phaseStarted;
         public IObservable<BattleSituation> OnSequenceCompleted => sequenceCompleted;
 
-        public void SetTimelineResolver(Func<BattlePhaseModelBase, TimelineAsset> resolver)
-            => timelineResolver = resolver;
+        void Awake()
+        {
+            // 未設定ならシーンから探す（シーン上の配置は変えずに済むようにする）
+            if (!enemySpawnReceiver) enemySpawnReceiver = FindFirstObjectByType<EnemySpawnReceiver>();
+            if (!bulletClearReceiver) bulletClearReceiver = FindFirstObjectByType<BulletClearReceiver>();
 
-        void Update() => BattleWind.Tick(Time.deltaTime);
+            actionRunner = new PhaseActionRunner(
+                action =>
+                {
+                    if (enemySpawnReceiver) enemySpawnReceiver.Spawn(action);
+                },
+                () =>
+                {
+                    if (bulletClearReceiver) bulletClearReceiver.ClearAll();
+                });
+        }
+
+        void Update()
+        {
+            BattleWind.Tick(Time.deltaTime);
+            actionRunner?.Tick(Time.deltaTime);
+        }
 
         public void PlaySequence(BattleSequenceModel sequence)
         {
@@ -68,8 +84,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            // Directorがまだ再生中のTimelineAssetを持つフェーズは破棄しない(次フェーズにTimelineが無い場合など)
-            if (exitedPhase != null && !(playableDirector && exitedPhase.OwnsTimeline(playableDirector.playableAsset)))
+            if (exitedPhase != null)
             {
                 activeSequence.ReleasePhase(exitedPhase);
             }
@@ -79,7 +94,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (nextPhase == null)
             {
                 BattleWind.Reset();
-                playableDirector?.Stop();
+                actionRunner?.Stop();
                 sequenceCompleted.OnNext(activeSequence.Situation);
                 DisposeSequence(activeSequence);
                 activeSequence = null;
@@ -93,43 +108,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // 購読を Enter() より先に済ませておく。後から購読すると OnExitPhase の通知を取りこぼし、
             // シーケンスがそのフェーズで止まったままになる。
             exitSubscription = nextPhase.OnExitPhase.Subscribe(_ => MoveNextPhase());
-            ApplyTimeline(nextPhase);
-            nextPhase.Enter(playableDirector);
+            actionRunner?.Stop();
+            nextPhase.Enter();
 
             // Enter() 中に即完了して MoveNextPhase が再帰済みの場合、activePhase は既に
-            // 後続フェーズへ進んでいるため、このフェーズ分の開始通知は出さない。
+            // 後続フェーズへ進んでいるため、このフェーズ分のアクション開始と開始通知は行わない。
             if (activePhase == nextPhase)
             {
+                actionRunner?.Start(nextPhase.ActionAsset);
                 phaseStarted.OnNext(nextPhase);
             }
-        }
-
-        void ApplyTimeline(BattlePhaseModelBase phase)
-        {
-            if (!playableDirector)
-            {
-                Debug.LogWarning("PlayableDirector is not assigned.", this);
-                return;
-            }
-
-            var timeline = timelineResolver?.Invoke(phase) ?? phase.ResolveTimeline();
-            if (!timeline)
-            {
-                Debug.LogWarning($"Phase {phase.PhaseId} does not have a timeline asset.", this);
-                return;
-            }
-
-            playableDirector.playableAsset = timeline;
-            playableDirector.time = 0;
-            playableDirector.Evaluate();
-            playableDirector.extrapolationMode = DirectorWrapMode.Hold;
-
-            if (bindingMap)
-            {
-                bindingMap.ApplyBindings(playableDirector, timeline);
-            }
-
-            playableDirector.Play();
         }
 
         public void Stop(BattleSequenceModel sequenceToKeep = null)
@@ -139,10 +127,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             exitSubscription?.Dispose();
             exitSubscription = null;
 
-            if (playableDirector)
-            {
-                playableDirector.Stop();
-            }
+            actionRunner?.Stop();
 
             activePhase?.Exit();
             activePhase = null;
@@ -160,6 +145,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             {
                 return;
             }
+
+            // 先に enumerator を破棄して Loop の終了条件の監視を止め、破棄済みフェーズへの interrupt を防ぐ
+            sequence.Dispose();
 
             foreach (var phase in sequence.AllCreatedPhases)
             {

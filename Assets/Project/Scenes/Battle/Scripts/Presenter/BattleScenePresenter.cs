@@ -241,7 +241,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             bossDisposables.Dispose();
             bossDisposables = new CompositeDisposable();
-            phaseStateMachine.SetTimelineResolver(null);
 
             if (bossPresenter != null)
             {
@@ -407,7 +406,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var targetSequence = startSituation == BattleSituation.Boss ? bossSequence : waySequence;
             if (targetSequence == null) return;
 
-            targetSequence.SetStartPhaseByFlatIndex(startPhaseIndex);
+            targetSequence.SetStartIndex(startPhaseIndex);
             Debug.Log($"[BattleScenePresenter] Debug start phase index {startPhaseIndex} applied to {startSituation} sequence.", this);
         }
 #endif
@@ -594,14 +593,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             playerPresenter?.FreezeRunAnimation();
             hasResumedPlayerAnimationOnBoss = false;
 
-            phaseStateMachine.SetTimelineResolver(phase =>
-            {
-                if (ShouldUseStrongAttack(phase))
-                {
-                    return phase.ResolveTimelineStrong();
-                }
-                return phase.ResolveTimeline();
-            });
             phaseStateMachine.OnPhaseStarted
                              .Subscribe(phase =>
                              {
@@ -611,13 +602,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                                      playerPresenter?.UnfreezeRunAnimation();
                                  }
 
-                                 bool useStrong = ShouldUseStrongAttack(phase);
-                                 if (useStrong)
+                                 var bossAction = phase.ActionAsset != null ? phase.ActionAsset.BossAction : null;
+                                 if (bossAction != null && bossAction.EnterStrongMode)
                                  {
                                      bossPresenter.Model.EnterStrongMode();
                                  }
-                                 var builder = useStrong ? phase.BuilderStrong : phase.Builder;
-                                 bossPresenter.OnPhaseStarted(phase, builder);
+                                 bossPresenter.OnPhaseStarted(bossAction);
                              })
                              .AddTo(bossDisposables);
 
@@ -636,12 +626,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             backgroundPresenter?.StartDeceleration();
 
             Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
-        }
-
-        bool ShouldUseStrongAttack(BattlePhaseModelBase phase)
-        {
-            if (phase.BuilderStrong == null || bossPresenter?.Model == null) return false;
-            return bossPresenter.Model.ShouldUseStrongAttack;
         }
 
         void StartBossSequence()

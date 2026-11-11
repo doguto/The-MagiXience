@@ -12,47 +12,72 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e9eb2c7bf1b4174a965e674148ccd2f, type: 3}
   m_Name: 4_Phase3
   m_EditorClassIdentifier: 
-  signalTracks: []
-  animationTracks: []
-  activationTracks: []
-  audioTracks: []
-  controlTracks: []
-  enemySpawnTracks:
-  - trackName: EnemySpawn
-    clips:
-    - time: 2.5
-      spawnPosition: {x: 10, y: -1, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 54a6d03eb28620a4d9fac007df958dde, type: 3}
-      movementOverride: {fileID: 0}
-      attackOverride: {fileID: 0}
-    - time: 2.5
-      spawnPosition: {x: 12, y: -2, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
-      movementOverride: {fileID: 0}
-      attackOverride: {fileID: 0}
-    - time: 2.5
-      spawnPosition: {x: 12, y: -1, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
-      movementOverride: {fileID: 0}
-      attackOverride: {fileID: 0}
-    - time: 2.5
-      spawnPosition: {x: 12, y: 0, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
-      movementOverride: {fileID: 0}
-      attackOverride: {fileID: 0}
-    - time: 2.5
-      spawnPosition: {x: 12, y: 1, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
-      movementOverride: {fileID: 0}
-      attackOverride: {fileID: 0}
-    - time: 2.5
-      spawnPosition: {x: 12, y: -3, z: 0}
-      prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
-      movementOverride: {fileID: 0}
-      attackOverride: {fileID: 0}
-  bulletClearTracks:
-  - trackName: BulletClear
-    clips:
-    - time: 1.5
-  bossAttackPreset: {fileID: 0}
-  bossMovementPreset: {fileID: 0}
+  actions:
+  - rid: 8540147769746653395
+  - rid: 8540147769746653396
+  - rid: 8540147769746653397
+  - rid: 8540147769746653398
+  - rid: 8540147769746653399
+  - rid: 8540147769746653400
+  - rid: 8540147769746653401
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147769746653395
+      type: {class: EnemySpawnAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 2.5
+        spawnPosition: {x: 10, y: -1, z: 0}
+        prefab: {fileID: 7074045735317373604, guid: 54a6d03eb28620a4d9fac007df958dde, type: 3}
+        movementOverride: {fileID: 0}
+        attackOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 0}
+    - rid: 8540147769746653396
+      type: {class: EnemySpawnAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 2.5
+        spawnPosition: {x: 12, y: -2, z: 0}
+        prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
+        movementOverride: {fileID: 0}
+        attackOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 0}
+    - rid: 8540147769746653397
+      type: {class: EnemySpawnAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 2.5
+        spawnPosition: {x: 12, y: -1, z: 0}
+        prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
+        movementOverride: {fileID: 0}
+        attackOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 0}
+    - rid: 8540147769746653398
+      type: {class: EnemySpawnAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 2.5
+        spawnPosition: {x: 12, y: 0, z: 0}
+        prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
+        movementOverride: {fileID: 0}
+        attackOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 0}
+    - rid: 8540147769746653399
+      type: {class: EnemySpawnAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 2.5
+        spawnPosition: {x: 12, y: 1, z: 0}
+        prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
+        movementOverride: {fileID: 0}
+        attackOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 0}
+    - rid: 8540147769746653400
+      type: {class: EnemySpawnAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 2.5
+        spawnPosition: {x: 12, y: -3, z: 0}
+        prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
+        movementOverride: {fileID: 0}
+        attackOverride: {fileID: 0}
+        bulletMovementOverride: {fileID: 0}
+    - rid: 8540147769746653401
+      type: {class: BulletClearAction, ns: Project.Scenes.Battle.Scripts.Model.PhaseAction, asm: Model}
+      data:
+        time: 1.5

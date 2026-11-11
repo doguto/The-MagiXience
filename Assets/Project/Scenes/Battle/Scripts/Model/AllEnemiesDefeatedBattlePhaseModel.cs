@@ -13,8 +13,8 @@ namespace Project.Scenes.Battle.Scripts.Model
             : base(definition)
         {
             this.tracker = tracker;
-            totalSpawnCount = definition.TimelineBuilder != null
-                ? definition.TimelineBuilder.TotalEnemySpawnCount
+            totalSpawnCount = definition.ActionAsset != null
+                ? definition.ActionAsset.TotalEnemySpawnCount
                 : 0;
         }
 
