@@ -20,8 +20,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public Port Input { get; }
         public Port Output { get; }
 
-        public BehaviorTreeNodeView(NodeDefinition definition, SerializedProperty property)
+        readonly System.Action<Port, UnityEngine.Vector2> onDropOutsidePort;
+
+        public BehaviorTreeNodeView(NodeDefinition definition, SerializedProperty property, System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
         {
+            this.onDropOutsidePort = onDropOutsidePort;
             Definition = definition;
             viewDataKey = definition.Guid;
             AddToClassList("bt-node");
@@ -64,8 +67,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         }
 
         // ツリーのルート接続口を表す擬似ノード
-        public BehaviorTreeNodeView()
+        public BehaviorTreeNodeView(System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
         {
+            this.onDropOutsidePort = onDropOutsidePort;
             IsRoot = true;
             viewDataKey = "__root__";
             capabilities &= ~(Capabilities.Deletable | Capabilities.Copiable);
@@ -107,14 +111,12 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         Port CreatePort(Direction direction, Port.Capacity capacity)
         {
-            var port = InstantiatePort(Orientation.Vertical, direction, capacity, typeof(bool));
-            port.portName = "";
-            return port;
+            return BehaviorTreePort.Create(direction, capacity, onDropOutsidePort);
         }
 
         static VisualElement PortRow(Port port, string modifier)
         {
-            var row = new VisualElement();
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
             row.AddToClassList("bt-port-row");
             row.AddToClassList(modifier);
             row.Add(port);

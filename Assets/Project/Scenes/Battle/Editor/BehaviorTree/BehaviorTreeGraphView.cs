@@ -54,7 +54,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             searchProvider = ScriptableObject.CreateInstance<NodeSearchWindowProvider>();
             searchProvider.hideFlags = HideFlags.HideAndDontSave;
             searchProvider.Initialize(CreateNodeAtScreenPosition);
-            nodeCreationRequest = ctx => SearchWindow.Open(new SearchWindowContext(ctx.screenMousePosition), searchProvider);
+            nodeCreationRequest = ctx =>
+            {
+                pendingPort = null;
+                SearchWindow.Open(new SearchWindowContext(ctx.screenMousePosition), searchProvider);
+            };
 
             graphViewChanged = OnGraphViewChanged;
             serializeGraphElements = SerializeForCopy;
@@ -156,14 +160,14 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             serializedObject = new SerializedObject(asset);
             var paths = CollectPropertyPaths(serializedObject);
 
-            rootView = new BehaviorTreeNodeView();
+            rootView = new BehaviorTreeNodeView(OnDropOutsidePort);
             rootView.SetPosition(new Rect(0, -150, 120, 60));
             AddElement(rootView);
 
             foreach (var def in AllDefinitions())
             {
                 var prop = paths.TryGetValue(def, out var path) ? serializedObject.FindProperty(path) : null;
-                var view = new BehaviorTreeNodeView(def, prop);
+                var view = new BehaviorTreeNodeView(def, prop, OnDropOutsidePort);
                 view.SetPosition(new Rect(def.GraphPosition, Vector2.zero));
                 views[def] = view;
                 AddElement(view);
@@ -172,7 +176,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             isReloading = true;
             if (asset.Root != null && views.TryGetValue(asset.Root, out var rootChild))
             {
-                AddElement(rootView.Output.ConnectTo(rootChild.Input));
+                AddElement(rootView.Output.ConnectTo<BehaviorTreeEdge>(rootChild.Input));
             }
 
             foreach (var (def, view) in views)
@@ -181,11 +185,13 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 {
                     if (child != null && views.TryGetValue(child, out var childView))
                     {
-                        AddElement(view.Output.ConnectTo(childView.Input));
+                        AddElement(view.Output.ConnectTo<BehaviorTreeEdge>(childView.Input));
                     }
                 }
             }
             isReloading = false;
+            // 線がポートより手前にあるとポートを掴めないため、線を背面に回す
+            foreach (var edge in edges.ToList()) edge.SendToBack();
             RefreshOrderBadges();
         }
 
@@ -458,12 +464,46 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         static List<NodeDefinition> SortByPosition(List<NodeDefinition> children) =>
             children.OrderBy(c => c.GraphPosition.x).ToList();
 
+        Port pendingPort;
+
+        // 線を何もない所で離したら検索ウィンドウを開き、選んだノードをその線の先に接続する
+        void OnDropOutsidePort(Port origin, Vector2 worldPosition)
+        {
+            if (asset == null || origin == null) return;
+            pendingPort = origin;
+            var screen = worldPosition + window.position.position;
+            SearchWindow.Open(new SearchWindowContext(screen), searchProvider);
+        }
+
         void CreateNodeAtScreenPosition(Type type, Vector2 screenPosition)
         {
             if (asset == null) return;
             var windowPos = screenPosition - window.position.position;
             var localPos = contentViewContainer.WorldToLocal(windowPos);
-            CreateNode((NodeDefinition)Activator.CreateInstance(type), localPos, null);
+            var def = (NodeDefinition)Activator.CreateInstance(type);
+
+            var port = pendingPort;
+            pendingPort = null;
+            if (port?.node is BehaviorTreeNodeView owner && port.direction == Direction.Output)
+            {
+                CreateNode(def, localPos, owner);
+                return;
+            }
+
+            CreateNode(def, localPos, null);
+            if (port?.node is BehaviorTreeNodeView child && port.direction == Direction.Input
+                && def.ChildCapacity != NodeChildCapacity.None && !child.IsRoot)
+            {
+                Undo.RecordObject(asset, "Connect Behavior Tree Node");
+                DetachFromCurrentParent(child.Definition);
+                asset.DetachedNodes.Remove(child.Definition);
+                if (asset.Root == null) asset.Root = def;
+                else if (asset.Root != def && !asset.DetachedNodes.Contains(def)) asset.DetachedNodes.Add(def);
+                def.SetChildren(new[] { child.Definition });
+                def.GraphPosition = child.Definition.GraphPosition + new Vector2(0, -(SizeOf(child).y + VerticalGap + 60f));
+                EditorUtility.SetDirty(asset);
+                Reload();
+            }
         }
 
         // parent を指定した場合はその最後の子として接続し、親の下に配置する

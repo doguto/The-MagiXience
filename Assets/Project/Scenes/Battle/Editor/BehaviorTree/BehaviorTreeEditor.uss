@@ -14,6 +14,12 @@
 .bt-node {
     min-width: 200px;
     max-width: 280px;
+    overflow: visible;
+}
+
+.bt-node #contents,
+.bt-node #collapsible-area {
+    overflow: visible;
 }
 
 .bt-node #node-border {
@@ -58,34 +64,33 @@
 }
 
 /* ---------- Ports ---------- */
+/* ポートはノード内の上端/下端に置く。はみ出させると当たり判定から外れる */
 
 .bt-port-row {
     flex-direction: row;
     justify-content: center;
-    height: 14px;
+    height: 18px;
 }
 
-.bt-port-row--in {
-    margin-top: -7px;
-}
-
-.bt-port-row--out {
-    margin-bottom: -7px;
-}
-
-.bt-port-row Port {
-    height: 14px;
-    width: 24px;
+.bt-port-row .port {
+    height: 18px;
+    width: 48px;
     padding: 0;
     margin: 0;
     justify-content: center;
+    align-items: center;
+    border-radius: 9px;
 }
 
-.bt-port-row Port #type {
+.bt-port-row .port:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.bt-port-row .port #type {
     display: none;
 }
 
-.bt-port-row Port #connector {
+.bt-port-row .port #connector {
     width: 12px;
     height: 12px;
     margin: 0;
@@ -94,7 +99,7 @@
     background-color: #2b2d31;
 }
 
-.bt-port-row Port:hover #connector {
+.bt-port-row .port:hover #connector {
     border-color: #ffffff;
 }
 
