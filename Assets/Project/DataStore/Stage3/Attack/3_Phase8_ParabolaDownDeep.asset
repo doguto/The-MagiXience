@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: 3_Phase8_ParabolaDownDeep
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 1.6
+      loopEnd: 5.3
+      cycleDuration: 1.2
+      entries:
+      - time: 0
+        signal:
+          rid: 1906880873211363636
+        directionProvider:
+          rid: 1906880873211363637
+        rotationProvider:
+          rid: 1906880873211363638
+        sourceIndexProvider:
+          rid: 1906880873211363639
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: d76c0ef7b039974459652c2298d64c08, type: 2}
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1906880873211363636
+      type: {class: SingleBulletSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 1906880873211363637
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1906880873211363638
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880873211363639
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 1

@@ -15,6 +15,7 @@ namespace Project.Editor
             // duration, x, y, ease dropdown
             int lines = 4 + EaseDrawerHelper.GetCustomCurveLineCount(property);
             height += lines * (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing);
+            height += EaseDrawerHelper.PreviewLayoutHeight;
             return height;
         }
 

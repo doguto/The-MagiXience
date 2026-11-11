@@ -95,6 +95,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public BossEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
         public IObservable<Unit> OnDeathSequenceCompleted => deathSequenceCompleted;
+        public event Action<BattlePhaseModelBase, BattleTimelineBuilderAsset> PhaseStarted;
 
         void Awake()
         {
@@ -173,6 +174,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 ApplyAttackTimeline(null);
                 currentPhaseMovementSteps = null;
                 StartMovementSequence(null);
+                PhaseStarted?.Invoke(phase, builder);
                 return;
             }
 
@@ -182,10 +184,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 : null;
             ApplyAttackTimeline(attackTimeline);
 
-            currentPhaseMovementSteps = builder.BossMovementPreset != null
+            var nextMovementSteps = builder.BossMovementPreset != null
                 ? builder.BossMovementPreset.Steps
                 : null;
-            StartMovementSequence(currentPhaseMovementSteps);
+            // 同じ無期限の移動は時計を戻さず継続する。攻撃と風のフェーズ切替は通常通り行う。
+            bool continueMovement = ReferenceEquals(currentPhaseMovementSteps, nextMovementSteps)
+                && activeMovementSteps.Count == 1
+                && activeMovementSteps[0] is IPhaseContinuousMovementStep continuous
+                && continuous.ContinueAcrossPhases;
+            currentPhaseMovementSteps = nextMovementSteps;
+            if (!continueMovement) StartMovementSequence(currentPhaseMovementSteps);
+            PhaseStarted?.Invoke(phase, builder);
         }
 
         void ApplyAttackTimeline(AttackTimeline attackTimeline)

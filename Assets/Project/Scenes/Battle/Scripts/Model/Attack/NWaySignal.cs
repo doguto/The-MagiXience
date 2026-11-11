@@ -16,6 +16,13 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField, Tooltip("全体の回転オフセット（度数法）。正の値で反時計回りに回転する")]
         float rotationOffset = 0f;
 
+        public NWaySignal() { }
+        public NWaySignal(int count, float angleBetweenBullets)
+        {
+            wayCount = count;
+            spreadAngle = angleBetweenBullets;
+        }
+
         public IAttackSignal Clone() => new NWaySignal { wayCount = wayCount, spreadAngle = spreadAngle, radius = radius, startDelay = startDelay, rotationOffset = rotationOffset };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)

@@ -136,6 +136,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
                 if (isLastPhase)
                 {
+                    // ネストしたPresetの連射が終わる前に完了扱いにしない。
+                    if (scheduledActions != null && scheduledActions.Count > 0)
+                        maxTime = Mathf.Max(maxTime, scheduledActions[scheduledActions.Count - 1].Time);
                     Schedule(maxTime, () => IsCompleted = true);
                 }
             }
@@ -179,7 +182,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
 
             Schedule(fireTime, () =>
             {
-                var attackEvent = entry.CreateEvent(inheritedBulletMovement);
+                var attackEvent = entry.CreateEvent(inheritedBulletMovement, fireTime);
                 onAttackTiming.OnNext(ApplyBeamOrigin(attackEvent, entry.directionProvider));
             });
         }
@@ -191,7 +194,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         static AttackEvent ApplyBeamOrigin(AttackEvent attackEvent, IDirectionProvider directionProvider)
         {
             if (attackEvent.Type != AttackEventType.Bullet) return attackEvent;
-            if (directionProvider is not IBeamLineProvider beamProvider) return attackEvent;
+            if (directionProvider is not IBeamLineProvider beamProvider)
+                return directionProvider is IAttackOriginProvider originProvider
+                    ? attackEvent.WithWorldOrigin(originProvider.GetOrigin(), 0f) : attackEvent;
 
             var line = beamProvider.Line;
             return attackEvent.WithWorldOrigin(line.Start, line.Length);

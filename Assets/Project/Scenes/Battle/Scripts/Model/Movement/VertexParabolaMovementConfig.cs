@@ -13,22 +13,68 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     }
 
     [Serializable]
-    public class VertexParabolaMovementConfig : IMovementStep, ISerializationCallbackReceiver
+    public class VertexParabolaMovementConfig : IMovementStep, ISerializationCallbackReceiver, IAttackTimeMovementStep
     {
         [SerializeField, FormerlySerializedAs("bulge"), Tooltip("縦：上下に折り返す。横：左右に折り返す。凸の向きは発射位置と頂点から自動で決まります。")]
         ParabolaOrientation orientation = ParabolaOrientation.Vertical;
-        [SerializeField, Tooltip("移動開始位置からの頂点の相対座標（ワールド軸）。Xは右、Yは上が正です。")]
+        [SerializeField, Tooltip("頂点の座標。Is RelativeがONなら発射位置からの相対座標、OFFならワールド座標。Xは右、Yは上が正です。")]
         Vector2 vertex = new(-3f, 4.5f);
         [SerializeField, Min(0.01f), Tooltip("発射時の速さ（ワールド単位/秒）。軌道を保ったまま速さを変更できます。飛行中は等速ではありません。")]
         float initialSpeed = 5f;
 
+        [SerializeField, Tooltip("ON：頂点XYは発射位置からの相対座標。OFF：頂点XYはワールド座標。風による軌道変化は補正しません。")]
+        bool isRelative = true;
+
+        [SerializeField, Tooltip("AttackPresetから発射する場合、発射予定時刻に応じて頂点を正弦波で変える。飛行中の頂点は固定。")]
+        bool oscillateVertex;
+        [SerializeField] Vector2 vertexAmplitude;
+        [SerializeField, Tooltip("頂点X・Yの角速度（ラジアン/秒）。0ならその軸は変化しない。")]
+        Vector2 vertexAngularSpeed;
+        [SerializeField, Tooltip("頂点の往復を開始するAttackPreset内の時刻（秒）。")]
+        float attackTimeOffset;
+
+        public Vector2 VertexOffset => vertex;
+        public float InitialSpeed => initialSpeed;
+
+        public IMovementStep SampleForAttackTime(float attackTime)
+        {
+            float time = Mathf.Max(0f, attackTime - attackTimeOffset);
+            var offset = oscillateVertex
+                ? new Vector2(vertexAmplitude.x * Mathf.Sin(time * vertexAngularSpeed.x),
+                    vertexAmplitude.y * Mathf.Sin(time * vertexAngularSpeed.y))
+                : Vector2.zero;
+            return new VertexParabolaMovementConfig(vertex + offset, initialSpeed, orientation)
+            {
+                isRelative = this.isRelative
+            };
+        }
+
+        public Vector2 GetWorldVertex(Vector2 start)
+            => isRelative ? start + vertex : vertex;
+
+        public VertexParabolaMovementConfig() { }
+
+        /// <summary>発射ごとに頂点を決める攻撃用。共有プリセットは変更しない。</summary>
+        public VertexParabolaMovementConfig(Vector2 vertexOffset, float speed,
+            ParabolaOrientation orientation = ParabolaOrientation.Vertical,
+            Vector2 amplitude = default, Vector2 angularSpeed = default, float timeOffset = 0f)
+        {
+            vertex = vertexOffset;
+            initialSpeed = speed;
+            this.orientation = orientation;
+            oscillateVertex = amplitude != Vector2.zero;
+            vertexAmplitude = amplitude;
+            vertexAngularSpeed = angularSpeed;
+            attackTimeOffset = timeOffset;
+        }
+
         public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)
         {
             Vector2 start = target.position;
-            Vector2 worldVertex = start + vertex;
+            Vector2 worldVertex = GetWorldVertex(start);
             if (!VertexParabola.TrySolve(start, worldVertex, orientation, initialSpeed, out var velocity, out var acceleration, out _))
             {
-                Debug.LogWarning($"[VertexParabola] {target.name}: invalid {orientation} parabola. Start={start}, VertexOffset={vertex}, Vertex={worldVertex}, InitialSpeed={initialSpeed}. " +
+                Debug.LogWarning($"[VertexParabola] {target.name}: invalid {orientation} parabola. Start={start}, ConfiguredVertex={vertex}, IsRelative={isRelative}, Vertex={worldVertex}, InitialSpeed={initialSpeed}. " +
                     "The vertex must differ from the start in both X and Y, with a positive finite speed.", target);
                 return null; // BulletEntityPresenter returns rejected shots to their pool.
             }
