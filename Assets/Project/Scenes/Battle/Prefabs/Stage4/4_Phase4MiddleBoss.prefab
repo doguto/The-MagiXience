@@ -103,10 +103,6 @@ MonoBehaviour:
   movementPreset: {fileID: 0}
   movementSteps:
   - rid: 2259957373586636897
-  - rid: 5211421472506773965
-  - rid: 5211421472506773780
-  - rid: 5211421472506774318
-  - rid: 5211421472506774285
   - rid: 2259957373586637429
   - rid: 2259957373586637446
   bulletPools:
@@ -136,6 +132,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506773884
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       - time: 1.125
         signal:
           rid: 5211421472506773853
@@ -146,6 +143,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506773883
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       - time: 1.25
         signal:
           rid: 5211421472506773684
@@ -156,6 +154,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 2259957373586637410
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       - time: 3
         signal:
           rid: 5211421472506773857
@@ -166,6 +165,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506773887
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       - time: 3.125
         signal:
           rid: 5211421472506773856
@@ -176,6 +176,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506773886
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       - time: 3.25
         signal:
           rid: 5211421472506773855
@@ -186,6 +187,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506773885
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       - time: 6
         signal:
           rid: 5211421472506774105
@@ -196,6 +198,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421472506774108
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       - time: 9
         signal:
           rid: 5211421632496402659
@@ -206,6 +209,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421632496402662
         seType: 3
+        bulletMovementOverride: {fileID: 0}
       nextPhaseTrigger:
         rid: -2
   deathAttackEntry:
@@ -219,6 +223,7 @@ MonoBehaviour:
     sourceIndexProvider:
       rid: 1002
     seType: 0
+    bulletMovementOverride: {fileID: 0}
   damageFlashInterval: 0.05
   damageFlashDuration: 0.2
   view: {fileID: 5041210401996759946}
@@ -286,11 +291,11 @@ MonoBehaviour:
     - rid: 2259957373586637429
       type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        duration: 5
+        duration: 12
     - rid: 2259957373586637446
       type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
       data:
-        targetOffset: {x: 3, y: 0, z: 0}
+        targetOffset: {x: 5, y: 0, z: 0}
         duration: 1
         easeValue: 3
         customCurve:
@@ -325,47 +330,15 @@ MonoBehaviour:
         count: 1
         spacing: 1
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -3, y: 0}
+        centerOffset: {x: -2, y: -5.5}
         movementOverride: {fileID: 0}
-    - rid: 5211421472506773780
-      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        targetOffset: {x: 0, y: 3, z: 0}
-        duration: 0.5
-        easeValue: 3
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 1
     - rid: 5211421472506773853
       type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         count: 3
         spacing: 1
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -2, y: 0}
+        centerOffset: {x: -1, y: -5.5}
         movementOverride: {fileID: 0}
     - rid: 5211421472506773854
       type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
@@ -373,7 +346,7 @@ MonoBehaviour:
         count: 5
         spacing: 1
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -1, y: 0}
+        centerOffset: {x: 0, y: -5.5}
         movementOverride: {fileID: 0}
     - rid: 5211421472506773855
       type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
@@ -381,7 +354,7 @@ MonoBehaviour:
         count: 1
         spacing: 1
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -3, y: 0}
+        centerOffset: {x: -2, y: -2.5}
         movementOverride: {fileID: 0}
     - rid: 5211421472506773856
       type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
@@ -389,7 +362,7 @@ MonoBehaviour:
         count: 3
         spacing: 1
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -2, y: 0}
+        centerOffset: {x: -1, y: -2.5}
         movementOverride: {fileID: 0}
     - rid: 5211421472506773857
       type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
@@ -397,7 +370,7 @@ MonoBehaviour:
         count: 5
         spacing: 1
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -1, y: 0}
+        centerOffset: {x: 0, y: -2.5}
         movementOverride: {fileID: 0}
     - rid: 5211421472506773863
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
@@ -459,17 +432,13 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 0
-    - rid: 5211421472506773965
-      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        duration: 2
     - rid: 5211421472506774105
       type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         count: 14
         spacing: 0.8
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -1, y: 0}
+        centerOffset: {x: 3, y: -3.5}
         movementOverride: {fileID: 0}
     - rid: 5211421472506774106
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
@@ -483,49 +452,13 @@ MonoBehaviour:
       type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         index: 3
-    - rid: 5211421472506774285
-      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        targetOffset: {x: 0, y: -1, z: 0}
-        duration: 0.5
-        easeValue: 3
-        customCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 1
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 1
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        curvePreset: {fileID: 0}
-        isRelative: 1
-    - rid: 5211421472506774318
-      type: {class: WaitMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        duration: 2
     - rid: 5211421632496402659
       type: {class: LineEnemySpawnAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
         count: 14
         spacing: 0.8
         lineAxis: {x: 0, y: 1}
-        centerOffset: {x: -1, y: 0}
+        centerOffset: {x: 3, y: -3.5}
         movementOverride: {fileID: 0}
     - rid: 5211421632496402660
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}

@@ -29,6 +29,7 @@ MonoBehaviour:
         sourceIndexProvider:
           rid: 5211421576021410453
         seType: 0
+        bulletMovementOverride: {fileID: 0}
       nextPhaseTrigger:
         rid: -2
   references:
@@ -39,9 +40,11 @@ MonoBehaviour:
     - rid: 5211421576021410449
       type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
-        wayCount: 6
-        spreadAngle: 60
+        wayCount: 10
+        spreadAngle: 36
         radius: 0
+        startDelay: 0
+        rotationOffset: 0
     - rid: 5211421576021410450
       type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
       data:
