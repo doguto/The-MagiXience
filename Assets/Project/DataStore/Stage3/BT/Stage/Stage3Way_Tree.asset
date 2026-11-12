@@ -141,7 +141,7 @@ MonoBehaviour:
         graphPosition: {x: -183.33301, y: 248.66666}
         comment: 3_Phase5_5
         child:
-          rid: 8540147884263211971
+          rid: 8540147886565098161
         wind:
           enabled: 1
           startSe: 12
@@ -227,17 +227,6 @@ MonoBehaviour:
         comment: 
         condition:
           rid: 8540147884263212016
-    - rid: 8540147884263211971
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 593e3f27d42a447f930fe00a447fb97b
-        graphPosition: {x: -183.33301, y: 397.3333}
-        comment: 
-        child:
-          rid: 8540147884263212017
-        condition:
-          rid: 8540147884263212018
-        onChildCompleted: 2
     - rid: 8540147884263211972
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -618,7 +607,7 @@ MonoBehaviour:
         graphPosition: {x: -678, y: 531.99994}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 9ec07ad2fab0b9a4aa566449480149eb, type: 3}
-        behavior: {fileID: 11400000, guid: 456697cb0854681408c8237f787e30f0, type: 2}
+        behavior: {fileID: 11400000, guid: 4ff23514eb362a14a9e90be60691c2de, type: 2}
         overrides: []
         position: {x: 11, y: -2.5}
         worldSpace: 0
@@ -635,21 +624,6 @@ MonoBehaviour:
     - rid: 8540147884263212016
       type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147884263212017
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: bdfa658c4a7046c7b7c95a4d267df7e4
-        graphPosition: {x: -183.33301, y: 547.33325}
-        comment: 
-        frames:
-          value: 0
-          param: 
-    - rid: 8540147884263212018
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 240
-          param: 
     - rid: 8540147884263212020
       type: {class: WaitUntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -2811,4 +2785,13 @@ MonoBehaviour:
         comment: 
         frames:
           value: 36
+          param: 
+    - rid: 8540147886565098161
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 04f7c9e22fbe44a88155b0e923d8e7f5
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 240
           param: 

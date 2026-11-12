@@ -42,23 +42,12 @@ MonoBehaviour:
       data:
         guid: 5853ce4cadc84fafb2c8d7ea3150cc14
         graphPosition: {x: 230, y: 300}
-        comment: Phase 0
+        comment: 
         child:
-          rid: 8540147884263211465
+          rid: 8540147886565098170
         condition:
           rid: 8540147884263211466
         onChildCompleted: 0
-    - rid: 8540147884263211465
-      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 022122f669db470ebf81d96005230ea9
-        graphPosition: {x: 230, y: 450}
-        comment: 
-        child:
-          rid: 8540147886565097975
-        count:
-          value: 0
-          param: 
     - rid: 8540147884263211466
       type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -96,16 +85,6 @@ MonoBehaviour:
     - rid: 8540147884263211472
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147886565097975
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: fd8972e7f52043e781a92d869ae374e7
-        graphPosition: {x: 230, y: 600}
-        comment: 
-        children:
-        - rid: 8540147886565097976
-        - rid: 8540147884263211469
-        - rid: 8540147886565097977
     - rid: 8540147886565097976
       type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -115,12 +94,26 @@ MonoBehaviour:
         frames:
           value: 30
           param: 
-    - rid: 8540147886565097977
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147886565098170
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 7de4e3ba15534113ac749f99b797b761
+        guid: 00632c49c7ad4d4db33b2a2de8ca9477
         graphPosition: {x: 0, y: 0}
         comment: 
-        frames:
-          value: 120
+        children:
+        - rid: 8540147886565097976
+        - rid: 8540147886565098171
+    - rid: 8540147886565098171
+      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 47fb1efc6b7c42978799e88163667976
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        child:
+          rid: 8540147884263211469
+        count:
+          value: 0
+          param: 
+        interval:
+          value: 150
           param: 
