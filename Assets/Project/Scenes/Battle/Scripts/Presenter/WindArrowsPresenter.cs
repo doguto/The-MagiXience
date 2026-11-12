@@ -6,7 +6,7 @@ using Project.Scripts.Presenter;
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
     /// <summary>
-    /// BattleWindの向き・強さに合わせて矢印グリッドを流す。背景のスクロール分も足して海の上を流れて見せる。
+    /// WindService が生成し、風の向き・強さに合わせて矢印グリッドを流す。背景のスクロール分も足して海の上を流れて見せる。
     /// 風が無効、または無風(None)の間は非表示。
     /// </summary>
     public class WindArrowsPresenter : MonoPresenter
@@ -19,8 +19,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         Vector2 offset;
         Project.Scenes.Battle.Scripts.Runtime.WindService wind;
 
-        // 風を宣言したステージの間だけ BattleScenePresenter から渡される
-        public void SetWind(Project.Scenes.Battle.Scripts.Runtime.WindService value) => wind = value;
+        public void Bind(Project.Scenes.Battle.Scripts.Runtime.WindService value, BackgroundPresenter background)
+        {
+            wind = value;
+            if (background != null) backgroundPresenter = background;
+        }
 
         void Update()
         {

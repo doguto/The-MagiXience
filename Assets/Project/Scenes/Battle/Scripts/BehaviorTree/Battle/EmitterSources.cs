@@ -213,7 +213,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
                     StartDelayFrames = startDelayFrames,
                     Motion = motionOverride ?? bullet.Motion,
                     AttackTime = e.AttackTime,
-                    AffectedByWind = bullet.affectedByWind,
+                    AffectedByForce = bullet.affectedByWind,
                 });
             }, owner);
         }

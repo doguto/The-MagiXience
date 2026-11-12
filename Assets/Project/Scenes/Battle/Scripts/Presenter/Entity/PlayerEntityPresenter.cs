@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniRx;
@@ -363,15 +364,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdateAnimation();
         }
 
-        // 風を宣言したステージの間だけ BattleScenePresenter から渡される
-        Project.Scenes.Battle.Scripts.Runtime.WindService wind;
-        public void SetWind(Project.Scenes.Battle.Scripts.Runtime.WindService value) => wind = value;
+        readonly List<Project.Scenes.Battle.Scripts.Runtime.IMoveModifier> moveModifiers = new();
+
+        public void AddMoveModifier(Project.Scenes.Battle.Scripts.Runtime.IMoveModifier modifier)
+        {
+            if (modifier != null && !moveModifiers.Contains(modifier)) moveModifiers.Add(modifier);
+        }
+
+        public void RemoveMoveModifier(Project.Scenes.Battle.Scripts.Runtime.IMoveModifier modifier) => moveModifiers.Remove(modifier);
 
         Vector3 HandleMovement()
         {
             var currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
             var input = currentMoveInput.sqrMagnitude < 0.01f ? Vector2.zero : currentMoveInput;
-            Vector2 velocity = wind != null ? wind.PlayerVelocity(input, currentSpeed) : input * currentSpeed;
+            Vector2 velocity = input * currentSpeed;
+            foreach (var modifier in moveModifiers) velocity = modifier.Modify(velocity, input, currentSpeed);
             Vector3 movement = velocity * Time.deltaTime;
             return movement;
         }

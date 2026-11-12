@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Presenter;
+using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scripts.Extensions;
 
 namespace Project.Scenes.Battle.Scripts.Runtime
@@ -39,7 +40,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         {
             Random = new Random(seed);
             this.bgmTimeProvider = bgmTimeProvider;
-            Services = new BattleServices(this);
+            Services = new BattleServices();
         }
 
         // 現在のステージ (道中/ボス戦) で宣言されたサービス。ステージ外では null
@@ -135,14 +136,15 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     // ノードから使うバトル内のサービス。BattleScenePresenter が設定する。
     public sealed class BattleServices
     {
-        public BattleServices(BattleWorld world) => Bullets = new BulletSystem(world);
-
-        public BulletSystem Bullets { get; }
+        public BulletSystem Bullets { get; } = new();
         public ActorSpawner Spawner { get; set; }
         public BulletClearReceiver Clearer { get; set; }
         public BattleActor Boss { get; set; }
         public Action<SeType> PlaySe { get; set; }
         public UnityEngine.AudioSource BgmSource { get; set; }
+        // ステージのサービスが自機や背景へ働きかけるときに使う
+        public PlayerEntityPresenter Player { get; set; }
+        public BackgroundPresenter Background { get; set; }
 
         // PhaseMarker ノードが通知するフェーズの区切り (進行ゲージなどが購読する)
         public event Action<string> PhaseStarted;

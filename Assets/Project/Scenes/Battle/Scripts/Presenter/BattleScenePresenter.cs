@@ -66,7 +66,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             flow = new BattleFlow(battleClock, enemyTracker, bulletClearReceiver,
                 () => soundManager != null ? soundManager.BgmAudioSource : null,
                 se => soundManager?.PlaySE(se));
-            flow.StageChanged += OnStageChanged;
+            flow.Background = backgroundPresenter;
             ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
@@ -324,6 +324,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             // PlayerEntityPresenterを取得（チュートリアル経由の場合は取得済み）
             if (playerPresenter == null) playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            flow.Player = playerPresenter;
             if (playerPresenter == null)
             {
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
@@ -447,18 +448,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             flow.BeginStage(wayStage);
             flow.StartStageTree(wayStage.Tree, () => HandleSequenceCompleted(BattleSituation.Way));
         }
-
-        // ステージで宣言されたサービスを、BehaviorTree の外にいる自機や表示へ渡す
-        void OnStageChanged(StageContext stage)
-        {
-            var wind = stage?.Get<WindService>();
-            if (playerPresenter == null) playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
-            playerPresenter?.SetWind(wind);
-            if (windArrowsPresenter == null) windArrowsPresenter = FindFirstObjectByType<WindArrowsPresenter>();
-            windArrowsPresenter?.SetWind(wind);
-        }
-
-        WindArrowsPresenter windArrowsPresenter;
 
         async void HandleSequenceCompleted(BattleSituation situation)
         {

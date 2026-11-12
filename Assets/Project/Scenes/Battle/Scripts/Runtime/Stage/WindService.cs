@@ -1,5 +1,6 @@
 using System;
 using Project.Scenes.Battle.Scripts.Model;
+using Project.Scenes.Battle.Scripts.Presenter;
 using Project.Scripts.Extensions;
 using UnityEngine;
 
@@ -9,23 +10,30 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     public sealed class WindServiceDefinition : StageServiceDefinition
     {
         [SerializeField, Tooltip("ステージ開始時の風。Intervals が空なら無風で始まる")] BattleWindSettings initial = new();
+        [SerializeField, Tooltip("風向きを示す矢印。ステージ開始時に背景の下へ生成する")] WindArrowsPresenter arrowsPrefab;
 
         public BattleWindSettings Initial => initial;
 
-        public override IStageService Create() => new WindService(initial);
+        public override IStageService Create() => new WindService(initial, arrowsPrefab);
     }
 
-    // 風の予定表 (向き × 秒数を順に繰り返す) と、自機・敵弾への影響を計算する。
+    // 風の予定表 (向き × 秒数を順に繰り返す) を進め、開始時に自機・敵弾・矢印表示へ自分を登録する。
     // Enabled が OFF でも予定表は進み、自機狙い放物線の曲げる向きなどには使われる
-    public sealed class WindService : IStageService
+    public sealed class WindService : IStageService, IMoveModifier, IBulletForce
     {
         readonly BattleWindSettings initial;
+        readonly WindArrowsPresenter arrowsPrefab;
         BattleWindSettings settings;
         int index;
         float remaining;
         StageContext stage;
+        WindArrowsPresenter arrows;
 
-        public WindService(BattleWindSettings initial) => this.initial = initial;
+        public WindService(BattleWindSettings initial, WindArrowsPresenter arrowsPrefab = null)
+        {
+            this.initial = initial;
+            this.arrowsPrefab = arrowsPrefab;
+        }
 
         bool HasSchedule => settings != null && settings.intervals != null && settings.intervals.Count > 0;
         public BattleWindSettings Current => settings;
@@ -41,11 +49,27 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public void Begin(StageContext context)
         {
             stage = context;
+            var services = context.World.Services;
+            services.Player?.AddMoveModifier(this);
+            services.Bullets.AddForce(this);
+            if (arrowsPrefab != null && services.Background != null)
+            {
+                arrows = UnityEngine.Object.Instantiate(arrowsPrefab, services.Background.transform, false);
+                arrows.Bind(this, services.Background);
+            }
             Apply(initial);
         }
 
         public void End()
         {
+            if (stage != null)
+            {
+                var services = stage.World.Services;
+                if (services.Player) services.Player.RemoveMoveModifier(this);
+                services.Bullets.RemoveForce(this);
+            }
+            if (arrows) UnityEngine.Object.Destroy(arrows.gameObject);
+            arrows = null;
             settings = null;
             stage = null;
         }
@@ -73,10 +97,13 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             PlayStartSeIfStarted(before);
         }
 
-        public Vector2 PlayerVelocity(Vector2 input, float speed) => (input + Vector * PlayerSpeedRatio) * speed;
+        Vector2 IMoveModifier.Modify(Vector2 velocity, Vector2 input, float speed) => velocity + Vector * (PlayerSpeedRatio * speed);
+
+        bool IBulletForce.Active => Enabled;
+        Vector2 IBulletForce.LaunchAxis => ProjectileVector;
 
         // 本来の軌道に対する風のずれを積分する。抵抗があるため流される速さは 加速度 / 抵抗 で頭打ちになる
-        public void IntegrateBullet(Vector2 authoredVelocity, float dt, ref Vector2 velocityCorrection, ref Vector2 positionCorrection)
+        public void Integrate(Vector2 authoredVelocity, float dt, ref Vector2 velocityCorrection, ref Vector2 positionCorrection)
         {
             if (dt <= 0f) return;
             if (Direction == WindDirection.None)

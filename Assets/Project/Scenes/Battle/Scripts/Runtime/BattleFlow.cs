@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Presenter;
+using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scenes.Battle.Scripts.Runtime.Motion;
 using Project.Scripts.Extensions;
 using UnityEngine;
@@ -32,15 +33,16 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
         public BattleWorld World => world;
         public event Action<string> PhaseStarted;
-        // ステージ (道中/ボス戦) の開始・終了。終了時は null。自機や表示がサービスを受け取るのに使う
-        public event Action<StageContext> StageChanged;
+        public PlayerEntityPresenter Player { get; set; }
+        public BackgroundPresenter Background { get; set; }
 
         // ステージで宣言されたサービスを生成して有効にする
         public void BeginStage(BattleStageAsset stage)
         {
             EnsureWorld();
+            world.Services.Player = Player;
+            world.Services.Background = Background;
             world.SetStage(new StageContext(world, stage != null ? stage.Services : null));
-            StageChanged?.Invoke(world.Stage);
         }
 
         // 道中などステージ直下のツリーを開始する。完了したら onFinished を呼ぶ
@@ -91,7 +93,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             }
             clock.End();
             world = null;
-            StageChanged?.Invoke(null);
         }
 
         void EnsureWorld()

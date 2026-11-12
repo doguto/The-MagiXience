@@ -20,7 +20,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public int StartDelayFrames;
         public IReadOnlyList<MotionStep> Motion;
         public float AttackTime;
-        public bool AffectedByWind;
+        public bool AffectedByForce;
     }
 
     // 敵弾を固定フレームで動かす。弾の見た目・当たり判定・寿命・画面外判定は BulletEntityPresenter が担う。
@@ -31,9 +31,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             public BulletEntityPresenter Presenter;
             public MotionSequence Motion;
             public int DelayFrames;
-            public bool Wind;
-            public Vector2 WindVelocity;
-            public Vector2 WindOffset;
+            public bool Force;
+            public Vector2 ForceVelocity;
+            public Vector2 ForceOffset;
             public Vector3 PreviousPosition;
             bool invincible;
 
@@ -51,13 +51,16 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
         static readonly MotionStep[] DefaultMotion = { new VelocityMotion() };
 
-        readonly BattleWorld world;
         readonly List<Bullet> bullets = new();
-
-        public BulletSystem(BattleWorld world) => this.world = world;
-
-        WindService Wind => world.Stage?.Get<WindService>();
         readonly Stack<Bullet> free = new();
+        readonly List<IBulletForce> forces = new();
+
+        public void AddForce(IBulletForce force)
+        {
+            if (force != null && !forces.Contains(force)) forces.Add(force);
+        }
+
+        public void RemoveForce(IBulletForce force) => forces.Remove(force);
 
         public int ActiveCount => bullets.Count;
 
@@ -79,23 +82,39 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             bullet.PreviousPosition = spawn.Position;
             bullet.Rotation = rotation;
             bullet.DelayFrames = Mathf.Max(0, spawn.StartDelayFrames);
-            var wind = Wind;
-            bullet.Wind = spawn.AffectedByWind && wind != null && wind.Enabled;
-            bullet.WindVelocity = bullet.WindOffset = Vector2.zero;
+            bullet.Force = spawn.AffectedByForce && AnyActiveForce();
+            bullet.ForceVelocity = bullet.ForceOffset = Vector2.zero;
             var steps = spawn.Motion != null && spawn.Motion.Count > 0 ? spawn.Motion : DefaultMotion;
             bullet.Motion = new MotionSequence(steps, bullet, new MotionLaunch
             {
                 Direction = spawn.Direction,
                 AttackTime = spawn.AttackTime,
-                WindAxis = wind != null ? wind.ProjectileVector : Vector2.zero,
+                WindAxis = LaunchAxis(),
             });
             bullets.Add(bullet);
             return presenter;
         }
 
+        bool AnyActiveForce()
+        {
+            foreach (var force in forces)
+            {
+                if (force.Active) return true;
+            }
+            return false;
+        }
+
+        Vector2 LaunchAxis()
+        {
+            foreach (var force in forces)
+            {
+                if (force.LaunchAxis != Vector2.zero) return force.LaunchAxis;
+            }
+            return Vector2.zero;
+        }
+
         public void Tick(float dt)
         {
-            var wind = Wind;
             for (var i = bullets.Count - 1; i >= 0; i--)
             {
                 var b = bullets[i];
@@ -121,11 +140,11 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 }
 
                 var position = b.Position;
-                if (b.Wind && wind != null)
+                if (b.Force && forces.Count > 0)
                 {
                     var authoredVelocity = (Vector2)(position - b.PreviousPosition) / dt;
-                    wind.IntegrateBullet(authoredVelocity, dt, ref b.WindVelocity, ref b.WindOffset);
-                    position += (Vector3)(b.WindOffset * b.Presenter.WindInfluence);
+                    foreach (var force in forces) force.Integrate(authoredVelocity, dt, ref b.ForceVelocity, ref b.ForceOffset);
+                    position += (Vector3)(b.ForceOffset * b.Presenter.WindInfluence);
                 }
                 b.PreviousPosition = b.Position;
                 b.Presenter.transform.SetPositionAndRotation(position, b.Rotation);

@@ -40,6 +40,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                 // 風を使うステージにだけ風のサービスを宣言する。シーケンス全体の風は開始時の風になる
                 var wind = new Project.Scenes.Battle.Scripts.Runtime.WindServiceDefinition();
                 Set(wind, "initial", CopyWind(sequence.Wind));
+                Set(wind, "arrowsPrefab", UnityEditor.AssetDatabase.LoadAssetAtPath<Project.Scenes.Battle.Scripts.Presenter.WindArrowsPresenter>("Assets/Project/Scenes/Battle/Prefabs/Stage3/WindArrows.prefab"));
                 Set(stage, "services", new List<Project.Scenes.Battle.Scripts.Runtime.StageServiceDefinition> { wind });
             }
             if (isBoss)
