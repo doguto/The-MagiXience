@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: BT_EditorSmokeTest
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147870824923241
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147870824923241
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Assembly-CSharp}
+      data:
+        guid: b65393ac8e4f4e649375629393d431a3
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        children:
+        - rid: 8540147870824923242
+        - rid: 8540147870824923243
+    - rid: 8540147870824923242
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Assembly-CSharp}
+      data:
+        guid: ae74a8b266aa4949a0ca9633e6d85b60
+        graphPosition: {x: -150, y: 150}
+        comment: 
+        frames:
+          value: 30
+          param: 
+    - rid: 8540147870824923243
+      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Assembly-CSharp}
+      data:
+        guid: c2a911544e564b0ca707ff52faba9d21
+        graphPosition: {x: 150, y: 150}
+        comment: 
+        child:
+          rid: 8540147870824923244
+        count:
+          value: 3
+          param: 
+    - rid: 8540147870824923244
+      type: {class: LogNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Assembly-CSharp}
+      data:
+        guid: 9ccd5988f34d4c2899616d34bfc0a725
+        graphPosition: {x: 150, y: 514}
+        comment: 
+        message: 
