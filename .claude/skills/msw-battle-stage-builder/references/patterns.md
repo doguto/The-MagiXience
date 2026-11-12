@@ -61,16 +61,18 @@ Selector
   Until … (通常版の中身)
 ```
 
-HP が閾値を切るまでフェーズをランダムに回す例（周の区切りでだけ判定する）:
+HP が閾値を切るまでフェーズをランダムに回す例:
 ```
-ForceSuccess
-  Loop ∞
-    Sequence
-      Inverter → CheckCondition (HpBelow Self 40%)
+Sequence
+  Until #Group0 (HpBelow Self 40%)
+    Loop ∞
       Random
-        Sequence [Until #PhaseA …, Until #Interlude …]
-        Sequence [Until #PhaseB …, Until #Interlude …]
+        Sequence [Until #PhaseA (FrameElapsed), Until #Interlude …]
+        Sequence [Until #PhaseB (FrameElapsed), Until #Interlude …]
+  Until #Interlude (FrameElapsed) → SetMovement 定位置へ戻る
+  …次のグループ
 ```
+- HP の判定は外側の `Until` 1 か所に置く。各フェーズの条件に同じ `HpBelow` を `Or` で重ねない。
 - ボスの攻撃周期と移動の周期は自動では揃わない。周期攻撃は `Timeline(Duration)` か `Repeat` の間隔を、移動プリセットの 1 周の長さに合わせる。
 - 進行ゲージ（`BossPhaseProgressGauge`）を持つボスは、各フェーズの先頭に `PhaseMarker` を置く。
 
@@ -107,6 +109,9 @@ BulletBeam
 | 向きだけ違う攻撃アセットを方向の数だけ作る | `ShotPattern`（NWay など）か、向きをパラメータにする |
 | 弾の種類違いでノードを 2 つ並べる（ビーム） | `BulletBeam` の Bullets に並べる |
 | 子のない `Timeline` / `Sequence`、子 1 つだけの `Sequence` | 取り除く |
+| `Inverter` + `ForceSuccess` で Loop をわざと失敗させて抜ける | `Until(条件)` で Loop を囲む |
+| 同じ終了条件を外側と各フェーズの両方に書く | 外側の `Until` 1 か所にまとめる |
+| 成立しない条件の `Until`（`HpBelow 0%`、極端に長い `FrameElapsed` など） | 取り除く。撃破でツリーごと止まる |
 | 移動 × 攻撃の組み合わせごとに、攻撃の中身まで複製した敵ツリーを作る | 攻撃は `SubTree` で共有する（移動・攻撃のパラメータ化は未対応） |
 | ステージ固有の処理を全ステージのツリーに入れる（例: 風を使わないステージで風を設定） | サービスとして、使うステージにだけ宣言する |
 | 自機や Presenter にステージ固有の処理を書く | サービス側から汎用の受け口へ働きかける |

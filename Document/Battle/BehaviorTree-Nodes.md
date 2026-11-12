@@ -548,18 +548,18 @@ Selector
 ### HP 閾値までランダムにフェーズを選ぶ
 
 ```text
-ForceSuccess
- └─ Loop ∞
-     └─ Sequence
-         ├─ Inverter
-         │   └─ CheckCondition  cond: HpBelow(Self, 40%)
-         └─ Random (avoidRepeat)
-             ├─ Sequence [Until #PhaseA, Until #Interlude]
-             ├─ Sequence [Until #PhaseB, Until #Interlude]
-             └─ ...
+Sequence
+ ├─ Until #Group0  cond: HpBelow(Self, 40%)
+ │   └─ Loop ∞
+ │       └─ Random (avoidRepeat)
+ │           ├─ Sequence [Until #PhaseA (FrameElapsed), Until #Interlude]
+ │           ├─ Sequence [Until #PhaseB (FrameElapsed), Until #Interlude]
+ │           └─ ...
+ ├─ Until #Interlude (FrameElapsed)  … 定位置へ戻る
+ └─ 次のグループ
 ```
 
-毎周の頭で HP を確認し、閾値を下回っていれば Inverter → Sequence → Loop が Failure になり、ForceSuccess で Success に変えて次のグループへ進む（Stage2 ボス）。周の途中で閾値を割った場合はその周の終わりまで続く。途中で打ち切りたい場合は各フェーズの Until 条件に `Or(FrameElapsed, HpBelow)` を入れる。
+HP が閾値を下回った瞬間に Until が中のフェーズを中断して Success を返し、次へ進む（Stage2 ボス）。HP の判定はこの 1 か所だけに置き、各フェーズの Until 条件に同じ `HpBelow` を重ねない。`Inverter` / `ForceSuccess` で Loop を失敗させて抜ける書き方はしない。
 
 ### 敵のツリー = Sequence[SetDeathBehavior?, SetMovement, 攻撃]
 

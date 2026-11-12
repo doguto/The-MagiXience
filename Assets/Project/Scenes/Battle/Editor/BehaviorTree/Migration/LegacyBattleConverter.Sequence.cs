@@ -59,6 +59,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
         }
 
         bool emitPhaseMarkers;
+        float groupEndHpPercent;
 
         NodeDefinition ConvertGroup(SequenceGroup group, bool isBoss, Shooter bossShooter)
         {
@@ -67,6 +68,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             if (group.RandomPick && phases.Count > 0)
             {
                 var interlude = group.Interlude;
+                var endHp = group.EndBossHpPercent;
+                groupEndHpPercent = endHp;
                 var options = phases.Select(p =>
                 {
                     NodeDefinition after = null;
@@ -79,21 +82,15 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                     }
                     return Sequence(new NodeDefinition[] { ConvertPhase(p, isBoss, bossShooter), after });
                 }).ToList();
+                groupEndHpPercent = 0f;
 
                 var random = WithChildren(new RandomNodeDefinition(), options);
-                NodeDefinition iteration = random;
-                if (group.EndBossHpPercent > 0f)
-                {
-                    // 旧実装はボス HP を周回の区切りでのみ判定していた
-                    var inverter = new InverterNodeDefinition();
-                    inverter.SetChildren(new NodeDefinition[] { Check(HpBelow(isBoss ? HpTarget.Self : HpTarget.Boss, group.EndBossHpPercent)) });
-                    iteration = Sequence(new NodeDefinition[] { inverter, random });
-                }
+                var loop = Loop(group.Loop ? group.LoopCount : 1, random);
+                if (endHp <= 0f) return loop;
 
-                var loop = Loop(group.Loop ? group.LoopCount : 1, iteration);
-                var safe = new ForceSuccessNodeDefinition();
-                safe.SetChildren(new NodeDefinition[] { loop });
-                return safe;
+                var cycle = Until(HpBelow(isBoss ? HpTarget.Self : HpTarget.Boss, endHp), loop, UntilChildCompletion.Finish);
+                var settle = interlude != null ? WithComment(ConvertPhase(interlude, isBoss, bossShooter), "Interlude") : null;
+                return Sequence(new[] { cycle, settle });
             }
 
             var body = Sequence(phases.Select(p => ConvertPhase(p, isBoss, bossShooter)));
@@ -182,7 +179,16 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                 case AllEnemiesDefeatedExitConditionConfig:
                     return new NoActiveEnemiesConditionDefinition();
                 case CompositeExitConditionConfig composite:
-                    var children = composite.Conditions.Select(ConvertExit).Where(c => c != null).ToList();
+                    var sources = composite.Conditions.Where(c => c != null).ToList();
+                    if (composite.Mode == CompositeMode.Or && groupEndHpPercent > 0f)
+                    {
+                        // グループ側の Until で判定する閾値は各フェーズに重複させない
+                        var rest = sources.Where(c => !(c is BossHpThresholdExitConditionConfig
+                            && Mathf.Approximately(Get<float>(c, "hpThresholdPercent"), groupEndHpPercent))).ToList();
+                        if (rest.Count > 0) sources = rest;
+                    }
+                    var children = sources.Select(ConvertExit).Where(c => c != null).ToList();
+                    if (children.Count == 1) return children[0];
                     if (composite.Mode == CompositeMode.Or)
                     {
                         var or = new OrConditionDefinition();
