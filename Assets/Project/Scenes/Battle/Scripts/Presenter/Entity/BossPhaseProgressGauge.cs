@@ -46,6 +46,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             SetVisible(false);
             BattleActor.Attached += OnActorAttached;
+
+            // 生成と同じフレームでツリーが付与された場合は Attached を取り逃がすため、既に付いていればここで拾う
+            var existing = GetComponentInParent<BattleActor>();
+            if (existing != null && existing.World != null)
+            {
+                OnActorAttached(existing);
+                // 既にツリーが動いていれば最初の PhaseMarker も通知済みなので、ここで補う
+                if (existing.World.Frame > existing.StartFrame) OnPhaseStarted();
+            }
         }
 
         void OnActorAttached(BattleActor attached)
