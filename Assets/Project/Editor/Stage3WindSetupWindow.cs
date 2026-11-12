@@ -762,7 +762,7 @@ namespace Project.Editor
                 var entries = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries");
                 entries.arraySize = 12;
                 float[] times = { 1.5f, 5.8f, 10.1f, 14.4f }; // フェーズ内では3.0/7.3/11.6/15.9秒。
-                float[] centers = { -5.5f, 0f, 5.5f, -2f };
+                float[] centers = { 5.5f, 0f, -5.5f, -2f };
                 var movement = AssetDatabase.LoadAssetAtPath<MovementPreset>(Data + "Bullet/3_Wind_ParallelWindOnly.asset");
                 for (int i = 0; i < entries.arraySize; i++)
                 {
@@ -854,7 +854,7 @@ namespace Project.Editor
             }
             finally { BattleWind.Reset(); }
             var phase7Attack = AssetDatabase.LoadAssetAtPath<AttackPreset>(Data + "Attack/3_Phase7_WindParallel.asset");
-            ValidateWayWindParallel(phase7Attack, new[] { 1.5f, 5.8f, 10.1f, 14.4f }, new[] { -5.5f, 0f, 5.5f, -2f });
+            ValidateWayWindParallel(phase7Attack, new[] { 1.5f, 5.8f, 10.1f, 14.4f }, new[] { 5.5f, 0f, -5.5f, -2f });
             // 実際のTimeline生成でも、新しい出現Clipが欠けないことを確認する。
             foreach (var builder in new[] { phase2, breakBuilder, phase7 })
             {
@@ -1230,7 +1230,7 @@ namespace Project.Editor
             using var so = new SerializedObject(attack);
             bool merged = P(P(so.FindProperty("attackTimeline"), "phases").GetArrayElementAtIndex(0), "entries").arraySize == 12;
             ValidateWayWindParallel(attack, merged ? new[] { 1.5f, 5.8f, 10.1f, 14.4f } : new[] { 3f, 7f, 11f },
-                merged ? new[] { -5.5f, 0f, 5.5f, -2f } : new[] { -5.5f, 0f, 5.5f });
+                merged ? new[] { 5.5f, 0f, -5.5f, -2f } : new[] { -5.5f, 0f, 5.5f });
         }
 
         static void ValidateWayWindParallel(AttackPreset preset, float[] times, float[] centers)
