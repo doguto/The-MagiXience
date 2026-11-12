@@ -24,6 +24,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public Random Random => World.Random;
         public float BgmTime => World.BgmTime;
         public BattleServices Services => World.Services;
+        public StageContext Stage => World.Stage;
 
         internal void AdvanceFrame() => World.AdvanceFrame();
 

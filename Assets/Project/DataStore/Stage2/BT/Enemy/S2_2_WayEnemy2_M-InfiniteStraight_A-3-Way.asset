@@ -13,73 +13,73 @@ MonoBehaviour:
   m_Name: S2_2_WayEnemy2_M-InfiniteStraight_A-3-Way
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147883075961229
+    rid: 8540147883688591448
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147883075961229
+    - rid: 8540147883688591448
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 04420da9a4cf496880bb26a370e7e058
+        guid: df274e49a1464c47b289d8afbd875a44
         graphPosition: {x: 115, y: 150}
         comment: 
         children:
-        - rid: 8540147883075961230
-        - rid: 8540147883075961231
-    - rid: 8540147883075961230
+        - rid: 8540147883688591449
+        - rid: 8540147883688591450
+    - rid: 8540147883688591449
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: a7d53175f52f4e2eb373cd7a804f2197
+        guid: 75d36195b07d4f1eb3c289960b2c6dd8
         graphPosition: {x: 0, y: 300}
         comment: 
         preset: {fileID: 11400000, guid: 9e9e26e41c504f749a65ce017343bc33, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147883075961231
+    - rid: 8540147883688591450
       type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: a8073b52413b43df913679ba9622b5fa
+        guid: 23564660656c4d6dbe9f9eaa203b1eef
         graphPosition: {x: 230, y: 300}
         comment: Phase 0
         child:
-          rid: 8540147883075961232
+          rid: 8540147883688591451
         condition:
-          rid: 8540147883075961233
+          rid: 8540147883688591452
         onChildCompleted: 0
-    - rid: 8540147883075961232
+    - rid: 8540147883688591451
       type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: b71a87ad50ef42d0a2ad884d158c31c9
+        guid: a6901411caec4d7ca9376c9651ead0a5
         graphPosition: {x: 230, y: 450}
         comment: 
         child:
-          rid: 8540147883075961234
+          rid: 8540147883688591453
         count:
           value: 0
           param: 
-    - rid: 8540147883075961233
+    - rid: 8540147883688591452
       type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 3601
           param: 
-    - rid: 8540147883075961234
+    - rid: 8540147883688591453
       type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 6ced63de271d4ddf89a6e694b707310d
+        guid: f3b32d0a986e441fa98dc3039c59921e
         graphPosition: {x: 230, y: 600}
         comment: 
         children:
-        - rid: 8540147883075961235
+        - rid: 8540147883688591454
         duration:
           value: 120
           param: 
-    - rid: 8540147883075961235
+    - rid: 8540147883688591454
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: c24611418ce84ffdb135a0aef40dccfb
+        guid: 9bd5dbe3e69f40d08dcd92de2b9c7590
         graphPosition: {x: 230, y: 750}
         comment: 
         bullet:
@@ -90,14 +90,14 @@ MonoBehaviour:
           range: 0
           affectedByWind: 1
         pattern:
-          rid: 8540147883075961236
+          rid: 8540147883688591455
         direction:
-          rid: 8540147883075961237
+          rid: 8540147883688591456
         rotation:
-          rid: 8540147883075961238
+          rid: 8540147883688591457
         muzzleOffset: {x: 0, y: 0}
         se: 0
-    - rid: 8540147883075961236
+    - rid: 8540147883688591455
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         wayCount: 3
@@ -105,10 +105,10 @@ MonoBehaviour:
         radius: 0.5
         startDelayFrames: 0
         rotationOffset: 0
-    - rid: 8540147883075961237
+    - rid: 8540147883688591456
       type: {class: ForwardDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147883075961238
+    - rid: 8540147883688591457
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0

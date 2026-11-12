@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Runtime;
@@ -121,25 +122,57 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         });
     }
 
-    [Serializable, NodeInfo("風の吹き方を設定する (無風に戻すときは Intervals を空に)", "Action/Stage")]
-    public sealed class SetWindNodeDefinition : ActionNodeDefinition
+    // 子の実行中だけ風を吹かせ、終わったら直前の風に戻す。バトル開始時は無風
+    [Serializable, NodeInfo("子の実行中だけ風を吹かせる。終わると直前の風に戻る", "Decorator")]
+    public sealed class WithWindNodeDefinition : DecoratorNodeDefinition
     {
-        [SerializeField] BattleWindSettings wind = new();
+        [SerializeField] BattleWindSettings wind = new() { enabled = true };
 
-        public override string Summary => wind.intervals.Count == 0 ? "風なし" : $"風 {wind.intervals[0].direction} ほか{wind.intervals.Count - 1}";
+        public override string Summary => wind.intervals.Count == 0 ? "風 (未設定)"
+            : string.Join(" → ", wind.intervals.Select(i => $"{i.direction} {i.seconds:0.#}s"));
 
-        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        public override INode Build(BuildScope scope) => new WithWindNode(BuildChild(scope), wind);
+
+        sealed class WithWindNode : Node
         {
-            var before = BattleWind.Direction;
-            if (wind.intervals.Count == 0) BattleWind.Reset();
-            else BattleWind.Begin(wind);
-            if (before == WindDirection.None && BattleWind.Direction != WindDirection.None) Emitter.PlaySe(ctx, BattleWind.StartSe);
-            return NodeStatus.Success;
-        });
+            readonly INode child;
+            readonly BattleWindSettings wind;
+            BattleWindSettings previous;
+
+            public WithWindNode(INode child, BattleWindSettings wind)
+            {
+                this.child = child;
+                this.wind = wind;
+            }
+
+            WindService service;
+
+            protected override void OnEnter(BattleContext ctx)
+            {
+                service = ctx.Stage?.Get<WindService>();
+                if (service == null)
+                {
+                    ctx.Stage?.WarnMissing<WindService>("WithWind");
+                    return;
+                }
+                previous = service.Current;
+                service.Apply(wind);
+            }
+
+            protected override NodeStatus OnTick(BattleContext ctx) => child.Tick(ctx);
+            protected override void OnAbort(BattleContext ctx) => child.Abort(ctx);
+
+            protected override void OnExit(BattleContext ctx)
+            {
+                service?.Apply(previous);
+                service = null;
+                previous = null;
+            }
+        }
     }
 
-    // 旧 BossWindCue。腕を上げる演出のあと風向きを切り替える (Stage3WindBossController が付いていれば演出も行う)
-    [Serializable, NodeInfo("腕を上げる合図のあと風向きを切り替える", "Action/Boss")]
+    // 旧 BossWindCue。合図の演出 (IWindCueReceiver を持つ敵のみ) のあと風向きを切り替える
+    [Serializable, NodeInfo("合図のあと風向きを切り替える", "Action/Boss")]
     public sealed class BossWindCueNodeDefinition : ActionNodeDefinition
     {
         [SerializeField] BossWindCueSettings cue = new() { enabled = true };
@@ -148,9 +181,14 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         public override INode Build(BuildScope scope) => new ActionNode(ctx =>
         {
-            var controller = ctx.Self != null ? ctx.Self.GetComponent<Presenter.Entity.Stage3WindBossController>() : null;
-            if (controller != null) controller.PlayCue(cue);
-            else BattleWind.Begin(cue.CreateWind(BattleWind.Direction));
+            var wind = ctx.Stage?.Get<WindService>();
+            if (wind == null)
+            {
+                ctx.Stage?.WarnMissing<WindService>("BossWindCue");
+                return NodeStatus.Success;
+            }
+            wind.Apply(cue.CreateWind(wind.Direction));
+            if (ctx.Self != null && ctx.Self.TryGetComponent<IWindCueReceiver>(out var receiver)) receiver.PlayCue(cue);
             return NodeStatus.Success;
         });
     }

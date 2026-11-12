@@ -99,7 +99,12 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         public override Vector2 GetDirection(in EmitContext e)
         {
-            if (followWind && BattleWind.Direction != WindDirection.None) return BattleWind.Vector;
+            if (followWind)
+            {
+                var wind = e.Context.Stage?.Get<WindService>();
+                if (wind == null) e.Context.Stage?.WarnMissing<WindService>(nameof(ScreenEdgeDirection));
+                else if (wind.Direction != WindDirection.None) return wind.Vector;
+            }
             return fromLeft ? Vector2.right : Vector2.left;
         }
 

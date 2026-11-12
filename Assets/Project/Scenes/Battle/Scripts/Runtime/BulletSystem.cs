@@ -51,7 +51,12 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
         static readonly MotionStep[] DefaultMotion = { new VelocityMotion() };
 
+        readonly BattleWorld world;
         readonly List<Bullet> bullets = new();
+
+        public BulletSystem(BattleWorld world) => this.world = world;
+
+        WindService Wind => world.Stage?.Get<WindService>();
         readonly Stack<Bullet> free = new();
 
         public int ActiveCount => bullets.Count;
@@ -74,16 +79,23 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             bullet.PreviousPosition = spawn.Position;
             bullet.Rotation = rotation;
             bullet.DelayFrames = Mathf.Max(0, spawn.StartDelayFrames);
-            bullet.Wind = spawn.AffectedByWind && BattleWind.Enabled;
+            var wind = Wind;
+            bullet.Wind = spawn.AffectedByWind && wind != null && wind.Enabled;
             bullet.WindVelocity = bullet.WindOffset = Vector2.zero;
             var steps = spawn.Motion != null && spawn.Motion.Count > 0 ? spawn.Motion : DefaultMotion;
-            bullet.Motion = new MotionSequence(steps, bullet, new MotionLaunch { Direction = spawn.Direction, AttackTime = spawn.AttackTime });
+            bullet.Motion = new MotionSequence(steps, bullet, new MotionLaunch
+            {
+                Direction = spawn.Direction,
+                AttackTime = spawn.AttackTime,
+                WindAxis = wind != null ? wind.ProjectileVector : Vector2.zero,
+            });
             bullets.Add(bullet);
             return presenter;
         }
 
         public void Tick(float dt)
         {
+            var wind = Wind;
             for (var i = bullets.Count - 1; i >= 0; i--)
             {
                 var b = bullets[i];
@@ -109,10 +121,10 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 }
 
                 var position = b.Position;
-                if (b.Wind)
+                if (b.Wind && wind != null)
                 {
                     var authoredVelocity = (Vector2)(position - b.PreviousPosition) / dt;
-                    BattleWind.IntegrateBullet(authoredVelocity, dt, ref b.WindVelocity, ref b.WindOffset);
+                    wind.IntegrateBullet(authoredVelocity, dt, ref b.WindVelocity, ref b.WindOffset);
                     position += (Vector3)(b.WindOffset * b.Presenter.WindInfluence);
                 }
                 b.PreviousPosition = b.Position;

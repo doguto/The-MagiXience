@@ -20,19 +20,28 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
         {
             var isBoss = sequence.Situation == BattleSituation.Boss;
             var bossShooter = isBoss ? Shooter.From(sequence.BossPrefab) : null;
-            var sequenceWind = sequence.Wind;
+            // フェーズ通知を使うのは進行ゲージを持つボスだけ
+            emitPhaseMarkers = isBoss && sequence.BossPrefab != null
+                && sequence.BossPrefab.GetComponentInChildren<BossPhaseProgressGauge>(true) != null;
 
-            var nodes = new List<NodeDefinition> { SetWind(sequenceWind) };
+            var nodes = new List<NodeDefinition>();
             var groupIndex = 0;
             foreach (var group in sequence.SequenceGroups)
             {
-                nodes.Add(WithComment(ConvertGroup(group, isBoss, bossShooter, sequenceWind), $"Group {groupIndex++}"));
+                nodes.Add(WithComment(ConvertGroup(group, isBoss, bossShooter), $"Group {groupIndex++}"));
             }
 
             var stage = CreateAsset<BattleStageAsset>("", $"{sequence.name}_BT");
             Set(stage, "situation", sequence.Situation);
 
             var tree = CreateTree("Stage", $"{sequence.name}_Tree", Sequence(nodes));
+            if (UsesWind(sequence))
+            {
+                // 風を使うステージにだけ風のサービスを宣言する。シーケンス全体の風は開始時の風になる
+                var wind = new Project.Scenes.Battle.Scripts.Runtime.WindServiceDefinition();
+                Set(wind, "initial", CopyWind(sequence.Wind));
+                Set(stage, "services", new List<Project.Scenes.Battle.Scripts.Runtime.StageServiceDefinition> { wind });
+            }
             if (isBoss)
             {
                 Set(stage, "bossPrefab", sequence.BossPrefab);
@@ -48,7 +57,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             return stage;
         }
 
-        NodeDefinition ConvertGroup(SequenceGroup group, bool isBoss, Shooter bossShooter, BattleWindSettings sequenceWind)
+        bool emitPhaseMarkers;
+
+        NodeDefinition ConvertGroup(SequenceGroup group, bool isBoss, Shooter bossShooter)
         {
             var phases = group.Phases.Where(p => p != null).ToList();
 
@@ -63,9 +74,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                         var def = p.InterludeBuilderOverride != null
                             ? interlude.WithTimelineBuilder(p.InterludeBuilderOverride, p.InterludeTimeLimitOverride)
                             : interlude;
-                        after = WithComment(ConvertPhase(def, isBoss, bossShooter, sequenceWind), "Interlude");
+                        after = WithComment(ConvertPhase(def, isBoss, bossShooter), "Interlude");
                     }
-                    return Sequence(new NodeDefinition[] { ConvertPhase(p, isBoss, bossShooter, sequenceWind), after });
+                    return Sequence(new NodeDefinition[] { ConvertPhase(p, isBoss, bossShooter), after });
                 }).ToList();
 
                 var random = WithChildren(new RandomNodeDefinition(), options);
@@ -84,11 +95,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                 return safe;
             }
 
-            var body = Sequence(phases.Select(p => ConvertPhase(p, isBoss, bossShooter, sequenceWind)));
+            var body = Sequence(phases.Select(p => ConvertPhase(p, isBoss, bossShooter)));
             return group.Loop ? Loop(group.LoopCount, body) : body;
         }
 
-        NodeDefinition ConvertPhase(BattlePhaseDefinition phase, bool isBoss, Shooter bossShooter, BattleWindSettings sequenceWind)
+        NodeDefinition ConvertPhase(BattlePhaseDefinition phase, bool isBoss, Shooter bossShooter)
         {
             var normal = ConvertPhaseVariant(phase, phase.TimelineBuilder, isBoss, bossShooter);
             NodeDefinition core = normal;
@@ -104,14 +115,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                 core = WithChildren(new SelectorNodeDefinition(), new NodeDefinition[] { strong, normal });
             }
 
-            var wind = phase.WindOverride;
-            return WithComment(Sequence(new[]
-            {
-                Marker(phase.PhaseId),
-                wind != null ? SetWind(wind) : null,
-                core,
-                wind != null ? SetWind(sequenceWind) : null,
-            }), phase.TimelineBuilder ? phase.TimelineBuilder.name : phase.PhaseId);
+            var body = WithWind(phase.WindOverride, core);
+            return WithComment(Sequence(new[] { emitPhaseMarkers ? Marker(phase.PhaseId) : null, body }),
+                phase.TimelineBuilder ? phase.TimelineBuilder.name : phase.PhaseId);
         }
 
         NodeDefinition ConvertPhaseVariant(BattlePhaseDefinition phase, BattleTimelineBuilderAsset builder, bool isBoss, Shooter bossShooter)
@@ -254,20 +260,45 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             return Timeline(items);
         }
 
-        static NodeDefinition SetWind(BattleWindSettings wind)
+        static bool HasWind(BattleWindSettings wind) => wind != null && wind.intervals != null && wind.intervals.Count > 0;
+
+        static bool UsesWind(BattleSequenceAsset sequence)
         {
-            var node = new SetWindNodeDefinition();
-            var copy = new BattleWindSettings();
-            if (wind != null)
+            if (HasWind(sequence.Wind)) return true;
+            foreach (var group in sequence.SequenceGroups)
             {
-                copy.enabled = wind.enabled;
-                copy.startSe = wind.startSe;
-                copy.playerSpeedRatio = wind.playerSpeedRatio;
-                copy.bulletAcceleration = wind.bulletAcceleration;
-                copy.bulletDrag = wind.bulletDrag;
-                copy.intervals = wind.intervals.Select(i => new WindInterval { direction = i.direction, seconds = i.seconds }).ToList();
+                var phases = group.Phases.Where(p => p != null).ToList();
+                if (group.Interlude != null) phases.Add(group.Interlude);
+                foreach (var phase in phases)
+                {
+                    if (phase.WindOverride != null) return true;
+                    foreach (var builder in new[] { phase.TimelineBuilder, phase.TimelineBuilderStrong, phase.InterludeBuilderOverride })
+                    {
+                        if (builder != null && builder.BossWindCue != null && builder.BossWindCue.enabled) return true;
+                    }
+                }
             }
-            Set(node, "wind", copy);
+            return false;
+        }
+
+        static BattleWindSettings CopyWind(BattleWindSettings wind) => wind == null ? new BattleWindSettings() : new BattleWindSettings
+        {
+            enabled = wind.enabled,
+            startSe = wind.startSe,
+            playerSpeedRatio = wind.playerSpeedRatio,
+            bulletAcceleration = wind.bulletAcceleration,
+            bulletDrag = wind.bulletDrag,
+            intervals = (wind.intervals ?? new List<WindInterval>()).Select(i => new WindInterval { direction = i.direction, seconds = i.seconds }).ToList(),
+        };
+
+        // フェーズで風を上書きする区間だけを囲む。設定が空なら何も挟まない
+        static NodeDefinition WithWind(BattleWindSettings wind, NodeDefinition child)
+        {
+            if (!HasWind(wind)) return child;
+
+            var node = new WithWindNodeDefinition();
+            Set(node, "wind", CopyWind(wind));
+            node.SetChildren(new[] { child });
             return node;
         }
     }

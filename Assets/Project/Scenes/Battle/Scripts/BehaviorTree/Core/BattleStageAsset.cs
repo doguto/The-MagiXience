@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.Model;
+using Project.Scenes.Battle.Scripts.Runtime;
 using Project.Scenes.Battle.Scripts.Runtime.Motion;
 using Project.Scripts.Model;
 using UnityEngine;
@@ -14,6 +15,10 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeField] BattleSituation situation = BattleSituation.Way;
 
+        [Header("Services")]
+        [SerializeReference, SubclassSelector, Tooltip("このステージでだけ使う機能 (風など)。宣言しないものは存在しない扱いになる")]
+        List<StageServiceDefinition> services = new();
+
         [Header("Stage Tree")]
         [SerializeField, Tooltip("ステージ直下で実行するツリー。道中ではこれが完了すると次へ進む")] BehaviorTreeAsset tree;
 
@@ -24,6 +29,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Tooltip("ボス自身に持たせるツリー。シナリオ明けに開始する")] BehaviorTreeAsset bossTree;
 
         public BattleSituation Situation => situation;
+        public IReadOnlyList<StageServiceDefinition> Services => services;
         public BehaviorTreeAsset Tree => tree;
         public GameObject BossPrefab => bossPrefab;
         public Vector3 BossSpawnPosition => bossSpawnPosition;

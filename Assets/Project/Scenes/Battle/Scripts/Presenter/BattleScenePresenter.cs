@@ -66,6 +66,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             flow = new BattleFlow(battleClock, enemyTracker, bulletClearReceiver,
                 () => soundManager != null ? soundManager.BgmAudioSource : null,
                 se => soundManager?.PlaySE(se));
+            flow.StageChanged += OnStageChanged;
             ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
@@ -443,8 +444,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void StartWaySequence()
         {
+            flow.BeginStage(wayStage);
             flow.StartStageTree(wayStage.Tree, () => HandleSequenceCompleted(BattleSituation.Way));
         }
+
+        // ステージで宣言されたサービスを、BehaviorTree の外にいる自機や表示へ渡す
+        void OnStageChanged(StageContext stage)
+        {
+            var wind = stage?.Get<WindService>();
+            if (playerPresenter == null) playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            playerPresenter?.SetWind(wind);
+            if (windArrowsPresenter == null) windArrowsPresenter = FindFirstObjectByType<WindArrowsPresenter>();
+            windArrowsPresenter?.SetWind(wind);
+        }
+
+        WindArrowsPresenter windArrowsPresenter;
 
         async void HandleSequenceCompleted(BattleSituation situation)
         {
@@ -575,6 +589,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             playerPresenter?.FreezeRunAnimation();
             hasResumedPlayerAnimationOnBoss = false;
+
+            flow.BeginStage(bossStage);
 
             bossPresenter.OnDeath
                          .Take(1)

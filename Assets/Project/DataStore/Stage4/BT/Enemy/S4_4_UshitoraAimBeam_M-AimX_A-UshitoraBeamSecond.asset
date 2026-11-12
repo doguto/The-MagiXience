@@ -13,91 +13,91 @@ MonoBehaviour:
   m_Name: S4_4_UshitoraAimBeam_M-AimX_A-UshitoraBeamSecond
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147883077535628
+    rid: 8540147883689902585
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147883077535628
+    - rid: 8540147883689902585
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: e9427d06e3a34caf94c04dfab77cc8a5
+        guid: 907985eaeb1944ba89f5458a47f6390e
         graphPosition: {x: 172.5, y: 150}
         comment: 
         children:
-        - rid: 8540147883077535629
-        - rid: 8540147883077535630
-    - rid: 8540147883077535629
+        - rid: 8540147883689902586
+        - rid: 8540147883689902587
+    - rid: 8540147883689902586
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 2a24358b841348c391b58a7f760f490f
+        guid: d71208a758b3496388d64ad2d4185b98
         graphPosition: {x: 0, y: 300}
         comment: 
         preset: {fileID: 11400000, guid: e25f561f24b240148a0d4d1b0be41578, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147883077535630
+    - rid: 8540147883689902587
       type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: afd6b1c8318445e2adaa1d1af226dd13
+        guid: 125ec9e47dd24247beabc5f308bd0258
         graphPosition: {x: 345, y: 300}
         comment: Phase 0
         child:
-          rid: 8540147883077535631
+          rid: 8540147883689902588
         condition:
-          rid: 8540147883077535632
+          rid: 8540147883689902589
         onChildCompleted: 0
-    - rid: 8540147883077535631
+    - rid: 8540147883689902588
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: b502592d38d74ac48dfedd808e98a2a0
+        guid: bd912036bd0e4a238985b2e546bc7f16
         graphPosition: {x: 345, y: 450}
         comment: 
         children:
-        - rid: 8540147883077535633
-        - rid: 8540147883077535634
-    - rid: 8540147883077535632
+        - rid: 8540147883689902590
+        - rid: 8540147883689902591
+    - rid: 8540147883689902589
       type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 487
           param: 
-    - rid: 8540147883077535633
+    - rid: 8540147883689902590
       type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: ac191b6c4c854188b0d87b555d681d9c
+        guid: 7bef644f3f6f4660bda61a3986448950
         graphPosition: {x: 230, y: 600}
         comment: 
         frames:
           value: 8
           param: 
-    - rid: 8540147883077535634
+    - rid: 8540147883689902591
       type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 7a155706ce4d45cb96b5b566640d6080
+        guid: 1752ac7088ca4932aab03c4e63ec3032
         graphPosition: {x: 460, y: 600}
         comment: 
         child:
-          rid: 8540147883077535635
+          rid: 8540147883689902592
         count:
           value: 0
           param: 
-    - rid: 8540147883077535635
+    - rid: 8540147883689902592
       type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: f9bd52624c1e4aa285fa58ee90771084
+        guid: c48b42e2aa0543999173882f9aff81f8
         graphPosition: {x: 460, y: 750}
         comment: 
         children:
-        - rid: 8540147883077535636
+        - rid: 8540147883689902593
         duration:
           value: 130
           param: 
-    - rid: 8540147883077535636
+    - rid: 8540147883689902593
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: f2c56b3790cb4843acc267c4e26b652f
+        guid: 75f4ffd26e0343af9dfaaf987d00229d
         graphPosition: {x: 460, y: 900}
         comment: 
         line:

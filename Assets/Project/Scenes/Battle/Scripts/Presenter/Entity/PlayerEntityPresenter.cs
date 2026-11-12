@@ -363,11 +363,16 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdateAnimation();
         }
 
+        // 風を宣言したステージの間だけ BattleScenePresenter から渡される
+        Project.Scenes.Battle.Scripts.Runtime.WindService wind;
+        public void SetWind(Project.Scenes.Battle.Scripts.Runtime.WindService value) => wind = value;
+
         Vector3 HandleMovement()
         {
             var currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
             var input = currentMoveInput.sqrMagnitude < 0.01f ? Vector2.zero : currentMoveInput;
-            Vector3 movement = BattleWind.PlayerVelocity(input, currentSpeed) * Time.deltaTime;
+            Vector2 velocity = wind != null ? wind.PlayerVelocity(input, currentSpeed) : input * currentSpeed;
+            Vector3 movement = velocity * Time.deltaTime;
             return movement;
         }
 

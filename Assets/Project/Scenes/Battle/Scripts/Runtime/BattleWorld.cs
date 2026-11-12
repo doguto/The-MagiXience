@@ -39,7 +39,17 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         {
             Random = new Random(seed);
             this.bgmTimeProvider = bgmTimeProvider;
-            Services = new BattleServices();
+            Services = new BattleServices(this);
+        }
+
+        // 現在のステージ (道中/ボス戦) で宣言されたサービス。ステージ外では null
+        public StageContext Stage { get; private set; }
+
+        public void SetStage(StageContext stage)
+        {
+            Stage?.End();
+            Stage = stage;
+            Stage?.Begin();
         }
 
         public int Frame { get; private set; }
@@ -82,7 +92,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             tickables.RemoveAll(t => t.IsFinished);
 
             Services.Bullets.Tick(DeltaTime);
-            BattleWind.Tick(DeltaTime);
+            Stage?.Tick(DeltaTime);
             AdvanceFrame();
         }
 
@@ -91,6 +101,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             tickables.Clear();
             pending.Clear();
             scheduled.Clear();
+            SetStage(null);
         }
 
         void RunScheduled()
@@ -124,7 +135,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     // ノードから使うバトル内のサービス。BattleScenePresenter が設定する。
     public sealed class BattleServices
     {
-        public BulletSystem Bullets { get; } = new();
+        public BattleServices(BattleWorld world) => Bullets = new BulletSystem(world);
+
+        public BulletSystem Bullets { get; }
         public ActorSpawner Spawner { get; set; }
         public BulletClearReceiver Clearer { get; set; }
         public BattleActor Boss { get; set; }

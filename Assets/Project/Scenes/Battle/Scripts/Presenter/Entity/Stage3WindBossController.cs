@@ -1,11 +1,12 @@
 using Project.Scenes.Battle.Scripts.Model;
+using Project.Scenes.Battle.Scripts.Runtime;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
     /// <summary>フェーズ設定に従って腕上げと風を同期する。攻撃・移動は通常のBossプリセットで実行する。</summary>
     [DisallowMultipleComponent, RequireComponent(typeof(BossEntityPresenter))]
-    public class Stage3WindBossController : MonoBehaviour
+    public class Stage3WindBossController : MonoBehaviour, IWindCueReceiver
     {
         [SerializeField] Sprite raisedArmsSprite;
 
@@ -25,17 +26,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             boss.PhaseStarted += BeginSection;
         }
 
-        void BeginSection(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder) =>
-            PlayCue(builder != null && builder.BossWindCue?.enabled == true ? builder.BossWindCue : null);
+        void BeginSection(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder)
+        {
+            var settings = builder != null && builder.BossWindCue?.enabled == true ? builder.BossWindCue : null;
+            if (settings != null) BattleWind.Begin(settings.CreateWind(BattleWind.Direction));
+            PlayCue(settings);
+        }
 
-        // 腕を上げて風向きを切り替える。BehaviorTree の BossWindCue ノードから呼ばれる
+        // 腕を上げる演出。風向きの切り替えは呼び出し側 (BossWindCue ノード) が行う
         public void PlayCue(BossWindCueSettings settings)
         {
             RestoreSprite();
             cue = settings;
             elapsed = 0f;
             if (cue == null) return;
-            BattleWind.Begin(cue.CreateWind(BattleWind.Direction));
             if (cue.cueSeconds > 0f && raisedArmsSprite != null) spriteRenderer.sprite = raisedArmsSprite;
         }
 

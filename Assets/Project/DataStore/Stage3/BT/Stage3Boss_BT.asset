@@ -13,16 +13,28 @@ MonoBehaviour:
   m_Name: Stage3Boss_BT
   m_EditorClassIdentifier: 
   situation: 1
+  services:
+  - rid: 8540147883689377911
   tree: {fileID: 0}
   bossPrefab: {fileID: 7069437974632321993, guid: dc6ad064f9af4a244b30b3f962ed9128, type: 3}
   bossSpawnPosition: {x: 10, y: 0, z: 0}
   bossEntrance:
-  - rid: 8540147883077534191
+  - rid: 8540147883689377912
   bossTree: {fileID: 11400000, guid: 18a5b1f7dccb9e74c920081fb7335f3a, type: 2}
   references:
     version: 2
     RefIds:
-    - rid: 8540147883077534191
+    - rid: 8540147883689377911
+      type: {class: WindServiceDefinition, ns: Project.Scenes.Battle.Scripts.Runtime, asm: Presenter}
+      data:
+        initial:
+          enabled: 0
+          startSe: 0
+          playerSpeedRatio: 0.2
+          intervals: []
+          bulletAcceleration: 3
+          bulletDrag: 0.6
+    - rid: 8540147883689377912
       type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
         targetOffset: {x: 5.7, y: 0, z: 0}

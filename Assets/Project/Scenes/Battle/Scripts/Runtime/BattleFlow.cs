@@ -32,6 +32,16 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
         public BattleWorld World => world;
         public event Action<string> PhaseStarted;
+        // ステージ (道中/ボス戦) の開始・終了。終了時は null。自機や表示がサービスを受け取るのに使う
+        public event Action<StageContext> StageChanged;
+
+        // ステージで宣言されたサービスを生成して有効にする
+        public void BeginStage(BattleStageAsset stage)
+        {
+            EnsureWorld();
+            world.SetStage(new StageContext(world, stage != null ? stage.Services : null));
+            StageChanged?.Invoke(world.Stage);
+        }
 
         // 道中などステージ直下のツリーを開始する。完了したら onFinished を呼ぶ
         public void StartStageTree(BehaviorTreeAsset tree, Action onFinished)
@@ -81,7 +91,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             }
             clock.End();
             world = null;
-            BattleWind.Reset();
+            StageChanged?.Invoke(null);
         }
 
         void EnsureWorld()
@@ -95,7 +105,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             services.PlaySe = playSe;
             services.BgmSource = bgmSource?.Invoke();
             services.PhaseStarted += OnPhaseStarted;
-            BattleWind.Reset();
             clock.Begin(world);
         }
 

@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Stage3Way_BT
   m_EditorClassIdentifier: 
   situation: 0
+  services:
+  - rid: 8540147883688593207
   tree: {fileID: 11400000, guid: 41bb12124539b104c88c9ad9bcfea4da, type: 2}
   bossPrefab: {fileID: 0}
   bossSpawnPosition: {x: 0, y: 0, z: 0}
@@ -20,4 +22,14 @@ MonoBehaviour:
   bossTree: {fileID: 0}
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8540147883688593207
+      type: {class: WindServiceDefinition, ns: Project.Scenes.Battle.Scripts.Runtime, asm: Presenter}
+      data:
+        initial:
+          enabled: 0
+          startSe: 0
+          playerSpeedRatio: 0.2
+          intervals: []
+          bulletAcceleration: 3
+          bulletDrag: 0.6

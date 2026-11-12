@@ -78,7 +78,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
                 aimed = true;
                 start = r.Target.Position;
                 z = r.Target.Position.z;
-                Vector2 axis = useBattleWind ? BattleWind.ProjectileVector : worldAcceleration.normalized;
+                Vector2 axis = useBattleWind ? r.LaunchWindAxis : worldAcceleration.normalized;
                 var shot = AimedParabola.NextShotIndex();
                 if (alternateVertical) axis = shot % 2 == 0 ? Vector2.up : Vector2.down;
                 var flightTime = Mathf.Max(0.1f, targetFlightTime * (1f + flightTimeVariation * ((shot % 11) / 5f - 1f)));

@@ -17,15 +17,19 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         float speedPerRatio = 150f;
 
         Vector2 offset;
+        Project.Scenes.Battle.Scripts.Runtime.WindService wind;
+
+        // 風を宣言したステージの間だけ BattleScenePresenter から渡される
+        public void SetWind(Project.Scenes.Battle.Scripts.Runtime.WindService value) => wind = value;
 
         void Update()
         {
-            Vector2 direction = BattleWind.Vector;
+            Vector2 direction = wind != null ? wind.Vector : Vector2.zero;
             bool visible = direction != Vector2.zero;
             foreach (var view in views) view.SetVisible(visible);
             if (!visible) return;
 
-            Vector2 velocity = direction * (speedPerRatio * BattleWind.PlayerSpeedRatio);
+            Vector2 velocity = direction * (speedPerRatio * wind.PlayerSpeedRatio);
             if (backgroundPresenter != null) velocity += backgroundPresenter.ScrollVelocityPixels;
             offset += velocity * Time.deltaTime;
 

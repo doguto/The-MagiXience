@@ -36,6 +36,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
         public Vector2 Direction;
         // 攻撃の発射時刻 (秒)。頂点の揺らぎなど発射時刻で変わる移動が使う
         public float AttackTime;
+        // 発射時点の風の予定上の向き (風が無効でも予定表があれば入る)。自機狙い放物線の曲げる向きに使う
+        public Vector2 WindAxis;
     }
 
     [Serializable]
@@ -52,6 +54,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
         protected IMotionBody Body { get; private set; }
         protected Vector2 Direction { get; private set; }
         protected float AttackTime { get; private set; }
+        protected Vector2 WindAxis { get; private set; }
 
         // 開始できない設定 (頂点が発射位置と同じ放物線など)。弾ならその場で消す
         public bool Rejected { get; protected set; }
@@ -62,6 +65,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
             Body = body;
             Direction = launch.Direction;
             AttackTime = launch.AttackTime;
+            WindAxis = launch.WindAxis;
             OnBegin();
         }
 

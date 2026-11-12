@@ -37,6 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         static float remaining;
         static bool HasSchedule => settings != null && settings.intervals != null && settings.intervals.Count > 0;
         public static bool Enabled => HasSchedule && settings.enabled;
+        public static BattleWindSettings Current => settings;
         // Projectile paths retain the authored schedule even when player wind and its HUD are disabled.
         public static WindDirection ProjectileDirection => HasSchedule ? settings.intervals[index].direction : WindDirection.None;
         public static Vector2 ProjectileVector => ToVector(ProjectileDirection);
