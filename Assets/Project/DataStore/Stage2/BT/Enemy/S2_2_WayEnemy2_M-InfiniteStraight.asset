@@ -13,21 +13,12 @@ MonoBehaviour:
   m_Name: S2_2_WayEnemy2_M-InfiniteStraight
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884261901005
+    rid: 8540147884261901006
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884261901005
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: d52b642ee0bb457dae33e9068bbe35c8
-        graphPosition: {x: 115, y: 150}
-        comment: 
-        children:
-        - rid: 8540147884261901006
-        - rid: 8540147884261901007
     - rid: 8540147884261901006
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -37,40 +28,3 @@ MonoBehaviour:
         preset: {fileID: 11400000, guid: 9e9e26e41c504f749a65ce017343bc33, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147884261901007
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 657f9e9183534e1e993934d453cca1b4
-        graphPosition: {x: 230, y: 300}
-        comment: Phase 0
-        child:
-          rid: 8540147884261901008
-        condition:
-          rid: 8540147884261901009
-        onChildCompleted: 0
-    - rid: 8540147884261901008
-      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 58e8d153456a4f86b3a76fa054c49bda
-        graphPosition: {x: 230, y: 450}
-        comment: 
-        child:
-          rid: 8540147884261901010
-        count:
-          value: 0
-          param: 
-    - rid: 8540147884261901009
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 181
-          param: 
-    - rid: 8540147884261901010
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 32e897f96f424a749c3d0a666b727778
-        graphPosition: {x: 230, y: 600}
-        comment: 
-        frames:
-          value: 30
-          param: 

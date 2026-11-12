@@ -28,7 +28,6 @@ MonoBehaviour:
         children:
         - rid: 8540147884261900977
         - rid: 8540147884261900978
-        - rid: 8540147884261900979
     - rid: 8540147884261900977
       type: {class: SetDeathBehaviorNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -45,40 +44,3 @@ MonoBehaviour:
         preset: {fileID: 11400000, guid: 9e9e26e41c504f749a65ce017343bc33, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147884261900979
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 2c14038320cd466fbd8fd1b3cefcd0b5
-        graphPosition: {x: 460, y: 300}
-        comment: Phase 0
-        child:
-          rid: 8540147884261900980
-        condition:
-          rid: 8540147884261900981
-        onChildCompleted: 0
-    - rid: 8540147884261900980
-      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 7a9ed933a16b408dbf7379061c57c84d
-        graphPosition: {x: 460, y: 450}
-        comment: 
-        child:
-          rid: 8540147884261900982
-        count:
-          value: 0
-          param: 
-    - rid: 8540147884261900981
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 181
-          param: 
-    - rid: 8540147884261900982
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 7124674caaaf496cb6358d2c3709b105
-        graphPosition: {x: 460, y: 600}
-        comment: 
-        frames:
-          value: 30
-          param: 

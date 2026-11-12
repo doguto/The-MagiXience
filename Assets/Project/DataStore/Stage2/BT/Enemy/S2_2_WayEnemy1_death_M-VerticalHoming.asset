@@ -28,14 +28,13 @@ MonoBehaviour:
         children:
         - rid: 8540147884261900999
         - rid: 8540147884261901000
-        - rid: 8540147884261901001
     - rid: 8540147884261900999
       type: {class: SetDeathBehaviorNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 371b48fa65fa4020bef46c2db5898b49
         graphPosition: {x: 0, y: 300}
         comment: 
-        tree: {fileID: 11400000, guid: f5ccb775c27fd414ba8cae44a9df867b, type: 2}
+        tree: {fileID: 11400000, guid: 83c582d2f1a53584fafff12a13034eae, type: 2}
     - rid: 8540147884261901000
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -45,40 +44,3 @@ MonoBehaviour:
         preset: {fileID: 11400000, guid: d856b296802150f45b8a1e2bad723eb6, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147884261901001
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 38651242d2fa40978ad539858e2cca2d
-        graphPosition: {x: 460, y: 300}
-        comment: Phase 0
-        child:
-          rid: 8540147884261901002
-        condition:
-          rid: 8540147884261901003
-        onChildCompleted: 0
-    - rid: 8540147884261901002
-      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 4953a38913a1423e92194eaa7493c26c
-        graphPosition: {x: 460, y: 450}
-        comment: 
-        child:
-          rid: 8540147884261901004
-        count:
-          value: 0
-          param: 
-    - rid: 8540147884261901003
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 181
-          param: 
-    - rid: 8540147884261901004
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 93d6e9510a54411cba3c7062f92b9458
-        graphPosition: {x: 460, y: 600}
-        comment: 
-        frames:
-          value: 30
-          param: 

@@ -85,21 +85,10 @@ MonoBehaviour:
         graphPosition: {x: 805, y: 450}
         comment: Phase 0
         child:
-          rid: 8540147884261901045
+          rid: 8540147884261901051
         condition:
           rid: 8540147884261901046
         onChildCompleted: 2
-    - rid: 8540147884261901045
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 01a501c1717241339ecf344f440a7901
-        graphPosition: {x: 805, y: 600}
-        comment: 
-        child:
-          rid: 8540147884261901051
-        condition:
-          rid: 8540147884261901052
-        onChildCompleted: 0
     - rid: 8540147884261901046
       type: {class: HpBelowConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -167,12 +156,6 @@ MonoBehaviour:
           rid: 8540147886565097692
         count:
           value: 0
-          param: 
-    - rid: 8540147884261901052
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 6001
           param: 
     - rid: 8540147884261901053
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}

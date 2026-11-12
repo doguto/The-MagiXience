@@ -27,7 +27,7 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147884261901086
-        - rid: 8540147884261901087
+        - rid: 8540147884261901088
     - rid: 8540147884261901086
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -37,17 +37,6 @@ MonoBehaviour:
         preset: {fileID: 11400000, guid: fc793741bae437a4cb7f4724ed553d91, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147884261901087
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 1255fcad024342bcaf7c77b8e4e2dacc
-        graphPosition: {x: 230, y: 300}
-        comment: Phase 0
-        child:
-          rid: 8540147884261901088
-        condition:
-          rid: 8540147884261901089
-        onChildCompleted: 0
     - rid: 8540147884261901088
       type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -61,12 +50,6 @@ MonoBehaviour:
           param: 
         interval:
           value: 120
-          param: 
-    - rid: 8540147884261901089
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 3601
           param: 
     - rid: 8540147884261901090
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
