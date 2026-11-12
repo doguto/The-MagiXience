@@ -13,26 +13,12 @@ MonoBehaviour:
   m_Name: S4_UshitoraThirdSubBeam_4_Ushitora
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263998435
+    rid: 8540147886565097674
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263998435
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: c1bc8e72f9454ec2a18edda7525821c5
-        graphPosition: {x: 345, y: 150}
-        comment: 
-        children:
-        - rid: 8540147884263998436
-        - rid: 8540147884263998437
-        - rid: 8540147884263998438
-        - rid: 8540147884263998439
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884263998436
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -126,3 +112,18 @@ MonoBehaviour:
         showWarning: 1
         warningPrefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
         warningFrames: 60
+    - rid: 8540147886565097674
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: c1bc8e72f9454ec2a18edda7525821c5
+        graphPosition: {x: 345, y: 150}
+        comment: 
+        children:
+        - rid: 8540147884263998436
+        - rid: 8540147884263998437
+        - rid: 8540147884263998438
+        - rid: 8540147884263998439
+        policy: 0
+        duration:
+          value: 0
+          param: 

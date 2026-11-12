@@ -178,6 +178,10 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 } while (it.Next(false));
             }
 
+            var nodeType = property.propertyType == SerializedPropertyType.ManagedReference
+                ? property.managedReferenceValue?.GetType()
+                : null;
+
             SerializedProperty commentProp = null;
             foreach (var field in fields)
             {
@@ -187,7 +191,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                     continue;
                 }
                 if (HiddenFields.Contains(field.name)) continue;
-                body.Add(BindField(field));
+                var element = BindField(field);
+                body.Add(element);
+                ApplyShowWhen(nodeType, field, fields, element);
             }
 
             // コメントは書かれている時だけ表示し、空なら右クリックの Edit Comment で出す
@@ -198,6 +204,36 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 commentRow.style.display = string.IsNullOrEmpty(commentProp.stringValue) ? DisplayStyle.None : DisplayStyle.Flex;
                 body.Add(commentRow);
             }
+        }
+
+        static void ApplyShowWhen(System.Type nodeType, SerializedProperty field, List<SerializedProperty> fields, VisualElement element)
+        {
+            System.Reflection.FieldInfo info = null;
+            for (var t = nodeType; t != null && info == null; t = t.BaseType)
+            {
+                info = t.GetField(field.name, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public
+                    | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly);
+            }
+            var showWhen = info?.GetCustomAttributes(typeof(ShowWhenAttribute), false);
+            if (showWhen == null || showWhen.Length == 0) return;
+
+            var attr = (ShowWhenAttribute)showWhen[0];
+            var controller = fields.Find(f => f.name == attr.Field);
+            if (controller == null) return;
+
+            void Refresh(SerializedProperty p)
+            {
+                var visible = p.propertyType switch
+                {
+                    SerializedPropertyType.Enum => p.intValue == System.Convert.ToInt32(attr.Value),
+                    SerializedPropertyType.Boolean => p.boolValue.Equals(attr.Value),
+                    _ => true,
+                };
+                element.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+
+            Refresh(controller);
+            element.TrackPropertyValue(controller, Refresh);
         }
 
         PropertyField BindField(SerializedProperty prop)

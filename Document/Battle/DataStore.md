@@ -155,10 +155,10 @@ Addressables には「アドレス = アセットパス」で登録されてい�
 
 役割ごとの典型的な形:
 
-- `Stage/Stage{N}Way_Tree`: `Sequence[ Sequence#Phase1[ Timeline{ Delay(t){Spawn} ... }, WaitUntil(NoActiveEnemies) ], Sequence#Phase2 ... ]`
+- `Stage/Stage{N}Way_Tree`: `Sequence[ Sequence#Phase1[ Parallel{ Delay(t){Spawn} ... }, WaitUntil(NoActiveEnemies) ], Sequence#Phase2 ... ]`
 - `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / Random / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP 閾値（`HpBelow`）、発狂（`NormalHpDepleted` + `EnterStrongMode`）など
 - `Enemy/*`: `Sequence[ SetDeathBehavior?, SetMovement, Until(FrameElapsed){ Repeat{Fire} } ]`
-- `Attack/*`: ボスの 1 フェーズ分の攻撃（`Timeline` / `Repeat` / `Fire` / `BulletBeam` など）
+- `Attack/*`: ボスの 1 フェーズ分の攻撃（`Parallel` / `Repeat` / `Fire` / `BulletBeam` など）
 
 ### MotionPreset（`Motion/`）
 

@@ -27,7 +27,7 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147884263997968
-        - rid: 8540147884263997969
+        - rid: 8540147886565097619
     - rid: 8540147884263997968
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -40,24 +40,6 @@ MonoBehaviour:
         - rid: 8540147884263997971
         - rid: 8540147884263997972
         continueIfSame: 0
-    - rid: 8540147884263997969
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 161989a7a95e4b33b301036213e2fdc4
-        graphPosition: {x: 1035, y: 300}
-        comment: Phase 0
-        children:
-        - rid: 8540147884263997973
-        - rid: 8540147884263997974
-        - rid: 8540147884263997975
-        - rid: 8540147884263997976
-        - rid: 8540147884263997977
-        - rid: 8540147884263997978
-        - rid: 8540147884263997979
-        - rid: 8540147884263997980
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884263997970
       type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
@@ -505,3 +487,22 @@ MonoBehaviour:
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         direction: {x: -1, y: 0}
+    - rid: 8540147886565097619
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 161989a7a95e4b33b301036213e2fdc4
+        graphPosition: {x: 1035, y: 300}
+        comment: Phase 0
+        children:
+        - rid: 8540147884263997973
+        - rid: 8540147884263997974
+        - rid: 8540147884263997975
+        - rid: 8540147884263997976
+        - rid: 8540147884263997977
+        - rid: 8540147884263997978
+        - rid: 8540147884263997979
+        - rid: 8540147884263997980
+        policy: 0
+        duration:
+          value: 0
+          param: 

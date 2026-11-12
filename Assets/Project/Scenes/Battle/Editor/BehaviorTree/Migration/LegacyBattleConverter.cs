@@ -150,7 +150,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             return list.Count == 1 ? list[0] : WithChildren(new SequenceNodeDefinition(), list);
         }
 
-        static NodeDefinition Parallel(IEnumerable<NodeDefinition> children, ParallelPolicy policy = ParallelPolicy.RequireAll)
+        static NodeDefinition Parallel(IEnumerable<NodeDefinition> children, ParallelPolicy policy = ParallelPolicy.All)
         {
             var list = children.Where(c => c != null).ToList();
             if (list.Count == 0) return null;
@@ -164,7 +164,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             var list = children.Where(c => c != null).ToList();
             if (list.Count == 0) return durationFrames > 0 ? Wait(durationFrames) : null;
             if (durationFrames <= 0 && list.Count == 1) return list[0];
-            var t = new TimelineNodeDefinition { Duration = durationFrames };
+            var t = durationFrames > 0
+                ? new ParallelNodeDefinition { Policy = ParallelPolicy.Duration, Duration = durationFrames }
+                : new ParallelNodeDefinition { Policy = ParallelPolicy.All };
             return WithChildren(t, list);
         }
 

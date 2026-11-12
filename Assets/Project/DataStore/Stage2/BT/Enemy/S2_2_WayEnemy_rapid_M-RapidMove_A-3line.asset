@@ -55,7 +55,7 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 450}
         comment: 
         child:
-          rid: 8540147884261901150
+          rid: 8540147886565097598
         count:
           value: 0
           param: 
@@ -64,19 +64,6 @@ MonoBehaviour:
       data:
         frames:
           value: 181
-          param: 
-    - rid: 8540147884261901150
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 6916aa4bab6c444fab9d166a701f2811
-        graphPosition: {x: 460, y: 600}
-        comment: 
-        children:
-        - rid: 8540147884261901151
-        - rid: 8540147884261901152
-        - rid: 8540147884261901153
-        duration:
-          value: 60
           param: 
     - rid: 8540147884261901151
       type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -214,3 +201,17 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
+    - rid: 8540147886565097598
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 6916aa4bab6c444fab9d166a701f2811
+        graphPosition: {x: 460, y: 600}
+        comment: 
+        children:
+        - rid: 8540147884261901151
+        - rid: 8540147884261901152
+        - rid: 8540147884261901153
+        policy: 2
+        duration:
+          value: 60
+          param: 

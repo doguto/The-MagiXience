@@ -153,34 +153,9 @@ MonoBehaviour:
         graphPosition: {x: 2070, y: 600}
         comment: 
         child:
-          rid: 8540147884264521827
+          rid: 8540147886565097620
         count:
           value: 0
-          param: 
-    - rid: 8540147884264521827
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: b627bf4e7bd146ab9bbc78ed65e491e8
-        graphPosition: {x: 2070, y: 750}
-        comment: 
-        children:
-        - rid: 8540147884264521828
-        - rid: 8540147884264521829
-        - rid: 8540147884264521830
-        - rid: 8540147884264521831
-        - rid: 8540147884264521832
-        - rid: 8540147884264521833
-        - rid: 8540147884264521834
-        - rid: 8540147884264521835
-        - rid: 8540147884264521836
-        - rid: 8540147884264521837
-        - rid: 8540147884264521838
-        - rid: 8540147884264521839
-        - rid: 8540147884264521840
-        - rid: 8540147884264521841
-        - rid: 8540147884264521842
-        duration:
-          value: 180
           param: 
     - rid: 8540147884264521828
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -876,3 +851,29 @@ MonoBehaviour:
     - rid: 8540147884264521901
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147886565097620
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b627bf4e7bd146ab9bbc78ed65e491e8
+        graphPosition: {x: 2070, y: 750}
+        comment: 
+        children:
+        - rid: 8540147884264521828
+        - rid: 8540147884264521829
+        - rid: 8540147884264521830
+        - rid: 8540147884264521831
+        - rid: 8540147884264521832
+        - rid: 8540147884264521833
+        - rid: 8540147884264521834
+        - rid: 8540147884264521835
+        - rid: 8540147884264521836
+        - rid: 8540147884264521837
+        - rid: 8540147884264521838
+        - rid: 8540147884264521839
+        - rid: 8540147884264521840
+        - rid: 8540147884264521841
+        - rid: 8540147884264521842
+        policy: 2
+        duration:
+          value: 180
+          param: 

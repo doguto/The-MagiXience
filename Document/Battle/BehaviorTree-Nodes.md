@@ -43,14 +43,17 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 ### Parallel
 
-全ての子を毎フレーム、左から順に Tick する。
+全ての子を毎フレーム、左から順に Tick する。各子の開始時刻は子側に Delay を挟んで指定する。
 
-| フィールド | 説明 |
-|---|---|
-| `policy` | `RequireAll`: 全ての子が Success したら Success / `RequireOne`: どれか 1 つが Success したら、残りを Abort して Success |
+| フィールド | 単位 | 説明 |
+|---|---|---|
+| `policy` | | `All`: 全ての子が Success したら Success / `Any`: どれか 1 つが Success したら、残りを Abort して Success / `Duration`: `duration` フレーム経過で実行中の子を Abort して Success |
+| `duration` ($ 可) | f | `policy = Duration` のときだけ表示・使用。0 以下なら `All` と同じ |
 
-- どちらのポリシーでも、子が 1 つでも Failure したら残りを Abort して Failure。
+- どのポリシーでも、子が 1 つでも Failure したら残りを Abort して Failure。
 - 完了した子は以後 Tick しない。
+- `Duration` の場合、子は f 〜 f+duration−1 の duration フレームだけ Tick され、f+duration のフレームで Success を返す。子が全て早く終わっても duration までは Running のまま。
+- `Duration` を Loop の子に置くと、Loop の同フレーム再開規則（後述）により **ちょうど duration フレーム周期** で繰り返す。攻撃パターンの 1 周期と、`SetMovement` の移動 1 周の長さを揃える用途で使う。
 
 ### Random
 
@@ -63,19 +66,6 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 - 「直前」は同じ実行時ノードで前回選んだ子。Loop の中に置くと、周回をまたいで連続を避ける。
 - 子が 0 個なら即 Success。
-
-### Timeline
-
-子を同時に実行し、`duration` で打ち切る。各子の開始時刻は子側に Delay を挟んで指定する。
-
-| フィールド | 単位 | 説明 |
-|---|---|---|
-| `duration` ($ 可) | f | 0 より大きければ、このフレーム数経過した時点で実行中の子を Abort して Success。0 なら全ての子の完了を待つ |
-
-- `duration > 0` の場合、子は f 〜 f+duration−1 の duration フレームだけ Tick され、f+duration のフレームで Success を返す。子が全て早く終わっても duration までは Running のまま。
-- Loop の子に置くと、Loop の同フレーム再開規則（後述）により **ちょうど duration フレーム周期** で繰り返す。攻撃パターンの 1 周期と、`SetMovement` の移動 1 周の長さを揃える用途で使う。
-- `duration = 0` の場合は全ての子が Success したフレームで Success。
-- どちらでも子が Failure したら残りを Abort して Failure。
 
 ## 2. Decorator
 
@@ -514,7 +504,7 @@ Until cond: FrameElapsed(481)
      └─ Fire
 ```
 
-`Repeat(interval=k)` は前の回の終了を待たずに k フレームおきに子を始める。子が SequentialFan のように時間のかかる Sequence でも周期がずれない。1 周期の中で複数の発射タイミングがある場合は `Loop ∞ { Timeline(duration=k) { Fire, Delay(a){Fire}, Delay(b){Fire} } }` を使う。
+`Repeat(interval=k)` は前の回の終了を待たずに k フレームおきに子を始める。子が SequentialFan のように時間のかかる Sequence でも周期がずれない。1 周期の中で複数の発射タイミングがある場合は `Loop ∞ { Parallel(Duration k) { Fire, Delay(a){Fire}, Delay(b){Fire} } }` を使う。
 
 ### BGM 同期のボスフェーズ = BgmSamples
 
@@ -574,12 +564,12 @@ Sequence
 
 移動は SetMovement でツリーと独立させ、ツリー本体は攻撃だけを書く。HP で行動を変える敵は `Sequence[Until(HpBelow){通常}, 後半]` のように並べる。
 
-### 道中 = Sequence[Timeline{Delay(t){Spawn}...}, WaitUntil(NoActiveEnemies)]
+### 道中 = Sequence[Parallel{Delay(t){Spawn}...}, WaitUntil(NoActiveEnemies)]
 
 ```text
 Sequence
  ├─ Sequence #Phase1
- │   ├─ Timeline (duration=0)
+ │   ├─ Parallel (All)
  │   │   ├─ Delay 150 → Spawn
  │   │   ├─ Delay 195 → Spawn
  │   │   └─ ...

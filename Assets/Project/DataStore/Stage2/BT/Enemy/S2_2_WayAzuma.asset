@@ -47,7 +47,7 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147884261901043
-        - rid: 8540147884261901044
+        - rid: 8540147886565097563
     - rid: 8540147884261901041
       type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
@@ -97,20 +97,6 @@ MonoBehaviour:
         condition:
           rid: 8540147884261901046
         onChildCompleted: 2
-    - rid: 8540147884261901044
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 42c60cdf5bdf40e78aea9ec6abcb9b0a
-        graphPosition: {x: 1955, y: 450}
-        comment: Phase 1
-        children:
-        - rid: 8540147884261901047
-        - rid: 8540147884261901048
-        - rid: 8540147884261901049
-        - rid: 8540147884261901050
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884261901045
       type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -197,7 +183,7 @@ MonoBehaviour:
         graphPosition: {x: 805, y: 750}
         comment: 
         child:
-          rid: 8540147884261901058
+          rid: 8540147886565097564
         count:
           value: 0
           param: 
@@ -261,22 +247,6 @@ MonoBehaviour:
             m_PostInfinity: 2
             m_RotationOrder: 4
           curvePreset: {fileID: 0}
-    - rid: 8540147884261901058
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 7dc7a6bf46ac4651ba1c5a5a06c648ff
-        graphPosition: {x: 805, y: 900}
-        comment: 
-        children:
-        - rid: 8540147884261901060
-        - rid: 8540147884261901061
-        - rid: 8540147884261901062
-        - rid: 8540147884261901063
-        - rid: 8540147884261901064
-        - rid: 8540147884261901065
-        duration:
-          value: 240
-          param: 
     - rid: 8540147884261901059
       type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
@@ -603,3 +573,35 @@ MonoBehaviour:
             m_PostInfinity: 2
             m_RotationOrder: 4
           curvePreset: {fileID: 0}
+    - rid: 8540147886565097563
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 42c60cdf5bdf40e78aea9ec6abcb9b0a
+        graphPosition: {x: 1955, y: 450}
+        comment: Phase 1
+        children:
+        - rid: 8540147884261901047
+        - rid: 8540147884261901048
+        - rid: 8540147884261901049
+        - rid: 8540147884261901050
+        policy: 0
+        duration:
+          value: 0
+          param: 
+    - rid: 8540147886565097564
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7dc7a6bf46ac4651ba1c5a5a06c648ff
+        graphPosition: {x: 805, y: 900}
+        comment: 
+        children:
+        - rid: 8540147884261901060
+        - rid: 8540147884261901061
+        - rid: 8540147884261901062
+        - rid: 8540147884261901063
+        - rid: 8540147884261901064
+        - rid: 8540147884261901065
+        policy: 2
+        duration:
+          value: 240
+          param: 

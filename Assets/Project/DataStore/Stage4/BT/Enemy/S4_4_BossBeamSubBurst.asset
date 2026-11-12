@@ -153,31 +153,9 @@ MonoBehaviour:
         graphPosition: {x: 1725, y: 600}
         comment: 
         child:
-          rid: 8540147884264521745
+          rid: 8540147886565097600
         count:
           value: 0
-          param: 
-    - rid: 8540147884264521745
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 7dd50e9140a24f6aafffcebba8ddb487
-        graphPosition: {x: 1725, y: 750}
-        comment: 
-        children:
-        - rid: 8540147884264521746
-        - rid: 8540147884264521747
-        - rid: 8540147884264521748
-        - rid: 8540147884264521749
-        - rid: 8540147884264521750
-        - rid: 8540147884264521751
-        - rid: 8540147884264521752
-        - rid: 8540147884264521753
-        - rid: 8540147884264521754
-        - rid: 8540147884264521755
-        - rid: 8540147884264521756
-        - rid: 8540147884264521757
-        duration:
-          value: 126
           param: 
     - rid: 8540147884264521746
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -732,3 +710,26 @@ MonoBehaviour:
     - rid: 8540147884264521804
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147886565097600
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7dd50e9140a24f6aafffcebba8ddb487
+        graphPosition: {x: 1725, y: 750}
+        comment: 
+        children:
+        - rid: 8540147884264521746
+        - rid: 8540147884264521747
+        - rid: 8540147884264521748
+        - rid: 8540147884264521749
+        - rid: 8540147884264521750
+        - rid: 8540147884264521751
+        - rid: 8540147884264521752
+        - rid: 8540147884264521753
+        - rid: 8540147884264521754
+        - rid: 8540147884264521755
+        - rid: 8540147884264521756
+        - rid: 8540147884264521757
+        policy: 2
+        duration:
+          value: 126
+          param: 

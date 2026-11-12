@@ -13,25 +13,12 @@ MonoBehaviour:
   m_Name: S4_UshitoraFirst4Way_4_Ushitora
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263998369
+    rid: 8540147886565097562
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263998369
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 0903538493d14d069618d1394337a21a
-        graphPosition: {x: 230, y: 150}
-        comment: 
-        children:
-        - rid: 8540147884263998370
-        - rid: 8540147884263998371
-        - rid: 8540147884263998372
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884263998370
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -168,3 +155,17 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
+    - rid: 8540147886565097562
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 0903538493d14d069618d1394337a21a
+        graphPosition: {x: 230, y: 150}
+        comment: 
+        children:
+        - rid: 8540147884263998370
+        - rid: 8540147884263998371
+        - rid: 8540147884263998372
+        policy: 0
+        duration:
+          value: 0
+          param: 

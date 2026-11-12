@@ -13,25 +13,12 @@ MonoBehaviour:
   m_Name: S2_3line-boss_2_Azuma
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263211142
+    rid: 8540147886565097603
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263211142
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: f13f49b5fbc748558fbddbbcfef26acf
-        graphPosition: {x: 230, y: 150}
-        comment: 
-        children:
-        - rid: 8540147884263211143
-        - rid: 8540147884263211144
-        - rid: 8540147884263211145
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884263211143
       type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -168,3 +155,17 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
+    - rid: 8540147886565097603
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f13f49b5fbc748558fbddbbcfef26acf
+        graphPosition: {x: 230, y: 150}
+        comment: 
+        children:
+        - rid: 8540147884263211143
+        - rid: 8540147884263211144
+        - rid: 8540147884263211145
+        policy: 0
+        duration:
+          value: 0
+          param: 

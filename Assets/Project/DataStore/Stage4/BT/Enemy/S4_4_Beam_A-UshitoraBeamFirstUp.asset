@@ -153,21 +153,9 @@ MonoBehaviour:
         graphPosition: {x: 575, y: 600}
         comment: 
         child:
-          rid: 8540147884263998453
+          rid: 8540147886565097602
         count:
           value: 0
-          param: 
-    - rid: 8540147884263998453
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 122f297cda8a4f5d925081c6b271e679
-        graphPosition: {x: 575, y: 750}
-        comment: 
-        children:
-        - rid: 8540147884263998454
-        - rid: 8540147884263998455
-        duration:
-          value: 521
           param: 
     - rid: 8540147884263998454
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -210,3 +198,16 @@ MonoBehaviour:
         showWarning: 1
         warningPrefab: {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
         warningFrames: 130
+    - rid: 8540147886565097602
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 122f297cda8a4f5d925081c6b271e679
+        graphPosition: {x: 575, y: 750}
+        comment: 
+        children:
+        - rid: 8540147884263998454
+        - rid: 8540147884263998455
+        policy: 2
+        duration:
+          value: 521
+          param: 

@@ -13,27 +13,12 @@ MonoBehaviour:
   m_Name: S2_FanTrailHourglass_2_Azuma
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263211117
+    rid: 8540147886565097576
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263211117
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 19a0cd48e1084e48bbfeef0939270cf7
-        graphPosition: {x: 460, y: 150}
-        comment: 
-        children:
-        - rid: 8540147884263211118
-        - rid: 8540147884263211119
-        - rid: 8540147884263211120
-        - rid: 8540147884263211121
-        - rid: 8540147884263211122
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884263211118
       type: {class: MoveTrailFanNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -283,3 +268,19 @@ MonoBehaviour:
     - rid: 8540147884263211136
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147886565097576
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 19a0cd48e1084e48bbfeef0939270cf7
+        graphPosition: {x: 460, y: 150}
+        comment: 
+        children:
+        - rid: 8540147884263211118
+        - rid: 8540147884263211119
+        - rid: 8540147884263211120
+        - rid: 8540147884263211121
+        - rid: 8540147884263211122
+        policy: 0
+        duration:
+          value: 0
+          param: 

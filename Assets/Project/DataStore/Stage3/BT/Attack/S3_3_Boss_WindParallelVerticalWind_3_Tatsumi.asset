@@ -13,25 +13,12 @@ MonoBehaviour:
   m_Name: S3_3_Boss_WindParallelVerticalWind_3_Tatsumi
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263997633
+    rid: 8540147886565097566
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263997633
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: ea50f145d4534ffb974a76b9e388cb29
-        graphPosition: {x: 230, y: 150}
-        comment: 
-        children:
-        - rid: 8540147884263997634
-        - rid: 8540147884263997635
-        - rid: 8540147884263997636
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884263997634
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -146,3 +133,17 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
+    - rid: 8540147886565097566
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: ea50f145d4534ffb974a76b9e388cb29
+        graphPosition: {x: 230, y: 150}
+        comment: 
+        children:
+        - rid: 8540147884263997634
+        - rid: 8540147884263997635
+        - rid: 8540147884263997636
+        policy: 0
+        duration:
+          value: 0
+          param: 

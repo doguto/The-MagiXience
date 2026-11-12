@@ -85,23 +85,9 @@ MonoBehaviour:
         graphPosition: {x: 2645, y: 600}
         comment: 
         child:
-          rid: 8540147884261900611
+          rid: 8540147886565097682
         count:
           value: 0
-          param: 
-    - rid: 8540147884261900611
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 94f89ee5ca4346e7b861f30923ffd32a
-        graphPosition: {x: 2645, y: 750}
-        comment: 
-        children:
-        - rid: 8540147884261900612
-        - rid: 8540147884261900613
-        - rid: 8540147884261900614
-        - rid: 8540147884261900615
-        duration:
-          value: 54
           param: 
     - rid: 8540147884261900612
       type: {class: RandomNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -744,3 +730,18 @@ MonoBehaviour:
     - rid: 8540147884261900682
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147886565097682
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 94f89ee5ca4346e7b861f30923ffd32a
+        graphPosition: {x: 2645, y: 750}
+        comment: 
+        children:
+        - rid: 8540147884261900612
+        - rid: 8540147884261900613
+        - rid: 8540147884261900614
+        - rid: 8540147884261900615
+        policy: 2
+        duration:
+          value: 54
+          param: 

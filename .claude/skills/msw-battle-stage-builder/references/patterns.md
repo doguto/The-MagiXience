@@ -5,21 +5,21 @@
 ## 基本の考え方
 
 - **フェーズ = `Until`**: 「条件を満たすまで中身を実行する」。中身が先に終わったときの扱いは `Until` のモードで決める（Finish: 終了 / Restart: やり直す / Hold: 条件まで待つ）。
-- **時刻つきの出来事 = `Timeline` + `Delay`**: `Timeline` の子は同時に始まり、各子の開始時刻は `Delay` で指定する。`Duration` を入れるとその長さで打ち切る。
+- **時刻つきの出来事 = `Parallel` + `Delay`**: `Parallel` の子は同時に始まり、各子の開始時刻は `Delay` で指定する。Policy を `Duration` にするとその長さで打ち切る（子が先に終わっても長さまで待つ）。
 - **一定間隔の繰り返し = `Repeat`**: 子を N 回（0 で無限）、k フレームおきに開始する。前の回が終わっていなくても次を始める。
-- **周回 = `Loop`**: 子が終わるたびにやり直す。「1 周 = `Timeline(Duration)`」と組み合わせて、周期の決まった攻撃に使う。
+- **周回 = `Loop`**: 子が終わるたびにやり直す。「1 周 = `Parallel(Duration)`」と組み合わせて、周期の決まった攻撃に使う。
 
 ## 道中（ステージツリー）
 
 ```
 Sequence
   Until #Phase1 (NoActiveEnemies / FrameElapsed / BgmSamples …)
-    Timeline
+    Parallel (All)
       Delay 60  → Spawn 敵A (Behavior = S{N}_EnemyA)
       Delay 120 → Spawn 敵B
   Until #Phase2 …
 ```
-- 「全滅したら次へ」は `Sequence[出現の Timeline, WaitUntil(NoActiveEnemies)]` でも書ける。
+- 「全滅したら次へ」は `Sequence[出現の Parallel, WaitUntil(NoActiveEnemies)]` でも書ける。
 - 弾消しは `ClearBullets`、背景などの一時オブジェクトは `WithPrefab`。
 - 道中で風を使う区間は `WithWind` で囲む（ステージに `WindService` の宣言が必要）。
 
@@ -35,7 +35,7 @@ Sequence
       Fire (弾 / ShotPattern / 向き)
 ```
 - 移動は `SetMovement` で「背景で流し続ける」。移動の完了を待ちたいときだけ `Move` を使う。
-- ツリーのパラメータ（`$名前`）を使えるのは、今のところ `Timeline` / `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` の数値だけ。`SetMovement` のプリセットや `Fire` の設定はパラメータにできない。
+- ツリーのパラメータ（`$名前`）を使えるのは、今のところ `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` の数値だけ。`SetMovement` のプリセットや `Fire` の設定はパラメータにできない。
 - そのため、移動だけが違う敵は敵ツリーを分けてよいが、攻撃部分は `Attack/` のツリーを `SubTree` で共有し、中身を複製しない。移動・攻撃のパラメータ化は未対応で、必要になったらユーザーと相談する。
 - `Spawn` の overrides には固定値を書く。親ツリーのパラメータを渡す（bind to parent）は敵ツリーでは効かない。
 
@@ -73,7 +73,7 @@ Sequence
   …次のグループ
 ```
 - HP の判定は外側の `Until` 1 か所に置く。各フェーズの条件に同じ `HpBelow` を `Or` で重ねない。
-- ボスの攻撃周期と移動の周期は自動では揃わない。周期攻撃は `Timeline(Duration)` か `Repeat` の間隔を、移動プリセットの 1 周の長さに合わせる。
+- ボスの攻撃周期と移動の周期は自動では揃わない。周期攻撃は `Parallel(Duration)` か `Repeat` の間隔を、移動プリセットの 1 周の長さに合わせる。
 - 進行ゲージ（`BossPhaseProgressGauge`）を持つボスは、各フェーズの先頭に `PhaseMarker` を置く。
 
 ## 攻撃ツリー（`Attack/`）
@@ -105,10 +105,10 @@ BulletBeam
 | 書き方 | 代わりに |
 |---|---|
 | 同じ攻撃を `Delay 0, 5, 10, …` と並べる | `Repeat`（回数と間隔） |
-| `Loop` → `Timeline(k)` → 攻撃 1 つ | `Repeat ∞ / k フレームおき` |
+| `Loop` → `Parallel(Duration k)` → 攻撃 1 つ | `Repeat ∞ / k フレームおき` |
 | 向きだけ違う攻撃アセットを方向の数だけ作る | `ShotPattern`（NWay など）か、向きをパラメータにする |
 | 弾の種類違いでノードを 2 つ並べる（ビーム） | `BulletBeam` の Bullets に並べる |
-| 子のない `Timeline` / `Sequence`、子 1 つだけの `Sequence` | 取り除く |
+| 子のない `Parallel` / `Sequence`、子 1 つだけの `Sequence` | 取り除く |
 | `Inverter` + `ForceSuccess` で Loop をわざと失敗させて抜ける | `Until(条件)` で Loop を囲む |
 | 同じ終了条件を外側と各フェーズの両方に書く | 外側の `Until` 1 か所にまとめる |
 | 成立しない条件の `Until`（`HpBelow 0%`、極端に長い `FrameElapsed` など） | 取り除く。撃破でツリーごと止まる |

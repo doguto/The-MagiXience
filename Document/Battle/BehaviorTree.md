@@ -46,7 +46,7 @@ BT の適用範囲は次の 2 層である。
 | パス | 内容 |
 |---|---|
 | `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/` | `Node` / `NodeDefinition` / `BehaviorTreeAsset` / `BuildScope` / `TreeParameter` / `BattleContext` / `BehaviorTreeRunner` / `BattleStageAsset` |
-| `.../BehaviorTree/Composite/` | Sequence / Selector / Parallel / Random / Timeline |
+| `.../BehaviorTree/Composite/` | Sequence / Selector / Parallel / Random |
 | `.../BehaviorTree/Decorator/` | Loop / Repeat / Until / Delay / Inverter / ForceSuccess |
 | `.../BehaviorTree/Condition/Condition.cs` | 条件定義 (`ConditionDefinition`) と CheckCondition / WaitUntil ノード |
 | `.../BehaviorTree/Action/BasicActions.cs` | Wait / Log / SubTree |
@@ -76,7 +76,7 @@ NodeDefinition (アセットに保存・不変)   ──Create(scope)──►  
 
 | 基底 | 子 | 例 |
 |---|---|---|
-| `CompositeNodeDefinition` | 複数 (`children`、左から右の順) | Sequence, Selector, Parallel, Random, Timeline |
+| `CompositeNodeDefinition` | 複数 (`children`、左から右の順) | Sequence, Selector, Parallel, Random |
 | `DecoratorNodeDefinition` | 1 つ (`child`、未接続なら即 Success のノード) | Loop, Repeat, Until, Delay, WithWind |
 | `ActionNodeDefinition` | なし | Wait, Fire, Spawn, SubTree |
 
@@ -198,7 +198,7 @@ Abort(ctx):
 - `BtFloat` は Int パラメータも受け付け、`BtInt` は Float パラメータを四捨五入して受け付ける。
 - エディタ上では `$名前` と表示される。
 
-現状 `Bt*` 型になっているのは、Timeline.duration / Loop.count / Repeat.count, interval / Delay.frames / Wait.frames / FrameElapsed.frames / BgmReached.seconds のみである。Fire や Move などバトルノードのフィールドは通常の値で、パラメータ化できない。
+現状 `Bt*` 型になっているのは、Parallel.duration / Loop.count / Repeat.count, interval / Delay.frames / Wait.frames / FrameElapsed.frames / BgmReached.seconds のみである。Fire や Move などバトルノードのフィールドは通常の値で、パラメータ化できない。
 
 ### 5.2 TreeParameter と BuildScope
 

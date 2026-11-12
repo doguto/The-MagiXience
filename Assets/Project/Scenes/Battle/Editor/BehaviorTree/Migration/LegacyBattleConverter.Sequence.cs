@@ -156,7 +156,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             if (exit is AllEnemiesDefeatedExitConditionConfig)
             {
                 var waitClear = Sequence(new NodeDefinition[] { content, WaitUntil(new NoActiveEnemiesConditionDefinition()) });
-                return actor == null ? waitClear : Parallel(new NodeDefinition[] { waitClear, actor }, ParallelPolicy.RequireOne);
+                return actor == null ? waitClear : Parallel(new NodeDefinition[] { waitClear, actor }, ParallelPolicy.Any);
             }
 
             var condition = ConvertExit(exit);

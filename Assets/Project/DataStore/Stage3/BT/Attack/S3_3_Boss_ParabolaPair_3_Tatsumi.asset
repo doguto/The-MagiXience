@@ -13,24 +13,12 @@ MonoBehaviour:
   m_Name: S3_3_Boss_ParabolaPair_3_Tatsumi
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263997618
+    rid: 8540147886565097561
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263997618
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 33ec774a6b1e4434bd7f8871c19e9179
-        graphPosition: {x: 115, y: 150}
-        comment: 
-        children:
-        - rid: 8540147884263997619
-        - rid: 8540147884263997620
-        duration:
-          value: 0
-          param: 
     - rid: 8540147884263997619
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -95,3 +83,16 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
+    - rid: 8540147886565097561
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 33ec774a6b1e4434bd7f8871c19e9179
+        graphPosition: {x: 115, y: 150}
+        comment: 
+        children:
+        - rid: 8540147884263997619
+        - rid: 8540147884263997620
+        policy: 0
+        duration:
+          value: 0
+          param: 

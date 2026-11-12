@@ -27,7 +27,7 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147883689903033
-        - rid: 8540147883689903034
+        - rid: 8540147886565097673
     - rid: 8540147883689903033
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -37,18 +37,6 @@ MonoBehaviour:
         preset: {fileID: 11400000, guid: 53acacc91373eaa46b19939bb30de96b, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147883689903034
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 925b6de603dc4e2196cb3897980be5e1
-        graphPosition: {x: 345, y: 300}
-        comment: Phase 0
-        children:
-        - rid: 8540147883689903035
-        - rid: 8540147883689903036
-        duration:
-          value: 0
-          param: 
     - rid: 8540147883689903035
       type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -135,3 +123,16 @@ MonoBehaviour:
     - rid: 8540147883689903044
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147886565097673
+      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 925b6de603dc4e2196cb3897980be5e1
+        graphPosition: {x: 345, y: 300}
+        comment: Phase 0
+        children:
+        - rid: 8540147883689903035
+        - rid: 8540147883689903036
+        policy: 0
+        duration:
+          value: 0
+          param: 

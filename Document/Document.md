@@ -849,7 +849,7 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 
 ### Nodes
 
-- `Composite/`: Sequence、Selector、Parallel（RequireAll / RequireOne）、Random（重み・連続回避）、Timeline（並列 + 長さ打ち切り）。
+- `Composite/`: Sequence、Selector、Parallel（All / Any / Duration。Duration は指定フレームで打ち切る）、Random（重み・連続回避）。
 - `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Delay、Inverter、ForceSuccess。
 - `Condition/Condition.cs`: Constant、FrameElapsed、BgmReached、And / Or / Not と、CheckCondition / WaitUntil ノード。
 - `Action/BasicActions.cs`: Wait、Log、SubTree。
