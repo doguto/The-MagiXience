@@ -138,6 +138,23 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         });
     }
 
+    // 旧 BossWindCue。腕を上げる演出のあと風向きを切り替える (Stage3WindBossController が付いていれば演出も行う)
+    [Serializable, NodeInfo("腕を上げる合図のあと風向きを切り替える", "Action/Boss")]
+    public sealed class BossWindCueNodeDefinition : ActionNodeDefinition
+    {
+        [SerializeField] BossWindCueSettings cue = new() { enabled = true };
+
+        public override string Summary => $"風の合図 → {cue.direction} ({cue.cueSeconds:0.##}s)";
+
+        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        {
+            var controller = ctx.Self != null ? ctx.Self.GetComponent<Presenter.Entity.Stage3WindBossController>() : null;
+            if (controller != null) controller.PlayCue(cue);
+            else BattleWind.Begin(cue.CreateWind(BattleWind.Direction));
+            return NodeStatus.Success;
+        });
+    }
+
     [Serializable, NodeInfo("フェーズの区切りを通知する (進行ゲージなどが使う)", "Action/Stage")]
     public sealed class PhaseMarkerNodeDefinition : ActionNodeDefinition
     {

@@ -25,10 +25,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             boss.PhaseStarted += BeginSection;
         }
 
-        void BeginSection(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder)
+        void BeginSection(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder) =>
+            PlayCue(builder != null && builder.BossWindCue?.enabled == true ? builder.BossWindCue : null);
+
+        // 腕を上げて風向きを切り替える。BehaviorTree の BossWindCue ノードから呼ばれる
+        public void PlayCue(BossWindCueSettings settings)
         {
             RestoreSprite();
-            cue = builder != null && builder.BossWindCue?.enabled == true ? builder.BossWindCue : null;
+            cue = settings;
             elapsed = 0f;
             if (cue == null) return;
             BattleWind.Begin(cue.CreateWind(BattleWind.Direction));

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S4_4_Phase3-A
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147883077534950
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147883077534950
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: c33ac7b5198c4e178deee731dec899fb
+        graphPosition: {x: 115, y: 150}
+        comment: 
+        children:
+        - rid: 8540147883077534951
+        - rid: 8540147883077534952
+    - rid: 8540147883077534951
+      type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: c98bfd7892314518805bf03d401eefac
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        preset: {fileID: 11400000, guid: 4695b668344e77d47b46b5a636c4e42d, type: 2}
+        steps: []
+        continueIfSame: 0
+    - rid: 8540147883077534952
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3b105bbf79424f27b8457f9a11085b0e
+        graphPosition: {x: 230, y: 300}
+        comment: 
+        children: []

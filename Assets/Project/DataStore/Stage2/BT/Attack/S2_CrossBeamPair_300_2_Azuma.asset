@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S2_CrossBeamPair_300_2_Azuma
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147883075961583
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147883075961583
+      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7d54cb84eaf0419ea502588ea2f4b16d
+        graphPosition: {x: 115, y: 150}
+        comment: 
+        children:
+        - rid: 8540147883075961584
+        - rid: 8540147883075961585
+        duration:
+          value: 0
+          param: 
+    - rid: 8540147883075961584
+      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: ba3f6751c5e94d64ae55adc753997dbf
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        bullet:
+          prefab: {fileID: -4487681364143076941, guid: 4ce7897fbed8238408a60313c2e27b3e, type: 3}
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: d60ab8ad084c3f6498e3efd174e18f68, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        pattern:
+          rid: 8540147883075961586
+        direction:
+          rid: 8540147883075961587
+        rotation:
+          rid: 8540147883075961588
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+    - rid: 8540147883075961585
+      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 415d020abb654466aca93629a5b52a1f
+        graphPosition: {x: 230, y: 300}
+        comment: 
+        bullet:
+          prefab: {fileID: -4487681364143076941, guid: 0adeecb1d4988fe4f88247da027fccc8, type: 3}
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 7cef9c86d81867345976be64d8a0b66a, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        pattern:
+          rid: 8540147883075961589
+        direction:
+          rid: 8540147883075961590
+        rotation:
+          rid: 8540147883075961591
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+    - rid: 8540147883075961586
+      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147883075961587
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        direction: {x: 0.4999999, y: -0.86602545}
+    - rid: 8540147883075961588
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147883075961589
+      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147883075961590
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        direction: {x: 0.4999999, y: -0.86602545}
+    - rid: 8540147883075961591
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0

@@ -83,14 +83,37 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             return candidate;
         }
 
+        // 途中でファイルを作るとフォルダ作成などで再読み込みが走り、作成済みのアセットが空の状態に戻ってしまう。
+        // メモリ上で全て組み立ててから Flush でまとめて書き出す。
+        readonly List<(ScriptableObject asset, string dir)> pending = new();
+
         T CreateAsset<T>(string folder, string name) where T : ScriptableObject
         {
             var dir = string.IsNullOrEmpty(folder) ? outDir : $"{outDir}/{folder}";
-            EnsureFolder(dir);
             var asset = ScriptableObject.CreateInstance<T>();
             asset.name = UniqueName(name);
-            AssetDatabase.CreateAsset(asset, $"{dir}/{asset.name}.asset");
+            pending.Add((asset, dir));
             return asset;
+        }
+
+        public void Flush()
+        {
+            foreach (var dir in pending.Select(p => p.dir).Distinct()) EnsureFolder(dir);
+
+            AssetDatabase.StartAssetEditing();
+            try
+            {
+                foreach (var (asset, dir) in pending) AssetDatabase.CreateAsset(asset, $"{dir}/{asset.name}.asset");
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+            }
+
+            // 参照先が全てアセット化された後に保存し直し、アセット間の参照を確定させる
+            foreach (var (asset, _) in pending) EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssets();
+            pending.Clear();
         }
 
         static void EnsureFolder(string path)

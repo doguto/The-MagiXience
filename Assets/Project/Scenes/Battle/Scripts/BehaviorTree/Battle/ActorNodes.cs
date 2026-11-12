@@ -72,6 +72,20 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         });
     }
 
+    [Serializable, NodeInfo("この敵が倒されたときに 1 回だけ実行するツリーを設定する", "Action/Actor")]
+    public sealed class SetDeathBehaviorNodeDefinition : ActionNodeDefinition
+    {
+        [SerializeField] BehaviorTreeAsset tree;
+
+        public override string Summary => tree ? $"撃破時: {tree.name}" : "撃破時の行動なし";
+
+        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        {
+            ctx.Self?.SetDeathBehavior(tree);
+            return NodeStatus.Success;
+        });
+    }
+
     [Serializable, NodeInfo("この敵の無敵を切り替える", "Action/Actor")]
     public sealed class SetInvincibleNodeDefinition : ActionNodeDefinition
     {

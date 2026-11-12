@@ -135,7 +135,15 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                 }
                 if (builder.BossWindCue != null && builder.BossWindCue.enabled)
                 {
-                    Warn($"{builder.name}: ボスの風の合図 (BossWindCue) は未移植");
+                    var cueNode = new BossWindCueNodeDefinition();
+                    var src = builder.BossWindCue;
+                    Set(cueNode, "cue", new BossWindCueSettings
+                    {
+                        enabled = true, direction = src.direction, cueSeconds = src.cueSeconds,
+                        playerSpeedRatio = src.playerSpeedRatio, bulletAcceleration = src.bulletAcceleration,
+                        bulletDrag = src.bulletDrag, cueScale = src.cueScale,
+                    });
+                    parts.Insert(0, cueNode);
                 }
                 actor = Sequence(parts);
             }

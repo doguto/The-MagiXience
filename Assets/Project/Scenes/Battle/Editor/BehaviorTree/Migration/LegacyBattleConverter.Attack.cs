@@ -62,11 +62,18 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                 : Get<AttackPreset>(presenter, "attackPreset") is { } preset ? preset.CreateTimeline()
                 : Get<AttackTimeline>(presenter, "attackTimeline");
 
+            NodeDefinition deathNode = null;
             var death = Get<AttackTimelineEntry>(presenter, "deathAttackEntry");
-            if (death?.signal != null) Warn($"{prefab.name}: 死亡時攻撃は未移植 ({death.signal.GetType().Name})");
+            if (death?.signal != null)
+            {
+                // 旧実装の死亡時攻撃は時刻 0 で 1 回だけ発火し、プリセット/ビームは展開されなかった
+                var deathTree = CreateTree("Enemy", $"{prefix}_{prefab.name}_Death", ConvertEntry(death, shooter, bulletMovementOverride));
+                deathNode = new SetDeathBehaviorNodeDefinition();
+                Set(deathNode, "tree", deathTree);
+            }
 
             var attack = timeline != null ? ConvertTimeline(timeline, shooter, bulletMovementOverride) : null;
-            var root = Sequence(new NodeDefinition[] { movementNode, attack });
+            var root = Sequence(new NodeDefinition[] { deathNode, movementNode, attack });
 
             var name = prefab.name
                 + (movementOverride ? $"_M-{movementOverride.name}" : "")

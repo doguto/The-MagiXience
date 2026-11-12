@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S4_4_UshitoraAimBeam_M-AimX_A-UshitoraBeamSecond
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147883077535628
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147883077535628
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: e9427d06e3a34caf94c04dfab77cc8a5
+        graphPosition: {x: 172.5, y: 150}
+        comment: 
+        children:
+        - rid: 8540147883077535629
+        - rid: 8540147883077535630
+    - rid: 8540147883077535629
+      type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2a24358b841348c391b58a7f760f490f
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        preset: {fileID: 11400000, guid: e25f561f24b240148a0d4d1b0be41578, type: 2}
+        steps: []
+        continueIfSame: 0
+    - rid: 8540147883077535630
+      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: afd6b1c8318445e2adaa1d1af226dd13
+        graphPosition: {x: 345, y: 300}
+        comment: Phase 0
+        child:
+          rid: 8540147883077535631
+        condition:
+          rid: 8540147883077535632
+        onChildCompleted: 0
+    - rid: 8540147883077535631
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b502592d38d74ac48dfedd808e98a2a0
+        graphPosition: {x: 345, y: 450}
+        comment: 
+        children:
+        - rid: 8540147883077535633
+        - rid: 8540147883077535634
+    - rid: 8540147883077535632
+      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        frames:
+          value: 487
+          param: 
+    - rid: 8540147883077535633
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: ac191b6c4c854188b0d87b555d681d9c
+        graphPosition: {x: 230, y: 600}
+        comment: 
+        frames:
+          value: 8
+          param: 
+    - rid: 8540147883077535634
+      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7a155706ce4d45cb96b5b566640d6080
+        graphPosition: {x: 460, y: 600}
+        comment: 
+        child:
+          rid: 8540147883077535635
+        count:
+          value: 0
+          param: 
+    - rid: 8540147883077535635
+      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f9bd52624c1e4aa285fa58ee90771084
+        graphPosition: {x: 460, y: 750}
+        comment: 
+        children:
+        - rid: 8540147883077535636
+        duration:
+          value: 130
+          param: 
+    - rid: 8540147883077535636
+      type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f2c56b3790cb4843acc267c4e26b652f
+        graphPosition: {x: 460, y: 900}
+        comment: 
+        line:
+          start: {x: 0, y: -1}
+          end: {x: 0, y: -10}
+        isRelative: 1
+        bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
+        bodyDuration: 0.81447965
+        showWarning: 1
+        warningPrefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        warningFrames: 65

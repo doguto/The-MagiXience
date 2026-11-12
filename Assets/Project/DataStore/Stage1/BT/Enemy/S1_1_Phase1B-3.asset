@@ -13,44 +13,44 @@ MonoBehaviour:
   m_Name: S1_1_Phase1B-3
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147870824923293
+    rid: 8540147883043456391
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147870824923293
+    - rid: 8540147883043456391
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: cd030a8560584ab089ad3824310f2ef0
+        guid: af323debccc740c9952bfbf63642aa65
         graphPosition: {x: 115, y: 150}
         comment: 
         children:
-        - rid: 8540147870824923294
-        - rid: 8540147870824923295
-    - rid: 8540147870824923294
+        - rid: 8540147883043456392
+        - rid: 8540147883043456393
+    - rid: 8540147883043456392
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 9cfc2c62643f47a78e0098d0906802f3
+        guid: 42891af6ae254b689eb38bde509916f4
         graphPosition: {x: 0, y: 300}
         comment: 
         preset: {fileID: 0}
         steps:
-        - rid: 8540147870824923296
-        - rid: 8540147870824923297
-        - rid: 8540147870824923298
+        - rid: 8540147883043456394
+        - rid: 8540147883043456395
+        - rid: 8540147883043456396
         continueIfSame: 0
-    - rid: 8540147870824923295
+    - rid: 8540147883043456393
       type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: e34fd37c52da41df9d51503fc4acbd6c
+        guid: bed4a1a3b3d5456d834c691dfe1f4b9d
         graphPosition: {x: 230, y: 300}
         comment: Phase 0
         children: []
         duration:
           value: 0
           param: 
-    - rid: 8540147870824923296
+    - rid: 8540147883043456394
       type: {class: PathMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
         waypoints:
@@ -85,12 +85,12 @@ MonoBehaviour:
             m_RotationOrder: 4
           curvePreset: {fileID: 0}
         isRelative: 0
-    - rid: 8540147870824923297
+    - rid: 8540147883043456395
       type: {class: WaitMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
         duration: 1
         invincible: 0
-    - rid: 8540147870824923298
+    - rid: 8540147883043456396
       type: {class: PathMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
         waypoints:

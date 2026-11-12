@@ -36,7 +36,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             var converter = new LegacyBattleConverter(outDir, $"S{stageNumber}");
             var newWay = way != null ? converter.ConvertSequence(way) : null;
             var newBoss = boss != null ? converter.ConvertSequence(boss) : null;
-            AssetDatabase.SaveAssets();
+            converter.Flush();
 
             Register(stageNumber, newWay, newBoss);
             AssetDatabase.SaveAssets();

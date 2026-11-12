@@ -16,6 +16,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         MotionSequence movement;
         IReadOnlyList<MotionStep> movementSteps;
         bool registered;
+        BehaviorTreeAsset deathBehavior;
+        System.IDisposable deathSubscription;
 
         public BattleWorld World { get; private set; }
         public EnemyEntityModel Model { get; private set; }
@@ -60,6 +62,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 : TryGetComponent<EnemyEntityPresenter>(out var enemy) ? enemy.Model
                 : null;
 
+            deathSubscription?.Dispose();
+            deathSubscription = Model != null ? UniRx.ObservableExtensions.Subscribe(Model.OnDeath, _ => RunDeathBehavior()) : null;
+
             runner?.Stop();
             runner = tree != null ? new BehaviorTreeRunner(tree, new BattleContext(world, this), overrides) : null;
             if (registered) return;
@@ -78,6 +83,17 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             if (runner != null && !runner.IsFinished) runner.Tick();
         }
 
+        // 倒されたときに 1 回だけ実行するツリー (旧「死亡時攻撃」)
+        public void SetDeathBehavior(BehaviorTreeAsset tree) => deathBehavior = tree;
+
+        void RunDeathBehavior()
+        {
+            if (deathBehavior == null || World == null) return;
+            var once = new BehaviorTreeRunner(deathBehavior, new BattleContext(World, this));
+            once.Tick();
+            once.Stop();
+        }
+
         public void Stop()
         {
             runner?.Stop();
@@ -88,6 +104,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         void OnDestroy()
         {
             destroyed = true;
+            deathSubscription?.Dispose();
             runner?.Stop();
             movement?.Stop();
         }

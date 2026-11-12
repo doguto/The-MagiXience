@@ -190,6 +190,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             if (bullet?.prefab == null) return;
             var world = ctx.World;
             var self = ctx.Self;
+            // 倒された瞬間に撃つ弾 (死亡時攻撃) は撃ち手が既にいないため、予約の取り消し対象にしない
+            var owner = self != null && self.IsAlive ? self : null;
             world.Schedule(spawnDelayFrames, () =>
             {
                 var e = new EmitContext(ctx, muzzleOffset);
@@ -208,7 +210,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
                     AttackTime = e.AttackTime,
                     AffectedByWind = bullet.affectedByWind,
                 });
-            }, self);
+            }, owner);
         }
 
         public static void PlaySe(BattleContext ctx, SeType se)

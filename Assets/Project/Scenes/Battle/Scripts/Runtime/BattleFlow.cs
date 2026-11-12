@@ -61,7 +61,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         {
             if (boss == null) return null;
             EnsureWorld();
-            entrance?.Stop();
+            // 旧実装と同じく、登場の動きは途中で止めず終点まで一気に進める
+            entrance?.Complete();
             entrance = null;
 
             var actor = BattleActor.Attach(boss, world, tree);
@@ -121,6 +122,12 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             {
                 stopped = true;
                 sequence.Stop();
+            }
+
+            public void Complete()
+            {
+                for (var i = 0; i < 64 && !sequence.IsFinished; i++) sequence.Tick(3600f);
+                Stop();
             }
         }
     }

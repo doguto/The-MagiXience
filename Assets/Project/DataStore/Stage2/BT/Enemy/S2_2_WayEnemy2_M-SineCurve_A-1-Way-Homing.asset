@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S2_2_WayEnemy2_M-SineCurve_A-1-Way-Homing
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147883075961053
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147883075961053
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d9086e4044e34b39ad18baf39ca25799
+        graphPosition: {x: 115, y: 150}
+        comment: 
+        children:
+        - rid: 8540147883075961054
+        - rid: 8540147883075961055
+    - rid: 8540147883075961054
+      type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 900622ca3bbf4390938ca743b41bbde5
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        preset: {fileID: 11400000, guid: fc793741bae437a4cb7f4724ed553d91, type: 2}
+        steps: []
+        continueIfSame: 0
+    - rid: 8540147883075961055
+      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d29e081630944f75866dd350b3600b99
+        graphPosition: {x: 230, y: 300}
+        comment: Phase 0
+        child:
+          rid: 8540147883075961056
+        condition:
+          rid: 8540147883075961057
+        onChildCompleted: 0
+    - rid: 8540147883075961056
+      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9625acc31500491982869294ec0f5086
+        graphPosition: {x: 230, y: 450}
+        comment: 
+        child:
+          rid: 8540147883075961058
+        count:
+          value: 0
+          param: 
+    - rid: 8540147883075961057
+      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        frames:
+          value: 481
+          param: 
+    - rid: 8540147883075961058
+      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f1bb00e1719b4854a3459a3530afc7c1
+        graphPosition: {x: 230, y: 600}
+        comment: 
+        children:
+        - rid: 8540147883075961059
+        duration:
+          value: 120
+          param: 
+    - rid: 8540147883075961059
+      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3249802feb7a4179b315231cebb16aa0
+        graphPosition: {x: 230, y: 750}
+        comment: 
+        bullet:
+          prefab: {fileID: -4487681364143076941, guid: 53b7f41feaeebca48a6de2d3686c79a8, type: 3}
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 3866b47cb7ed86d4a926e25289143a01, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        pattern:
+          rid: 8540147883075961060
+        direction:
+          rid: 8540147883075961061
+        rotation:
+          rid: 8540147883075961062
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+    - rid: 8540147883075961060
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        wayCount: 1
+        spreadAngle: 30
+        radius: 0.5
+        startDelayFrames: 0
+        rotationOffset: 0
+    - rid: 8540147883075961061
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147883075961062
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0

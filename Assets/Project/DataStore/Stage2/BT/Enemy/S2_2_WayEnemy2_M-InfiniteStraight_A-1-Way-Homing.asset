@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S2_2_WayEnemy2_M-InfiniteStraight_A-1-Way-Homing
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147883075961009
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147883075961009
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 29f808619ea14412a44344bc591e7551
+        graphPosition: {x: 115, y: 150}
+        comment: 
+        children:
+        - rid: 8540147883075961010
+        - rid: 8540147883075961011
+    - rid: 8540147883075961010
+      type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 4c98c68ccebe4ea5a28c0cf2db48eb69
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        preset: {fileID: 11400000, guid: 9e9e26e41c504f749a65ce017343bc33, type: 2}
+        steps: []
+        continueIfSame: 0
+    - rid: 8540147883075961011
+      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 8f77fd71dbfa4071b0097adea7dd5305
+        graphPosition: {x: 230, y: 300}
+        comment: Phase 0
+        child:
+          rid: 8540147883075961012
+        condition:
+          rid: 8540147883075961013
+        onChildCompleted: 0
+    - rid: 8540147883075961012
+      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b84e152d7ada4dd58610d7c700ecc712
+        graphPosition: {x: 230, y: 450}
+        comment: 
+        child:
+          rid: 8540147883075961014
+        count:
+          value: 0
+          param: 
+    - rid: 8540147883075961013
+      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        frames:
+          value: 481
+          param: 
+    - rid: 8540147883075961014
+      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f7b65d93fb3e43af82421f3957237599
+        graphPosition: {x: 230, y: 600}
+        comment: 
+        children:
+        - rid: 8540147883075961015
+        duration:
+          value: 120
+          param: 
+    - rid: 8540147883075961015
+      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 8467b61569ef47e0915513274bcbfb4e
+        graphPosition: {x: 230, y: 750}
+        comment: 
+        bullet:
+          prefab: {fileID: -4487681364143076941, guid: 53b7f41feaeebca48a6de2d3686c79a8, type: 3}
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 3866b47cb7ed86d4a926e25289143a01, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        pattern:
+          rid: 8540147883075961016
+        direction:
+          rid: 8540147883075961017
+        rotation:
+          rid: 8540147883075961018
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+    - rid: 8540147883075961016
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        wayCount: 1
+        spreadAngle: 30
+        radius: 0.5
+        startDelayFrames: 0
+        rotationOffset: 0
+    - rid: 8540147883075961017
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147883075961018
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0

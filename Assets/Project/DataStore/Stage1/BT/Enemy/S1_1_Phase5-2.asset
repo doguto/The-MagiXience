@@ -13,45 +13,45 @@ MonoBehaviour:
   m_Name: S1_1_Phase5-2
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147870824923648
+    rid: 8540147883043456494
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147870824923648
+    - rid: 8540147883043456494
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 81019d82d12647e5b6bf57c1241a70d8
+        guid: c7bd956c20864d2bb5945a6fe00a6289
         graphPosition: {x: 115, y: 150}
         comment: 
         children:
-        - rid: 8540147870824923649
-        - rid: 8540147870824923650
-    - rid: 8540147870824923649
+        - rid: 8540147883043456495
+        - rid: 8540147883043456496
+    - rid: 8540147883043456495
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 0248f92417fa49cfb669d8c897d400f0
+        guid: f3044daf4f944bb79edd544253bfef6b
         graphPosition: {x: 0, y: 300}
         comment: 
         preset: {fileID: 11400000, guid: 6552068c6dc4d384597d92e9025a57c4, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147870824923650
+    - rid: 8540147883043456496
       type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: bb94c767ffb94bc79284c563238ffbce
+        guid: a6a183b0a8fe407ab94b1af0dbba70bc
         graphPosition: {x: 230, y: 300}
         comment: Phase 0
         child:
-          rid: 8540147870824923651
+          rid: 8540147883043456497
         frames:
           value: 60
           param: 
-    - rid: 8540147870824923651
+    - rid: 8540147883043456497
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: c85d1ec53de94325a4f63899a61f33ea
+        guid: 4d715280b79145b6b84b0b630556470d
         graphPosition: {x: 230, y: 450}
         comment: 
         bullet:
@@ -62,14 +62,14 @@ MonoBehaviour:
           range: 0
           affectedByWind: 1
         pattern:
-          rid: 8540147870824923652
+          rid: 8540147883043456498
         direction:
-          rid: 8540147870824923653
+          rid: 8540147883043456499
         rotation:
-          rid: 8540147870824923654
+          rid: 8540147883043456500
         muzzleOffset: {x: -0.5, y: 0}
         se: 0
-    - rid: 8540147870824923652
+    - rid: 8540147883043456498
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         wayCount: 7
@@ -77,10 +77,10 @@ MonoBehaviour:
         radius: 0.5
         startDelayFrames: 0
         rotationOffset: 0
-    - rid: 8540147870824923653
+    - rid: 8540147883043456499
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         direction: {x: -1, y: 0}
-    - rid: 8540147870824923654
+    - rid: 8540147883043456500
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 

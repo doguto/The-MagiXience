@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ca5abebc82188d479a596cebc2214bc, type: 3}
+  m_Name: SlowInRaiseUp
+  m_EditorClassIdentifier: 
+  steps:
+  - rid: 8540147883077534914
+  - rid: 8540147883077534915
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147883077534914
+      type: {class: AcceleratedMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        direction: {x: -1, y: 0}
+        useConfiguredDirection: 0
+        initialSpeed: 4
+        acceleration: -0.8
+        maxSpeed: 10
+        minSpeed: 1.2
+        duration: 5
+        useWorldAcceleration: 0
+        worldAcceleration: {x: 0, y: -1}
+        aimAtPlayer: 0
+        useBattleWind: 1
+        targetFlightTime: 4
+        vertexDepth: 1.1
+        vertexScreenMargin: 0.35
+        rightShotInterval: 0
+        alternateVertical: 0
+        flightTimeVariation: 0
+        vertexDepthVariation: 0
+    - rid: 8540147883077534915
+      type: {class: QuadraticMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        initialVelocity: {x: -1.2, y: 0, z: 0}
+        acceleration: {x: 0, y: 1.5, z: 0}
+        duration: 0
