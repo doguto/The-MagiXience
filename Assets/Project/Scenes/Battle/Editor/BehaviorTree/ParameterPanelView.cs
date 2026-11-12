@@ -73,7 +73,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             this.Unbind();
             if (serializedObject != null)
             {
-                this.TrackSerializedObjectValue(serializedObject, _ => OnSerializedChanged());
+                // ツリー全体を監視すると大きなツリーで毎フレーム重くなるため、パラメータ一覧だけを監視する
+                this.TrackPropertyValue(serializedObject.FindProperty("parameters"), _ => OnSerializedChanged());
             }
             Rebuild();
         }

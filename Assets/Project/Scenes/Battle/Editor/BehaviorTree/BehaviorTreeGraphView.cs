@@ -158,41 +158,96 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             if (asset == null) return;
 
             serializedObject = new SerializedObject(asset);
-            var paths = CollectPropertyPaths(serializedObject);
+            pathCache = null;
 
             rootView = new BehaviorTreeNodeView(OnDropOutsidePort);
             rootView.SetPosition(new Rect(0, -150, 120, 60));
             AddElement(rootView);
 
-            foreach (var def in AllDefinitions())
+            Sync();
+        }
+
+        // パラメータの改名などで要約だけが変わった場合に使う
+        public void RefreshTexts()
+        {
+            serializedObject?.Update();
+            foreach (var view in views.Values) view.RefreshTexts();
+            foreach (var view in selection.OfType<BehaviorTreeNodeView>()) view.RefreshFields();
+        }
+
+        Dictionary<NodeDefinition, string> pathCache;
+
+        // 入力欄の対象プロパティ。構造が変わるとパスがずれるため、必要になった時点で引き直す
+        SerializedProperty FindPropertyFor(NodeDefinition def)
+        {
+            if (serializedObject == null) return null;
+            if (pathCache == null)
             {
-                var prop = paths.TryGetValue(def, out var path) ? serializedObject.FindProperty(path) : null;
-                var view = new BehaviorTreeNodeView(def, prop, OnDropOutsidePort);
+                serializedObject.Update();
+                pathCache = CollectPropertyPaths(serializedObject);
+            }
+            return pathCache.TryGetValue(def, out var path) ? serializedObject.FindProperty(path) : null;
+        }
+
+        // 定義を正として、ノードの増減と線の過不足だけを画面に反映する (全体の作り直しは重いため)
+        void Sync()
+        {
+            if (asset == null || rootView == null) return;
+            // 定義を直接書き換えた後なので、古い SerializedObject の値で上書きしないよう読み直す
+            serializedObject?.Update();
+            pathCache = null;
+            isReloading = true;
+
+            var alive = new HashSet<NodeDefinition>(AllDefinitions());
+            var removed = views.Keys.Where(d => !alive.Contains(d)).ToList();
+            foreach (var def in removed)
+            {
+                var view = views[def];
+                DeleteElements(view.Input.connections.Concat(view.Output?.connections ?? Enumerable.Empty<Edge>()).ToList());
+                RemoveElement(view);
+                views.Remove(def);
+            }
+
+            foreach (var def in alive)
+            {
+                if (views.ContainsKey(def)) continue;
+                var target = def;
+                var view = new BehaviorTreeNodeView(def, () => FindPropertyFor(target), OnDropOutsidePort);
                 view.SetPosition(new Rect(def.GraphPosition, Vector2.zero));
                 views[def] = view;
                 AddElement(view);
             }
 
-            isReloading = true;
-            if (asset.Root != null && views.TryGetValue(asset.Root, out var rootChild))
-            {
-                AddElement(rootView.Output.ConnectTo<BehaviorTreeEdge>(rootChild.Input));
-            }
-
+            var wanted = new HashSet<(Port, Port)>();
+            if (asset.Root != null && views.TryGetValue(asset.Root, out var rootChild)) wanted.Add((rootView.Output, rootChild.Input));
             foreach (var (def, view) in views)
             {
                 foreach (var child in def.Children)
                 {
-                    if (child != null && views.TryGetValue(child, out var childView))
-                    {
-                        AddElement(view.Output.ConnectTo<BehaviorTreeEdge>(childView.Input));
-                    }
+                    if (child != null && views.TryGetValue(child, out var childView)) wanted.Add((view.Output, childView.Input));
                 }
             }
+
+            var stale = new List<GraphElement>();
+            foreach (var edge in edges.ToList())
+            {
+                if (!wanted.Remove((edge.output, edge.input))) stale.Add(edge);
+            }
+            if (stale.Count > 0) DeleteElements(stale);
+
+            foreach (var (output, input) in wanted)
+            {
+                var edge = output.ConnectTo<BehaviorTreeEdge>(input);
+                AddElement(edge);
+                // 線がポートより手前にあるとポートを掴めないため、線を背面に回す
+                edge.SendToBack();
+            }
+
             isReloading = false;
-            // 線がポートより手前にあるとポートを掴めないため、線を背面に回す
-            foreach (var edge in edges.ToList()) edge.SendToBack();
             RefreshOrderBadges();
+
+            // 選択中のノードの入力欄は構造変更でパスがずれている可能性があるため作り直す
+            foreach (var view in selection.OfType<BehaviorTreeNodeView>()) view.RefreshFields();
         }
 
         void RefreshOrderBadges()
@@ -406,7 +461,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             if (structural)
             {
                 change.edgesToCreate?.Clear();
-                schedule.Execute(Reload);
+                schedule.Execute(Sync);
             }
 
             return change;
@@ -523,7 +578,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 def.SetChildren(new[] { child.Definition });
                 def.GraphPosition = child.Definition.GraphPosition + new Vector2(0, -(SizeOf(child).y + VerticalGap + 60f));
                 EditorUtility.SetDirty(asset);
-                Reload();
+                Sync();
             }
         }
 
@@ -561,7 +616,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             }
 
             EditorUtility.SetDirty(asset);
-            Reload();
+            Sync();
             if (views.TryGetValue(def, out var created))
             {
                 ClearSelection();
@@ -605,7 +660,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 asset.DetachedNodes.Add(entry.node);
             }
             EditorUtility.SetDirty(asset);
-            Reload();
+            Sync();
         }
 
         [Serializable]

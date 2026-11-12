@@ -65,7 +65,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             parameterPanel = new ParameterPanelView();
             parameterPanel.UsageClicked += name => graphView.SelectNodesUsingParameter(name);
-            parameterPanel.Changed += () => graphView.Reload();
+            parameterPanel.Changed += () => graphView.RefreshTexts();
             rightSplit.Add(parameterPanel);
 
             split.Add(rightSplit);

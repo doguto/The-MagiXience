@@ -21,9 +21,14 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public Port Input { get; }
         public Port Output { get; }
 
-        public BehaviorTreeNodeView(NodeDefinition definition, SerializedProperty property, System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
+        // 入力欄は重いため、選択中のノードにだけ作る。それ以外はヘッダーと要約のみ表示する
+        readonly System.Func<SerializedProperty> resolveProperty;
+        VisualElement fields;
+
+        public BehaviorTreeNodeView(NodeDefinition definition, System.Func<SerializedProperty> resolveProperty, System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
         {
             this.onDropOutsidePort = onDropOutsidePort;
+            this.resolveProperty = resolveProperty;
             Definition = definition;
             viewDataKey = definition.Guid;
             AddToClassList("bt-node");
@@ -45,7 +50,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             var body = new VisualElement();
             body.AddToClassList("bt-body");
-            BuildFields(property, body);
+            fields = new VisualElement();
+            body.Add(fields);
             summaryLabel = StyledLabel("", "bt-summary");
             body.Add(summaryLabel);
             mainContainer.Add(body);
@@ -81,6 +87,29 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             mainContainer.Add(PortRow(Output, "bt-port-row--out"));
             RefreshExpandedState();
             RefreshPorts();
+        }
+
+        public override void OnSelected()
+        {
+            base.OnSelected();
+            if (fields == null || fields.childCount > 0) return;
+            BuildFields(resolveProperty?.Invoke(), fields);
+        }
+
+        public void RefreshFields()
+        {
+            if (fields == null || !selected) return;
+            fields.Clear();
+            commentRow = null;
+            BuildFields(resolveProperty?.Invoke(), fields);
+        }
+
+        public override void OnUnselected()
+        {
+            base.OnUnselected();
+            if (fields == null) return;
+            fields.Clear();
+            commentRow = null;
         }
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)

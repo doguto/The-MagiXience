@@ -128,7 +128,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 e.StopPropagation();
             });
 
-            row.TrackSerializedObjectValue(so, _ => Refresh());
+            // ツリー全体ではなく自分の値だけを監視する (大きなツリーで毎フレーム重くなるため)
+            row.TrackPropertyValue(property, _ => Refresh());
             Refresh();
             return row;
         }
