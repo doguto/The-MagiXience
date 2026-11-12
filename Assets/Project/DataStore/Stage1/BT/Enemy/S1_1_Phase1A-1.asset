@@ -13,21 +13,12 @@ MonoBehaviour:
   m_Name: S1_1_Phase1A-1
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147883689902966
+    rid: 8540147883689902967
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147883689902966
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 47930e87d4594afeb8b8363cd5942c33
-        graphPosition: {x: 115, y: 150}
-        comment: 
-        children:
-        - rid: 8540147883689902967
-        - rid: 8540147883689902968
     - rid: 8540147883689902967
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -40,17 +31,6 @@ MonoBehaviour:
         - rid: 8540147883689902970
         - rid: 8540147883689902971
         continueIfSame: 0
-    - rid: 8540147883689902968
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: bd9b67845f7b4fd285d374c92876a7b4
-        graphPosition: {x: 230, y: 300}
-        comment: Phase 0
-        child:
-          rid: 8540147883689902972
-        condition:
-          rid: 8540147883689902973
-        onChildCompleted: 0
     - rid: 8540147883689902969
       type: {class: PathMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
@@ -128,29 +108,3 @@ MonoBehaviour:
             m_RotationOrder: 4
           curvePreset: {fileID: 0}
         isRelative: 0
-    - rid: 8540147883689902972
-      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 7e0d47a5b60c45e9b85f184444c2b267
-        graphPosition: {x: 230, y: 450}
-        comment: 
-        child:
-          rid: 8540147883689902974
-        count:
-          value: 0
-          param: 
-    - rid: 8540147883689902973
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 301
-          param: 
-    - rid: 8540147883689902974
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: f8856234f56549ed8c287e6f3e37576f
-        graphPosition: {x: 230, y: 600}
-        comment: 
-        frames:
-          value: 120
-          param: 

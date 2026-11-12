@@ -27,7 +27,8 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147884261900305
-        - rid: 8540147884261900306
+        - rid: 8540147886565098075
+        - rid: 8540147884261900310
     - rid: 8540147884261900305
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -40,17 +41,6 @@ MonoBehaviour:
         - rid: 8540147884261900308
         - rid: 8540147884261900309
         continueIfSame: 0
-    - rid: 8540147884261900306
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 3ed79125374045c690ca14b098f8986b
-        graphPosition: {x: 230, y: 300}
-        comment: Phase 0
-        child:
-          rid: 8540147884261900310
-        frames:
-          value: 90
-          param: 
     - rid: 8540147884261900307
       type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
@@ -159,3 +149,12 @@ MonoBehaviour:
     - rid: 8540147884261900313
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147886565098075
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: e275f76384b24f46ab3a07783110a230
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 90
+          param: 
