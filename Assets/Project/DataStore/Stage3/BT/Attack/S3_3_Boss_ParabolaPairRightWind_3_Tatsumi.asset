@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: S3_3_Boss_ParabolaPairRightWind_3_Tatsumi
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147886565097601
+    rid: 8540147886565097814
   detachedNodes: []
   parameters: []
   references:
@@ -83,8 +83,8 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
-    - rid: 8540147886565097601
-      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147886565097814
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 3cf04f6c08c74a2881b1e39a69c9a324
         graphPosition: {x: 115, y: 150}
@@ -92,7 +92,3 @@ MonoBehaviour:
         children:
         - rid: 8540147884263997657
         - rid: 8540147884263997658
-        policy: 0
-        duration:
-          value: 0
-          param: 

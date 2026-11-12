@@ -13,34 +13,12 @@ MonoBehaviour:
   m_Name: S2_3line-boss_2_Azuma
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147886565097603
+    rid: 8540147886565097818
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263211143
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 58ccaa696615467b8f363b1f49a87ef5
-        graphPosition: {x: 0, y: 300}
-        comment: 
-        child:
-          rid: 8540147884263211146
-        frames:
-          value: 12
-          param: 
-    - rid: 8540147884263211144
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 1b31197a44d74d4b85de84e0facbf096
-        graphPosition: {x: 230, y: 300}
-        comment: 
-        child:
-          rid: 8540147884263211147
-        frames:
-          value: 6
-          param: 
     - rid: 8540147884263211145
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -155,17 +133,33 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
-    - rid: 8540147886565097603
-      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147886565097818
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: f13f49b5fbc748558fbddbbcfef26acf
         graphPosition: {x: 230, y: 150}
         comment: 
         children:
-        - rid: 8540147884263211143
-        - rid: 8540147884263211144
         - rid: 8540147884263211145
-        policy: 0
-        duration:
-          value: 0
+        - rid: 8540147886565097819
+        - rid: 8540147884263211147
+        - rid: 8540147886565097820
+        - rid: 8540147884263211146
+    - rid: 8540147886565097819
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 6a1bad187c654c44ae44c8042bd9ca39
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 6
+          param: 
+    - rid: 8540147886565097820
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: cc6d057fae084a6c8176e9e2d63fba5e
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 6
           param: 

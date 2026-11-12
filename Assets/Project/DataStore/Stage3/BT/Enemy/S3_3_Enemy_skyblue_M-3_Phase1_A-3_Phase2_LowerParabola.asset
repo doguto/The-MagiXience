@@ -55,7 +55,7 @@ MonoBehaviour:
         graphPosition: {x: 230, y: 450}
         comment: 
         child:
-          rid: 8540147886565097611
+          rid: 8540147886565097879
         count:
           value: 0
           param: 
@@ -64,17 +64,6 @@ MonoBehaviour:
       data:
         frames:
           value: 481
-          param: 
-    - rid: 8540147884263211490
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 7b6b03f6f11140459f90b0a2803d609b
-        graphPosition: {x: 230, y: 750}
-        comment: 
-        child:
-          rid: 8540147884263211491
-        frames:
-          value: 30
           param: 
     - rid: 8540147884263211491
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -107,15 +96,31 @@ MonoBehaviour:
     - rid: 8540147884263211494
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147886565097611
-      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147886565097879
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 69cf67ff09264083b72cf1e4ec713150
         graphPosition: {x: 230, y: 600}
         comment: 
         children:
-        - rid: 8540147884263211490
-        policy: 2
-        duration:
-          value: 150
+        - rid: 8540147886565097880
+        - rid: 8540147884263211491
+        - rid: 8540147886565097881
+    - rid: 8540147886565097880
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9c1627a3fe354e8286804c5cc46c7916
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 30
+          param: 
+    - rid: 8540147886565097881
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 25342712f82e43718d2391a3cfa61fc5
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 120
           param: 

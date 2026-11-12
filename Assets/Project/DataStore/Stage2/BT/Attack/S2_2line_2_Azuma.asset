@@ -13,23 +13,12 @@ MonoBehaviour:
   m_Name: S2_2line_2_Azuma
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147886565097618
+    rid: 8540147886565097898
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263211247
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: b152e1b53a7941efad5a4e9a39eb293b
-        graphPosition: {x: 0, y: 300}
-        comment: 
-        child:
-          rid: 8540147884263211249
-        frames:
-          value: 6
-          param: 
     - rid: 8540147884263211248
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -106,16 +95,22 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
-    - rid: 8540147886565097618
-      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147886565097898
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: ed88e72f83a14e2fb9341eb3702179fe
         graphPosition: {x: 115, y: 150}
         comment: 
         children:
-        - rid: 8540147884263211247
         - rid: 8540147884263211248
-        policy: 0
-        duration:
-          value: 0
+        - rid: 8540147886565097899
+        - rid: 8540147884263211249
+    - rid: 8540147886565097899
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 932244998cd44b12bd0e6350419c20f1
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 6
           param: 

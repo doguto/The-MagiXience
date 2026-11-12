@@ -18,6 +18,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         public NodeDefinition Definition { get; }
         public bool IsRoot { get; }
+        public event System.Action ValuesChanged;
         public Port Input { get; }
         public Port Output { get; }
 
@@ -125,9 +126,12 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             base.BuildContextualMenu(evt);
         }
 
-        public void SetOrder(int order)
+        public void SetOrder(int order, int? startFrame = null)
         {
-            if (orderLabel != null) orderLabel.text = order > 0 ? order.ToString() : "";
+            if (orderLabel == null) return;
+            var text = order > 0 ? order.ToString() : "";
+            if (startFrame.HasValue) text += $"  @{startFrame.Value}f";
+            orderLabel.text = text;
         }
 
         public void SetRuntimeActive(bool active) => EnableInClassList("bt-running", active);
@@ -240,7 +244,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             var field = new PropertyField(prop.Copy());
             field.Bind(prop.serializedObject);
-            field.RegisterValueChangeCallback(_ => RefreshTexts());
+            field.RegisterValueChangeCallback(_ =>
+            {
+                RefreshTexts();
+                ValuesChanged?.Invoke();
+            });
             return field;
         }
 

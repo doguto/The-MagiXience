@@ -32,6 +32,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 - 子が Success したフレームのうちに次の子を開始する（同じフレームで複数の即時ノードを連続実行できる）。
 - 子が Running ならそこで止まり Running。子が Failure なら Failure（以降の子は実行しない）。
 - 全ての子が Success なら Success。子が 0 個なら即 Success。
+- `Wait N` の次の子は、前の子の N フレーム後に動く。即時に終わる子（Fire / Spawn など）だけなら `Sequence[Wait a, X, Wait b, Y]` で時刻つきの出来事を表せる。`Delay` は `Sequence[Wait, 子]` と同じ動きをする。
 
 ### Selector
 
@@ -43,7 +44,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 ### Parallel
 
-全ての子を毎フレーム、左から順に Tick する。各子の開始時刻は子側に Delay を挟んで指定する。
+全ての子を毎フレーム、左から順に Tick する。各子の開始時刻は子側に Delay を挟んで指定する。時間のかかる子（Repeat / Move / SubTree など）を重ねて動かすときに使い、即時に終わる子だけなら Sequence + Wait で書く。
 
 | フィールド | 単位 | 説明 |
 |---|---|---|
@@ -504,7 +505,7 @@ Until cond: FrameElapsed(481)
      └─ Fire
 ```
 
-`Repeat(interval=k)` は前の回の終了を待たずに k フレームおきに子を始める。子が SequentialFan のように時間のかかる Sequence でも周期がずれない。1 周期の中で複数の発射タイミングがある場合は `Loop ∞ { Parallel(Duration k) { Fire, Delay(a){Fire}, Delay(b){Fire} } }` を使う。
+`Repeat(interval=k)` は前の回の終了を待たずに k フレームおきに子を始める。子が SequentialFan のように時間のかかる Sequence でも周期がずれない。1 周期の中で複数の発射タイミングがある場合は `Loop ∞ { Sequence[Fire, Wait a, Fire, Wait (b−a), Fire, Wait (k−b)] }` を使う（最後の Wait で 1 周の長さを揃える）。
 
 ### BGM 同期のボスフェーズ = BgmSamples
 
@@ -564,17 +565,18 @@ Sequence
 
 移動は SetMovement でツリーと独立させ、ツリー本体は攻撃だけを書く。HP で行動を変える敵は `Sequence[Until(HpBelow){通常}, 後半]` のように並べる。
 
-### 道中 = Sequence[Parallel{Delay(t){Spawn}...}, WaitUntil(NoActiveEnemies)]
+### 道中 = Sequence[Wait, Spawn, Wait, Spawn..., WaitUntil(NoActiveEnemies)]
 
 ```text
 Sequence
  ├─ Sequence #Phase1
- │   ├─ Parallel (All)
- │   │   ├─ Delay 150 → Spawn
- │   │   ├─ Delay 195 → Spawn
- │   │   └─ ...
+ │   ├─ Wait 150
+ │   ├─ Spawn          (@150f)
+ │   ├─ Wait 45
+ │   ├─ Spawn          (@195f)
+ │   ├─ ...
  │   └─ WaitUntil  cond: NoActiveEnemies
  └─ Sequence #Phase2 ...
 ```
 
-出現時刻を Delay で並べ、全員出し終えたら全滅を待って次のフェーズへ進む。Stage3 道中では一部のフェーズを `WithWind` で包み、その間だけ風を吹かせる。
+出現の間隔を Wait で並べ、全員出し終えたら全滅を待って次のフェーズへ進む。Stage3 道中では一部のフェーズを `WithWind` で包み、その間だけ風を吹かせる。

@@ -164,6 +164,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             var list = children.Where(c => c != null).ToList();
             if (list.Count == 0) return durationFrames > 0 ? Wait(durationFrames) : null;
             if (durationFrames <= 0 && list.Count == 1) return list[0];
+            var timed = TimedSequence(list, durationFrames);
+            if (timed != null) return timed;
             var t = durationFrames > 0
                 ? new ParallelNodeDefinition { Policy = ParallelPolicy.Duration, Duration = durationFrames }
                 : new ParallelNodeDefinition { Policy = ParallelPolicy.All };
@@ -196,8 +198,39 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
         }
 
         // 1 フレームで終わるノード (周期で打ち切られることがない)
-        static bool IsInstant(NodeDefinition node) =>
-            node is ActionNodeDefinition and not (SubTreeNodeDefinition or WaitNodeDefinition or WaitUntilNodeDefinition or MoveNodeDefinition or MoveTrailFanNodeDefinition);
+        static bool IsInstant(NodeDefinition node) => BehaviorTreeGraphView.IsInstant(node);
+
+        // Delay で開始時刻を付けた子が全て即時完了なら、Wait を挟んだ Sequence で表す
+        static NodeDefinition TimedSequence(List<NodeDefinition> children, int durationFrames)
+        {
+            var timed = new List<(int time, NodeDefinition node)>();
+            foreach (var child in children)
+            {
+                var time = 0;
+                var node = child;
+                if (child is DelayNodeDefinition delay)
+                {
+                    var frames = Get<BtInt>(delay, "frames");
+                    if (!string.IsNullOrEmpty(frames.param) || delay.Children.Count == 0) return null;
+                    time = frames.value;
+                    node = delay.Children[0];
+                }
+                if (!IsInstant(node)) return null;
+                if (durationFrames > 0 && time >= durationFrames) return null;
+                timed.Add((time, node));
+            }
+
+            var list = new List<NodeDefinition>();
+            var now = 0;
+            foreach (var (time, node) in timed.OrderBy(x => x.time))
+            {
+                if (time > now) list.Add(Wait(time - now));
+                list.Add(node);
+                now = time;
+            }
+            if (durationFrames > now) list.Add(Wait(durationFrames - now));
+            return list.Count == 1 ? list[0] : WithChildren(new SequenceNodeDefinition(), list);
+        }
 
         static NodeDefinition Loop(int count, NodeDefinition child)
         {

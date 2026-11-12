@@ -361,7 +361,7 @@ public abstract class StageServiceDefinition
 |---|---|
 | ツールバー | 対象アセット、`Auto Layout`（ルートから下向きに整列）、`Frame All`、`Blackboard`（右ペインの表示切替）、`MiniMap` |
 | 左ペイン (`NodePaletteView`) | ノード一覧（Composite / Decorator / Condition / Action とサブカテゴリ）と SubTree 用の BT アセット一覧。検索欄あり。項目をキャンバスへドラッグして作成 |
-| 中央 (`BehaviorTreeGraphView`) | ノードグラフ。上が親、子は左から右の順に実行される |
+| 中央 (`BehaviorTreeGraphView`) | ノードグラフ。上が親、子は左から右の順に実行される。ヘッダーの番号は親の中での実行順。Wait を含む Sequence の子には、Sequence 開始から何フレーム目に動くか（`@150f`）も出す。時間の読めない子（Move / SubTree など）より後ろには出さない |
 | 右ペイン (`ParameterPanelView`) | ツリーパラメータの一覧（名前 / 型 / 既定値）。`+` で追加、右クリックで `Select Usages` / `Delete` |
 
 操作:

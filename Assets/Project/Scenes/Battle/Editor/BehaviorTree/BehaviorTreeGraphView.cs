@@ -213,6 +213,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 if (views.ContainsKey(def)) continue;
                 var target = def;
                 var view = new BehaviorTreeNodeView(def, () => FindPropertyFor(target), OnDropOutsidePort);
+                view.ValuesChanged += RefreshOrderBadges;
                 view.SetPosition(new Rect(def.GraphPosition, Vector2.zero));
                 views[def] = view;
                 AddElement(view);
@@ -257,12 +258,30 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 if (def.ChildCapacity != NodeChildCapacity.Multiple) continue;
                 var order = 1;
+                var showTime = def is SequenceNodeDefinition && def.Children.Any(c => c is WaitNodeDefinition);
+                int? time = 0;
                 foreach (var child in def.Children)
                 {
-                    if (child != null && views.TryGetValue(child, out var childView)) childView.SetOrder(order++);
+                    if (child != null && views.TryGetValue(child, out var childView))
+                        childView.SetOrder(order++, showTime ? time : null);
+                    time = NextTime(time, child);
                 }
             }
         }
+
+        // Sequence の子が開始から何フレーム目に動くか。時間の読めない子より後ろは表示しない
+        static int? NextTime(int? time, NodeDefinition child)
+        {
+            if (time == null || child == null) return time;
+            if (child is WaitNodeDefinition wait)
+                return string.IsNullOrEmpty(wait.Frames.param) ? time + Mathf.Max(0, wait.Frames.value) : null;
+            return IsInstant(child) ? time : null;
+        }
+
+        // 実行したフレームのうちに Success を返すノード
+        public static bool IsInstant(NodeDefinition node) =>
+            node is ActionNodeDefinition
+            && node is not (SubTreeNodeDefinition or WaitNodeDefinition or WaitUntilNodeDefinition or MoveNodeDefinition or MoveTrailFanNodeDefinition);
 
         const float HorizontalGap = 40f;
         const float VerticalGap = 70f;

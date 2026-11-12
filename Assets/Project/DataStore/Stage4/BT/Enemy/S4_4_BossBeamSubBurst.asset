@@ -153,7 +153,7 @@ MonoBehaviour:
         graphPosition: {x: 1725, y: 600}
         comment: 
         child:
-          rid: 8540147886565097600
+          rid: 8540147886565097801
         count:
           value: 0
           param: 
@@ -178,127 +178,6 @@ MonoBehaviour:
           rid: 8540147884264521760
         muzzleOffset: {x: -1.25, y: 0}
         se: 0
-    - rid: 8540147884264521747
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: b0c4941398cc44a8a71fc5f5817c7771
-        graphPosition: {x: 690, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521761
-        frames:
-          value: 9
-          param: 
-    - rid: 8540147884264521748
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 6067c4d0249f4209b4cec08273f6d8c4
-        graphPosition: {x: 920, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521762
-        frames:
-          value: 18
-          param: 
-    - rid: 8540147884264521749
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 0c6b93bcb77b47c6953ac3c5e7a3db1f
-        graphPosition: {x: 1150, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521763
-        frames:
-          value: 27
-          param: 
-    - rid: 8540147884264521750
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: a06648140ef04463a3603a61df1d4147
-        graphPosition: {x: 1380, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521764
-        frames:
-          value: 36
-          param: 
-    - rid: 8540147884264521751
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 360c7f7c1808468bb0612ef8f75a8d58
-        graphPosition: {x: 1610, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521765
-        frames:
-          value: 45
-          param: 
-    - rid: 8540147884264521752
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 21e1b31a368b410882dcf1c2d2848f1a
-        graphPosition: {x: 1840, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521766
-        frames:
-          value: 63
-          param: 
-    - rid: 8540147884264521753
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 1465881af69f437faa98b7a95dfca8d9
-        graphPosition: {x: 2070, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521767
-        frames:
-          value: 72
-          param: 
-    - rid: 8540147884264521754
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 8fc9df09225542a3a1aa76b213891b80
-        graphPosition: {x: 2300, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521768
-        frames:
-          value: 81
-          param: 
-    - rid: 8540147884264521755
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 0df863f428de4c5ea2676a76abfdad7f
-        graphPosition: {x: 2530, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521769
-        frames:
-          value: 90
-          param: 
-    - rid: 8540147884264521756
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 63d27e7807944257a8de8ee9e1b70473
-        graphPosition: {x: 2760, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521770
-        frames:
-          value: 99
-          param: 
-    - rid: 8540147884264521757
-      type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 9c4ebec935744ac58e48b003169d6547
-        graphPosition: {x: 2990, y: 900}
-        comment: 
-        child:
-          rid: 8540147884264521771
-        frames:
-          value: 108
-          param: 
     - rid: 8540147884264521758
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -710,26 +589,142 @@ MonoBehaviour:
     - rid: 8540147884264521804
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147886565097600
-      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147886565097801
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 7dd50e9140a24f6aafffcebba8ddb487
         graphPosition: {x: 1725, y: 750}
         comment: 
         children:
         - rid: 8540147884264521746
-        - rid: 8540147884264521747
-        - rid: 8540147884264521748
-        - rid: 8540147884264521749
-        - rid: 8540147884264521750
-        - rid: 8540147884264521751
-        - rid: 8540147884264521752
-        - rid: 8540147884264521753
-        - rid: 8540147884264521754
-        - rid: 8540147884264521755
-        - rid: 8540147884264521756
-        - rid: 8540147884264521757
-        policy: 2
-        duration:
-          value: 126
+        - rid: 8540147886565097802
+        - rid: 8540147884264521761
+        - rid: 8540147886565097803
+        - rid: 8540147884264521762
+        - rid: 8540147886565097804
+        - rid: 8540147884264521763
+        - rid: 8540147886565097805
+        - rid: 8540147884264521764
+        - rid: 8540147886565097806
+        - rid: 8540147884264521765
+        - rid: 8540147886565097807
+        - rid: 8540147884264521766
+        - rid: 8540147886565097808
+        - rid: 8540147884264521767
+        - rid: 8540147886565097809
+        - rid: 8540147884264521768
+        - rid: 8540147886565097810
+        - rid: 8540147884264521769
+        - rid: 8540147886565097811
+        - rid: 8540147884264521770
+        - rid: 8540147886565097812
+        - rid: 8540147884264521771
+        - rid: 8540147886565097813
+    - rid: 8540147886565097802
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 5ca7391678584dfcbe3dc699e85b4fea
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097803
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d22c142aa92d4709a9143a6c9417d487
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097804
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f01546377a3c4c07b439f4e7ed4e3b48
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097805
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f015cb93c6e244ca9d067fa968dd2f30
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097806
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 5a69870bcb60455aa6abf61650ea7f1f
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097807
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b2985f9ab35748d4b4ea82bd72053a1d
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 18
+          param: 
+    - rid: 8540147886565097808
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 035bfcda4a0c4c2ea584ead9a4a2961e
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097809
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d43e4352abac46aeb8e9624ef1599da9
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097810
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: af66f9b714bf4773a4178c236a7d1df3
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097811
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: ff7ddbc29ed14676a164820a518f4656
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097812
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 82f54ae4146e4a0bb8b32b5a7d1c568d
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 9
+          param: 
+    - rid: 8540147886565097813
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f9193c84356e41d68492442301fac502
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 18
           param: 
