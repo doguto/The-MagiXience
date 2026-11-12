@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: S2_2_WayEnemy1_death_Death_3
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147883498537881
+    rid: 8540147884261901012
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147883498537881
+    - rid: 8540147884261901012
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 61a6e02cc30d4f148f94f8e3e59b7706
+        guid: 04ef5daf2c674f85b047a0569b088ae4
         graphPosition: {x: 0, y: 150}
         comment: 
         bullet:
@@ -33,14 +33,14 @@ MonoBehaviour:
           range: 0
           affectedByWind: 1
         pattern:
-          rid: 8540147883498537882
+          rid: 8540147884261901013
         direction:
-          rid: 8540147883498537883
+          rid: 8540147884261901014
         rotation:
-          rid: 8540147883498537884
+          rid: 8540147884261901015
         muzzleOffset: {x: 0, y: 0}
         se: 0
-    - rid: 8540147883498537882
+    - rid: 8540147884261901013
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         wayCount: 12
@@ -48,10 +48,10 @@ MonoBehaviour:
         radius: 0.01
         startDelayFrames: 0
         rotationOffset: 0
-    - rid: 8540147883498537883
+    - rid: 8540147884261901014
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         direction: {x: -1, y: 0}
-    - rid: 8540147883498537884
+    - rid: 8540147884261901015
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 

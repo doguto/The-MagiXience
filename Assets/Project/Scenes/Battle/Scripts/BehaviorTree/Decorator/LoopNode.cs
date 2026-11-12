@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
@@ -17,6 +18,93 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public override INode Build(BuildScope scope) => new LoopNode(BuildChild(scope), Mathf.Max(0, count.Resolve(scope)));
 
         public override string Summary => count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞ 無限" : "× " + count;
+    }
+
+    [Serializable, NodeInfo("子を Interval フレームおきに開始する。前の回が終わっていなくても次を始める (重なってよい)")]
+    public sealed class RepeatNodeDefinition : DecoratorNodeDefinition
+    {
+        [SerializeField, Tooltip("開始する回数。0 = 無限")] BtInt count;
+        [SerializeField, Tooltip("開始の間隔 (フレーム)")] BtInt interval = new(60);
+
+        public BtInt Count
+        {
+            get => count;
+            set => count = value;
+        }
+
+        public BtInt Interval
+        {
+            get => interval;
+            set => interval = value;
+        }
+
+        public override INode Build(BuildScope scope) =>
+            new RepeatNode(() => BuildChild(scope), Mathf.Max(0, count.Resolve(scope)), Mathf.Max(1, interval.Resolve(scope)));
+
+        public override string Summary =>
+            (count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞" : "× " + count) + " / " + interval.ToFrameString() + " おき";
+    }
+
+    // 子を一定間隔で開始し、実行中の回はすべて並行して進める。指定回数を開始し、全て終わったら Success
+    public sealed class RepeatNode : Node
+    {
+        readonly Func<INode> factory;
+        readonly int count;
+        readonly int interval;
+        readonly List<INode> running = new();
+        readonly Stack<INode> idle = new();
+        int started;
+        int elapsed;
+
+        public RepeatNode(Func<INode> factory, int count, int interval)
+        {
+            this.factory = factory;
+            this.count = count;
+            this.interval = interval;
+        }
+
+        protected override void OnEnter(BattleContext ctx)
+        {
+            started = 0;
+            elapsed = 0;
+        }
+
+        protected override NodeStatus OnTick(BattleContext ctx)
+        {
+            if ((count == 0 || started < count) && elapsed == started * interval)
+            {
+                running.Add(idle.Count > 0 ? idle.Pop() : factory());
+                started++;
+            }
+
+            for (var i = 0; i < running.Count; i++)
+            {
+                var status = running[i].Tick(ctx);
+                if (status == NodeStatus.Running) continue;
+                if (status == NodeStatus.Failure)
+                {
+                    AbortRunning(ctx);
+                    return NodeStatus.Failure;
+                }
+                idle.Push(running[i]);
+                running.RemoveAt(i--);
+            }
+
+            elapsed++;
+            return count > 0 && started >= count && running.Count == 0 ? NodeStatus.Success : NodeStatus.Running;
+        }
+
+        protected override void OnAbort(BattleContext ctx) => AbortRunning(ctx);
+
+        void AbortRunning(BattleContext ctx)
+        {
+            foreach (var node in running)
+            {
+                node.Abort(ctx);
+                idle.Push(node);
+            }
+            running.Clear();
+        }
     }
 
     // 子を指定回数繰り返す。子が Failure を返したら Failure。

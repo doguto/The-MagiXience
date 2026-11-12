@@ -13,68 +13,68 @@ MonoBehaviour:
   m_Name: S1_1_Phase2-5_M-CurveUp
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147883498537092
+    rid: 8540147883689903032
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147883498537092
+    - rid: 8540147883689903032
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 1c71b022c8a04d5eafa81a825dce7c7a
+        guid: 74bca368dd0c4590bd203992e0e06d30
         graphPosition: {x: 172.5, y: 150}
         comment: 
         children:
-        - rid: 8540147883498537093
-        - rid: 8540147883498537094
-    - rid: 8540147883498537093
+        - rid: 8540147883689903033
+        - rid: 8540147883689903034
+    - rid: 8540147883689903033
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 82b7e7a85457427ca2e278bbebe5b569
+        guid: 6c0663b443254e69879a862d05af620c
         graphPosition: {x: 0, y: 300}
         comment: 
         preset: {fileID: 11400000, guid: 53acacc91373eaa46b19939bb30de96b, type: 2}
         steps: []
         continueIfSame: 0
-    - rid: 8540147883498537094
+    - rid: 8540147883689903034
       type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 05a28b5681ae4ff8946ab7278e6cfca5
+        guid: 925b6de603dc4e2196cb3897980be5e1
         graphPosition: {x: 345, y: 300}
         comment: Phase 0
         children:
-        - rid: 8540147883498537095
-        - rid: 8540147883498537096
+        - rid: 8540147883689903035
+        - rid: 8540147883689903036
         duration:
           value: 0
           param: 
-    - rid: 8540147883498537095
+    - rid: 8540147883689903035
       type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 28fe3b0e46fe4b7ca7a2420ddc8e2136
+        guid: 3342dddad15d40aaa7a85f3bba5a04bb
         graphPosition: {x: 230, y: 450}
         comment: 
         child:
-          rid: 8540147883498537097
+          rid: 8540147883689903037
         frames:
           value: 60
           param: 
-    - rid: 8540147883498537096
+    - rid: 8540147883689903036
       type: {class: DelayNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: fc1a8850566e4c72a5acfe6851617204
+        guid: 82c67e821b594df0acace0426e2a8c7e
         graphPosition: {x: 460, y: 450}
         comment: 
         child:
-          rid: 8540147883498537098
+          rid: 8540147883689903038
         frames:
           value: 180
           param: 
-    - rid: 8540147883498537097
+    - rid: 8540147883689903037
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: adf40974fde44cf2a6f762045823939e
+        guid: 3232569e6f094763aa7758914e048b89
         graphPosition: {x: 230, y: 600}
         comment: 
         bullet:
@@ -85,17 +85,17 @@ MonoBehaviour:
           range: 0
           affectedByWind: 1
         pattern:
-          rid: 8540147883498537099
+          rid: 8540147883689903039
         direction:
-          rid: 8540147883498537100
+          rid: 8540147883689903040
         rotation:
-          rid: 8540147883498537101
+          rid: 8540147883689903041
         muzzleOffset: {x: -0.75, y: 0}
         se: 0
-    - rid: 8540147883498537098
+    - rid: 8540147883689903038
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: afcb00d08d3249db9e9bf76cec77cbe6
+        guid: f2a9899c61ab4e99b5245333a95c9ebb
         graphPosition: {x: 460, y: 600}
         comment: 
         bullet:
@@ -106,32 +106,32 @@ MonoBehaviour:
           range: 0
           affectedByWind: 1
         pattern:
-          rid: 8540147883498537102
+          rid: 8540147883689903042
         direction:
-          rid: 8540147883498537103
+          rid: 8540147883689903043
         rotation:
-          rid: 8540147883498537104
+          rid: 8540147883689903044
         muzzleOffset: {x: -0.75, y: 0}
         se: 0
-    - rid: 8540147883498537099
+    - rid: 8540147883689903039
       type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147883498537100
+    - rid: 8540147883689903040
       type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         maxUpAngle: 180
         maxDownAngle: 180
-    - rid: 8540147883498537101
+    - rid: 8540147883689903041
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147883498537102
+    - rid: 8540147883689903042
       type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
-    - rid: 8540147883498537103
+    - rid: 8540147883689903043
       type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         maxUpAngle: 180
         maxDownAngle: 180
-    - rid: 8540147883498537104
+    - rid: 8540147883689903044
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 

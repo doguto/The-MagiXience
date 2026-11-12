@@ -142,15 +142,18 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             return node;
         }
 
+        // 子が無い Composite は作らない (null を返し、親側で取り除く)
         static NodeDefinition Sequence(IEnumerable<NodeDefinition> children)
         {
             var list = children.Where(c => c != null).ToList();
+            if (list.Count == 0) return null;
             return list.Count == 1 ? list[0] : WithChildren(new SequenceNodeDefinition(), list);
         }
 
         static NodeDefinition Parallel(IEnumerable<NodeDefinition> children, ParallelPolicy policy = ParallelPolicy.RequireAll)
         {
             var list = children.Where(c => c != null).ToList();
+            if (list.Count == 0) return null;
             if (list.Count == 1) return list[0];
             var p = new ParallelNodeDefinition { Policy = policy };
             return WithChildren(p, list);
@@ -159,6 +162,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
         static NodeDefinition Timeline(IEnumerable<NodeDefinition> children, int durationFrames = 0)
         {
             var list = children.Where(c => c != null).ToList();
+            if (list.Count == 0) return durationFrames > 0 ? Wait(durationFrames) : null;
             if (durationFrames <= 0 && list.Count == 1) return list[0];
             var t = new TimelineNodeDefinition { Duration = durationFrames };
             return WithChildren(t, list);
@@ -180,8 +184,22 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             return w;
         }
 
+        static NodeDefinition Repeat(int count, int intervalFrames, NodeDefinition child)
+        {
+            if (child == null) return null;
+            if (count == 1) return child;
+            var r = new RepeatNodeDefinition { Count = new BtInt(count), Interval = new BtInt(Mathf.Max(1, intervalFrames)) };
+            r.SetChildren(new[] { child });
+            return r;
+        }
+
+        // 1 フレームで終わるノード (周期で打ち切られることがない)
+        static bool IsInstant(NodeDefinition node) =>
+            node is ActionNodeDefinition and not (SubTreeNodeDefinition or WaitNodeDefinition or WaitUntilNodeDefinition or MoveNodeDefinition or MoveTrailFanNodeDefinition);
+
         static NodeDefinition Loop(int count, NodeDefinition child)
         {
+            if (child == null) return null;
             var l = new LoopNodeDefinition { Count = count };
             l.SetChildren(new NodeDefinition[] { child });
             return l;

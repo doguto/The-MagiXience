@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: S2_Charge_2_Azuma
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147883688591717
+    rid: 8540147884263211160
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147883688591717
+    - rid: 8540147884263211160
       type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 99fc4eb69f514f4ea4f1959e5e6f72cb
+        guid: a555fe07442a48d6bcba1d25cb1461ad
         graphPosition: {x: 0, y: 150}
         comment: 
         bullet:
@@ -33,14 +33,14 @@ MonoBehaviour:
           range: 0
           affectedByWind: 1
         pattern:
-          rid: 8540147883688591718
+          rid: 8540147884263211161
         direction:
-          rid: 8540147883688591719
+          rid: 8540147884263211162
         rotation:
-          rid: 8540147883688591720
+          rid: 8540147884263211163
         muzzleOffset: {x: 0, y: 0}
         se: 0
-    - rid: 8540147883688591718
+    - rid: 8540147884263211161
       type: {class: ChargeShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         wayCount: 16
@@ -49,10 +49,10 @@ MonoBehaviour:
         gatherDuration: 1
         rotationSpeed: 480
         startDelayFrames: 0
-    - rid: 8540147883688591719
+    - rid: 8540147884263211162
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         direction: {x: 1, y: 0}
-    - rid: 8540147883688591720
+    - rid: 8540147884263211163
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 

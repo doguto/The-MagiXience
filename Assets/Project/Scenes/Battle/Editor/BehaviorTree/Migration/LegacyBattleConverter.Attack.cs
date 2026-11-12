@@ -121,26 +121,25 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             var cycleFrames = Mathf.Max(1, Frames(cycle));
 
             NodeDefinition looped;
-            if (entries.All(e => e.time < cycle))
+            var converted = entries.Select(e => (entry: e, node: ConvertEntry(e, shooter, inheritedBullet))).Where(x => x.node != null).ToList();
+            if (converted.Count == 1 && Frames(converted[0].entry.time) == 0 && IsInstant(converted[0].node))
             {
-                var oneCycle = Timeline(entries.Select(e => Delay(Frames(e.time), ConvertEntry(e, shooter, inheritedBullet))), cycleFrames);
-                looped = Loop(0, oneCycle);
+                // 周期の先頭で 1 回撃つだけなら、一定間隔の繰り返しで表す
+                looped = Repeat(0, cycleFrames, converted[0].node);
+            }
+            else if (entries.All(e => e.time < cycle))
+            {
+                looped = Loop(0, Timeline(converted.Select(x => Delay(Frames(x.entry.time), x.node)), cycleFrames));
             }
             else
             {
-                // 周期より後ろに置かれたエントリがある場合は、周期をまたいで重なるため全周期を展開する
-                var cycles = Mathf.FloorToInt((loopEnd - loopStart) / cycle);
-                var all = new List<NodeDefinition>();
-                for (var c = 0; c <= cycles; c++)
+                // 周期より後ろに置かれたエントリは周期をまたいで重なるため、エントリごとに一定間隔で繰り返す
+                var span = loopEnd - loopStart;
+                looped = Timeline(converted.Select(x =>
                 {
-                    foreach (var e in entries)
-                    {
-                        var t = c * cycle + e.time;
-                        if (loopStart + t > loopEnd) continue;
-                        all.Add(Delay(Frames(t), ConvertEntry(e, shooter, inheritedBullet)));
-                    }
-                }
-                looped = Timeline(all);
+                    var times = Mathf.FloorToInt((span - x.entry.time) / cycle) + 1;
+                    return times <= 0 ? null : Delay(Frames(x.entry.time), Repeat(times, cycleFrames, x.node));
+                }));
             }
 
             // 旧実装は loopEnd を過ぎた発射を捨てる
@@ -356,13 +355,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
             var cycles = loop && count > 0 ? count : 1;
             if (cycles == 1) return sub;
 
-            var cycle = Get<float>(signal, "cycleDuration");
-            var copies = new List<NodeDefinition>();
-            for (var c = 0; c < cycles; c++)
-            {
-                copies.Add(Delay(Frames(c * cycle), new SubTreeNodeDefinition { Tree = sub.Tree }));
-            }
-            return Timeline(copies);
+            return Repeat(cycles, Frames(Get<float>(signal, "cycleDuration")), sub);
         }
 
         // 旧 PresetAttackSignal は参照先プリセットの最初のフェーズのエントリだけを使っていた
@@ -435,27 +428,34 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree.Migration
                 ? Get<IList>(phases[0], "entries")?.Cast<AttackTimelineEntry>().Where(e => e?.signal != null).ToList()
                 : new List<AttackTimelineEntry>();
 
+            var segment = new BeamSegment { start = line.Start, end = line.End };
             var nodes = new List<NodeDefinition>();
             var warnIndex = Get<int>(signal, "warningSourceIndex");
             var first = true;
-            foreach (var e in inner)
+            // 同じ時刻・同じ撃ち方のエントリは弾違いなので 1 本のビームにまとめる
+            foreach (var group in inner.GroupBy(e => (Frames(e.time), JsonUtility.ToJson(e.signal), e.seType)))
             {
+                var e = group.First();
                 var pattern = ConvertPattern(e.signal);
                 if (pattern == null)
                 {
                     Warn($"{shooter.Name}: ビーム内の未対応の攻撃 {e.signal.GetType().Name}");
                     continue;
                 }
-                var idx = e.sourceIndexProvider is ConstantSourceIndex c ? Get<int>(c, "index") : 0;
                 var beam = new BulletBeamNodeDefinition();
-                Set(beam, "line", new BeamSegment { start = line.Start, end = line.End });
-                Set(beam, "bullet", Bullet(shooter, idx, e.bulletMovementOverride));
+                Set(beam, "origin", BeamOrigin.World);
+                Set(beam, "position", segment.start);
+                Set(beam, "direction", new FixedDirection(segment.Direction));
+                var rotation = new FixedRotation();
+                Set(rotation, "degrees", segment.Rotation.eulerAngles.z);
+                Set(beam, "rotation", rotation);
+                Set(beam, "range", segment.Length);
+                Set(beam, "bullets", group.Select(g => Bullet(shooter, g.sourceIndexProvider is ConstantSourceIndex c ? Get<int>(c, "index") : 0, g.bulletMovementOverride)).ToList());
                 Set(beam, "pattern", pattern);
                 Set(beam, "shotCount", Get<int>(signal, "shotCount"));
                 Set(beam, "shotIntervalFrames", Mathf.Max(1, Frames(Get<float>(signal, "shotInterval"))));
                 // 警告線はビーム 1 本につき 1 回だけ出す
-                Set(beam, "showWarning", first && Get<bool>(signal, "showWarning"));
-                Set(beam, "warningPrefab", SpawnPrefab(shooter, warnIndex));
+                Set(beam, "warningPrefab", first && Get<bool>(signal, "showWarning") ? SpawnPrefab(shooter, warnIndex) : null);
                 Set(beam, "warningFrames", Frames(Get<float>(signal, "warningDuration")));
                 Set(beam, "warningWidth", Get<float>(signal, "warningWidth"));
                 Set(beam, "se", e.seType != SeType.None ? e.seType : entry.seType);

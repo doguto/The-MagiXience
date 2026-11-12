@@ -13,44 +13,25 @@ MonoBehaviour:
   m_Name: S1_1_Phase1B-1
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147883498537047
+    rid: 8540147883689902993
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147883498537047
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: aa7be3d1ba5c4804a5f89b1942873cef
-        graphPosition: {x: 115, y: 150}
-        comment: 
-        children:
-        - rid: 8540147883498537048
-        - rid: 8540147883498537049
-    - rid: 8540147883498537048
+    - rid: 8540147883689902993
       type: {class: SetMovementNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: d79daab0502848d0b632d9d58f903cd6
-        graphPosition: {x: 0, y: 300}
+        guid: 1d3f6c99b4504ef5bcccd02820c1392a
+        graphPosition: {x: 0, y: 150}
         comment: 
         preset: {fileID: 0}
         steps:
-        - rid: 8540147883498537050
-        - rid: 8540147883498537051
-        - rid: 8540147883498537052
+        - rid: 8540147883689902994
+        - rid: 8540147883689902995
+        - rid: 8540147883689902996
         continueIfSame: 0
-    - rid: 8540147883498537049
-      type: {class: TimelineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: e171098eb8bf40dc83ddc72dd8cf9ef6
-        graphPosition: {x: 230, y: 300}
-        comment: Phase 0
-        children: []
-        duration:
-          value: 0
-          param: 
-    - rid: 8540147883498537050
+    - rid: 8540147883689902994
       type: {class: PathMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
         waypoints:
@@ -85,12 +66,12 @@ MonoBehaviour:
             m_RotationOrder: 4
           curvePreset: {fileID: 0}
         isRelative: 0
-    - rid: 8540147883498537051
+    - rid: 8540147883689902995
       type: {class: WaitMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
         duration: 1
         invincible: 0
-    - rid: 8540147883498537052
+    - rid: 8540147883689902996
       type: {class: PathMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
       data:
         waypoints:

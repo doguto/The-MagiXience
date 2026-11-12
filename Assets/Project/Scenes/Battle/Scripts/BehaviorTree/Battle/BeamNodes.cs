@@ -18,22 +18,37 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public Quaternion Rotation => Quaternion.Euler(0f, 0f, Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg);
     }
 
-    // 旧 BeamAttackSignal。警告線のあと、線分の始点から終点まで弾を連射する
-    [Serializable, NodeInfo("警告線を出したあと、線分に沿って弾を連射するビーム", "Action/Attack")]
+    public enum BeamOrigin
+    {
+        Self,
+        World,
+    }
+
+    // 警告線を出したあと、同じ位置・向きへ弾を一定間隔で連射してビームにする。
+    // 向きと本数は開始時に 1 回だけ決め、Pattern の各方向へ 1 本ずつ出す
+    [Serializable, NodeInfo("警告線を出したあと、同じ向きに弾を連射してビームにする", "Action/Attack")]
     public sealed class BulletBeamNodeDefinition : ActionNodeDefinition
     {
-        [SerializeField, Tooltip("ワールド座標")] BeamSegment line = new() { start = new Vector2(5f, 0f), end = new Vector2(-9f, 0f) };
-        [SerializeField] BulletSpec bullet = new();
-        [SerializeReference, SubclassSelector, Tooltip("1 回の連射で撃つ形。方向は線分の向きになる")] ShotPattern pattern = new SingleShot();
+        [SerializeField, Tooltip("Self: 撃つ敵の位置 + Position (連射ごとにその時点の位置) / World: Position をワールド座標として使う")]
+        BeamOrigin origin = BeamOrigin.Self;
+        [SerializeField] Vector2 position;
+        [SerializeReference, SubclassSelector] DirectionSource direction = new FixedDirection();
+        [SerializeReference, SubclassSelector, Tooltip("ビームの本数と角度")] ShotPattern pattern = new SingleShot();
+        [SerializeReference, SubclassSelector] RotationSource rotation = new FixedRotation();
+        [SerializeField, Tooltip("弾の飛距離と警告線の長さ。0 なら弾/警告線 Prefab の値")] float range;
+        [SerializeField, Tooltip("1 回の連射で撃つ弾。複数並べると同じ位置・向きに重ねて撃つ")] List<BulletSpec> bullets = new() { new BulletSpec() };
         [SerializeField, Min(1)] int shotCount = 36;
         [SerializeField, Min(1)] int shotIntervalFrames = 5;
-        [SerializeField] bool showWarning = true;
-        [SerializeField] GameObject warningPrefab;
-        [SerializeField, Min(0), Tooltip("警告線の表示フレーム数。警告線を出さない場合も連射開始はこの分だけ待つ")] int warningFrames = 60;
+
+        [Header("Warning")]
+        [SerializeField, Tooltip("未指定なら警告線を出さない")] GameObject warningPrefab;
+        [SerializeField, Min(0), Tooltip("連射を始めるまでのフレーム数 (警告線を出さない場合も待つ)")] int warningFrames = 60;
+        [SerializeField, Min(0), Tooltip("警告線を表示するフレーム数。0 なら Warning Frames と同じ")] int warningDisplayFrames;
         [SerializeField, Min(0f)] float warningWidth;
         [SerializeField] SeType se;
 
-        public override string Summary => $"弾ビーム {shotCount}発 / 警告 {warningFrames}f";
+        public override string Summary =>
+            $"{pattern?.Summary ?? "?"} / {direction?.Summary ?? "?"} / {string.Join(", ", bullets)} × {shotCount}発 {shotIntervalFrames}f おき / 警告 {warningFrames}f";
 
         public override INode Build(BuildScope scope)
         {
@@ -49,36 +64,48 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         {
             var world = ctx.World;
             var self = ctx.Self;
-            var segment = line;
-
-            if (showWarning && warningPrefab != null)
-            {
-                ctx.Services.Spawner?.Spawn(new ActorSpawn
-                {
-                    Prefab = warningPrefab,
-                    Position = segment.start,
-                    Rotation = segment.Rotation,
-                    BeamRange = segment.Length,
-                    BeamDuration = warningFrames * BattleWorld.DeltaTime,
-                    BeamWidth = warningWidth,
-                });
-            }
+            var muzzle = origin == BeamOrigin.Self ? position : Vector2.zero;
+            var e = new EmitContext(ctx, muzzle);
+            var baseDirection = (direction ?? new FixedDirection()).GetDirection(e);
+            var rot = rotation?.GetRotation(e) ?? Quaternion.identity;
+            var fixedOrigin = origin == BeamOrigin.World ? position : e.Origin;
 
             shots.Clear();
-            (pattern ?? new SingleShot()).Build(segment.Direction, shots);
+            (pattern ?? new SingleShot()).Build(baseDirection, shots);
             var snapshot = shots.ToArray();
 
+            if (warningPrefab != null)
+            {
+                var display = warningDisplayFrames > 0 ? warningDisplayFrames : warningFrames;
+                foreach (var shot in snapshot)
+                {
+                    ctx.Services.Spawner?.Spawn(new ActorSpawn
+                    {
+                        Prefab = warningPrefab,
+                        Position = fixedOrigin + shot.Offset,
+                        Rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(shot.Direction.y, shot.Direction.x) * Mathf.Rad2Deg),
+                        BeamRange = range,
+                        BeamDuration = display * BattleWorld.DeltaTime,
+                        BeamWidth = warningWidth,
+                    });
+                }
+            }
+
+            var rangeOverride = range > 0f ? range : -1f;
             for (var i = 0; i < shotCount; i++)
             {
-                var delay = warningFrames + i * shotIntervalFrames;
-                world.Schedule(delay, () =>
+                world.Schedule(warningFrames + i * shotIntervalFrames, () =>
                 {
                     Emitter.PlaySe(ctx, se);
                     foreach (var shot in snapshot)
                     {
                         var offset = shot.Offset;
-                        Emitter.Spawn(ctx, bullet, Vector2.zero, _ => segment.start + offset, shot.Direction, segment.Rotation,
-                            shot.SpawnDelayFrames, shot.StartDelayFrames, shot.Motion, segment.Length);
+                        Func<EmitContext, Vector2> at = origin == BeamOrigin.World ? _ => fixedOrigin + offset : x => x.Origin + offset;
+                        foreach (var bullet in bullets)
+                        {
+                            Emitter.Spawn(ctx, bullet, muzzle, at, shot.Direction, rot,
+                                shot.SpawnDelayFrames, shot.StartDelayFrames, shot.Motion, rangeOverride);
+                        }
                     }
                 }, self);
             }
