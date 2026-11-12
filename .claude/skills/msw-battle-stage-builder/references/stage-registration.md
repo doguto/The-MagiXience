@@ -1,40 +1,44 @@
 # ステージ登録（DataStore / StageData / Addressable / BGM / シナリオ）
 
-## DataStoreのレイアウト
+## DataStore のレイアウト
 
-新規ステージ用のデータは `Assets/Project/DataStore/Stage{N}/` 配下に、以下のサブフォルダで構成する（Stage1, Stage2で実例あり）。
+ステージのデータは `Assets/Project/DataStore/Stage{N}/` 配下に置く。BT 形式のデータは `BT/` にまとめる。
 
 ```
 Assets/Project/DataStore/Stage{N}/
+├─ BT/
+│   ├─ Stage{N}Way_BT.asset    # 道中の BattleStageAsset (situation = Way)
+│   ├─ Stage{N}Boss_BT.asset   # ボス戦の BattleStageAsset (situation = Boss)
+│   ├─ Stage/                  # ステージツリー (Stage{N}Way_Tree / Stage{N}Boss_Tree)
+│   ├─ Enemy/                  # 敵ツリー (Spawn の Behavior に指定する)
+│   ├─ Attack/                 # 複数箇所から SubTree で参照する攻撃ツリー
+│   ├─ Motion/                 # MotionPreset (敵・ボス・弾の移動)
+│   └─ Ease/                   # EaseCurveAsset
 ├─ Way/
-│   ├─ Stage{N}Way.asset          # 道中のBattleSequenceAsset本体
-│   ├─ Phase1.asset ... PhaseK.asset  # 道中の各フェーズのBattleTimelineBuilderAsset
-│   └─ Stage{N}WayScenario.asset  # 道中クリア後のシナリオデータ
-├─ Boss/
-│   ├─ Stage{N}Boss.asset         # ボスのBattleSequenceAsset本体
-│   ├─ Intro.asset / MelodyA.asset / MelodyB.asset / Chorus.asset
-│   │   （+ IntroStrong.asset等、Strong版があれば）  # 楽節ごとのBattleTimelineBuilderAsset
-│   └─ Stage{N}BossScenario.asset # ボスクリア後のシナリオデータ
-├─ Attack/
-│   └─ {楽節名}Normal.asset / {楽節名}Strong.asset   # AttackPreset（例: IntroNormal, MelodyAStrong）
-├─ Movement/
-│   └─ 用途ごとの MovementPreset（例: BossIntro, BossMelodyA, QuadInOut, Straight1, Phase1Down）
-└─ Ease/
-    └─ EaseCurvePreset（例: InLinearOutQuad, InQuadOutLinear, MidStop）
+│   └─ Stage{N}WayScenario.asset   # 道中クリア後のシナリオ (命名規則で自動ロード)
+└─ Boss/
+    └─ Stage{N}BossScenario.asset  # ボスクリア後のシナリオ (命名規則で自動ロード)
 ```
 
-命名規則:
-- 道中のフェーズ資産は `Phase1`, `Phase2`, ... と連番。
-- ボスの資産はBGMの楽節名（`Intro` / `MelodyA` / `MelodyB` / `Chorus`）を使い、発狂版には `Strong` サフィックスを付ける（`ChorusStrong` 等）。
-- `BattleSequenceAsset` 自体は `Stage{N}Way` / `Stage{N}Boss` という名前にする。**アセット名に"Way"または"Boss"の文字列が含まれていれば `BattleSequenceAsset.OnValidate()` が `situation` フィールドを自動設定する**ため、命名を外すと道中/ボスの判定がずれる。
+- `Way/` `Boss/` にある他のアセット（`Stage{N}Way.asset` などの `BattleSequenceAsset`、`Phase*.asset`）と、`Attack/` `Movement/` `Ease/` `Bullet/` は旧形式のデータで、実行時には使われていない（削除予定）。新しく作らない。
+- **シナリオアセットは `Way/` `Boss/` から動かさない。** 読み込み側がパスを決め打ちしている（下の「シナリオ接続」）。
 
-## StageData.assetへの登録
+`BattleStageAsset`（`Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/BattleStageAsset.cs`）の項目:
+
+| 項目 | 内容 |
+|---|---|
+| Situation | `Way` / `Boss` |
+| Services | このステージでだけ有効な機能（`WindService` など）。宣言しないものは存在しない扱い |
+| Tree | 道中: ステージ直下で実行するツリー。完了したら次へ進む |
+| Boss Prefab / Boss Spawn Position | ボス戦で出すボス（`BossEntityPresenter` 付き Prefab）と出現位置 |
+| Boss Entrance | 登場時の移動（`MotionStep` の列）。Boss Tree の開始時に終点まで進めて打ち切る |
+| Boss Tree | ボス自身が実行するツリー。シナリオ明けに開始し、ボス撃破で完了 |
+
+## StageData.asset への登録
 
 `Assets/Project/DataStore/StageData.asset` は `StageDataObject`（`Assets/Project/Scripts/Infra/StageDataObject.cs`）のインスタンスで、`List<StageData>` を保持する。
 
 ```csharp
-public class StageDataObject : ScriptableObject { public List<StageData> stageData; }
-
 [Serializable]
 public class StageData
 {
@@ -42,15 +46,16 @@ public class StageData
     public int stageNumber;
     public string charaStillAddress;
     public string title;
-    public string waySequenceAddress;  // Addressableアドレス = アセットパス文字列
-    public string bossSequenceAddress; // Addressableアドレス = アセットパス文字列
+    public string waySequenceAddress;  // 道中の BattleStageAsset のアドレス (= アセットパス)
+    public string bossSequenceAddress; // ボス戦の BattleStageAsset のアドレス (= アセットパス)
 }
 ```
 
-- `waySequenceAddress` / `bossSequenceAddress` には **アセットのパスそのもの**を文字列で入れる（GUIDではない）。例: `Assets/Project/DataStore/Stage1/Way/Stage1Way.asset`。
-- 実際、Stage3〜7（`id: 3`〜`6`, `id: EX`(stageNumber: 7)）は既にエントリが存在するが `waySequenceAddress` / `bossSequenceAddress` は空文字のまま。**新規ステージを追加する場合、多くはこの既存エントリの空アドレスを埋めるだけでよい**（エントリ自体を新規追加する必要があるかはStageData.assetの現状を必ず確認すること）。
-- この登録・値設定はUnity MCP経由で行う（`.asset`の直接編集禁止）。
-- `charaStillAddress` はステージのキャラクター静止画のAddressableキーで、シナリオのキャラ画像ロード（`ScenarioModelRepository.GetEnemyCharaName`）にも使われる。新規ステージでは対応する画像アセットのアドレスを設定すること。
+- フィールド名は旧形式の名残で `SequenceAddress` だが、指す先は **`BattleStageAsset`**。例: `Assets/Project/DataStore/Stage1/BT/Stage1Way_BT.asset`。
+- `BattleScenePresenter` がこのアドレスで Addressables から `BattleStageAsset` を読み込む。
+- Stage5 以降のエントリは用意済みでアドレスが空の場合がある。新規ステージでは既存エントリを埋めれば済むことが多いので、まず `StageData.asset` の現状を確認する。
+- 値の設定は Unity Editor 上で行う（Inspector か MCP の `execute_code` で `SerializedObject` を使う）。
+- `charaStillAddress` はキャラクター静止画の Addressable キーで、シナリオのキャラ画像ロード（`ScenarioModelRepository.GetEnemyCharaName`）にも使われる。
 
 ## BGM
 
@@ -83,6 +88,10 @@ Addressables.LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
 
 `ScenarioData` の中身自体（会話ステップ等）はこのスキルの対象外（別のシナリオ実装の知識が必要な場合は本文中の `Assets/Project/Scenes/Scenario/` 配下を別途調査すること）。
 
-## Addressableの扱いについて
+## Addressables の扱い
 
-このプロジェクトでは `waySequenceAddress` / `bossSequenceAddress` および シナリオのアドレスは、Addressable Groupへの明示登録名ではなく **アセットのプロジェクトパスをそのままAddressableアドレスとして使う運用**になっている（`Addressables.LoadAssetAsync<T>(path)` にパス文字列を直接渡している）。新規アセットを作成した時点でAddressableとして自動的に解決可能になるかは、プロジェクトのAddressable設定（パスベースのアドレス自動割当が有効かどうか）に依存するため、Unity MCPでアセット作成後に対象アセットがAddressableグループに含まれているか確認すること。含まれていなければAddressable Groups WindowでGroup追加が必要になる場合がある。
+このプロジェクトでは、`waySequenceAddress` / `bossSequenceAddress` とシナリオのアドレスに **アセットのプロジェクトパスをそのまま使う**（`Addressables.LoadAssetAsync<T>(path)` にパス文字列を渡している）。
+
+- 既存の `Stage{N}Way_BT` / `Stage{N}Boss_BT` は Default Local Group に、アドレス = アセットパスで登録済み。
+- 新しい `BattleStageAsset` を作ったら、Addressables Groups ウィンドウで Default Local Group に追加し、アドレスをアセットパスにする。MCP から行う場合は `AddressableAssetSettingsDefaultObject.Settings.CreateOrMoveEntry(guid, settings.DefaultGroup)` で登録し、`entry.address` にパスを入れる。
+- `BattleStageAsset` から参照されるツリーや `MotionPreset` は、依存関係として一緒に読み込まれるので個別の登録は要らない。

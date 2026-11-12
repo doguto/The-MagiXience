@@ -1,5 +1,7 @@
 # Battle Timeline 構造解説
 
+> **旧方式（削除予定）**: このドキュメントが説明する Unity Timeline 方式（`BattleSequenceAsset` / `BattleTimelineBuilderAsset` / `BattlePhaseStateMachine` / `BattleTimelineBindingMap` / `EnemySpawnReceiver` / `AttackPreset` / `MovementPreset` など）は、実行時には使われていない。バトル進行は BehaviorTree 方式に置き換わっており、旧方式のコードとデータは削除予定である。現在の仕組みは [BehaviorTree.md](./BehaviorTree.md) と [BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md) を参照すること。以下の本文は旧方式の記録として残している。本文中で参照している [DataStore.md](./DataStore.md) の旧形式の節（Way/Boss、Attack、Movement、BattleTimelineBuilderAsset）は削除済みのため、git 履歴の旧版を参照すること。
+
 このドキュメントは、バトルシーンにおける Unity Timeline (`UnityEngine.Timeline`) の動的生成・再生・イベント連携の仕組みについて解説する。[DataStore.md](./DataStore.md) の「8. BattleTimelineBuilderAsset とトラック定義」で触れた内容を、実行時のフロー（Presenter層でどう再生・Bindingされ、Signalがどう処理されるか）まで含めて掘り下げたもの。
 
 > **注意**: `Assets/Project/Scenes/Battle/Documents/` 配下に開発初期の `フェーズ管理基盤実装.md` / `シーケンス図など？.md` が存在するが、`Stage1SignalReceiver` という単一クラスや `EnemySpawnSignal.MaxHp` フィールド、`extrapolationMode = Loop` など、現在のコードと食い違う記述が残っている（実際は `EnemySpawnReceiver`/`BulletClearReceiver` に分離済み、`EnemySpawnSignal` は `prefab` を持つ、`extrapolationMode` は `Hold`）。本ドキュメントは現在のソースコードを正として書いているので、食い違いがあれば本ドキュメントとソースコードを優先すること。
