@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Project.Commons.UI.Scripts.View
 {
-    // 0-100の値をブロック列で表示する。端数のブロックは右上から斜めに削る
+    // 0-100の値をブロック列で表示する。端数のブロックは左下から45度の斜線で塗る
     [RequireComponent(typeof(CanvasRenderer))]
     public class VolumeBlockGauge : MaskableGraphic
     {
@@ -61,7 +61,7 @@ namespace Project.Commons.UI.Scripts.View
             vh.AddTriangle(start, start + 2, start + 3);
         }
 
-        // fill>=0.5: 右上の三角を削る / fill<0.5: 左下の三角のみ残す。面積がfillに比例する
+        // 境界線は常に左上→右下の45度。左下の角から右上の角へ向かって塗り進め、面積がfillに比例する
         static void AddFill(VertexHelper vh, float x0, float y0, float size, float fill, Color32 c)
         {
             if (fill >= 1f)
@@ -70,27 +70,30 @@ namespace Project.Commons.UI.Scripts.View
                 return;
             }
 
+            // 左下からの正規化距離 u+v=k を境界とする(0<k<2)
+            var k = fill < 0.5f ? Mathf.Sqrt(2f * fill) : 2f - Mathf.Sqrt(2f * (1f - fill));
             var x1 = x0 + size;
             var y1 = y0 + size;
             var start = vh.currentVertCount;
 
-            if (fill >= 0.5f)
+            if (k <= 1f)
             {
-                var topX = x0 + (2f * fill - 1f) * size;
                 vh.AddVert(new Vector3(x0, y0), c, Vector2.zero);
-                vh.AddVert(new Vector3(x0, y1), c, Vector2.zero);
-                vh.AddVert(new Vector3(topX, y1), c, Vector2.zero);
-                vh.AddVert(new Vector3(x1, y0), c, Vector2.zero);
+                vh.AddVert(new Vector3(x0, y0 + k * size), c, Vector2.zero);
+                vh.AddVert(new Vector3(x0 + k * size, y0), c, Vector2.zero);
                 vh.AddTriangle(start, start + 1, start + 2);
-                vh.AddTriangle(start, start + 2, start + 3);
             }
             else
             {
-                var bottomX = x0 + 2f * fill * size;
+                var d = (k - 1f) * size;
                 vh.AddVert(new Vector3(x0, y0), c, Vector2.zero);
                 vh.AddVert(new Vector3(x0, y1), c, Vector2.zero);
-                vh.AddVert(new Vector3(bottomX, y0), c, Vector2.zero);
+                vh.AddVert(new Vector3(x0 + d, y1), c, Vector2.zero);
+                vh.AddVert(new Vector3(x1, y0 + d), c, Vector2.zero);
+                vh.AddVert(new Vector3(x1, y0), c, Vector2.zero);
                 vh.AddTriangle(start, start + 1, start + 2);
+                vh.AddTriangle(start, start + 2, start + 3);
+                vh.AddTriangle(start, start + 3, start + 4);
             }
         }
 
