@@ -46,8 +46,13 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
         float? typeWriterSpeed;
 
         readonly Queue<float> pressTimes = new();
-        // 確認モーダルで「スキップしない」を選んだシナリオでは再度確認しない
-        bool isMashDetectionSuppressed;
+        // 「スキップしない」を選んだらゲーム再起動まで連打検知を止める（保存はしない）
+        static bool isMashDetectionSuppressed;
+
+        // Domain Reload 無効時でも Play 開始ごとにリセットする
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => isMashDetectionSuppressed = false;
+
         bool isSkipping;
         // モーダルの決定入力と同フレームのUISubmitMessageで会話が進まないようにする
         int modalClosedFrame = -1;
