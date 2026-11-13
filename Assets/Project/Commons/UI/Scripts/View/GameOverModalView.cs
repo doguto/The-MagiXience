@@ -15,14 +15,19 @@ namespace Project.Commons.UI.Scripts.View
         [FormerlySerializedAs("retryTipText")]
         [SerializeField] TMP_Text tipText;
 
-        const string RetryTipFormat = "Rewrite: 次回リトライ時、主人公の体力を {0}% 増加した状態に書き換える。";
-        const string ExitTip = "Return: 物語の進行を一時中断する。";
+        public const string RetryTipFormat = "Rewrite: 次回リトライ時、主人公の体力を {0}% 増加した状態に書き換える。";
+        public const string RetryFromStageStartTip = "Rewrite: Phaseを最初からやり直す。";
+        public const string ExitTip = "Return: 物語の進行を一時中断する。";
 
         public IObservable<Unit> OnPressedRetry => retryButton.OnPressed;
         public IObservable<Unit> OnPressedOption => optionButton.OnPressed;
         public IObservable<Unit> OnPressedTitle => exitButton.OnPressed;
 
-        string retryTip = "";
+        int retryHpIncreaseRate;
+        bool isRetryFromStageStart;
+        string retryTip => isRetryFromStageStart
+            ? RetryFromStageStartTip
+            : string.Format(RetryTipFormat, retryHpIncreaseRate);
 
         void Awake()
         {
@@ -47,7 +52,13 @@ namespace Project.Commons.UI.Scripts.View
         // 次回リトライ時のHP増加率(初期HP比, %)をリトライ用のtipsに設定する
         public void SetRetryHpIncreaseRate(int increaseRatePercent)
         {
-            retryTip = string.Format(RetryTipFormat, increaseRatePercent);
+            retryHpIncreaseRate = increaseRatePercent;
+        }
+
+        // オプション「リトライ時にステージの最初からやり直す」の状態をリトライ用のtipsに反映する
+        public void SetRetryFromStageStart(bool isEnabled)
+        {
+            isRetryFromStageStart = isEnabled;
         }
 
         void SetTip(string text)

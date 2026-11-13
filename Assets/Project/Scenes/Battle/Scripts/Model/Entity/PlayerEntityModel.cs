@@ -63,6 +63,12 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
                 .AddTo(invincibilityDisposables);
         }
 
+        // 被弾履歴を消去する（ステージ最初からの完全リセット用）
+        public void ClearDamageHistory()
+        {
+            HasTakenDamage = false;
+        }
+
         public void ResetCharge()
         {
             chargeTime.Value = 0f;

@@ -61,6 +61,14 @@ namespace Project.Scripts.Model
             UserData.isMashSkipEnabled = isEnabled;
         }
 
+        public bool IsRetryFromStageStartEnabled => UserData.isRetryFromStageStartEnabled;
+
+        // メモリ上に反映する。永続化はSave()を別途呼ぶ。
+        public void SetRetryFromStageStartEnabled(bool isEnabled)
+        {
+            UserData.isRetryFromStageStartEnabled = isEnabled;
+        }
+
         public void StageClear(int stageNumber, StageClearRank rank)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);

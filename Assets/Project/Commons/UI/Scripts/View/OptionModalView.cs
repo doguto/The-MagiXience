@@ -26,6 +26,12 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] GameObject mashSkipOnFrame;
         [SerializeField] GameObject mashSkipOffFrame;
 
+        [Header("Retry")]
+        // リトライ時にステージの最初からやり直すか
+        [SerializeField] Toggle retryFromStageStartToggle;
+        [SerializeField] GameObject retryFromStageStartOnFrame;
+        [SerializeField] GameObject retryFromStageStartOffFrame;
+
         readonly Subject<int> onBgmValueChanged = new();
         readonly Subject<int> onSeValueChanged = new();
 
@@ -35,6 +41,10 @@ namespace Project.Commons.UI.Scripts.View
         public IObservable<int> OnBgmValueChanged => onBgmValueChanged;
         public IObservable<int> OnSeValueChanged => onSeValueChanged;
         public IObservable<bool> OnMashSkipChanged => mashSkipToggle.OnValueChangedAsObservable().Skip(1);
+        public IObservable<bool> OnRetryFromStageStartChanged =>
+            retryFromStageStartToggle != null
+                ? retryFromStageStartToggle.OnValueChangedAsObservable().Skip(1)
+                : Observable.Empty<bool>();
 
         // SE音量がEventSystemで選択された/選択解除されたタイミングで発火する。
         public IObservable<BaseEventData> OnSeVolumeSelected =>
@@ -86,6 +96,28 @@ namespace Project.Commons.UI.Scripts.View
             mashSkipToggle.OnValueChangedAsObservable()
                 .Subscribe(UpdateMashSkipFrame)
                 .AddTo(this);
+
+            if (retryFromStageStartToggle != null)
+            {
+                // 左右キーでON/OFFを切り替える(左:ON 右:OFF)
+                retryFromStageStartToggle.OnMoveAsObservable()
+                    .Subscribe(e =>
+                    {
+                        if (e.moveDir == MoveDirection.Left) retryFromStageStartToggle.isOn = true;
+                        else if (e.moveDir == MoveDirection.Right) retryFromStageStartToggle.isOn = false;
+                    })
+                    .AddTo(this);
+
+                retryFromStageStartToggle.OnValueChangedAsObservable()
+                    .Subscribe(UpdateRetryFromStageStartFrame)
+                    .AddTo(this);
+            }
+        }
+
+        void UpdateRetryFromStageStartFrame(bool isOn)
+        {
+            if (retryFromStageStartOnFrame != null) retryFromStageStartOnFrame.SetActive(isOn);
+            if (retryFromStageStartOffFrame != null) retryFromStageStartOffFrame.SetActive(!isOn);
         }
 
         void UpdateMashSkipFrame(bool isOn)
@@ -111,6 +143,12 @@ namespace Project.Commons.UI.Scripts.View
         {
             mashSkipToggle.SetIsOnWithoutNotify(isEnabled);
             UpdateMashSkipFrame(isEnabled);
+        }
+
+        public void SetRetryFromStageStartWithoutNotify(bool isEnabled)
+        {
+            if (retryFromStageStartToggle != null) retryFromStageStartToggle.SetIsOnWithoutNotify(isEnabled);
+            UpdateRetryFromStageStartFrame(isEnabled);
         }
     }
 }
