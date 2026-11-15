@@ -1,38 +1,41 @@
-# ステージ登録（DataStore / StageData / Addressable / BGM / シナリオ）
+# ステージ登録（DataStore / StageData / Addressable / BGM / 会話）
 
 ## DataStore のレイアウト
 
-ステージのデータは `Assets/Project/DataStore/Stage{N}/` 配下に置く。BT 形式のデータは `BT/` にまとめる。
+ステージのデータは `Assets/Project/DataStore/Stage{N}/` 配下に置く。BT 形式のデータは `BT/`、会話は `Scenario/` にまとめる。全ステージ共通の雑魚ツリーは `Assets/Project/DataStore/Commons/BT/Enemy.asset`。
 
 ```
 Assets/Project/DataStore/Stage{N}/
 ├─ BT/
-│   ├─ Stage{N}Way_BT.asset    # 道中の BattleStageAsset (situation = Way)
-│   ├─ Stage{N}Boss_BT.asset   # ボス戦の BattleStageAsset (situation = Boss)
-│   ├─ Stage/                  # ステージツリー (Stage{N}Way_Tree / Stage{N}Boss_Tree)
-│   ├─ Enemy/                  # 敵ツリー (Spawn の Behavior に指定する)
-│   ├─ Attack/                 # 複数箇所から SubTree で参照する攻撃ツリー
-│   ├─ Motion/                 # MotionPreset (敵・ボス・弾の移動)
-│   └─ Ease/                   # EaseCurveAsset
-├─ Way/
-│   └─ Stage{N}WayScenario.asset   # 道中クリア後のシナリオ (命名規則で自動ロード)
-└─ Boss/
-    └─ Stage{N}BossScenario.asset  # ボスクリア後のシナリオ (命名規則で自動ロード)
+│   ├─ Stage{N}_BT.asset       # BattleStageAsset (StageData.stageAddress の参照先。1 ステージに 1 つ)
+│   ├─ Stage{N}_Boss.asset     # BossDefinition (SpawnBoss / BossBattle ノードから参照)
+│   ├─ Stage/                  # ステージツリー Stage{N}_Tree とボスのツリー Stage{N}Boss_Tree
+│   ├─ Attack/                 # 攻撃ツリー S{N}_* (雑魚の attack パラメータ、ボスの SubTree から参照)
+│   ├─ Motion/                 # MotionPreset (敵・ボス・弾の移動。雑魚の movement パラメータ)
+│   ├─ Enemy/                  # 共通ツリーに収まらない特殊な敵の専用ツリー (必要なときだけ)
+│   ├─ Trail/                  # TrailPath (必要なときだけ)
+│   └─ Ease/                   # EaseCurveAsset (必要なときだけ。現状どのステージにも無い)
+└─ Scenario/
+    ├─ Stage{N}WayScenario.asset   # ボス前の会話
+    └─ Stage{N}BossScenario.asset  # 撃破後の会話
 ```
 
-- `Way/` `Boss/` にある他のアセット（`Stage{N}Way.asset` などの `BattleSequenceAsset`、`Phase*.asset`）と、`Attack/` `Movement/` `Ease/` `Bullet/` は旧形式のデータで、実行時には使われていない（削除予定）。新しく作らない。
-- **シナリオアセットは `Way/` `Boss/` から動かさない。** 読み込み側がパスを決め打ちしている（下の「シナリオ接続」）。
+- 旧形式のデータ（`Stage{N}/` 直下の `Attack/` `Movement/` `Ease/` `Bullet/`、`Commons/` の `Attack/` `Ease/` `Movement/`）は削除済み。`Stage{N}/` 直下に `BT/` `Scenario/` 以外のフォルダを作らない（`Stage1/Boss/MusicTerminologySpectrum.asset` だけ例外的に残っている）。
 
 `BattleStageAsset`（`Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/BattleStageAsset.cs`）の項目:
 
 | 項目 | 内容 |
 |---|---|
-| Situation | `Way` / `Boss` |
-| Services | このステージでだけ有効な機能（`WindService` など）。宣言しないものは存在しない扱い |
-| Tree | 道中: ステージ直下で実行するツリー。完了したら次へ進む |
-| Boss Prefab / Boss Spawn Position | ボス戦で出すボス（`BossEntityPresenter` 付き Prefab）と出現位置 |
-| Boss Entrance | 登場時の移動（`MotionStep` の列）。Boss Tree の開始時に終点まで進めて打ち切る |
-| Boss Tree | ボス自身が実行するツリー。シナリオ明けに開始し、ボス撃破で完了 |
+| Services | このステージでだけ有効な機能（`WindService` など）。ステージ単位で、道中からボス戦まで続く。宣言しないものは存在しない扱い |
+| Tree | ステージツリー。ルートは Stage ノード。Success で完了するとステージクリア |
+
+`BossDefinition`（`.../BehaviorTree/Battle/BossDefinition.cs`）の項目:
+
+| 項目 | 内容 |
+|---|---|
+| Prefab / Spawn Position | ボス（`BossEntityPresenter` 付き Prefab）と出現位置 |
+| Entrance | 登場時の移動（`MotionStep` の列）。BossBattle の開始時に終わっていなければ終点まで進める |
+| Tree | ボス自身が実行するツリー。BossBattle で開始し、ボス撃破（撃破演出の完了）で BossBattle が完了する |
 
 ## StageData.asset への登録
 
@@ -45,53 +48,46 @@ public class StageData
     public string id;
     public int stageNumber;
     public string charaStillAddress;
+    public string backgroundAddress;
     public string title;
-    public string waySequenceAddress;  // 道中の BattleStageAsset のアドレス (= アセットパス)
-    public string bossSequenceAddress; // ボス戦の BattleStageAsset のアドレス (= アセットパス)
+    public string stageAddress; // BattleStageAsset のアドレス (= アセットパス)
+    public Vector2 scenarioEnemyStillOffset;
+    public float scenarioEnemyStillScale = 1f;
 }
 ```
 
-- フィールド名は旧形式の名残で `SequenceAddress` だが、指す先は **`BattleStageAsset`**。例: `Assets/Project/DataStore/Stage1/BT/Stage1Way_BT.asset`。
-- `BattleScenePresenter` がこのアドレスで Addressables から `BattleStageAsset` を読み込む。
-- Stage5 以降のエントリは用意済みでアドレスが空の場合がある。新規ステージでは既存エントリを埋めれば済むことが多いので、まず `StageData.asset` の現状を確認する。
+- `stageAddress` の例: `Assets/Project/DataStore/Stage1/BT/Stage1_BT.asset`。`BattleScenePresenter` がこのアドレスで Addressables から `BattleStageAsset` を読み込む。
+- Stage5 以降のエントリは用意済みで `stageAddress` が空。新規ステージでは既存エントリを埋めれば済むことが多いので、まず `StageData.asset` の現状を確認する。
 - 値の設定は Unity Editor 上で行う（Inspector か MCP の `execute_code` で `SerializedObject` を使う）。
-- `charaStillAddress` はキャラクター静止画の Addressable キーで、シナリオのキャラ画像ロード（`ScenarioModelRepository.GetEnemyCharaName`）にも使われる。
+- `charaStillAddress` はキャラクター静止画の Addressable キーで、会話シーンの敵立ち絵のロードにも使われる。
 
 ## BGM
 
-`BattleScenePresenter.PlayBgmForSituation()`（`Assets/Project/Scenes/Battle/Scripts/Presenter/BattleScenePresenter.cs`）が再生ロジックを持つ。
+BGM はステージツリーの `PlayBgm` ノードで流す（道中の頭で `BattleWay`、ボス前の会話の `PlayBossBgm` コマンドで `BattleBoss`）。曲の選択は `BattleScenePresenter.PlayBgm(bgmType)`（`Assets/Project/Scenes/Battle/Scripts/Presenter/BattleScenePresenter.cs`）が行い、曲名も表示する。
 
 ```csharp
-var sceneType = (SceneType)(stageNumber + 2);  // SceneType.Stage1=3, Stage2=4, ... の対応
-var bgmType = situation == BattleSituation.Boss ? BgmType.BattleBoss : BgmType.BattleWay;
+var sceneType = (SceneType)(stageModel.StageNumber + 2);  // SceneType.Stage1=3, Stage2=4, ... の対応
 soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
 ```
 
-`SceneType`（`Assets/Project/Scripts/Extensions/SceneType.cs`）は `Global, Title, StageList, Stage1, Stage2, Stage3, Stage4, Stage5, Stage6, StageEx, Scenario, ...` の順で定義されているため、`stageNumber + 2` で対応するenum値に変換される（Stage1=3なので `1+2=3`）。**新規ステージのBGMアセットは、この対応するSceneType×BgmType.BattleWay/BattleBossの組み合わせでサウンド管理側（SoundManager／BGMテーブル）に登録されている必要がある** — Battle Scene側の実装だけでなく、BGM登録側の設定も忘れずに確認すること。
+`SceneType`（`Assets/Project/Scripts/Extensions/SceneType.cs`）は `Global, Title, StageList, Stage1, Stage2, ...` の順なので `stageNumber + 2` で対応する値になる。**新規ステージの BGM は、この SceneType × `BgmType.BattleWay` / `BattleBoss` の組み合わせで `BgmData.asset` に登録されている必要がある。** Battle Scene 側だけでなく BGM 登録側も確認すること。
 
-`BgmType`（`Assets/Project/Scripts/Extensions/BgmType.cs`）: `Default, BattleWay, BattleBoss, Tutorial, Phase1, Phase2, ...`。道中/ボスで共通の2種類のみを使う（フェーズごとに別BGMにするわけではない）。
+## 会話の接続
 
-## シナリオ接続
+会話（`ScenarioData`）はステージツリーの Scenario ノードが直接参照する。命名規則による自動ロードや Addressables への登録は無い。
 
-道中クリア後・ボスクリア後は自動的にシナリオシーンへ遷移する（`BattleScenePresenter.HandleSequenceCompleted` → `TransitionToScenario`）。シナリオデータの読み込みは **明示的な参照ではなく命名規則からの動的解決**で行われる。
+- ボス前: Section "Boss" の最初の Scenario（`skipOnResume` ON）に `Stage{N}WayScenario` を設定する。会話中の `SpawnBoss` / `PlayBossBgm` は子の OnCommand で処理する。
+- 撃破後: Section "Boss" の最後の Scenario（`skipOnResume` OFF、`restorePlayerControl` OFF）に `Stage{N}BossScenario` を設定する。
+- 会話シーンが処理する演出関数は `ScenarioData` の一覧（`ShowCastMessage` / `ShowMessage` / `TypeWriter` / `AutoAdvance` / `ShowCast` / `HideCast` / `ChangeCastAnimation` / `ShakeCastV`）だけ。それ以外の行はコマンドとしてツリーへ通知され、同名の OnCommand が無ければ警告が出て何も起きない。Scenario ノードの要約欄の ⚠ で過不足を確認する。
+- `.txt` からの取り込み（`Assets/Project/Editor/ScenarioImporter.cs`）は、`{N}面ボス前` / `{N}面ボス後` を `Stage{N}/Scenario/Stage{N}WayScenario.asset` / `Stage{N}BossScenario.asset` に上書きする。既存アセットを上書きするので Scenario ノードの参照は保たれる。
 
-`ScenarioModelRepository.LoadData()`（`Assets/Project/Scenes/Scenario/Scripts/Repository/ModelRepository/ScenarioModelRepository.cs`）:
-
-```csharp
-string scenarioId = $"Stage{stageNumber}{situationSuffix}Scenario";  // situationSuffix: "Way" or "Boss"
-string path = $"{GamePath.DataStorepath}/Stage{stageNumber}/{situationFolder}/{scenarioId}.asset";
-// 例: Assets/Project/DataStore/Stage3/Way/Stage3WayScenario.asset
-Addressables.LoadAssetAsync<ScenarioData>(path).WaitForCompletion();
-```
-
-つまり **`Stage{N}WayScenario.asset` / `Stage{N}BossScenario.asset` を正しいパス・正しい名前で配置しさえすれば、StageData等への追加登録なしに自動的にロードされる**。逆に言えば、命名や配置場所が1文字でもずれるとAddressablesロードが失敗し例外がスローされる（`ScenarioModelRepository.LoadData`は失敗時に例外をthrowする実装）ので、Unity MCPでアセットを作成する際は命名規則を厳密に守ること。
-
-`ScenarioData` の中身自体（会話ステップ等）はこのスキルの対象外（別のシナリオ実装の知識が必要な場合は本文中の `Assets/Project/Scenes/Scenario/` 配下を別途調査すること）。
+`ScenarioData` の中身自体（会話ステップ等）はこのスキルの対象外（必要なら `Assets/Project/Scenes/Scenario/` 配下を別途調査すること）。
 
 ## Addressables の扱い
 
-このプロジェクトでは、`waySequenceAddress` / `bossSequenceAddress` とシナリオのアドレスに **アセットのプロジェクトパスをそのまま使う**（`Addressables.LoadAssetAsync<T>(path)` にパス文字列を渡している）。
+`stageAddress` には **アセットのプロジェクトパスをそのまま使う**（`Addressables.LoadAssetAsync<BattleStageAsset>(path)` にパス文字列を渡している）。
 
-- 既存の `Stage{N}Way_BT` / `Stage{N}Boss_BT` は Default Local Group に、アドレス = アセットパスで登録済み。
+- 既存の `Stage{N}_BT` は Default Local Group に、アドレス = アセットパスで登録済み。
 - 新しい `BattleStageAsset` を作ったら、Addressables Groups ウィンドウで Default Local Group に追加し、アドレスをアセットパスにする。MCP から行う場合は `AddressableAssetSettingsDefaultObject.Settings.CreateOrMoveEntry(guid, settings.DefaultGroup)` で登録し、`entry.address` にパスを入れる。
-- `BattleStageAsset` から参照されるツリーや `MotionPreset` は、依存関係として一緒に読み込まれるので個別の登録は要らない。
+- `BattleStageAsset` から参照されるツリー・`BossDefinition`・`MotionPreset`・会話は、依存関係として一緒に読み込まれるので個別の登録は要らない。
+- ステージ開始時に、`BattleStageAsset` から参照をたどって見つかった弾 Prefab（1 種類 30 発）とプール対象の敵 Prefab（1 種類 4 体）が事前生成される（`StagePrefabCollector`）。Prefab の中身はたどらないので、Prefab の中からだけ参照される弾や敵は事前生成されない（初回の使用時に生成される）。

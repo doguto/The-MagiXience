@@ -7,7 +7,7 @@
 - **フェーズ = `Until`**: 「条件を満たすまで中身を実行する」。中身が先に終わったときの扱いは `Until` のモードで決める（Finish: 終了 / Restart: やり直す / Hold: 条件まで待つ）。
 - **時刻つきの出来事 = `Sequence` + `Wait`**: 撃つ・出すなど即時に終わる出来事は `Sequence[Wait a, X, Wait b, Y]` と間隔で並べる。同じ時刻のものは Wait を挟まずに並べる。BT エディタでは各子に開始からのフレーム数（`@150f`）が出る。
 - **時間のかかるものを重ねる = `Parallel` + `Delay`**: `Repeat` / `Move` / `SubTree` など終わるまで時間がかかる子を同時に走らせるときだけ使う。Policy `Duration` でその長さで打ち切る（子が先に終わっても長さまで待つ）。
-- **一定間隔の繰り返し = `Repeat`**: 子を N 回（0 で無限）、k フレームおきに開始する。前の回が終わっていなくても次を始める。
+- **一定周期の繰り返し = `Repeat`**: 子を N 回（0 で無限）、k フレームの周期で直列に繰り返す。子が早く終われば周期まで待ち、最後の回の後は待たない。回が重なることはない。
 - **周回 = `Loop`**: 子が終わるたびにやり直す。「1 周 = 最後に余りの `Wait` を置いた `Sequence`（重ねるなら `Parallel(Duration)`）」と組み合わせて、周期の決まった攻撃に使う。
 
 ## 道中（ステージツリー）
@@ -17,7 +17,7 @@ Sequence
   Until #Phase1 (NoActiveEnemies / FrameElapsed / BgmSamples …)
     Sequence
       Wait 60
-      Spawn 敵A (Behavior = S{N}_EnemyA)   … @60f
+      Spawn 敵A (Behavior = Enemy, Overrides: movement / attack)   … @60f
       Wait 60
       Spawn 敵B                           … @120f
   Until #Phase2 …
@@ -26,23 +26,30 @@ Sequence
 - 弾消しは `ClearBullets`、背景などの一時オブジェクトは `WithPrefab`。
 - 道中で風を使う区間は `WithWind` で囲む（ステージに `WindService` の宣言が必要）。
 
-## 敵ツリー（`Enemy/`）
+## 雑魚（共通ツリー `Commons/BT/Enemy` + Overrides）
 
 ```
-Sequence
-  SetDeathBehavior (倒されたときに実行するツリー)   … 必要なときだけ
-  SetMovement (MotionPreset)
+Commons/BT/Enemy (パラメータ: movement / attack / death)
+  Sequence
+    SetDeathBehavior ($death)     … 空なら撃破時の行動なし
+    SetMovement ($movement)       … 空なら動かない
+    SubTree ($attack)             … 空なら攻撃しない
+
+Stage{N}/BT/Attack/S{N}_xxx (攻撃ツリー)
   Sequence
     Wait 75
     Repeat ∞ / 15f おき
       Fire (弾 / ShotPattern / 向き)
 ```
+- 雑魚は敵ごとのツリーを作らない。Wave の entries / Spawn で Behavior = `Enemy` とし、Overrides で `movement`（`Motion/` の MotionPreset）、`attack`（`Attack/` の攻撃ツリー）、`death`（撃破時のツリー）を渡す。
+- 攻撃ツリーは中身が同じなら 1 つを使い回す。移動だけが違う敵は `movement` だけ変える。
 - 移動は `SetMovement` で「背景で流し続ける」。移動の完了を待ちたいときだけ `Move` を使う。
-- ツリーのパラメータ（`$名前`）を使えるのは、今のところ `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` の数値だけ。`SetMovement` のプリセットや `Fire` の設定はパラメータにできない。
-- そのため、移動だけが違う敵は敵ツリーを分けてよいが、攻撃部分は `Attack/` のツリーを `SubTree` で共有し、中身を複製しない。移動・攻撃のパラメータ化は未対応で、必要になったらユーザーと相談する。
+- 攻撃の途中で移動を変える、HP で行動を変えるなど、共通ツリーの形に収まらない敵だけ `Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。専用ツリーでも攻撃部分は `Attack/` を `SubTree` で参照し、中身を複製しない。
+- ツリーのパラメータ（`$名前`）を使えるのは、数値では `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` と `ChargeShot` / `MovePath` / `PlaceAlongPath` の一部、アセット参照では `*Param` 欄（`SetMovement.presetParam` / `SubTree.treeParam` / `SetDeathBehavior.treeParam` / `BulletSpec.prefabParam`）だけ。`Fire` の向きや本数などはパラメータにできない。
 - `Spawn` の overrides には固定値を書く。親ツリーのパラメータを渡す（bind to parent）は敵ツリーでは効かない。
+- 撃破時のツリーは 1 フレームだけ実行される。`Fire` / `Spawn` など即時に終わるものだけを書く。
 
-## ボスツリー（`BattleStageAsset.BossTree`、ボス自身が実行）
+## ボスツリー（`BossDefinition.Tree`、ボス自身が実行）
 
 BGM の区切りでフェーズを進める例:
 ```
@@ -81,9 +88,10 @@ Sequence
 
 ## 攻撃ツリー（`Attack/`）
 
-- 複数の敵・フェーズで使う攻撃は `Attack/` に切り出し、`SubTree` で参照する。既存の攻撃をコピーして別アセットにしない（元を直せば全体に効くようにする）。
-- 逆に、1 か所でしか使わない攻撃や、数ノードで書ける小さな攻撃は SubTree にしない。ツリーを開いたときに中身が見えている方が読みやすい。SubTree にするのは「複数のツリーから使う」か「名前の付いたひとまとまりの攻撃として調整する」ものだけ。
-- 値だけ変えたいときは、攻撃ツリーにパラメータを作り、`SubTree` の overrides で上書きする。
+- 雑魚の攻撃は必ず `Attack/` に置き、`Enemy` の `attack` パラメータで参照する。
+- ボスで複数のフェーズから使う攻撃も `Attack/` に切り出し、`SubTree` で参照する。既存の攻撃をコピーして別アセットにしない（元を直せば全体に効くようにする）。
+- 逆に、ボスのツリーで 1 か所でしか使わない攻撃や、数ノードで書ける小さな攻撃は SubTree にしない。ツリーを開いたときに中身が見えている方が読みやすい。SubTree にするのは「複数のツリーから使う」か「名前の付いたひとまとまりの攻撃として調整する」ものだけ。
+- 値だけ変えたいときは、攻撃ツリーにパラメータを作り、`SubTree` の overrides で上書きする。弾だけ変えたいときは `BulletSpec.prefabParam` を使う。
 
 ## ビーム
 
@@ -118,6 +126,7 @@ BulletBeam
 | `Inverter` + `ForceSuccess` で Loop をわざと失敗させて抜ける | `Until(条件)` で Loop を囲む |
 | 同じ終了条件を外側と各フェーズの両方に書く | 外側の `Until` 1 か所にまとめる |
 | 成立しない条件の `Until`（`HpBelow 0%`、極端に長い `FrameElapsed` など） | 取り除く。撃破でツリーごと止まる |
-| 移動 × 攻撃の組み合わせごとに、攻撃の中身まで複製した敵ツリーを作る | 攻撃は `SubTree` で共有する（移動・攻撃のパラメータ化は未対応） |
+| 移動 × 攻撃の組み合わせごとに敵ツリーを作る | 共通ツリー `Enemy` に Overrides で `movement` / `attack` を渡す |
+| 敵を消すために Prefab 側のスクリプトで `Destroy` する | `Despawn` ノード（内部は `ActorDespawn.Despawn`。プール品はプールへ戻る） |
 | ステージ固有の処理を全ステージのツリーに入れる（例: 風を使わないステージで風を設定） | サービスとして、使うステージにだけ宣言する |
 | 自機や Presenter にステージ固有の処理を書く | サービス側から汎用の受け口へ働きかける |

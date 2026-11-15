@@ -50,7 +50,7 @@ Packages/
 - `com.unity.addressables`: Addressables によるアセット管理。
 - `com.unity.inputsystem`: キーボード/ゲームパッド入力管理。
 - `com.unity.render-pipelines.universal`: URP/2D 描画基盤。
-- `com.unity.timeline`: 旧バトル方式（Timeline 駆動）が依存している。現在のバトル進行は自前の BehaviorTree で行い、Timeline は使っていない。
+- `com.unity.timeline`: manifest に残っているが、旧バトル方式（Timeline 駆動）の削除後はどのコードからも使われていない。バトル進行は自前の BehaviorTree で行う。
 - `com.unity.ugui`: UI 表示基盤。
 - `com.mackysoft.serializereference-extensions`: SerializeReference の Inspector 拡張。
 
@@ -124,7 +124,9 @@ Assets/Project/DataStore/
 ├── SeData.asset            # SE 定義データベース。
 ├── StageData.asset         # ステージ定義データベース。
 ├── UserData.json           # Editor 実行時のユーザーセーブデータ。
+├── Commons/BT/Enemy.asset  # 全ステージ共通の雑魚ツリー。
 ├── Stage1/ 〜 Stage4/      # 各ステージのバトル (BT)・シナリオデータ。
+├── MVCapture/              # MV キャプチャ用のシナリオ。
 └── Test/                   # バトルデータ検証用アセット。
 ```
 
@@ -132,19 +134,16 @@ Assets/Project/DataStore/
 
 ```text
 Stage{N}/
-├── BT/                     # BehaviorTree 形式のバトルデータ (現行)。
-│   ├── Stage{N}Way_BT.asset   # 道中の BattleStageAsset (StageData から参照)。
-│   ├── Stage{N}Boss_BT.asset  # ボス戦の BattleStageAsset (StageData から参照)。
-│   ├── Stage/              # ステージ直下・ボス本体の BehaviorTreeAsset。
-│   ├── Enemy/              # 敵ごとの行動 BehaviorTreeAsset (Spawn ノードから参照)。
-│   ├── Attack/             # SubTree で再利用する攻撃パターン (Stage2〜4)。
-│   └── Motion/             # 移動ステップ列の MotionPreset。
-├── Way/                    # 道中後シナリオ Stage{N}WayScenario.asset (現行) と旧 BattleSequence/TimelineBuilder。
-├── Boss/                   # ボス戦後シナリオ Stage{N}BossScenario.asset (現行) と旧 BattleSequence/TimelineBuilder。
-├── Attack/                 # 旧 AttackPreset (未使用・削除予定)。
-├── Movement/               # 旧 MovementPreset (未使用・削除予定)。
-├── Ease/                   # 旧 EaseCurvePreset (未使用・削除予定)。
-└── Bullet/                 # 旧 弾用 MovementPreset (Stage1/Stage3 のみ。未使用・削除予定)。
+├── BT/                     # BehaviorTree 形式のバトルデータ。
+│   ├── Stage{N}_BT.asset   # BattleStageAsset (StageData.stageAddress から参照)。
+│   ├── Stage{N}_Boss.asset # BossDefinition。
+│   ├── Stage/              # ステージツリー Stage{N}_Tree とボスのツリー Stage{N}Boss_Tree。
+│   ├── Attack/             # 攻撃パターンのツリー (雑魚の attack パラメータ、ボスの SubTree から参照)。
+│   ├── Motion/             # 移動ステップ列の MotionPreset。
+│   ├── Enemy/              # 共通ツリーに収まらない敵の専用ツリー (Stage2 のみ中身あり)。
+│   └── Trail/              # TrailPath (Stage2 のみ)。
+├── Scenario/               # ボス前の会話 Stage{N}WayScenario.asset と撃破後の会話 Stage{N}BossScenario.asset。
+└── Boss/                   # Stage1 のみ。MusicTerminologySpectrum.asset。
 ```
 
 データ構造の詳細は `Document/Battle/DataStore.md` を参照。
@@ -259,24 +258,23 @@ DemoClear/Scripts/
 ```text
 Battle/
 ├── Documents/                         # Battle 固有の設計メモ置き場 (旧方式時代のもの)。
-├── Editor/                            # Battle データ編集用 Inspector 拡張。
+├── Editor/                            # Battle 用のエディタ拡張 (SpectrumBarHeightRecorder)。
 │   └── BehaviorTree/                  # BehaviorTree エディタ (GraphView)。
-│       └── Migration/                 # 旧データ → BT の一回限りの変換ツール (削除予定)。
 ├── Prefabs/                           # Player/敵/ステージ用バトルプレハブ。
 └── Scripts/
     ├── BehaviorTree/                  # BT のコアとノード定義。
     │   ├── Core/                      # Node / NodeDefinition / BehaviorTreeAsset / BattleStageAsset / パラメータ / Runner。
-    │   ├── Composite/                 # Sequence / Selector / Parallel / Random / Timeline。
+    │   ├── Composite/                 # Sequence / Selector / Parallel / Random。
     │   ├── Decorator/                 # Loop / Repeat / Until / Delay / Inverter / ForceSuccess。
     │   ├── Condition/                 # 条件定義と CheckCondition / WaitUntil。
     │   ├── Action/                    # Wait / Log / SubTree。
     │   └── Battle/                    # 発射・ビーム・移動・出現・ステージ演出のバトル固有ノード。
-    ├── Runtime/                       # BT の実行基盤 (BattleFlow / BattleWorld / BattleClock / BattleActor / ActorSpawner / BulletSystem)。
+    ├── Runtime/                       # BT の実行基盤 (BattleFlow / BattleWorld / BattleClock / BattleActor / ActorSpawner / ActorPool / BulletSystem)。
     │   ├── Stage/                     # ステージサービス (StageContext / WindService) と外力の受け口。
     │   └── Motion/                    # 敵・ボス・弾共通の移動定義 MotionStep と実行器。
-    ├── Model/                         # Battle の純粋データ・Entity Model。旧方式のフェーズ・攻撃・移動定義も残る。
+    ├── Model/                         # Battle の純粋データ・Entity Model・風の設定型。
     ├── Presenter/                     # Battle 全体の進行とエンティティ制御。
-    ├── Repository/                    # Battle 専用 Repository (旧方式用)。
+    ├── Repository/                    # asmref だけが残る (スクリプトなし)。
     └── View/                          # Battle 表示と当たり判定補助。
 ```
 
@@ -284,89 +282,62 @@ Battle/
 
 Battle BehaviorTree:
 
-- `Core/BattleStageAsset.cs`: 道中またはボス戦 1 本分の定義 (サービス、ステージツリー、ボス Prefab・登場移動・ボスツリー)。
+- `Core/BattleStageAsset.cs`: 1 ステージ (道中・会話・ボス戦) 全体の定義 (ステージサービス、ステージツリー)。
 - `Core/BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject (root、未接続ノード、パラメータ)。
 - `Core/NodeDefinition.cs` / `Core/Node.cs`: 保存用の不変定義と、Enter/Tick/Abort/Exit を保証する実行時ノードの基底。
 - `Core/BuildScope.cs` / `Core/TreeParameter.cs`: パラメータ解決 (`BtInt` などの `$param`) と SubTree の循環検出。
 - `Core/BattleContext.cs` / `Core/BehaviorTreeRunner.cs`: ツリー 1 本の実行文脈と駆動。
 - `Battle/EmitterSources.cs` / `Battle/FireNodes.cs` / `Battle/BeamNodes.cs`: 方向・回転・弾設定・撃ち方と、Fire / BulletBeam / SpriteBeam / MoveTrailFan。
 - `Battle/ActorNodes.cs`: Move / SetMovement / SetDeathBehavior / SetInvincible / Despawn / PlaySe / Spawn。
+- `Battle/TrailNodes.cs` / `Battle/TrailPath.cs`: MovePath / PlaceAlongPath と経路アセット。
+- `Battle/FlowNodes.cs` / `Battle/BossDefinition.cs`: Stage / Section / Wave / PlayBgm / SpawnBoss / BossBattle / Scenario / OnCommand と、ボスの定義。
 - `Battle/StageNodes.cs`: HP・敵全滅・BGM 位置の条件、EnterStrongMode / ClearBullets / WithWind / BossWindCue / PhaseMarker / WithPrefab。
 
 Battle Runtime:
 
-- `BattleFlow.cs`: バトル 1 回分の BT 実行 (ステージサービスの切り替え、ステージツリー・ボスツリーの開始、停止) を管理する。
+- `BattleFlow.cs`: バトル 1 回分の BT 実行 (ステージサービス、弾・敵の事前生成、ステージツリー・ボスツリーの開始、停止) を管理する。
 - `BattleWorld.cs`: フレーム番号・乱数・予約実行・サービスを持ち、1 フレームを進める。
 - `BattleClock.cs`: 固定 60fps で BattleWorld を進める MonoBehaviour。
 - `BattleActor.cs`: 敵/ボスに付けてツリーと移動を毎フレーム進める。
-- `ActorSpawner.cs`: 敵・ビーム・障害物 Prefab を生成し、必要ならツリーを付ける。
-- `BulletSystem.cs`: 敵弾を MotionStep に従って固定フレームで動かす。
+- `ActorSpawner.cs`: 敵・ビーム・障害物 Prefab を生成 (プール対象は ActorPool から取得) し、必要ならツリーを付ける。
+- `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs`: 敵を Prefab ごとに使い回すプール。`IPoolableActor` と、敵を消す共通の入口 `ActorDespawn` も `ActorPool.cs` にある。
+- `StagePrefabCollector.cs`: BattleStageAsset から参照をたどり、事前生成する弾・出現物の Prefab を集める。
+- `BulletSystem.cs`: 敵弾・自機弾を MotionStep に従って固定フレームで動かす。
 - `Stage/StageContext.cs` / `Stage/WindService.cs` / `Stage/ExternalForces.cs`: ステージサービスの仕組み、風、自機・弾への外力の受け口。
-- `Motion/MotionCore.cs` / `Motion/MotionSteps.Basic.cs` / `Motion/MotionSteps.Advanced.cs` / `Motion/MotionAssets.cs`: MotionStep の定義・実行、MotionPreset / EaseCurveAsset。
+- `Motion/MotionCore.cs` / `Motion/MotionSteps.Basic.cs` / `Motion/MotionSteps.Advanced.cs` / `Motion/MotionAssets.cs`: MotionStep の定義・実行、MotionPreset / EaseCurveAsset / BattleTargets (自機の Transform)。
 
 Battle BehaviorTree Editor:
 
 - `BehaviorTreeEditorWindow.cs`: `Window > Battle > Behavior Tree Editor`。BT アセットのダブルクリックでも開く。
 - `BehaviorTreeGraphView.cs` / `BehaviorTreeNodeView.cs` / `BehaviorTreePort.cs` / `BehaviorTreeEdge.cs`: グラフ表示と編集。
 - `NodePaletteView.cs` / `NodeCatalog.cs` / `NodeSearchWindowProvider.cs`: ノード一覧・検索・ドラッグ作成。
-- `ParameterPanelView.cs` / `BtValueDrawer.cs` / `ParameterUtility.cs`: パラメータ一覧と値欄の結びつけ。
-- `Migration/LegacyBattleConverter*.cs` / `Migration/LegacyStageMigrationMenu.cs`: 旧データの変換ツール (削除予定)。
+- `ParameterPanelView.cs` / `BtValueDrawer.cs` / `ParameterUtility.cs`: パラメータ一覧と値欄の結びつけ。パラメータ名の変更は値欄・`bindToParent`・`*Param` 欄に追従する。
 
-Battle Editor (旧方式用の Drawer は削除予定):
+Battle Model:
 
-- `AttackTimelineDrawer.cs`: AttackTimeline の Inspector 表示を整える。
-- `BattlePhaseDefinitionDrawer.cs`: BattlePhaseDefinition の Inspector 表示を整える。
-- `CompositeExitConditionConfigDrawer.cs`: 複合終了条件の Inspector 表示を整える。
-- `EaseDrawerHelper.cs`: Ease/Curve 系 Drawer の共通補助。
-- `EnemyEntityPresenterEditor.cs`: EnemyEntityPresenter の Inspector を拡張する。
-- `PathMovementConfigDrawer.cs`: PathMovementConfig の Inspector 表示を整える。
-- `TweenMovementConfigDrawer.cs`: TweenMovementConfig の Inspector 表示を整える。
-
-Battle Model (`BattleSequence*` / `*BattlePhaseModel` / `BattleTimelineBuilderAsset` / Signal は旧方式で未使用・削除予定):
-
-- `BattleSequenceAsset.cs`: バトルシーケンスの ScriptableObject 定義。
-- `BattleSequenceModel.cs`: シーケンスグループとフェーズ進行を管理する。
-- `BattlePhaseModelBase.cs`: フェーズ終了通知と Timeline 解決の基底。
-- `BattleTimelineBuilderAsset.cs`: Track 定義からランタイム Timeline を生成する。
-- `TimeLimitBattlePhaseModel.cs`: 時間経過で終わるフェーズ。
-- `AllEnemiesDefeatedBattlePhaseModel.cs`: 敵全滅で終わるフェーズ。
-- `BgmPositionBattlePhaseModel.cs`: BGM 再生位置で終わるフェーズ。
-- `BossHpThresholdBattlePhaseModel.cs`: ボス HP 閾値で終わるフェーズ。
-- `CompositeBattlePhaseModel.cs`: 複数終了条件を AND/OR でまとめるフェーズ。
-- `EnemySpawnSignal.cs`: Timeline から敵生成を通知する Signal。
-- `BulletClearSignal.cs`: Timeline から弾消去を通知する Signal。
+- `BattleWind.cs`: 風の設定型 (`WindDirection` / `WindInterval` / `BattleWindSettings`)。
+- `BossWindCueSettings.cs`: BossWindCue ノードの設定。
+- `BattleBackgroundModel.cs`: 背景の状態。
 - `ScreenBoundsCache.cs`: Battle シーンの画面境界をキャッシュする。
 - `IEnemyTracker.cs`: 敵数監視の抽象インターフェース。
-
-Battle Model subdirectories:
-
-```text
-Model/Attack/             # 旧: 弾・敵生成イベント、方向/回転/発射元の設定。
-Model/Definitions/        # 旧: Timeline の Track/Clip 定義。
-Model/Entity/             # Player/Enemy/Boss/Bullet などの純粋 EntityModel。
-Model/ExitCondition/      # 旧: フェーズ終了条件の SerializeReference 設定。
-Model/Movement/           # 旧: DOTween ベースの移動ステップ設定 (PlayerPositionReference は現行でも使用)。
-```
+- `Entity/`: Player/Enemy/Boss/Bullet/SpectrumBar などの純粋 EntityModel。
 
 Battle Presenter:
 
 - `BattleScenePresenter.cs`: バトル全体の初期化、BattleStageAsset のロード、BattleFlow による Way/Boss 進行、Scenario 遷移、Retry/Title 戻りを制御する。
-- `BattlePhaseStateMachine.cs`: 旧: BattleSequenceModel のフェーズを Timeline で再生する (未使用・削除予定)。
-- `BattleTimelineBindingMap.cs`: 旧: ランタイム生成 Timeline の Binding を適用する (未使用・削除予定)。
 - `WindArrowsPresenter.cs`: 風向き矢印を表示する。WindService が生成する。
 - `BackgroundPresenter.cs`: バトル背景の初期化・スクロール・減速を制御する。
 - `BattleWallPresenter.cs`: バトル画面の壁/境界関連を制御する。
-- `EnemySpawnReceiver.cs`: 旧: Timeline Signal を受けて敵を生成する (未使用・削除予定)。
 - `BulletClearReceiver.cs`: 弾・警告線・ビームや敵をまとめて消去する (ClearBullets ノード、Retry)。
-- `EnemyTracker.cs`: 生存中の敵数を監視し、NoActiveEnemies 条件へ提供する。
+- `EnemyTracker.cs`: 生存中の敵数を `EnemyEntityPresenter.OnRemoved` で数え、NoActiveEnemies 条件へ提供する。
 
 Battle Entity Presenter:
 
 - `PlayerEntityPresenter.cs`: プレイヤー移動、攻撃、チャージ、被弾、死亡演出を制御する。
-- `EnemyEntityPresenter.cs`: 通常敵の移動、攻撃、寿命、被弾、死亡を制御する。
-- `BossEntityPresenter.cs`: ボスの HP、強化攻撃、移動、攻撃、死亡演出を制御する。
-- `BulletEntityPresenter.cs`: 弾の移動、寿命、衝突、プール返却を制御する。
-- `BulletPool.cs`: 弾 Presenter の ObjectPool を管理する。
+- `EnemyEntityPresenter.cs`: 通常敵の HP・被弾点滅・効かない攻撃の SE・寿命・画面外・接触を扱う (移動と攻撃は BattleActor のツリー)。ActorPool での出し入れに対応する。
+- `BossEntityPresenter.cs`: ボスの HP・被弾・撃破演出・登場直後の当たり判定オフを扱う。
+- `BulletEntityPresenter.cs`: 弾の見た目・寿命・衝突・画面外・プール返却を扱う (位置は BulletSystem が与える)。
+- `BulletPool.cs`: 弾 Prefab ごとの共有 ObjectPool (`GetOrCreateSharedPool` / `Prewarm`) と、撃ち手の弾 Prefab の保持。
 - `PhysicsBallPresenter.cs`: 物理挙動を持つ Battle エンティティを制御する。
 - `AudioSpectrumPresenter.cs`: 音声スペクトラム表現を制御する。
 - `BossPhaseProgressGauge.cs`: ボスフェーズ進行ゲージを表示する。
@@ -379,7 +350,6 @@ Battle Entity Presenter:
 
 Battle Repository/View:
 
-- `BattleSequenceModelRepository.cs`: 旧: BattleSequenceAsset を読み BattleSequenceModel を生成する (未使用・削除予定)。
 - `BackgroundView.cs`: 背景表示とスクロール見た目を扱う。
 - `FanCollider2D.cs`: 扇形当たり判定を提供する。
 - `StaffNotationPresenter.cs`: 五線譜風表示を制御する。
@@ -419,7 +389,7 @@ Extensions:
 
 Infra:
 
-- `StageDataObject.cs`: ステージ番号、タイトル、キャラ、背景、道中/ボスの BattleStageAsset アドレスを定義する。
+- `StageDataObject.cs`: ステージ番号、タイトル、キャラ、背景、BattleStageAsset のアドレスを定義する。
 - `CharacterDataObject.cs`: キャラクター ID/名前/英名を定義する。
 - `BgmDataObject.cs`: BGM 種別、対象シーン、ループ位置を定義する。
 - `SeDataObject.cs`: SE 種別とループ位置を定義する。
@@ -432,7 +402,7 @@ Model:
 - `AddressablesModel.cs`: Addressables 初期化処理を表す。
 - `RuntimeModel.cs`: 現在ステージと Way/Boss 状態を保持する。
 - `SceneRouterModel.cs`: シーン名定数を定義する。
-- `StageModel.cs`: ステージ開放/クリア状態と BattleSequence 参照を持つ。
+- `StageModel.cs`: ステージ開放/クリア状態と BattleStageAsset のアドレスを持つ。
 - `UserModel.cs`: UserData の読み書きと進行状態/音量を管理する。
 - `CharacterModel.cs`: キャラクターデータを表す。
 - `BgmModel.cs`: BGM データと AudioClip を表す。
@@ -525,11 +495,9 @@ StageList
   -> Battle
 
 Battle
-  -> play Way sequence
-  -> load Scenario additively
-  -> Scenario completes and RuntimeModel advances to Boss
-  -> play Boss sequence
-  -> load Scenario additively
-  -> Scenario completes and RuntimeModel advances to next stage
+  -> load BattleStageAsset and run the stage tree (BattleFlow)
+  -> Section "Way": waves
+  -> Section "Boss": load Scenario additively, spawn boss, boss battle, load Scenario additively
+  -> stage tree completes and the stage is cleared
   -> DemoClear in current demo flow
 ```

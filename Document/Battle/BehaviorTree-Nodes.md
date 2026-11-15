@@ -20,6 +20,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 | 条件 | `Scripts/BehaviorTree/Condition/Condition.cs`、`Battle/StageNodes.cs` |
 | 基本 Action | `Scripts/BehaviorTree/Action/BasicActions.cs` |
 | バトル Action | `Scripts/BehaviorTree/Battle/FireNodes.cs` / `BeamNodes.cs` / `ActorNodes.cs` / `StageNodes.cs` |
+| ステージ進行 | `Scripts/BehaviorTree/Battle/FlowNodes.cs`、`BossDefinition.cs` |
 | 発射の部品 | `Scripts/BehaviorTree/Battle/EmitterSources.cs`、`FireNodes.cs` |
 | MotionStep | `Scripts/Runtime/Motion/MotionSteps.Basic.cs` / `MotionSteps.Advanced.cs` |
 
@@ -83,17 +84,18 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 ### Repeat
 
-子を `interval` フレームおきに開始する。前の回が終わっていなくても次を開始し、複数の回が並行して進む。
+子を `interval` フレームの周期で直列に繰り返す。回が重なることはない。
 
 | フィールド | 単位 | 説明 |
 |---|---|---|
-| `count` ($ 可) | 回 | 開始する回数。0 = 無限 |
-| `interval` ($ 可) | f | 開始の間隔。既定 60、最小 1 |
+| `count` ($ 可) | 回 | 回数。0 = 無限 |
+| `interval` ($ 可) | f | 周期（ある回の開始から次の回の開始まで）。既定 60、最小 1 |
 
-- 1 回目は開始フレーム f、k 回目は f + (k−1)×interval に開始する。開始したフレームのうちにその回を Tick する。
-- 実行中の回のどれかが Failure したら、全ての回を Abort して Failure。
-- `count > 0` なら、指定回数を開始し全ての回が終わったフレームで Success。`count = 0` なら終わらない（親の Until などで打ち切る）。
-- 回ごとの実行時ノードは使い回す（同時に走る数だけ生成される）。
+- 1 回目は開始フレーム f、子が周期内に終われば k 回目は f + (k−1)×interval に開始する。
+- 子が周期より長くかかったときは、その回が終わったフレームに次の回を始める（以降の開始はそこから数え直す）。
+- 最後の回が終わったフレームで Success。最後の回の後は待たない。`count = 0` なら終わらない（親の Until などで打ち切る）。
+- 子が Failure したら Failure。
+- `Loop{ Sequence[子, Wait] }` との違いは 2 点: 周期が子の長さに左右されないことと、最後の回の後に待ちが入らないこと。
 
 ### Until
 
@@ -172,8 +174,8 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 | `Or` | `conditions` | どれか成立（空なら不成立） |
 | `Not` | `condition` | 中の条件が不成立（未設定なら成立） |
 
-- `HpTarget.Self` はツリーを持つアクター自身、`Boss` は `Services.Boss`（ボス戦で `StartBossTree` された BattleActor）。ステージ直下のツリーからボスの HP を見るときは `Boss` を使う。
-- 移行データの FrameElapsed は 601 や 1801 のように +1 された値が多い。旧データのループ終端時刻ちょうどの発射を含めるために移行ツールが付けたもの。
+- `HpTarget.Self` はツリーを持つアクター自身、`Boss` は `Services.Boss`（BossBattle ノードでツリーを付けたボスの BattleActor）。ステージツリーからボスの HP を見るときは `Boss` を使う。
+- 実データの FrameElapsed は 601 や 1801 のように +1 された値が多い。旧形式から変換したとき、旧データのループ終端時刻ちょうどの発射を含めるために付けたもの。
 
 ## 4. 基本 Action
 
@@ -204,6 +206,7 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 | フィールド | 説明 |
 |---|---|
 | `tree` | 実行するツリー。未設定なら警告して即 Success |
+| `treeParam` | ツリーの Object パラメータ名。指定するとその値のツリーを `tree` の代わりに実行する。値が空なら何もせず即 Success（共通の雑魚ツリー `Enemy` の `attack` で使う） |
 | `overrides` | 子ツリーのパラメータの上書き（`TreeParameter`）。`bindToParent` に親ツリーのパラメータ名を入れると、その値を引き継ぐ |
 
 Build 時に展開されるため、実行時の戻り値は子ツリーのルートと同じ。循環参照は Build 時に例外になる。
@@ -278,11 +281,35 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | `spreadAngle` | 度 | 扇の隣り合う弾の角度 |
 | `releaseDelayFrames` | f | 移動終了から全弾が動き出すまで |
 
+### PlaceAlongPath（Action/Attack）
+
+経路アセット（`TrailPath`）に沿って弾を等間隔に置き、経路の移動時間 + `fireDelayFrames` 後に一斉に放つ。敵の実際の位置ではなく経路から計算した位置に置くので、同じ経路の `MovePath` と `Parallel` で並べると移動と弾がずれない。経路の移動時間が経つまで Running。
+
+| フィールド | 単位 | 説明 |
+|---|---|---|
+| `path` | | `TrailPath`（パラメータ可） |
+| `bullet` / `rotation` / `se` | | Fire と同じ |
+| `spacing` | ワールド単位 | 弾を置く間隔（パラメータ可） |
+| `fireDelayFrames` | f | 経路の移動を終えてから放つまで（パラメータ可） |
+
+弾の向きと扇は区間ごとに `TrailPath` 側で指定する。扇の角度は区間内の弾の並び順で決まる。
+
+### TrailPath（ScriptableObject、Create → Battle/Trail Path）
+
+| フィールド | 説明 |
+|---|---|
+| `relative` | ON なら各点を直前の点からの移動量として扱う。OFF ならワールド座標 |
+| `frames` | 経路全体を等速で移動するフレーム数 |
+| `segments[].position` | 区間の終点 |
+| `segments[].direction` / `spread` | この区間に置いた弾を撃つ向きと、隣り合う弾の角度（度） |
+| `segments[].extraFireDelayFrames` | 全体の発射時刻からさらに遅らせるフレーム数（区間ごとに時間差で撃つとき） |
+
 ### 発射の部品: BulletSpec
 
 | フィールド | 説明 |
 |---|---|
 | `prefab` | `BulletEntityPresenter` を持つ弾 Prefab。未設定なら何も出さない |
+| `prefabParam` | ツリーの Object パラメータ名。指定するとその値（弾 Prefab）を `prefab` の代わりに使う。SubTree で弾だけ差し替えるときに使う（`Fire` / `PlaceAlongPath` が対応） |
 | `damage` | ダメージ（既定 10） |
 | `motionPreset` | 指定するとインラインの `motion` より優先 |
 | `motion` | 弾の移動 (`List<MotionStep>`)。空なら発射方向へ等速 (`VelocityMotion`) |
@@ -299,7 +326,8 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | `NWayShot` | `wayCount`、`spreadAngle`(度、隣り合う弾の角度)、`radius`(発射位置を各方向へずらす距離)、`startDelayFrames`(f、動き出すまで)、`rotationOffset`(度、反時計回り) | 同時に扇状に撃つ。奇数は中央に 1 発、偶数は中央を空ける |
 | `SequentialFanShot` | `wayCount`、`spreadAngle`(度)、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 扇状に 1 発ずつ `spawnIntervalFrames` おきに出し、最後の 1 発から `releaseDelayFrames` 後に全弾同時に動き出す |
 | `SequentialCircleShot` | `wayCount`、`radius`、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 円周上（360°/wayCount 間隔、半径 radius）に 1 発ずつ出し、全弾同時に動き出す |
-| `ChargeShot` | `wayCount`、`radius`、`targetRadius`、`gatherDuration`(s)、`rotationSpeed`(度/s、負で時計回り)、`startDelayFrames`(f) | 周囲に弾を並べ、渦を巻きながら `targetRadius` まで集める。弾の移動は `SpiralMotion` に置き換わり、`BulletSpec.motion` は使われない |
+| `ChargeShot` | `count`、`radius`、`targetRadius`、`gatherFrames`(f)、`rotationSpeed`(度/s、負で時計回り)、`startDelayFrames`(f)。すべてパラメータ可 | 周囲に弾を並べ、渦を巻きながら `targetRadius` まで集める。弾の移動は `SpiralMotion` に置き換わり、`BulletSpec.motion` は使われない |
+| `BurstShot` | `wayCount`、`spreadAngle`(度)、`shotCount`、`intervalFrames`(f)、`startRadius`、`endRadius` | 同じ扇を `intervalFrames` おきに `shotCount` 回撃つ。発射位置の半径は 1 回目の `startRadius` から最後の `endRadius` へ線形に変わる。向きは最初に 1 回だけ決める |
 
 ### 発射の部品: DirectionSource
 
@@ -342,6 +370,14 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 中断・完了時に移動を止める。ツリーと移動を独立させたい場合は SetMovement を使う。
 
+### MovePath（Action/Move）
+
+経路アセット（`TrailPath`）に沿ってこの敵を等速（Linear）で動かす。`TrailPath.frames` 経つと Success。`Self` が無ければ Failure。`PlaceAlongPath` と同じ経路を渡して `Parallel` で並べると「走りながら弾を置く」攻撃になる（例: `Stage2/BT/Attack/S2_TrailFire`）。
+
+| フィールド | 説明 |
+|---|---|
+| `path` | `TrailPath`（パラメータ可） |
+
 ### SetMovement（Action/Move）
 
 この敵の移動を差し替える。移動はツリーと独立して流れ続け、ノードは即 Success。
@@ -349,11 +385,13 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | フィールド | 説明 |
 |---|---|
 | `preset` / `steps` | Move と同じ。空なら移動を止める |
+| `presetParam` | ツリーの Object パラメータ名。指定するとその値の `MotionPreset` を使う。値が空なら移動を止める |
 | `continueIfSame` | ON なら、同じ移動（同じリスト参照）が再生中のときはやり直さない。フェーズをまたいで続く移動に使う |
 
 ### SetDeathBehavior（Action/Actor）
 
 この敵が倒されたときに 1 回だけ実行するツリー (`tree`) を設定する。即 Success。
+`treeParam`（ツリーの Object パラメータ名）を指定するとその値のツリーを使い、値が空なら撃破時の行動なしになる。
 死亡時ツリーは 1 フレームだけ Tick して停止するため、即時ノード（Fire など）だけが意味を持つ。
 
 ### SetInvincible（Action/Actor）
@@ -362,7 +400,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 ### Despawn（Action/Actor）
 
-この敵を消す（撃破扱いにしない）。この敵が予約していた発射も取り消す。即 Success。
+この敵を消す（撃破扱いにしない）。この敵が予約していた発射も取り消す。消す処理は `ActorDespawn.Despawn` で、プールから出した敵はプールへ戻す。即 Success。
 
 ### PlaySe（Action）
 
@@ -375,7 +413,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | フィールド | 単位 | 説明 |
 |---|---|---|
 | `prefab` | | 出す Prefab |
-| `behavior` | | この Prefab を動かすツリー。指定すると Prefab 側の旧来の移動・攻撃を止めて `BattleActor` を付ける。未指定なら Prefab の旧来の動き |
+| `behavior` | | この Prefab を動かすツリー（`BattleActor` を付ける）。雑魚は通常 `Commons/BT/Enemy`。未指定ならツリーを付けず、その場から動かない |
 | `overrides` | | `behavior` のパラメータ上書き（固定値のみ。`bindToParent` は効かない） |
 | `position` | ワールド単位 | 撃つ敵がいなければワールド座標、いればその位置からの相対 |
 | `worldSpace` | | ON なら撃つ敵がいてもワールド座標で出す |
@@ -387,7 +425,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | `beamDuration` | s | ビーム/警告線の表示時間。0 以下は Prefab の値 |
 | `beamWidth` | ワールド単位 | ビーム/警告線の幅。0 以下は Prefab の値 |
 
-`beam*` は Prefab が `IBeamVisualReceiver` を持つ場合だけ使われる。出現した敵のツリーは翌フレームから動く。
+`beam*` は Prefab が `IBeamVisualReceiver` を持つ場合だけ使われる。出現した敵のツリーは翌フレームから動く。プール対象の敵 Prefab は `ActorPool` から出す（[BehaviorTree.md](./BehaviorTree.md) 4.5）。
 
 ### SpawnLayout
 
@@ -427,9 +465,91 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 `phaseId` を `BattleServices.PhaseStarted` で通知する。即 Success。`BossPhaseProgressGauge` がボスのフェーズ区切りの検出に使う（現状 `phaseId` の値は見ていない）。
 
+## 7.5 ステージ進行
+
+ステージツリー（`BattleStageAsset.tree`）で道中・会話・ボス戦を並べるノード。ソースは `Battle/FlowNodes.cs`。ツリー全体の形は [BehaviorTree.md](./BehaviorTree.md) 6.1 を参照。
+
+### Stage（Flow）
+
+ステージツリーのルートに置く Composite。子の Section を順に実行し、全て Success なら Success。
+
+- 開始時は `Services.Progress.StartSection`（リトライ・デバッグ起動の開始位置）番目の Section から始める。
+- Section に入るたびに `Services.Progress.Enter` で通知し、Presenter が `RuntimeModel.CheckpointSection` に記録する。
+- 子が Section でないと Build 時に警告する（Way 扱いで実行はする）。
+
+### Section（Flow）
+
+ステージの区切り（Decorator）。リトライするとこの Section の頭からやり直す。子の結果をそのまま返す。
+
+| フィールド | 説明 |
+|---|---|
+| `label` | 表示名（BT エディタ・Battle Debug Launcher の一覧に出る） |
+| `situation` | `Way` / `Boss`。背景スクロールなどシーン側の扱いに使う |
+
+### Wave（Flow）
+
+出現一覧を時刻どおりに出し、全部出したあと終了条件が成立したら Success。
+
+| フィールド | 単位 | 説明 |
+|---|---|---|
+| `entries[].frame` | f | Wave の開始から数えたフレーム。`Sequence[Wait(N), Spawn]` の Spawn と同じ数え方（0 なら開始フレーム） |
+| `entries[].spawn` | | 出す内容（Spawn ノードと同じフィールド） |
+| `until` | | 全部出したあとに待つ条件（例: `NoActiveEnemies`）。未設定なら最後の出現のフレームで Success |
+
+entries は `frame` 順に並べ替えて実行する。
+
+### PlayBgm（Action/Stage）
+
+`bgm`（`BgmType`、既定 BattleWay）を `Services.PlayBgm` で流す。即 Success。曲の選択（`SceneType = stageNumber + 2`）と曲名の表示は Presenter が行う。
+
+### SpawnBoss（Action/Boss）
+
+`boss`（`BossDefinition`）のボスを生成し、登場の移動を流す。即 Success。ツリーはまだ付けない（BossBattle で付ける）。BossHost や BossDefinition が無い、Prefab に `BossEntityPresenter` が無い、既にボスが出ている場合は Failure。
+
+### BossBattle（Action/Boss）
+
+出ているボスにツリーを付けて戦闘を始め、撃破演出が終わるまで Running、終わったら Success。
+
+| フィールド | 説明 |
+|---|---|
+| `tree` | ボスに付けるツリー。未指定なら `BossDefinition.tree` |
+
+- 開始時に登場の移動が残っていれば終点まで一気に進める。
+- ボスが出ていない、またはツリーが無ければ警告して Failure。
+- ボスツリーの結果は見ない。ボスツリーが先に完了しても撃破まで待つ。
+
+### Scenario（Flow）
+
+会話を流し、終わるまで待つ Composite。子には OnCommand だけを置く。
+
+| フィールド | 説明 |
+|---|---|
+| `scenario` | 流す会話 (`ScenarioData`) |
+| `skipOnResume` | ON（既定）なら、リトライやデバッグ起動でこの Section を途中から始めたときは会話を見せず、コマンドだけを順に即実行する |
+| `restorePlayerControl` | ON（既定）なら会話の後に自機の攻撃入力を戻す。ステージ最後の会話では OFF |
+
+- 会話中に届いたコマンド（演出関数以外の行）は、同名の `command` を持つ OnCommand の子を実行する。子は会話と並行して動き、同じ子がまだ実行中なら後のコマンドは警告して無視する。
+- 会話が終わり、かつ実行中の子が全て終わったら Success。
+- 対応する OnCommand が無いコマンドは警告して無視する。
+- 要約欄に、OnCommand が無いコマンド（`⚠ OnCommand が無い`）と会話に出てこない OnCommand（`⚠ 会話に無いコマンド`）を表示する。
+- BT エディタで Scenario ノードを右クリック →「会話のコマンドから OnCommand を作る」で、足りない OnCommand をまとめて作れる。
+
+### OnCommand（Flow）
+
+Scenario の子に置く Decorator。会話が `command`（シナリオの `function` 名。例: `SpawnBoss`）の行に来たら子を実行する。子の結果をそのまま返す。
+
+### BossDefinition（ScriptableObject、Create → Battle/Boss Definition）
+
+| フィールド | 説明 |
+|---|---|
+| `prefab` | `BossEntityPresenter` を持つ Prefab |
+| `spawnPosition` | 生成位置 |
+| `entrance` | 登場の移動 (`List<MotionStep>`、秒) |
+| `tree` | ボス自身が実行するツリー |
+
 ## 8. MotionStep
 
-敵・ボス・弾の移動の 1 ステップ。`Move` / `SetMovement` / `BulletSpec.motion` / `BattleStageAsset.bossEntrance` / `MotionPreset` に並べる。
+敵・ボス・弾の移動の 1 ステップ。`Move` / `SetMovement` / `BulletSpec.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
 **時間はすべて秒**。`duration` が「0 で無限」のステップは終わらないため、後ろのステップに進まない。
 
 「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに旧実装の OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.2 参照）。
@@ -505,7 +625,7 @@ Until cond: FrameElapsed(481)
      └─ Fire
 ```
 
-`Repeat(interval=k)` は前の回の終了を待たずに k フレームおきに子を始める。子が SequentialFan のように時間のかかる Sequence でも周期がずれない。1 周期の中で複数の発射タイミングがある場合は `Loop ∞ { Sequence[Fire, Wait a, Fire, Wait (b−a), Fire, Wait (k−b)] }` を使う（最後の Wait で 1 周の長さを揃える）。
+`Repeat(interval=k)` は k フレームの周期で子を繰り返す。子が時間のかかる Sequence でも、周期より短ければ開始間隔はずれない。1 周期の中で複数の発射タイミングがある場合は `Repeat ∞ / k { Sequence[Fire, Wait a, Fire, Wait (b−a), Fire] }` のように子の中に並べる（残りは Repeat が周期まで待つ）。
 
 ### BGM 同期のボスフェーズ = BgmSamples
 
@@ -552,31 +672,32 @@ Sequence
 
 HP が閾値を下回った瞬間に Until が中のフェーズを中断して Success を返し、次へ進む（Stage2 ボス）。HP の判定はこの 1 か所だけに置き、各フェーズの Until 条件に同じ `HpBelow` を重ねない。`Inverter` / `ForceSuccess` で Loop を失敗させて抜ける書き方はしない。
 
-### 敵のツリー = Sequence[SetDeathBehavior?, SetMovement, 攻撃]
+### 雑魚 = 共通ツリー Enemy + overrides
 
 ```text
-Sequence
- ├─ SetDeathBehavior (撃破時: 死亡時攻撃ツリー)   … 必要な敵のみ
- ├─ SetMovement (移動プリセット)
+Commons/BT/Enemy
+ └─ Sequence
+     ├─ SetDeathBehavior  $death      … 撃破時のツリー (空なら無し)
+     ├─ SetMovement       $movement   … Stage{N}/BT/Motion/*
+     └─ SubTree           $attack     … Stage{N}/BT/Attack/S{N}_*
+
+Stage{N}/BT/Attack/S{N}_*
  └─ Until cond: FrameElapsed(N)
      └─ Repeat ∞ / k f
          └─ Fire
 ```
 
-移動は SetMovement でツリーと独立させ、ツリー本体は攻撃だけを書く。HP で行動を変える敵は `Sequence[Until(HpBelow){通常}, 後半]` のように並べる。
+Spawn（Wave の entries を含む）で `behavior = Enemy` とし、`overrides` で `movement` / `attack` / `death` を渡す。移動は SetMovement でツリーと独立させ、攻撃ツリーは攻撃だけを書く。攻撃の途中で移動を変える、HP で行動を変える（`Sequence[Until(HpBelow){通常}, 後半]`）など、この形に収まらない敵だけ `Stage{N}/BT/Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。
 
-### 道中 = Sequence[Wait, Spawn, Wait, Spawn..., WaitUntil(NoActiveEnemies)]
+### 道中 = Section "Way" [ PlayBgm, Wave..., Wait ]
 
 ```text
-Sequence
- ├─ Sequence #Phase1
- │   ├─ Wait 150
- │   ├─ Spawn          (@150f)
- │   ├─ Wait 45
- │   ├─ Spawn          (@195f)
- │   ├─ ...
- │   └─ WaitUntil  cond: NoActiveEnemies
- └─ Sequence #Phase2 ...
+Section "Way" [Way]
+ └─ Sequence
+     ├─ PlayBgm  BattleWay
+     ├─ Wave  (150f: Spawn, 195f: Spawn, ...)  until: NoActiveEnemies
+     ├─ Wave  ...
+     └─ Wait 120
 ```
 
-出現の間隔を Wait で並べ、全員出し終えたら全滅を待って次のフェーズへ進む。Stage3 道中では一部のフェーズを `WithWind` で包み、その間だけ風を吹かせる。
+出現の時刻を Wave の `entries` に並べ、全員出し終えたら `until`（全滅など）を待って次の Wave へ進む。Stage3 道中では一部の Wave を `WithWind` で包み、その間だけ風を吹かせる。
