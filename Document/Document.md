@@ -842,7 +842,7 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 - `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Delay、Inverter、ForceSuccess。
 - `Condition/Condition.cs`: Constant、FrameElapsed、BgmReached、And / Or / Not と、CheckCondition / WaitUntil ノード。
 - `Action/BasicActions.cs`: Wait、Log、SubTree と、`*Param` 欄から Object パラメータを引く `ParamObjects`。
-- `Battle/`: 発射（Fire と ShotPattern / DirectionSource / RotationSource / BulletSpec、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetMovement、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples 条件、EnterStrongMode、ClearBullets、WithWind、BossWindCue、PhaseMarker、WithPrefab）、進行（Stage、Section、Wave、PlayBgm、SpawnBoss、BossBattle、Scenario、OnCommand）。
+- `Battle/`: 発射（SingleShot / NWayShot などの弾を撃つノードと ShotPattern / DirectionSource / RotationSource / BulletSpec、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetMovement、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples 条件、EnterStrongMode、ClearBullets、WithWind、BossWindCue、PhaseMarker、WithPrefab）、進行（Stage、Section、Wave、PlayBgm、SpawnBoss、BossBattle、Scenario、OnCommand）。
 
 ### 設計方針
 
@@ -1331,7 +1331,7 @@ Editor 実行では `Assets/Project/DataStore/UserData.json` を使う。
 
 - 新しいステージを追加する: `StageData.asset`（`stageAddress` に `BattleStageAsset` のパス）、`DataStore/StageN/BT`、Addressables 登録（アドレス = アセットパス）、`BattleStageType`, 必要なら `SceneType`, UserData の進行制限。
 - 新しい道中/ボスフェーズを作る: ステージツリー・ボスのツリー（`BT/Stage/`）を BT エディタで編集する。フェーズの区切りは Until と条件で表す。
-- 新しい弾幕を作る: `Fire` / `BulletBeam` などのノードを組んだ `BehaviorTreeAsset`（`BT/Attack/`）を作り SubTree で参照する。足りない撃ち方は `ShotPattern` / `DirectionSource` / `RotationSource` を追加する。
+- 新しい弾幕を作る: `NWayShot` などの弾を撃つノードや `BulletBeam` を組んだ `BehaviorTreeAsset`（`BT/Attack/`）を作り SubTree で参照する。足りない撃ち方は `ShotPattern` / `DirectionSource` / `RotationSource` を追加する。
 - 新しい敵移動を作る: `MotionPreset`（`BT/Motion/`）を作るか、`MotionStep` 実装を `Runtime/Motion/` に追加する。
 - 新しい敵 Prefab を作る: `EnemyEntityPresenter`, `EnemyEntityView` を設定する。行動は Spawn ノードの `behavior` に共通ツリー `Commons/BT/Enemy` を指定し、`overrides` で `movement`（`BT/Motion/`）/ `attack`（`BT/Attack/`）/ `death` を渡す。この形に収まらない敵だけ `BT/Enemy/` に専用ツリーを作る。
 - 新しいボス挙動を作る: Boss Prefab（`BossEntityPresenter`）と、`BossDefinition` の `prefab` / `spawnPosition` / `entrance` / `tree` を設定する。

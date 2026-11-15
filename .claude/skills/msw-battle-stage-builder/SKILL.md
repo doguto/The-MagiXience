@@ -51,7 +51,7 @@ BehaviorTreeAsset
 - **時間**: BT のノードは **フレーム（60fps 固定）**。移動（`MotionStep`）の時間は **秒**。
 - **進行**: 道中・会話・ボス戦の順序はすべてステージツリーに書く。Section はリトライ地点。会話中のコマンド（`SpawnBoss` など）は Scenario ノードの子の OnCommand で処理する。
 - **敵**: `Wave` の entries（または `Spawn` ノード）で Prefab と Behavior を指定して出す。雑魚の Behavior は共通ツリー `Commons/BT/Enemy` にし、Overrides で `movement`（`Motion/` の MotionPreset）/ `attack`（`Attack/` の攻撃ツリー）/ `death`（撃破時のツリー、任意）を渡す。攻撃中に移動を変えるなど、この形に収まらない特殊な敵だけ `Enemy/` に専用ツリーを作る。雑魚 Prefab は `ActorPool` で使い回される（使い回せない Prefab には `NoActorPool` を付ける）。
-- **弾**: BT の外の `BulletSystem` が動かす（自機の弾も同じ）。BT からは `Fire` / `BulletBeam` などで撃つだけ。
+- **弾**: BT の外の `BulletSystem` が動かす（自機の弾も同じ）。BT からは `NWayShot` などの弾を撃つノード（撃ち方ごとに別ノード）や `BulletBeam` で撃つだけ。
 - **割り込み・フェーズ**: `Until(条件)` で表す。BGM 同期は `BgmSamples`、HP 閾値は `HpBelow`、発狂は `NormalHpDepleted` → `EnterStrongMode`。
 - **再利用**: 攻撃は `Attack/` の別ツリーにして参照する（コピーしない）。雑魚は `Enemy` の `attack` パラメータ、ボスは `SubTree` で参照する。
 

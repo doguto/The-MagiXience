@@ -39,15 +39,15 @@ Stage{N}/BT/Attack/S{N}_xxx (攻撃ツリー)
   Sequence
     Wait 75
     Repeat ∞ / 15f おき
-      Fire (弾 / ShotPattern / 向き)
+      NWayShot など (弾 / 撃ち方の設定 / 向き)
 ```
 - 雑魚は敵ごとのツリーを作らない。Wave の entries / Spawn で Behavior = `Enemy` とし、Overrides で `movement`（`Motion/` の MotionPreset）、`attack`（`Attack/` の攻撃ツリー）、`death`（撃破時のツリー）を渡す。
 - 攻撃ツリーは中身が同じなら 1 つを使い回す。移動だけが違う敵は `movement` だけ変える。
 - 移動は `SetMovement` で「背景で流し続ける」。移動の完了を待ちたいときだけ `Move` を使う。
 - 攻撃の途中で移動を変える、HP で行動を変えるなど、共通ツリーの形に収まらない敵だけ `Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。専用ツリーでも攻撃部分は `Attack/` を `SubTree` で参照し、中身を複製しない。
-- ツリーのパラメータ（`$名前`）を使えるのは、数値では `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` と `ChargeShot` / `MovePath` / `PlaceAlongPath` の一部、アセット参照では `*Param` 欄（`SetMovement.presetParam` / `SubTree.treeParam` / `SetDeathBehavior.treeParam` / `BulletSpec.prefabParam`）だけ。`Fire` の向きや本数などはパラメータにできない。
+- ツリーのパラメータ（`$名前`）を使えるのは、数値では `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` と `ChargeEffect` / `MovePath` / `PlaceAlongPath` の一部、アセット参照では `*Param` 欄（`ChargeEffect.prefabParam` / `SetMovement.presetParam` / `SubTree.treeParam` / `SetDeathBehavior.treeParam` / `BulletSpec.prefabParam`）だけ。弾を撃つノードの向きや本数などはパラメータにできない。
 - `Spawn` の overrides には固定値を書く。親ツリーのパラメータを渡す（bind to parent）は敵ツリーでは効かない。
-- 撃破時のツリーは 1 フレームだけ実行される。`Fire` / `Spawn` など即時に終わるものだけを書く。
+- 撃破時のツリーは 1 フレームだけ実行される。`NWayShot` などの発射や `Spawn` など、即時に終わるものだけを書く。
 
 ## ボスツリー（`BossDefinition.Tree`、ボス自身が実行）
 
@@ -57,7 +57,7 @@ Sequence
   Until #Intro (BgmSamples)
     Sequence
       SetMovement BossIntro (Continue If Same)
-      Repeat ∞ / 60f おき → Fire …
+      Repeat ∞ / 60f おき → NWayShot …
   Until #MelodyA (BgmSamples) …
 ```
 
@@ -95,16 +95,17 @@ Sequence
 
 ## ビーム
 
-弾を同じ向きに連射してビームにする場合は `BulletBeam` 1 つで書く。
+弾を同じ向きに連射してビームにする場合は `BulletBeam` 1 つで書く。予測線は `WarningLine` で包んで出す（予測線とビームの位置・向きは WarningLine が 1 回だけ決めて揃えるので、ビーム側にだけ設定すればよい）。
 ```
-BulletBeam
-  Origin: Self (撃つ敵の位置) / World (Position をワールド座標として使う)
-  Direction: Fixed 180°        Pattern: NWay 9本 40°おき   … 本数と角度
-  Bullets: [TriUp, TriDown]    … 同じ位置・向きに重ねる弾
-  Shot Count 36 / Interval 5f
-  Warning Prefab / Warning Frames 78 (撃ち始めまで) / Warning Display Frames 60 (表示の長さ)
+WarningLine  Prefab: 2_WarningLine / Frames 78 (撃ち始めまで) / Display Frames 60 (表示の長さ)
+  └─ BulletBeam
+       Origin: Self (撃つ敵の位置) / World (Position をワールド座標として使う)
+       Direction: Fixed 180°        Pattern: NWay 9本 40°おき   … 本数と角度
+       Bullets: [TriUp, TriDown]    … 同じ位置・向きに重ねる弾
+       Shot Count 36 / Interval 5f
 ```
-画像 1 枚のビームは `SpriteBeam` を使う。
+画像 1 枚のビームは `SpriteBeam` を使う。予測線の付け方は同じ（`WarningLine{ SpriteBeam }`）。
+溜めと同時に予測線を出すときは `Parallel{ 溜め, WarningLine{ ビーム } }` と並べる。
 
 ## ステージ固有の機能（サービス）
 

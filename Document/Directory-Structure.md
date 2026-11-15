@@ -287,7 +287,7 @@ Battle BehaviorTree:
 - `Core/NodeDefinition.cs` / `Core/Node.cs`: 保存用の不変定義と、Enter/Tick/Abort/Exit を保証する実行時ノードの基底。
 - `Core/BuildScope.cs` / `Core/TreeParameter.cs`: パラメータ解決 (`BtInt` などの `$param`) と SubTree の循環検出。
 - `Core/BattleContext.cs` / `Core/BehaviorTreeRunner.cs`: ツリー 1 本の実行文脈と駆動。
-- `Battle/EmitterSources.cs` / `Battle/FireNodes.cs` / `Battle/BeamNodes.cs`: 方向・回転・弾設定・撃ち方と、Fire / BulletBeam / SpriteBeam / MoveTrailFan。
+- `Battle/EmitterSources.cs` / `Battle/FireNodes.cs` / `Battle/ShotNodes.cs` / `Battle/BeamNodes.cs`: 方向・回転・弾設定・撃ち方（ShotPattern）と、撃ち方ごとの弾を撃つノード（SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot）、溜めの演出 ChargeEffect、WarningLine / BulletBeam / SpriteBeam / MoveTrailFan。
 - `Battle/ActorNodes.cs`: Move / SetMovement / SetDeathBehavior / SetInvincible / Despawn / PlaySe / Spawn。
 - `Battle/TrailNodes.cs` / `Battle/TrailPath.cs`: MovePath / PlaceAlongPath と経路アセット。
 - `Battle/FlowNodes.cs` / `Battle/BossDefinition.cs`: Stage / Section / Wave / PlayBgm / SpawnBoss / BossBattle / Scenario / OnCommand と、ボスの定義。

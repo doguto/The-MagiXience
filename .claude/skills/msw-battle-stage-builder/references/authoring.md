@@ -66,11 +66,11 @@ System.Action<object, string, object> set = (o, n, v) => field(o.GetType(), n).S
 
 var tree = UnityEngine.ScriptableObject.CreateInstance<Project.Scenes.Battle.Scripts.BehaviorTree.BehaviorTreeAsset>();
 
-var fire = new Project.Scenes.Battle.Scripts.BehaviorTree.FireNodeDefinition();
+var fire = new Project.Scenes.Battle.Scripts.BehaviorTree.NWayShotNodeDefinition();
 var nway = new Project.Scenes.Battle.Scripts.BehaviorTree.NWayShot();
 set(nway, "wayCount", 3);
 set(nway, "spreadAngle", 20f);
-set(fire, "pattern", nway);
+set(fire, "pattern", nway);   // 撃ち方はノードの種類で決まる。pattern はその種類のパターン
 set(fire, "direction", new Project.Scenes.Battle.Scripts.BehaviorTree.AimDirection());
 // set(fire, "bullet", new Project.Scenes.Battle.Scripts.BehaviorTree.BulletSpec { prefab = ..., damage = 10, motionPreset = ... });
 

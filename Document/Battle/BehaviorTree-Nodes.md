@@ -19,9 +19,9 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 | Decorator | `Scripts/BehaviorTree/Decorator/*.cs`、`Battle/StageNodes.cs`（WithWind, WithPrefab） |
 | 条件 | `Scripts/BehaviorTree/Condition/Condition.cs`、`Battle/StageNodes.cs` |
 | 基本 Action | `Scripts/BehaviorTree/Action/BasicActions.cs` |
-| バトル Action | `Scripts/BehaviorTree/Battle/FireNodes.cs` / `BeamNodes.cs` / `ActorNodes.cs` / `StageNodes.cs` |
+| バトル Action | `Scripts/BehaviorTree/Battle/ShotNodes.cs` / `BeamNodes.cs` / `ActorNodes.cs` / `StageNodes.cs` |
 | ステージ進行 | `Scripts/BehaviorTree/Battle/FlowNodes.cs`、`BossDefinition.cs` |
-| 発射の部品 | `Scripts/BehaviorTree/Battle/EmitterSources.cs`、`FireNodes.cs` |
+| 発射の部品 | `Scripts/BehaviorTree/Battle/EmitterSources.cs`、`FireNodes.cs`（ShotPattern） |
 | MotionStep | `Scripts/Runtime/Motion/MotionSteps.Basic.cs` / `MotionSteps.Advanced.cs` |
 
 ## 1. Composite
@@ -33,7 +33,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 - 子が Success したフレームのうちに次の子を開始する（同じフレームで複数の即時ノードを連続実行できる）。
 - 子が Running ならそこで止まり Running。子が Failure なら Failure（以降の子は実行しない）。
 - 全ての子が Success なら Success。子が 0 個なら即 Success。
-- `Wait N` の次の子は、前の子の N フレーム後に動く。即時に終わる子（Fire / Spawn など）だけなら `Sequence[Wait a, X, Wait b, Y]` で時刻つきの出来事を表せる。`Delay` は `Sequence[Wait, 子]` と同じ動きをする。
+- `Wait N` の次の子は、前の子の N フレーム後に動く。即時に終わる子（NWayShot などの発射 / Spawn など）だけなら `Sequence[Wait a, X, Wait b, Y]` で時刻つきの出来事を表せる。`Delay` は `Sequence[Wait, 子]` と同じ動きをする。
 
 ### Selector
 
@@ -213,14 +213,23 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 ## 5. バトル Action: 発射
 
-### Fire（Action/Attack）
+### 弾を撃つノード: SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot（Action/Attack）
 
-弾を撃つ。即 Success。
+撃ち方ごとに別のノードになっている（グラフ上でノードの種類を見れば何を撃つか分かる）。共通部分は `ShotNodeDefinition`（`ShotNodes.cs`）。即 Success。
+
+| ノード | 撃ち方 (`pattern`) |
+|---|---|
+| `SingleShot` | 基準方向に 1 発 |
+| `NWayShot` | 扇状に同時に撃つ |
+| `SequentialFanShot` | 扇状に 1 発ずつ並べ、最後の 1 発のあと全弾同時に動き出す |
+| `SequentialCircleShot` | 円周上に 1 発ずつ並べ、最後の 1 発のあと全弾同時に動き出す |
+| `BurstShot` | 同じ扇を間隔をあけて何回か撃つ |
+
+`pattern` の各フィールドは後述の「発射の部品: ShotPattern」を参照。どのノードも次の共通フィールドを持つ。
 
 | フィールド | 説明 |
 |---|---|
 | `bullet` (`BulletSpec`) | 弾の設定（後述） |
-| `pattern` (`ShotPattern`) | 撃ち方。既定は Single |
 | `direction` (`DirectionSource`) | 基準方向。既定は Fixed(左) |
 | `rotation` (`RotationSource`) | 弾の回転（Prefab 本来の回転に対するオフセット）。既定は Inherit |
 | `muzzleOffset` | 撃つ敵の位置からのずれ（ワールド単位）。ステージ直下では原点からのずれ |
@@ -229,9 +238,31 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 - 方向は実行したフレームで決める。パターンの `SpawnDelayFrames` が付いた弾は予約され、出現時点の撃ち手の位置から出る。
 - `DirectionSource` が発射位置を返す場合（ScreenEdge）、その位置を使う。
 
+### WarningLine（Decorator）
+
+予測線を出して `frames` 待ってから、子のビームを実行する。子は `IBeamShape` を実装するビーム（`BulletBeam` / `SpriteBeam`）。予測線とビームの位置・向きは、WarningLine の開始時に子のビームから 1 回だけ決めて（`CreateAim`）、そのまま子に渡す（`IAimableBeam.UseAim`）。自機狙いのビームでも予測線と撃つ向きがずれない。
+
+| フィールド | 単位 | 説明 |
+|---|---|---|
+| `prefab` | | 予測線の Prefab。未指定なら予測線を出さずに待つだけ |
+| `frames` | f | 子のビームを撃つまでの待ち（既定 60）。Wait と同じく開始から `frames` フレーム目に子を実行する |
+| `displayFrames` | f | 予測線の表示時間。0 なら `frames` と同じ |
+| `width` | ワールド単位 | 予測線の太さ。0 以下は Prefab の値 |
+| `waitForBeam` | | ON（既定）: ビームを撃つまで Running（後ろのノードを待たせる。途中で打ち切られたらビームも撃たない）/ OFF: 予測線を出したらすぐ Success。ビームは `frames` 後に予約で撃つ（撃ち手が倒れたら取り消し、ツリーが打ち切られても撃つ） |
+
+溜めと並べる例（Stage2 ボスの Beam フェーズ）:
+
+```text
+Parallel(All)
+ ├─ SubTree S2_Charge            … 溜め
+ └─ Delay +6f
+     └─ WarningLine 78f          … 予測線
+         └─ BulletBeam 9way 40°  … ビーム
+```
+
 ### BulletBeam（Action/Attack）
 
-警告線を出したあと、同じ位置・向きに弾を一定間隔で連射してビームにする。即 Success（連射は予約で行う）。
+同じ位置・向きに弾を一定間隔で連射してビームにする。即 Success（連射は予約で行う）。予測線は `WarningLine` で包んで出す。
 
 | フィールド | 単位 | 説明 |
 |---|---|---|
@@ -240,31 +271,25 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | `direction` | | 基準方向 (`DirectionSource`) |
 | `pattern` | | ビームの本数と角度 (`ShotPattern`)。パターンの各方向に 1 本ずつ出す |
 | `rotation` | | 弾の回転。既定は Fixed(0°) |
-| `range` | ワールド単位 | 弾の飛距離と警告線の長さ。0 なら弾/警告線 Prefab の値 |
+| `range` | ワールド単位 | 弾の飛距離と予測線の長さ。0 なら弾/予測線 Prefab の値 |
 | `bullets` | | 1 回の連射で撃つ弾 (`List<BulletSpec>`)。複数なら同じ位置・向きに重ねて撃つ |
 | `shotCount` | 回 | 連射回数（最小 1、既定 36） |
 | `shotIntervalFrames` | f | 連射の間隔（最小 1、既定 5） |
-| `warningPrefab` | | 警告線の Prefab。未指定なら警告線を出さない |
-| `warningFrames` | f | 連射を始めるまでの待ち。警告線を出さない場合も待つ（既定 60） |
-| `warningDisplayFrames` | f | 警告線の表示時間。0 なら `warningFrames` と同じ |
-| `warningWidth` | ワールド単位 | 警告線の幅。0 以下は Prefab の値 |
 | `se` | | 連射 1 回ごとに鳴らす SE |
 
-- 向きと本数は実行時に 1 回だけ決める。
-- i 回目の連射は実行から `warningFrames + i × shotIntervalFrames` フレーム後。撃ち手が倒れると以降の連射は取り消される。
+- 向きと本数は 1 回だけ決める（WarningLine の子なら WarningLine の開始時、そうでなければ実行時）。
+- i 回目の連射は実行から `i × shotIntervalFrames` フレーム後。撃ち手が倒れると以降の連射は取り消される。
 
 ### SpriteBeam（Action/Attack）
 
-警告線のあと、1 枚絵のビーム本体を出す（旧 SpriteBeamAttackSignal）。即 Success。
+1 枚絵のビーム本体を出す。即 Success。予測線は `WarningLine` で包んで出す。
 
 | フィールド | 単位 | 説明 |
 |---|---|---|
 | `line` (`start` / `end`) | ワールド単位 | ビームの線分。向き・長さはこの線分から決まる |
-| `isRelative` | | ON なら線分を撃つ敵の位置からの相対にする（実行時点の位置で固定） |
+| `isRelative` | | ON なら線分を撃つ敵の位置からの相対にする（狙いを決めた時点の位置で固定） |
 | `bodyPrefab` | | ビーム本体の Prefab (`IBeamVisualReceiver`) |
 | `bodyDuration` | s | 本体の表示時間 |
-| `showWarning` / `warningPrefab` | | 警告線の有無と Prefab。どちらかが欠けると警告なしで本体を即出す |
-| `warningFrames` | f | 警告線の表示時間。本体はこの後に出る |
 
 ### MoveTrailFan（Action/Attack）
 
@@ -276,7 +301,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | `moveDuration` | s | 移動時間 |
 | `moveEase` | | 移動の Ease (`MotionEase`) |
 | `emitBullets` | | OFF なら移動だけ |
-| `bullet` / `direction` / `rotation` / `se` | | Fire と同じ。方向は開始時に決める |
+| `bullet` / `direction` / `rotation` / `se` | | 弾を撃つノードと同じ。方向は開始時に決める |
 | `wayCount` | 発 | 弾数。移動の進捗が i/(n−1) に達した位置に i 発目を置く |
 | `spreadAngle` | 度 | 扇の隣り合う弾の角度 |
 | `releaseDelayFrames` | f | 移動終了から全弾が動き出すまで |
@@ -288,7 +313,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | フィールド | 単位 | 説明 |
 |---|---|---|
 | `path` | | `TrailPath`（パラメータ可） |
-| `bullet` / `rotation` / `se` | | Fire と同じ |
+| `bullet` / `rotation` / `se` | | 弾を撃つノードと同じ |
 | `spacing` | ワールド単位 | 弾を置く間隔（パラメータ可） |
 | `fireDelayFrames` | f | 経路の移動を終えてから放つまで（パラメータ可） |
 
@@ -309,16 +334,32 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | フィールド | 説明 |
 |---|---|
 | `prefab` | `BulletEntityPresenter` を持つ弾 Prefab。未設定なら何も出さない |
-| `prefabParam` | ツリーの Object パラメータ名。指定するとその値（弾 Prefab）を `prefab` の代わりに使う。SubTree で弾だけ差し替えるときに使う（`Fire` / `PlaceAlongPath` が対応） |
+| `prefabParam` | ツリーの Object パラメータ名。指定するとその値（弾 Prefab）を `prefab` の代わりに使う。SubTree で弾だけ差し替えるときに使う（弾を撃つノード / `PlaceAlongPath` が対応） |
 | `damage` | ダメージ（既定 10） |
 | `motionPreset` | 指定するとインラインの `motion` より優先 |
 | `motion` | 弾の移動 (`List<MotionStep>`)。空なら発射方向へ等速 (`VelocityMotion`) |
 | `range` | 飛距離の上限（発射方向への進捗、ワールド単位）。0 で無制限 |
 | `affectedByWind` | 発射時に風 (`IBulletForce`) が有効なら外力を受ける（既定 ON） |
 
+### ChargeEffect（Action/Effect）
+
+周囲に弾を並べ、渦を巻きながら中心へ集める溜めの演出。撃つ攻撃ではないので弾を撃つノードとは別の型で、向き・回転・弾の動き・ダメージの欄は持たない（ダメージは常に 0。弾は当たり判定のない Prefab を使う）。即 Success（弾を出すだけで、溜めの長さは呼ぶ側の `Wait` で待つ）。寄せ終わった弾はその位置に止まる。
+
+| フィールド | 説明 |
+|---|---|
+| `prefab` / `prefabParam` | 弾の Prefab。`prefabParam` にツリーの Object パラメータ名を書くとその値を使う（`BulletSpec` と同じ） |
+| `count` | 並べる弾の数 |
+| `radius` | 出し始めの半径 |
+| `targetRadius` | 寄せた先の半径（0 で中心） |
+| `gatherFrames` (f) | 寄せるのにかけるフレーム数 |
+| `rotationSpeed` (度/s) | 回る速さ。負で時計回り |
+| `se` | 出したときの SE |
+
+`count` / `radius` / `targetRadius` / `gatherFrames` / `rotationSpeed` はツリーのパラメータにできる。例: `Stage2/BT/Attack/S2_Charge`（パラメータ prefab / count / frames / radius）。
+
 ### 発射の部品: ShotPattern
 
-基準方向から弾ごとの方向・ずれ・遅延を作る。
+基準方向から弾ごとの方向・ずれ・遅延を作る。弾を撃つノードがそれぞれ 1 つずつ持つ（`NWayShot` ノードなら `NWayShot` パターン）。`BulletBeam` はビームの本数と角度に使う。
 
 | パターン | フィールド | 動作 |
 |---|---|---|
@@ -326,7 +367,6 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | `NWayShot` | `wayCount`、`spreadAngle`(度、隣り合う弾の角度)、`radius`(発射位置を各方向へずらす距離)、`startDelayFrames`(f、動き出すまで)、`rotationOffset`(度、反時計回り) | 同時に扇状に撃つ。奇数は中央に 1 発、偶数は中央を空ける |
 | `SequentialFanShot` | `wayCount`、`spreadAngle`(度)、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 扇状に 1 発ずつ `spawnIntervalFrames` おきに出し、最後の 1 発から `releaseDelayFrames` 後に全弾同時に動き出す |
 | `SequentialCircleShot` | `wayCount`、`radius`、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 円周上（360°/wayCount 間隔、半径 radius）に 1 発ずつ出し、全弾同時に動き出す |
-| `ChargeShot` | `count`、`radius`、`targetRadius`、`gatherFrames`(f)、`rotationSpeed`(度/s、負で時計回り)、`startDelayFrames`(f)。すべてパラメータ可 | 周囲に弾を並べ、渦を巻きながら `targetRadius` まで集める。弾の移動は `SpiralMotion` に置き換わり、`BulletSpec.motion` は使われない |
 | `BurstShot` | `wayCount`、`spreadAngle`(度)、`shotCount`、`intervalFrames`(f)、`startRadius`、`endRadius` | 同じ扇を `intervalFrames` おきに `shotCount` 回撃つ。発射位置の半径は 1 回目の `startRadius` から最後の `endRadius` へ線形に変わる。向きは最初に 1 回だけ決める |
 
 ### 発射の部品: DirectionSource
@@ -392,7 +432,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 この敵が倒されたときに 1 回だけ実行するツリー (`tree`) を設定する。即 Success。
 `treeParam`（ツリーの Object パラメータ名）を指定するとその値のツリーを使い、値が空なら撃破時の行動なしになる。
-死亡時ツリーは 1 フレームだけ Tick して停止するため、即時ノード（Fire など）だけが意味を持つ。
+死亡時ツリーは 1 フレームだけ Tick して停止するため、即時ノード（NWayShot などの発射）だけが意味を持つ。
 
 ### SetInvincible（Action/Actor）
 
@@ -582,7 +622,7 @@ Scenario の子に置く Decorator。会話が `command`（シナリオの `func
 | `VertexParabolaMotion` | `orientation`(Vertical/Horizontal)、`vertex`、`initialSpeed`、`isRelative`、`oscillateVertex`、`vertexAmplitude`、`vertexAngularSpeed`(rad/s)、`attackTimeOffset`(s) | 発射位置から頂点へ向かい折り返す軸平行の放物線。`oscillateVertex` なら発射時刻 (`AttackTime − attackTimeOffset`) で頂点を揺らす。解けない設定なら弾を即消す。終わらない |
 | `ReflectMotion` | `speed`、`maxReflections`、`reflectTop` / `reflectBottom` / `reflectLeft` / `reflectRight` | 発射方向へ進み、一度画面内に入ってから指定した画面端で反射する。終わらない。OutQuad 再現 |
 | `ZigzagMotion` | `speed`、`angleDegrees`(度)、`segmentLength`、`initialSign`、`maxReflections`(0=無制限)、`firstSegmentLength`(0=segmentLength)、`duration`(s, 0=無限)、`fallbackAxis`、`rotateToVelocity`、`rotationOffsetDegrees` | 発射方向（無ければ `fallbackAxis`）を軸に ±angle で折り返しながら進む |
-| `SpiralMotion` | `startRadius`、`targetRadius`、`duration`(s)、`rotationSpeed`(度/s、負で時計回り) | 開始位置から発射方向の逆へ `startRadius` の点を中心に回りながら半径を変える。ChargeShot が使う |
+| `SpiralMotion` | `startRadius`、`targetRadius`、`duration`(s)、`rotationSpeed`(度/s、負で時計回り) | 開始位置から発射方向の逆へ `startRadius` の点を中心に回りながら半径を変える。ChargeEffect が使う |
 | `DriftMotion` | `anchor`、`pullStrength`、`moveDistance`、`moveBounds`(幅, 高さ)、`moveDuration`(s)、`pauseDuration`(s)、`moveEase`(DOTween の `Ease`)、`duration`(s, 0=無限) | `anchor` の周りを「移動 → 停止」で漂う。行き先は `UnityEngine.Random` で決める |
 | `FadeMoveMotion` | `duration`(s)、`velocity`、`startAlpha`、`endAlpha`、`invincible` | 等速で動きながら SpriteRenderer のアルファを変える。`invincible` は弾のみ有効。OutQuad 再現 |
 | `PathMotion` | `waypoints`、`duration`(s)、`shape`(CatmullRom/Linear)、`ease`、`isRelative` | ウェイポイントを通る経路を、経路長に対して `ease` で進む |
@@ -612,7 +652,7 @@ Until [onChildCompleted=Hold]  cond: BgmSamples(422391)
          └─ Sequence
              ├─ Wait 60
              └─ Repeat ∞ / 60f
-                 └─ Fire
+                 └─ NWayShot
 ```
 
 外側の Until がフェーズの終了条件、内側の Until が攻撃の打ち切り。攻撃が先に終わってもフェーズを終えたくない場合は外側を `Hold` にする（Stage1 ボスのイントロ）。
@@ -622,10 +662,10 @@ Until [onChildCompleted=Hold]  cond: BgmSamples(422391)
 ```text
 Until cond: FrameElapsed(481)
  └─ Repeat ∞ / 150f
-     └─ Fire
+     └─ NWayShot
 ```
 
-`Repeat(interval=k)` は k フレームの周期で子を繰り返す。子が時間のかかる Sequence でも、周期より短ければ開始間隔はずれない。1 周期の中で複数の発射タイミングがある場合は `Repeat ∞ / k { Sequence[Fire, Wait a, Fire, Wait (b−a), Fire] }` のように子の中に並べる（残りは Repeat が周期まで待つ）。
+`Repeat(interval=k)` は k フレームの周期で子を繰り返す。子が時間のかかる Sequence でも、周期より短ければ開始間隔はずれない。1 周期の中で複数の発射タイミングがある場合は `Repeat ∞ / k { Sequence[NWayShot, Wait a, NWayShot, Wait (b−a), NWayShot] }` のように子の中に並べる（残りは Repeat が周期まで待つ）。
 
 ### BGM 同期のボスフェーズ = BgmSamples
 
@@ -684,7 +724,7 @@ Commons/BT/Enemy
 Stage{N}/BT/Attack/S{N}_*
  └─ Until cond: FrameElapsed(N)
      └─ Repeat ∞ / k f
-         └─ Fire
+         └─ NWayShot
 ```
 
 Spawn（Wave の entries を含む）で `behavior = Enemy` とし、`overrides` で `movement` / `attack` / `death` を渡す。移動は SetMovement でツリーと独立させ、攻撃ツリーは攻撃だけを書く。攻撃の途中で移動を変える、HP で行動を変える（`Sequence[Until(HpBelow){通常}, 後半]`）など、この形に収まらない敵だけ `Stage{N}/BT/Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。

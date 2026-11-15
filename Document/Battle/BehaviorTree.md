@@ -80,7 +80,7 @@ NodeDefinition (アセットに保存・不変)   ──Create(scope)──►  
 |---|---|---|
 | `CompositeNodeDefinition` | 複数 (`children`、左から右の順) | Sequence, Selector, Parallel, Random |
 | `DecoratorNodeDefinition` | 1 つ (`child`、未接続なら即 Success のノード) | Loop, Repeat, Until, Delay, WithWind |
-| `ActionNodeDefinition` | なし | Wait, Fire, Spawn, SubTree |
+| `ActionNodeDefinition` | なし | Wait, NWayShot などの発射, Spawn, SubTree |
 
 条件は別系統の `ConditionDefinition`（`Condition/Condition.cs`）で、`Build()` で `ICondition`（`Reset` / `Evaluate`）を生成する。Until / CheckCondition / WaitUntil の `condition` フィールドに `[SerializeReference, SubclassSelector]` で入れる。
 
@@ -225,7 +225,7 @@ Spawn ノードで出す敵は `ActorPool`（`Runtime/ActorPool.cs`）で Prefab
 - `BtFloat` は Int パラメータも受け付け、`BtInt` は Float パラメータを四捨五入して受け付ける。
 - エディタ上では `$名前` と表示される。
 
-現状 `Bt*` 型になっているのは、Parallel.duration / Loop.count / Repeat.count, interval / Delay.frames / Wait.frames / FrameElapsed.frames / BgmReached.seconds、`ChargeShot` の各フィールド、MovePath.path / PlaceAlongPath.path, spacing, fireDelayFrames のみである。Fire や Move などバトルノードのその他のフィールドは通常の値で、パラメータ化できない。
+現状 `Bt*` 型になっているのは、Parallel.duration / Loop.count / Repeat.count, interval / Delay.frames / Wait.frames / FrameElapsed.frames / BgmReached.seconds、`ChargeEffect` の各フィールド、MovePath.path / PlaceAlongPath.path, spacing, fireDelayFrames のみである。弾を撃つノードや Move などバトルノードのその他のフィールドは通常の値で、パラメータ化できない。
 
 例外として、次のアセット参照は `*Param` 欄（Object パラメータ名）で差し替えられる。値の解決は `ParamObjects.Resolve`（`Action/BasicActions.cs`）で、欄が空なら固定値を使う。
 
@@ -409,7 +409,7 @@ public abstract class StageServiceDefinition
 
 ### 8.1 弾の発射
 
-発射系ノード（Fire、BulletBeam、MoveTrailFan）はすべて `Battle/EmitterSources.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
+発射系ノード（SingleShot / NWayShot などの弾を撃つノード、BulletBeam、MoveTrailFan、PlaceAlongPath）はすべて `Battle/EmitterSources.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
 
 - 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletSpec`、撃ち方は `ShotPattern` で指定する（詳細はノードリファレンス）。
 - 発射位置は「撃つ敵の位置 + muzzleOffset + パターンごとのずれ」。ステージ直下（`Self == null`）なら原点基準。
@@ -491,7 +491,7 @@ public abstract class StageServiceDefinition
 - **プール品の状態**: 使い回す敵の Prefab に、`Start` などで一度だけ状態を作るコンポーネントがあると 2 体目以降で動きが変わる。`IPoolableActor` で戻せないものは `NoActorPool` を付ける。
 - **死亡時ツリーは 1 フレームだけ**: `SetDeathBehavior` のツリーは 1 回 Tick して停止する。Wait や Delay を含めても後半は実行されない。
 - **ツリー開始は翌フレーム**: 出現させた敵のツリー、`StartStage` で登録したステージツリーは次の `Step` から動く。
-- **秒とフレームの混在**: BT ノードの時間はフレーム、`MotionStep` と一部のバトルノードのフィールド（Spawn.beamDuration、SpriteBeam.bodyDuration、MoveTrailFan.moveDuration、ChargeShot.gatherDuration、ScreenEdgeDirection など）は秒。各フィールドの単位はノードリファレンスを参照。
+- **秒とフレームの混在**: BT ノードの時間はフレーム、`MotionStep` と一部のバトルノードのフィールド（Spawn.beamDuration、SpriteBeam.bodyDuration、MoveTrailFan.moveDuration、ScreenEdgeDirection など）は秒。各フィールドの単位はノードリファレンスを参照。
 - **PhaseMarker の phaseId は現状使われていない**: `BossPhaseProgressGauge` は通知の回数だけを見て、BGM のサンプル位置から現在フェーズを推定する。
 - **型の置き場所**: `WindDirection` / `WindInterval` / `BattleWindSettings` は `Model/BattleWind.cs`、`BossWindCueSettings` は `Model/BossWindCueSettings.cs`、自機の Transform を持つ `BattleTargets` は `Runtime/Motion/MotionAssets.cs` にある。
 - `BossEntityPresenter` は HP・被弾・撃破演出・登場直後の当たり判定オフだけを持つ。`Stage3WindBossController` は BossWindCue ノードの腕上げ演出の受け手（`IWindCueReceiver`）として残っている。

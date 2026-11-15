@@ -66,7 +66,7 @@ BgmData.asset / SeData.asset
 | `seType` | `SeType` | `None, Click, Cancel, EnemyShotShort, EnemyShotLong, Attack, Charge, ChargeRelease, Damage, LocoAttack1, LocoAttack2` |
 | `loopStartSamples` / `loopEndSamples` | `int` | ループ再生用（`PlayLoopSE`使用時のみ参照） |
 
-`seType` は BT の発射系ノード（`Fire` / `BulletBeam` / `MoveTrailFan`）や `PlaySe` ノードの `se` フィールドからも参照され、発射時に鳴らすSEの指定に使われる。
+`seType` は BT の発射系ノード（`NWayShot` などの弾を撃つノード / `BulletBeam` / `MoveTrailFan`）や `PlaySe` ノードの `se` フィールドからも参照され、発射時に鳴らすSEの指定に使われる。
 
 ### CharacterData（`CharacterData.asset`）
 
@@ -166,7 +166,7 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 - `Stage/Stage{N}_Tree`: `Stage[ Section "Way"[ PlayBgm, Wave..., Wait ], Section "Boss"[ Scenario{OnCommand SpawnBoss / PlayBossBgm}, BossBattle, Wait, Scenario ] ]`（[BehaviorTree.md](./BehaviorTree.md) 6.1）
 - `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / Random / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP 閾値（`HpBelow`）、発狂（`NormalHpDepleted` + `EnterStrongMode`）など
 - `Commons/BT/Enemy`: `Sequence[ SetDeathBehavior($death), SetMovement($movement), SubTree($attack) ]`。パラメータ `movement`（MotionPreset）/ `attack` / `death`（BehaviorTreeAsset）を Spawn の `overrides` で渡す
-- `Attack/*`: 雑魚の攻撃（`Until(FrameElapsed){ Repeat{Fire} }` など）やボスの 1 フェーズ分の攻撃（`Sequence` + `Wait` / `Repeat` / `Fire` / `BulletBeam` など）
+- `Attack/*`: 雑魚の攻撃（`Until(FrameElapsed){ Repeat{NWayShot} }` など）やボスの 1 フェーズ分の攻撃（`Sequence` + `Wait` / `Repeat` / `NWayShot` などの弾を撃つノード / `BulletBeam` など）
 - `Enemy/*`: 共通ツリーで表せない敵の専用ツリー（攻撃の途中で `SetMovement` を差し替えるなど）
 
 ### MotionPreset（`Motion/`）
