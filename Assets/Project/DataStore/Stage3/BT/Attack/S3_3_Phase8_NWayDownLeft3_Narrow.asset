@@ -61,17 +61,25 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 600}
         comment: 
         child:
-          rid: 8540147961671974972
+          rid: 8540147961671975613
         count:
           value: 0
           param: 
         interval:
           value: 96
           param: 
-    - rid: 8540147961671974972
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147961671974974
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 36845fc5d4734f339667fc908a5a5ee7
+        direction: {x: -1, y: -1}
+    - rid: 8540147961671974975
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975613
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 8f85fb9c0f7247ec8e5150318cbbd101
         graphPosition: {x: 460, y: 750}
         comment: 
         bullet:
@@ -82,27 +90,15 @@ MonoBehaviour:
           motion: []
           range: 0
           affectedByWind: 1
-        pattern:
-          rid: 8540147961671974973
         direction:
           rid: 8540147961671974974
         rotation:
           rid: 8540147961671974975
         muzzleOffset: {x: -0.5, y: 0}
         se: 0
-    - rid: 8540147961671974973
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 3
-        spreadAngle: 35
-        radius: 0
-        startDelayFrames: 0
-        rotationOffset: 0
-    - rid: 8540147961671974974
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        direction: {x: -1, y: -1}
-    - rid: 8540147961671974975
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0
+        pattern:
+          wayCount: 3
+          spreadAngle: 35
+          radius: 0
+          startDelayFrames: 0
+          rotationOffset: 0

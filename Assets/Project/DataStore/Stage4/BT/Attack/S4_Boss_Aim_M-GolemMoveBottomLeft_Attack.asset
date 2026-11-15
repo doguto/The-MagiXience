@@ -61,17 +61,25 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 600}
         comment: 
         child:
-          rid: 8540147961671975172
+          rid: 8540147961671975617
         count:
           value: 0
           param: 
         interval:
           value: 84
           param: 
-    - rid: 8540147961671975172
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147961671975174
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: cf43ca7167a74b4890e053857bdf7aea
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147961671975175
+      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147961671975617
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 89cdc62a1afc442db6aacff217e0991c
         graphPosition: {x: 460, y: 750}
         comment: 
         bullet:
@@ -82,27 +90,15 @@ MonoBehaviour:
           motion: []
           range: 0
           affectedByWind: 1
-        pattern:
-          rid: 8540147961671975173
         direction:
           rid: 8540147961671975174
         rotation:
           rid: 8540147961671975175
         muzzleOffset: {x: 0, y: 0}
         se: 0
-    - rid: 8540147961671975173
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 7
-        spreadAngle: 51.42857
-        radius: 0
-        startDelayFrames: 0
-        rotationOffset: 0
-    - rid: 8540147961671975174
-      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        maxUpAngle: 180
-        maxDownAngle: 180
-    - rid: 8540147961671975175
-      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
+        pattern:
+          wayCount: 7
+          spreadAngle: 51.42857
+          radius: 0
+          startDelayFrames: 0
+          rotationOffset: 0

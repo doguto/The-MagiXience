@@ -26,17 +26,24 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 450}
         comment: 
         child:
-          rid: 8540147961671974929
+          rid: 8540147961671975532
         count:
           value: 0
           param: 
         interval:
           value: 120
           param: 
-    - rid: 8540147961671974929
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147961671974931
+      type: {class: ForwardDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147961671974932
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 99a9a9b7024e45e7ad580d4785880f3b
+        degrees: 0
+    - rid: 8540147961671975532
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f9ead650d90d4741b80c86c707f442a4
         graphPosition: {x: 460, y: 600}
         comment: 
         bullet:
@@ -47,26 +54,15 @@ MonoBehaviour:
           motion: []
           range: 0
           affectedByWind: 1
-        pattern:
-          rid: 8540147961671974930
         direction:
           rid: 8540147961671974931
         rotation:
           rid: 8540147961671974932
         muzzleOffset: {x: 0, y: 0}
         se: 0
-    - rid: 8540147961671974930
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 3
-        spreadAngle: 30
-        radius: 0.5
-        startDelayFrames: 0
-        rotationOffset: 0
-    - rid: 8540147961671974931
-      type: {class: ForwardDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
-    - rid: 8540147961671974932
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0
+        pattern:
+          wayCount: 3
+          spreadAngle: 30
+          radius: 0.5
+          startDelayFrames: 0
+          rotationOffset: 0

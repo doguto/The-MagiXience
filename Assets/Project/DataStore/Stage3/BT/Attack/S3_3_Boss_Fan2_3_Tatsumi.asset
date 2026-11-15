@@ -13,41 +13,12 @@ MonoBehaviour:
   m_Name: S3_3_Boss_Fan2_3_Tatsumi
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263997628
+    rid: 8540147961671975612
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263997628
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 01bea0df4dd74f7cbb2e3a7781599bb9
-        graphPosition: {x: 0, y: 150}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: d0789b0b139bbc74f87e28c808dfccb2, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147884263997629
-        direction:
-          rid: 8540147884263997630
-        rotation:
-          rid: 8540147884263997631
-        muzzleOffset: {x: 0, y: 0}
-        se: 0
-    - rid: 8540147884263997629
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 2
-        spreadAngle: 60
-        radius: 0
-        startDelayFrames: 0
-        rotationOffset: 0
     - rid: 8540147884263997630
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -56,3 +27,29 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
+    - rid: 8540147961671975612
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a88451f0ff1b48fb99a9bb436640c927
+        graphPosition: {x: 0, y: 150}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: d0789b0b139bbc74f87e28c808dfccb2, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147884263997630
+        rotation:
+          rid: 8540147884263997631
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+        pattern:
+          wayCount: 2
+          spreadAngle: 60
+          radius: 0
+          startDelayFrames: 0
+          rotationOffset: 0

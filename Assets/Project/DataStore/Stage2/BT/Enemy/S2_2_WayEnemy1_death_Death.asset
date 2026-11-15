@@ -13,41 +13,12 @@ MonoBehaviour:
   m_Name: S2_2_WayEnemy1_death_Death
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884261900972
+    rid: 8540147961671975511
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884261900972
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 98865f664947428cb111fac2c25bf221
-        graphPosition: {x: 0, y: 150}
-        comment: 
-        bullet:
-          prefab: {fileID: -4487681364143076941, guid: e2ad805985555774684271fd2bfa9439, type: 3}
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: f4d5f40c98241be4f9e178ffd70136f4, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147884261900973
-        direction:
-          rid: 8540147884261900974
-        rotation:
-          rid: 8540147884261900975
-        muzzleOffset: {x: 0, y: 0}
-        se: 0
-    - rid: 8540147884261900973
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 12
-        spreadAngle: 30
-        radius: 0.01
-        startDelayFrames: 0
-        rotationOffset: 0
     - rid: 8540147884261900974
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -55,3 +26,29 @@ MonoBehaviour:
     - rid: 8540147884261900975
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147961671975511
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: bcc436d3f9a04c6ea8fa5cffeea893ca
+        graphPosition: {x: 0, y: 150}
+        comment: 
+        bullet:
+          prefab: {fileID: -4487681364143076941, guid: e2ad805985555774684271fd2bfa9439, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: f4d5f40c98241be4f9e178ffd70136f4, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147884261900974
+        rotation:
+          rid: 8540147884261900975
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+        pattern:
+          wayCount: 12
+          spreadAngle: 30
+          radius: 0.01
+          startDelayFrames: 0
+          rotationOffset: 0

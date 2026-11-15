@@ -31,9 +31,6 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
         bodyDuration: 1
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
-        warningFrames: 60
     - rid: 8540147884263998440
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -46,9 +43,6 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
         bodyDuration: 1
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
-        warningFrames: 60
     - rid: 8540147884263998441
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -61,9 +55,6 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
         bodyDuration: 1
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
-        warningFrames: 60
     - rid: 8540147884263998442
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -76,9 +67,6 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
         bodyDuration: 1
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
-        warningFrames: 60
     - rid: 8540147886565097971
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -86,13 +74,13 @@ MonoBehaviour:
         graphPosition: {x: 345, y: 150}
         comment: 
         children:
-        - rid: 8540147884263998436
+        - rid: 8540147961671975493
         - rid: 8540147886565097972
-        - rid: 8540147884263998440
+        - rid: 8540147961671975494
         - rid: 8540147886565097973
-        - rid: 8540147884263998441
+        - rid: 8540147961671975495
         - rid: 8540147886565097974
-        - rid: 8540147884263998442
+        - rid: 8540147961671975496
     - rid: 8540147886565097972
       type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -120,3 +108,55 @@ MonoBehaviour:
         frames:
           value: 120
           param: 
+    - rid: 8540147961671975493
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 4828ea077b6742c1b01ea51bcfd388b8
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        child:
+          rid: 8540147884263998436
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540147961671975494
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a6b545ee4e254d1281047646ac3232cc
+        graphPosition: {x: 230, y: 450}
+        comment: 
+        child:
+          rid: 8540147884263998440
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540147961671975495
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a62b3181ce3c40c1b550c0ffbd6ff986
+        graphPosition: {x: 460, y: 450}
+        comment: 
+        child:
+          rid: 8540147884263998441
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540147961671975496
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9d08be48577042b58e5912d88c45cade
+        graphPosition: {x: 690, y: 450}
+        comment: 
+        child:
+          rid: 8540147884263998442
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0

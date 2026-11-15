@@ -61,17 +61,25 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 600}
         comment: 
         child:
-          rid: 8540147961671975056
+          rid: 8540147961671975596
         count:
           value: 0
           param: 
         interval:
           value: 72
           param: 
-    - rid: 8540147961671975056
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147961671975058
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: b7bf279eb41c40a49bfdd157462dabf3
+        direction: {x: -1, y: 0}
+    - rid: 8540147961671975059
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975596
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 8080ac3ab3f4421db5465bed0498ad9f
         graphPosition: {x: 460, y: 750}
         comment: 
         bullet:
@@ -82,22 +90,9 @@ MonoBehaviour:
           motion: []
           range: 0
           affectedByWind: 1
-        pattern:
-          rid: 8540147961671975057
         direction:
           rid: 8540147961671975058
         rotation:
           rid: 8540147961671975059
         muzzleOffset: {x: -0.5, y: 0}
         se: 0
-    - rid: 8540147961671975057
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
-    - rid: 8540147961671975058
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        direction: {x: -1, y: 0}
-    - rid: 8540147961671975059
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0

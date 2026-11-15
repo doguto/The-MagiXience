@@ -27,7 +27,7 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147960821842842
-        - rid: 8540147960821842843
+        - rid: 8540147961671975615
     - rid: 8540147960821842842
       type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -37,10 +37,18 @@ MonoBehaviour:
         frames:
           value: 180
           param: 
-    - rid: 8540147960821842843
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147960821842845
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: f10f14a4d1c047beb3b384ed320e6824
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147960821842846
+      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147961671975615
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 419abd7348a14b0c8a8c932708fa0a6e
         graphPosition: {x: 230, y: 450}
         comment: 
         bullet:
@@ -51,27 +59,15 @@ MonoBehaviour:
           motion: []
           range: 0
           affectedByWind: 1
-        pattern:
-          rid: 8540147960821842844
         direction:
           rid: 8540147960821842845
         rotation:
           rid: 8540147960821842846
         muzzleOffset: {x: -0.3, y: 0}
         se: 0
-    - rid: 8540147960821842844
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 3
-        spreadAngle: 60
-        radius: 0
-        startDelayFrames: 0
-        rotationOffset: 0
-    - rid: 8540147960821842845
-      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        maxUpAngle: 180
-        maxDownAngle: 180
-    - rid: 8540147960821842846
-      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
+        pattern:
+          wayCount: 3
+          spreadAngle: 60
+          radius: 0
+          startDelayFrames: 0
+          rotationOffset: 0

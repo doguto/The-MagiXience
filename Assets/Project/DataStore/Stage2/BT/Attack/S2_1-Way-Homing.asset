@@ -37,7 +37,7 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 450}
         comment: 
         child:
-          rid: 8540147961671974924
+          rid: 8540147961671975623
         count:
           value: 0
           param: 
@@ -50,10 +50,19 @@ MonoBehaviour:
         frames:
           value: 481
           param: 
-    - rid: 8540147961671974924
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147961671974926
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 7120ead029864236a9662e4802843e1e
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147961671974927
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975623
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 85d17cbe3e0345e8adb39d6f99669673
         graphPosition: {x: 460, y: 600}
         comment: 
         bullet:
@@ -64,28 +73,15 @@ MonoBehaviour:
           motion: []
           range: 0
           affectedByWind: 1
-        pattern:
-          rid: 8540147961671974925
         direction:
           rid: 8540147961671974926
         rotation:
           rid: 8540147961671974927
         muzzleOffset: {x: 0, y: 0}
         se: 0
-    - rid: 8540147961671974925
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 1
-        spreadAngle: 30
-        radius: 0.5
-        startDelayFrames: 0
-        rotationOffset: 0
-    - rid: 8540147961671974926
-      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        maxUpAngle: 180
-        maxDownAngle: 180
-    - rid: 8540147961671974927
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0
+        pattern:
+          wayCount: 1
+          spreadAngle: 30
+          radius: 0.5
+          startDelayFrames: 0
+          rotationOffset: 0

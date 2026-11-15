@@ -89,126 +89,13 @@ MonoBehaviour:
         graphPosition: {x: 920, y: 900}
         comment: 
         children:
-        - rid: 8540147960821842903
-        - rid: 8540147960821842904
-        - rid: 8540147960821842905
-        - rid: 8540147960821842906
-        - rid: 8540147960821842907
+        - rid: 8540147961671975498
+        - rid: 8540147961671975499
+        - rid: 8540147961671975500
+        - rid: 8540147961671975501
+        - rid: 8540147961671975502
         weights: []
         avoidRepeat: 0
-    - rid: 8540147960821842903
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 19fe002b3adf44f38eba04085d54347b
-        graphPosition: {x: 460, y: 1050}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147960821842908
-        direction:
-          rid: 8540147960821842909
-        rotation:
-          rid: 8540147960821842910
-        muzzleOffset: {x: 0, y: -0.375}
-        se: 3
-    - rid: 8540147960821842904
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: a5e6a2523a784f35b13338fd44b22809
-        graphPosition: {x: 690, y: 1050}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147960821842908
-        direction:
-          rid: 8540147960821842911
-        rotation:
-          rid: 8540147960821842912
-        muzzleOffset: {x: 0, y: 0}
-        se: 3
-    - rid: 8540147960821842905
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 44dea681496640f8b48fee92d44d2b37
-        graphPosition: {x: 920, y: 1050}
-        comment: 
-        bullet:
-          prefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: c9753289d645e6f4daab6e80fd412470, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147960821842908
-        direction:
-          rid: 8540147960821842913
-        rotation:
-          rid: 8540147960821842914
-        muzzleOffset: {x: 0, y: -0.125}
-        se: 3
-    - rid: 8540147960821842906
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 82dc6c2083084f37b314e0055dc057d3
-        graphPosition: {x: 1150, y: 1050}
-        comment: 
-        bullet:
-          prefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: c9753289d645e6f4daab6e80fd412470, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147960821842908
-        direction:
-          rid: 8540147960821842915
-        rotation:
-          rid: 8540147960821842916
-        muzzleOffset: {x: 0, y: 0.25}
-        se: 3
-    - rid: 8540147960821842907
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 656c96ad56ee45a683c1c80e78565759
-        graphPosition: {x: 1380, y: 1050}
-        comment: 
-        bullet:
-          prefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: c9753289d645e6f4daab6e80fd412470, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147960821842908
-        direction:
-          rid: 8540147960821842917
-        rotation:
-          rid: 8540147960821842918
-        muzzleOffset: {x: 0, y: 0.625}
-        se: 3
-    - rid: 8540147960821842908
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
     - rid: 8540147960821842909
       type: {class: ForwardDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
@@ -239,3 +126,103 @@ MonoBehaviour:
     - rid: 8540147960821842918
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540147961671975498
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: ddf4d84de9284112865a208e0e398d68
+        graphPosition: {x: 460, y: 1050}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147960821842909
+        rotation:
+          rid: 8540147960821842910
+        muzzleOffset: {x: 0, y: -0.375}
+        se: 3
+    - rid: 8540147961671975499
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 5d07d7f5425e45cbb0380359c9b153d5
+        graphPosition: {x: 690, y: 1050}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147960821842911
+        rotation:
+          rid: 8540147960821842912
+        muzzleOffset: {x: 0, y: 0}
+        se: 3
+    - rid: 8540147961671975500
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 4539585e7a2346eaba996317c615471c
+        graphPosition: {x: 920, y: 1050}
+        comment: 
+        bullet:
+          prefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: c9753289d645e6f4daab6e80fd412470, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147960821842913
+        rotation:
+          rid: 8540147960821842914
+        muzzleOffset: {x: 0, y: -0.125}
+        se: 3
+    - rid: 8540147961671975501
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 0a4bcf58c78e48e6b733174f5e14a44a
+        graphPosition: {x: 1150, y: 1050}
+        comment: 
+        bullet:
+          prefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: c9753289d645e6f4daab6e80fd412470, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147960821842915
+        rotation:
+          rid: 8540147960821842916
+        muzzleOffset: {x: 0, y: 0.25}
+        se: 3
+    - rid: 8540147961671975502
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: feaf2ce4dd864fb48f1d97acd65f34c0
+        graphPosition: {x: 1380, y: 1050}
+        comment: 
+        bullet:
+          prefab: {fileID: 1857604087058932705, guid: aa5db85bcb22cc943a2ee2b14439dffa, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: c9753289d645e6f4daab6e80fd412470, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147960821842917
+        rotation:
+          rid: 8540147960821842918
+        muzzleOffset: {x: 0, y: 0.625}
+        se: 3

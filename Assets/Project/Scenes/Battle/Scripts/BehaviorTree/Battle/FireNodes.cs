@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Project.Scenes.Battle.Scripts.Runtime.Motion;
 using Project.Scripts.Extensions;
 using UnityEngine;
 
@@ -12,7 +11,6 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public Vector2 Offset;
         public int SpawnDelayFrames;
         public int StartDelayFrames;
-        public IReadOnlyList<MotionStep> Motion;
     }
 
     [Serializable]
@@ -125,47 +123,6 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public override string Summary => $"順に円 {wayCount}発 / 半径 {radius:0.##}";
     }
 
-    // 旧 ChargeSignal。周囲に弾を並べ、渦を巻きながら中心へ集める
-    [Serializable]
-    public sealed class ChargeShot : ShotPattern
-    {
-        [SerializeField] BtInt count = 16;
-        [SerializeField] BtFloat radius = 1.5f;
-        [SerializeField] BtFloat targetRadius = 0f;
-        [SerializeField] BtInt gatherFrames = 60;
-        [SerializeField, Tooltip("度/秒。負で時計回り")] BtFloat rotationSpeed = 480f;
-        [SerializeField] BtInt startDelayFrames = 0;
-
-        public ChargeShot() { }
-
-        public ChargeShot(int count, float radius, float targetRadius, int gatherFrames, float rotationSpeed, int startDelayFrames)
-        {
-            this.count = count;
-            this.radius = radius;
-            this.targetRadius = targetRadius;
-            this.gatherFrames = gatherFrames;
-            this.rotationSpeed = rotationSpeed;
-            this.startDelayFrames = startDelayFrames;
-        }
-
-        public override void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots)
-        {
-            var n = Mathf.Max(1, count.Resolve(scope));
-            var r = Mathf.Max(0f, radius.Resolve(scope));
-            var seconds = Mathf.Max(1, gatherFrames.Resolve(scope)) / (float)BattleContext.FramesPerSecond;
-            var delay = Mathf.Max(0, startDelayFrames.Resolve(scope));
-            var baseAngle = Angle(baseDirection);
-            var motion = new MotionStep[] { new SpiralMotion(r, Mathf.Max(0f, targetRadius.Resolve(scope)), seconds, rotationSpeed.Resolve(scope)) };
-            for (var i = 0; i < n; i++)
-            {
-                var dir = Rotate(baseAngle + 360f / n * i);
-                shots.Add(new Shot { Direction = dir, Offset = dir * r, StartDelayFrames = delay, Motion = motion });
-            }
-        }
-
-        public override string Summary => $"チャージ {count}発 / {gatherFrames.ToFrameString()}";
-    }
-
     // 同じ扇を間隔をあけて何度か撃つ。発射位置の半径は1発目から最後へ線形に変わる
     [Serializable]
     public sealed class BurstShot : ShotPattern
@@ -192,51 +149,5 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public override string Summary => $"{wayCount}way {spreadAngle:0.#}° × {shotCount}連 / {intervalFrames}f";
-    }
-
-    [Serializable, NodeInfo("弾を撃つ。撃ち方 (Pattern) と方向・弾の設定を指定する", "Action/Attack")]
-    public sealed class FireNodeDefinition : ActionNodeDefinition
-    {
-        [SerializeField] BulletSpec bullet = new();
-        [SerializeReference, SubclassSelector] ShotPattern pattern = new SingleShot();
-        [SerializeReference, SubclassSelector] DirectionSource direction = new FixedDirection();
-        [SerializeReference, SubclassSelector] RotationSource rotation = new InheritRotation();
-        [SerializeField, Tooltip("撃つ敵の位置からのずれ")] Vector2 muzzleOffset;
-        [SerializeField] SeType se;
-
-        public override string Summary => $"{pattern?.Summary ?? "?"} / {direction?.Summary ?? "?"} / {bullet}";
-
-        public override INode Build(BuildScope scope)
-        {
-            var shots = new List<Shot>();
-            var spec = bullet.Resolve(scope);
-            return new ActionNode(ctx =>
-            {
-                Fire(ctx, scope, spec, shots);
-                return NodeStatus.Success;
-            });
-        }
-
-        void Fire(BattleContext ctx, BuildScope scope, BulletSpec spec, List<Shot> shots)
-        {
-            var e = new EmitContext(ctx, muzzleOffset);
-            var dirSource = direction ?? new FixedDirection();
-            var baseDirection = dirSource.GetDirection(e);
-            var worldOrigin = dirSource.GetOrigin(e);
-            var rot = rotation?.GetRotation(e) ?? Quaternion.identity;
-
-            shots.Clear();
-            (pattern ?? new SingleShot()).Build(scope, baseDirection, shots);
-            Emitter.PlaySe(ctx, se);
-
-            foreach (var shot in shots)
-            {
-                var offset = shot.Offset;
-                Func<EmitContext, Vector2> position = worldOrigin.HasValue
-                    ? _ => worldOrigin.Value + offset
-                    : at => at.Origin + offset;
-                Emitter.Spawn(ctx, spec, muzzleOffset, position, shot.Direction, rot, shot.SpawnDelayFrames, shot.StartDelayFrames, shot.Motion);
-            }
-        }
     }
 }

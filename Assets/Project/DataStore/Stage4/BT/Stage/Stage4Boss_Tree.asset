@@ -540,9 +540,6 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: 577ee49c912bc0b4097462305ef65d80, type: 3}
         bodyDuration: 2.1719458
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 937944f0173f45b49baa10f05dcb4f4a, type: 3}
-        warningFrames: 98
     - rid: 8540147884264521964
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -555,9 +552,6 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: dd82e0b2e7e5ee24b9c22d7ebdab8a59, type: 3}
         bodyDuration: 0.5429864
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
-        warningFrames: 49
     - rid: 8540147884264521965
       type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -570,9 +564,6 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: dd82e0b2e7e5ee24b9c22d7ebdab8a59, type: 3}
         bodyDuration: 0.5429864
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
-        warningFrames: 49
     - rid: 8540147884264521968
       type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -1890,10 +1881,10 @@ MonoBehaviour:
         comment: UshitoraBeamThird
         children:
         - rid: 8540147886565097748
-        - rid: 8540147884264521963
+        - rid: 8540147961671975487
         - rid: 8540147886565097749
-        - rid: 8540147884264521964
-        - rid: 8540147884264521965
+        - rid: 8540147961671975488
+        - rid: 8540147961671975489
     - rid: 8540147886565097748
       type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -1912,3 +1903,42 @@ MonoBehaviour:
         frames:
           value: 212
           param: 
+    - rid: 8540147961671975487
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f9bf552f26444eb8a83d365bb52e58ed
+        graphPosition: {x: 3859.6665, y: 1130.6665}
+        comment: 
+        child:
+          rid: 8540147884264521963
+        prefab: {fileID: 5888170941882211794, guid: 937944f0173f45b49baa10f05dcb4f4a, type: 3}
+        frames: 98
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540147961671975488
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 1f188aae976046ef86f39fa6f9048013
+        graphPosition: {x: 4079.667, y: 1130.6665}
+        comment: 
+        child:
+          rid: 8540147884264521964
+        prefab: {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
+        frames: 49
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540147961671975489
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: fa99588c5fe84de695ae1dcf59506fa8
+        graphPosition: {x: 4299.667, y: 1130.6665}
+        comment: 
+        child:
+          rid: 8540147884264521965
+        prefab: {fileID: 5888170941882211794, guid: 5b7921af80bf02040a2e13f5524cc5f0, type: 3}
+        frames: 49
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0

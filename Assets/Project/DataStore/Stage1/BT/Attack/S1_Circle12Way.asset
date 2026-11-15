@@ -27,7 +27,7 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147960821842881
-        - rid: 8540147960821842882
+        - rid: 8540147961671975562
     - rid: 8540147960821842881
       type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -37,10 +37,17 @@ MonoBehaviour:
         frames:
           value: 90
           param: 
-    - rid: 8540147960821842882
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147960821842884
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: bb3c2c78e0a74e18b5ae6e07be8b67e4
+        direction: {x: -1, y: 0}
+    - rid: 8540147960821842885
+      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147961671975562
+      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b9117268501a4f82941a26f769c18996
         graphPosition: {x: 230, y: 450}
         comment: 
         bullet:
@@ -51,26 +58,15 @@ MonoBehaviour:
           motion: []
           range: 0
           affectedByWind: 1
-        pattern:
-          rid: 8540147960821842883
         direction:
           rid: 8540147960821842884
         rotation:
           rid: 8540147960821842885
         muzzleOffset: {x: -0.3, y: 0}
         se: 0
-    - rid: 8540147960821842883
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        wayCount: 12
-        spreadAngle: 30
-        radius: 0
-        startDelayFrames: 0
-        rotationOffset: 15
-    - rid: 8540147960821842884
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        direction: {x: -1, y: 0}
-    - rid: 8540147960821842885
-      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
+        pattern:
+          wayCount: 12
+          spreadAngle: 30
+          radius: 0
+          startDelayFrames: 0
+          rotationOffset: 15

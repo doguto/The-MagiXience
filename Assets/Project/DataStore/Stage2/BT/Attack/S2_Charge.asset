@@ -55,45 +55,28 @@ MonoBehaviour:
       type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 87eccd4b494044798e0277632d927f47
-        graphPosition: {x: -110, y: 150}
+        graphPosition: {x: -120.00001, y: 125.33333}
         comment: 
         children:
-        - rid: 8540147960821841994
+        - rid: 8540147961671975631
         - rid: 8540147960821841995
-    - rid: 8540147960821841994
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 8b3ed31b854449dcbaee200a5f723fb6
-        graphPosition: {x: -240, y: 300}
-        comment: 
-        bullet:
-          prefab: {fileID: -4487681364143076941, guid: 118a344943d79ef4b8234910b6c79a93, type: 3}
-          prefabParam: prefab
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 3648757b66a8ad5468eb22f48b6c8084, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147960821841996
-        direction:
-          rid: 8540147960821841997
-        rotation:
-          rid: 8540147960821841998
-        muzzleOffset: {x: 0, y: 0}
-        se: 0
     - rid: 8540147960821841995
       type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: ae4226312ac84e83a745514fc5fd12c3
-        graphPosition: {x: 20, y: 300}
+        graphPosition: {x: 80, y: 278.66666}
         comment: 
         frames:
           value: 60
           param: frames
-    - rid: 8540147960821841996
-      type: {class: ChargeShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540147961671975631
+      type: {class: ChargeEffectNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
+        guid: 2ecb1c1a8fd048b682e0f2647a2aefd3
+        graphPosition: {x: -320, y: 278.66666}
+        comment: 
+        prefab: {fileID: -4487681364143076941, guid: 118a344943d79ef4b8234910b6c79a93, type: 3}
+        prefabParam: prefab
         count:
           value: 16
           param: count
@@ -109,13 +92,4 @@ MonoBehaviour:
         rotationSpeed:
           value: 480
           param: 
-        startDelayFrames:
-          value: 0
-          param: 
-    - rid: 8540147960821841997
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        direction: {x: 1, y: 0}
-    - rid: 8540147960821841998
-      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
+        se: 0

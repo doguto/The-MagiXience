@@ -61,7 +61,7 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 600}
         comment: 
         child:
-          rid: 8540147961671975477
+          rid: 8540147961671975490
         count:
           value: 0
           param: 
@@ -80,6 +80,16 @@ MonoBehaviour:
         isRelative: 1
         bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
         bodyDuration: 0.81447965
-        showWarning: 1
-        warningPrefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
-        warningFrames: 65
+    - rid: 8540147961671975490
+      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 58b8ea84a6b64451a2101a721b98f3ce
+        graphPosition: {x: 460, y: 750}
+        comment: 
+        child:
+          rid: 8540147961671975477
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 65
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0

@@ -19,51 +19,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263997657
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 2be0c1a31d2040c9881eb427fb7cdbb2
-        graphPosition: {x: 0, y: 300}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 6c1175f883c0188438ef26b9e24a5072, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147884263997659
-        direction:
-          rid: 8540147884263997660
-        rotation:
-          rid: 8540147884263997661
-        muzzleOffset: {x: 0, y: 0}
-        se: 0
-    - rid: 8540147884263997658
-      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 27fda632e8444e8086a7e2d2070beb0b
-        graphPosition: {x: 230, y: 300}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 0b14410a72525924ca6173bc134e1ecf, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        pattern:
-          rid: 8540147884263997662
-        direction:
-          rid: 8540147884263997663
-        rotation:
-          rid: 8540147884263997664
-        muzzleOffset: {x: 0, y: 0}
-        se: 0
-    - rid: 8540147884263997659
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
     - rid: 8540147884263997660
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -72,9 +27,6 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
-    - rid: 8540147884263997662
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
     - rid: 8540147884263997663
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -90,5 +42,45 @@ MonoBehaviour:
         graphPosition: {x: 115, y: 150}
         comment: 
         children:
-        - rid: 8540147884263997657
-        - rid: 8540147884263997658
+        - rid: 8540147961671975533
+        - rid: 8540147961671975534
+    - rid: 8540147961671975533
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 560923431bd74830a01757a24f636c74
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 6c1175f883c0188438ef26b9e24a5072, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147884263997660
+        rotation:
+          rid: 8540147884263997661
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+    - rid: 8540147961671975534
+      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 4916de0aa1ae499aaac3437681e52532
+        graphPosition: {x: 230, y: 300}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 0b14410a72525924ca6173bc134e1ecf, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540147884263997663
+        rotation:
+          rid: 8540147884263997664
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
