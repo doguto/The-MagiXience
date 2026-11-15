@@ -12,7 +12,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public GameObject Prefab;
         public Vector3 Position;
         public Quaternion Rotation;
-        // 指定すると Prefab 側の旧来の移動・攻撃を止め、このツリーで動かす
+        // 出した敵に付けるツリー。未指定ならツリーを付けない
         public BehaviorTreeAsset Behavior;
         public IReadOnlyList<TreeParameter> Overrides;
         // 「敵の全滅」の判定対象にするか

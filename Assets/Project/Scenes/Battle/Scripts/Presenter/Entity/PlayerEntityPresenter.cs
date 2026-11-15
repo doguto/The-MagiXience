@@ -418,7 +418,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         // 弾はバトル中だけ存在する BulletSystem が動かす。BattleFlow がバトル開始時に渡す
         public void BindBulletSystem(BulletSystem bullets) => bulletSystem = bullets;
 
-        void Shoot(BulletPool source, int damage, Vector3 position, float speed, bool isPlayerBullet)
+        void Shoot(BulletPool source, int damage, Vector3 position, float speed, bool isChargeShot)
         {
             if (bulletSystem == null || source == null) return;
             bulletSystem.Spawn(new BulletSpawn
@@ -429,7 +429,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 Rotation = Quaternion.identity,
                 Motion = new MotionStep[] { new VelocityMotion(new Vector3(speed, 0f, 0f)) },
                 AffectedByForce = false,
-                IsPlayerBullet = isPlayerBullet,
+                IsPlayerChargeBullet = isChargeShot,
             });
         }
 

@@ -207,7 +207,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class SpawnNodeDefinition : ActionNodeDefinition
     {
         [SerializeField] GameObject prefab;
-        [SerializeField, Tooltip("この Prefab を動かすツリー。未指定なら Prefab に設定された旧来の動き")] BehaviorTreeAsset behavior;
+        [SerializeField, Tooltip("この Prefab を動かすツリー。未指定ならツリーを付けない (自前で動く Prefab 用)")] BehaviorTreeAsset behavior;
         [SerializeField] List<TreeParameter> overrides = new();
         [SerializeField, Tooltip("撃つ敵がいなければワールド座標、いればその位置からの相対")] Vector2 position;
         [SerializeField, Tooltip("撃つ敵がいてもワールド座標で出す")] bool worldSpace;

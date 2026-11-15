@@ -21,7 +21,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public IReadOnlyList<MotionStep> Motion;
         public float AttackTime;
         public bool AffectedByForce;
-        public bool IsPlayerBullet;
+        // 自機のチャージ弾。敵の「チャージ攻撃のみ有効」の判定に使う
+        public bool IsPlayerChargeBullet;
     }
 
     // 敵弾を固定フレームで動かす。弾の見た目・当たり判定・寿命・画面外判定は BulletEntityPresenter が担う。
@@ -75,7 +76,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
             var pool = BulletPool.GetOrCreateSharedPool(spawn.Prefab);
             var presenter = pool.Get();
-            var rotation = presenter.InitializeDriven(spawn.Damage, spawn.Position, spawn.Direction, pool, spawn.Rotation, spawn.Range, spawn.IsPlayerBullet);
+            var rotation = presenter.InitializeDriven(spawn.Damage, spawn.Position, spawn.Direction, pool, spawn.Rotation, spawn.Range, spawn.IsPlayerChargeBullet);
 
             var bullet = free.Count > 0 ? free.Pop() : new Bullet();
             bullet.Presenter = presenter;

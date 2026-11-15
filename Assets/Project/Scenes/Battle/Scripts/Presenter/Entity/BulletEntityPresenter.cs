@@ -60,7 +60,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         /// <param name="rotation">Prefab本来の回転に対するオフセット</param>
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>
         /// <returns>Prefab本来の回転を合成した、実際の回転</returns>
-        public Quaternion InitializeDriven(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, Quaternion rotation, float range, bool isPlayerBullet = false)
+        public Quaternion InitializeDriven(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, Quaternion rotation, float range, bool isPlayerChargeBullet = false)
         {
             pool = objectPool;
             var offsetRotation = rotation == default ? Quaternion.identity : rotation;
@@ -73,12 +73,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             if (model == null)
             {
-                model = new BulletEntityModel(damage, isPlayerBullet);
+                model = new BulletEntityModel(damage, isPlayerChargeBullet);
                 BindModelToView();
             }
             else
             {
-                model.Reinitialize(damage, isPlayerBullet);
+                model.Reinitialize(damage, isPlayerChargeBullet);
             }
 
             isInPool = false;
