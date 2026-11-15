@@ -521,6 +521,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6055463501492457358, guid: 3a7569f3381cd4c4d9f3dc790a805b27, type: 3}
+      propertyPath: startSection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6055463501492457358, guid: 3a7569f3381cd4c4d9f3dc790a805b27, type: 3}
       propertyPath: startPhaseIndex
       value: 0
       objectReference: {fileID: 0}
@@ -771,7 +775,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1635331042}
-  - component: {fileID: 1635331041}
   - component: {fileID: 1635331043}
   m_Layer: 0
   m_Name: SignalReceiver
@@ -780,19 +783,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1635331041
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1635331040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4172ac9c776176348a60684fe9d8cdf1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enemyTracker: {fileID: 439110980}
 --- !u!4 &1635331042
 Transform:
   m_ObjectHideFlags: 0
@@ -1106,10 +1096,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2011392386}
-  - component: {fileID: 2011392385}
   - component: {fileID: 2011392384}
-  - component: {fileID: 2011392388}
-  - component: {fileID: 2011392387}
   m_Layer: 0
   m_Name: Stage1
   m_TagString: Untagged
@@ -1134,20 +1121,6 @@ MonoBehaviour:
   bulletClearReceiver: {fileID: 1635331043}
   bgmNameView: {fileID: 0}
   continueHpTable: 640000006400000096000000c800000090010000e8030000
---- !u!114 &2011392385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2011392383}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbe57ad618f785c47ac95493f3f2387c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playableDirector: {fileID: 2011392387}
-  bindingMap: {fileID: 2011392388}
 --- !u!4 &2011392386
 Transform:
   m_ObjectHideFlags: 0
@@ -1164,44 +1137,6 @@ Transform:
   - {fileID: 1635331042}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!320 &2011392387
-PlayableDirector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2011392383}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_PlayableAsset: {fileID: 0}
-  m_InitialState: 1
-  m_WrapMode: 2
-  m_DirectorUpdateMode: 1
-  m_InitialTime: 0
-  m_SceneBindings: []
-  m_ExposedReferences:
-    m_References: []
---- !u!114 &2011392388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2011392383}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53e55d5a36d7c4840b06c4ed2555a3a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bindings:
-  - trackName: EnemySpawn
-    target: {fileID: 1635331040}
-  - trackName: Control
-    target: {fileID: 1635331040}
-  - trackName: BulletClear
-    target: {fileID: 1635331040}
-  - trackName: 
-    target: {fileID: 1635331040}
 --- !u!1001 &2072124215
 PrefabInstance:
   m_ObjectHideFlags: 0

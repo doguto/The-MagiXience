@@ -9,13 +9,14 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 {
     // 敵/ボスに BehaviorTree を持たせて固定フレームで動かす。生成時に ActorSpawner が付与する。
     [DisallowMultipleComponent]
-    public sealed class BattleActor : MonoBehaviour, IBattleTickable
+    public sealed class BattleActor : MonoBehaviour, IBattleTickable, IPoolableActor
     {
         BehaviorTreeRunner runner;
         bool destroyed;
         MotionSequence movement;
         IReadOnlyList<MotionStep> movementSteps;
-        bool registered;
+        // プールへ戻された。次に Attach されるまで生きていない扱いにする
+        bool released;
         BehaviorTreeAsset deathBehavior;
         System.IDisposable deathSubscription;
 
@@ -27,7 +28,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public int StartFrame { get; private set; }
         // この敵が動き出してからの秒数。発射時刻で変わる弾 (頂点の揺らぎなど) に使う
         public float AttackTime => (World.Frame - StartFrame) * BattleWorld.DeltaTime;
-        public bool IsAlive => !destroyed && this != null && (Model == null || Model.IsAlive);
+        public bool IsAlive => !destroyed && !released && this != null && (Model == null || Model.IsAlive);
 
         public bool IsFinished => !IsAlive || ((runner == null || runner.IsFinished) && (movement == null || movement.IsFinished));
 
@@ -65,11 +66,26 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             deathSubscription?.Dispose();
             deathSubscription = Model != null ? UniRx.ObservableExtensions.Subscribe(Model.OnDeath, _ => RunDeathBehavior()) : null;
 
+            released = false;
             runner?.Stop();
             runner = tree != null ? new BehaviorTreeRunner(tree, new BattleContext(world, this), overrides) : null;
-            if (registered) return;
-            registered = true;
             world.Register(this);
+        }
+
+        public void OnTakenFromPool() { }
+
+        public void OnReturnedToPool()
+        {
+            released = true;
+            World?.CancelScheduled(this);
+            runner?.Stop();
+            runner = null;
+            movement?.Stop();
+            movement = null;
+            movementSteps = null;
+            deathBehavior = null;
+            deathSubscription?.Dispose();
+            deathSubscription = null;
         }
 
         public void BattleTick()

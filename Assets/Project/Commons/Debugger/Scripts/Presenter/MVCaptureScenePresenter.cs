@@ -35,10 +35,11 @@ namespace Project.Commons.Debugger.Scripts.Presenter
             // シナリオの立ち絵はRuntimeModelの現在ステージから決まるため、撮影用のステージを設定しておく
             var runtimeModel = RuntimeModelRepository.Get();
             runtimeModel.CurrentStageType = BattleStageTypeExtensions.FromInt(charaStageNumber);
-            runtimeModel.CurrentSituation = BattleSituation.Way;
+            runtimeModel.CheckpointSection = 0;
 
             backgroundModel.SetStage(StageModelRepository.GetByStageNumber(backgroundStageNumber).BackgroundAddress);
             backgroundPresenter?.Initialize(backgroundModel);
+            backgroundPresenter?.ResetScroll(true);
 
             if (scenarioData == null)
             {
@@ -46,7 +47,7 @@ namespace Project.Commons.Debugger.Scripts.Presenter
                 return;
             }
 
-            ScenarioModelRepository.Instance.SetOverrideData(scenarioData);
+            ScenarioModelRepository.Instance.SetData(scenarioData);
             PlayScenarioThenDemoClear().Forget();
         }
 

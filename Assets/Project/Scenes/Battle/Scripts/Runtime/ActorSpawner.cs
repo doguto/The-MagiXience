@@ -28,11 +28,13 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     {
         readonly BattleWorld world;
         readonly EnemyTracker tracker;
+        readonly ActorPool pool;
 
-        public ActorSpawner(BattleWorld world, EnemyTracker tracker)
+        public ActorSpawner(BattleWorld world, EnemyTracker tracker, ActorPool pool = null)
         {
             this.world = world;
             this.tracker = tracker;
+            this.pool = pool;
         }
 
         public int ActiveEnemyCount => tracker != null ? tracker.ActiveEnemyCount : 0;
@@ -46,7 +48,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             }
 
             var rotation = spawn.Rotation == default ? Quaternion.identity : spawn.Rotation;
-            var instance = Object.Instantiate(spawn.Prefab, spawn.Position, rotation);
+            var instance = pool != null && ActorPool.IsPoolable(spawn.Prefab)
+                ? pool.Get(spawn.Prefab, spawn.Position, rotation)
+                : Object.Instantiate(spawn.Prefab, spawn.Position, rotation);
 
             if (instance.TryGetComponent<IBeamVisualReceiver>(out var beam))
             {
@@ -54,11 +58,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             }
 
             var enemy = instance.GetComponent<EnemyEntityPresenter>();
-            if (spawn.Behavior != null)
-            {
-                if (enemy != null) enemy.DetachLegacyBehaviour();
-                BattleActor.Attach(instance, world, spawn.Behavior, spawn.Overrides);
-            }
+            if (spawn.Behavior != null) BattleActor.Attach(instance, world, spawn.Behavior, spawn.Overrides);
 
             if (enemy != null && spawn.Tracked && tracker != null)
             {

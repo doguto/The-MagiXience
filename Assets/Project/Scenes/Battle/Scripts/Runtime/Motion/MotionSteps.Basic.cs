@@ -75,6 +75,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
         [SerializeField] Vector3 velocity = Vector3.left;
         [SerializeField, Min(0f), Tooltip("0 で無限")] float duration;
 
+        public VelocityMotion() { }
+        public VelocityMotion(Vector3 velocity) => this.velocity = velocity;
+
         public override string Summary => $"速度 {velocity.magnitude:0.##}" + (duration > 0f ? $" / {duration:0.##}s" : "");
 
         public override MotionRunner CreateRunner()

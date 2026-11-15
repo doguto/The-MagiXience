@@ -281,7 +281,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         // 実行したフレームのうちに Success を返すノード
         public static bool IsInstant(NodeDefinition node) =>
             node is ActionNodeDefinition
-            && node is not (SubTreeNodeDefinition or WaitNodeDefinition or WaitUntilNodeDefinition or MoveNodeDefinition or MoveTrailFanNodeDefinition);
+            && node is not (SubTreeNodeDefinition or WaitNodeDefinition or WaitUntilNodeDefinition or MoveNodeDefinition or MoveTrailFanNodeDefinition or MovePathNodeDefinition or PlaceAlongPathNodeDefinition or WaveNodeDefinition or BossBattleNodeDefinition);
 
         const float HorizontalGap = 40f;
         const float VerticalGap = 70f;
@@ -400,6 +400,32 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 evt.menu.AppendAction("Open SubTree", _ => BehaviorTreeEditorWindow.Open(tree));
             }
+
+            if (evt.target is BehaviorTreeNodeView { Definition: ScenarioNodeDefinition scenario })
+            {
+                var missing = scenario.MissingCommands().ToList();
+                evt.menu.AppendAction("会話のコマンドから OnCommand を作る", _ => AddOnCommands(scenario, missing),
+                    missing.Count > 0 ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled);
+            }
+        }
+
+        // 子の並びは x 座標で決まるので、既存の子の右側へ順に置く
+        void AddOnCommands(ScenarioNodeDefinition scenario, List<string> commands)
+        {
+            if (commands.Count == 0) return;
+            Undo.RecordObject(asset, "Add OnCommand Nodes");
+
+            var children = scenario.Children.ToList();
+            var x = children.Count > 0 ? children.Max(c => c.GraphPosition.x) : scenario.GraphPosition.x - HorizontalGap;
+            var y = scenario.GraphPosition.y + VerticalGap + 80f;
+            foreach (var command in commands)
+            {
+                x += 220f;
+                children.Add(new OnCommandNodeDefinition { Command = command, GraphPosition = new Vector2(x, y) });
+            }
+            scenario.SetChildren(children);
+            EditorUtility.SetDirty(asset);
+            Reload();
         }
 
         IEnumerable<NodeDefinition> AllDefinitions()

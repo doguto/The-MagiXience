@@ -26,8 +26,8 @@
 /* ---------- Node ---------- */
 
 .bt-node {
-    min-width: 180px;
-    max-width: 240px;
+    min-width: 240px;
+    max-width: 360px;
     overflow: visible;
 }
 
@@ -81,7 +81,7 @@
 .bt-port-row {
     flex-direction: row;
     justify-content: center;
-    height: 12px;
+    height: 16px;
 }
 
 .bt-port-row--in {
@@ -91,8 +91,8 @@
 }
 
 .bt-port-row .port {
-    height: 12px;
-    width: 40px;
+    height: 16px;
+    width: 56px;
     padding: 0;
     margin: 0;
     justify-content: center;
@@ -104,8 +104,8 @@
 }
 
 .bt-port-row .port #connector {
-    width: 9px;
-    height: 9px;
+    width: 12px;
+    height: 12px;
     margin: 0;
     border-width: 1px;
     border-color: #9a9a9a;
@@ -121,22 +121,22 @@
 .bt-header {
     flex-direction: row;
     align-items: center;
-    height: 22px;
-    padding: 0 8px 2px 8px;
+    height: 30px;
+    padding: 0 10px 2px 10px;
     background-color: #3b3b3b;
 }
 
 .bt-marker {
-    width: 8px;
-    height: 8px;
-    margin-right: 7px;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
     flex-shrink: 0;
 }
 
 .bt-title {
     flex-grow: 1;
     color: #e0e0e0;
-    font-size: 12px;
+    font-size: 15px;
     -unity-font-style: bold;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -144,31 +144,32 @@
 
 .bt-order {
     color: #8c8c8c;
-    font-size: 11px;
+    font-size: 13px;
     margin-left: 6px;
 }
 
 /* ---------- Body ---------- */
 
 .bt-body {
-    padding: 4px 6px 4px 6px;
+    padding: 6px 8px 6px 8px;
+    font-size: 13px;
 }
 
 .bt-body .unity-base-field {
-    margin: 1px 0;
-    min-height: 18px;
+    margin: 2px 0;
+    min-height: 22px;
 }
 
 .bt-body .unity-base-field__label {
-    min-width: 60px;
-    width: 60px;
+    min-width: 90px;
+    width: 90px;
     color: #9d9d9d;
 }
 
 .bt-summary {
-    color: #8c8c8c;
-    font-size: 11px;
-    margin: 2px 2px 0 2px;
+    color: #b0b0b0;
+    font-size: 13px;
+    margin: 3px 2px 0 2px;
     white-space: normal;
 }
 
@@ -201,7 +202,7 @@
 
 .bt-node--root .bt-header {
     justify-content: center;
-    height: 24px;
+    height: 30px;
     padding: 0 12px;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
@@ -217,13 +218,13 @@
 .bt-value {
     flex-direction: row;
     align-items: center;
-    margin: 1px 0;
-    min-height: 18px;
+    margin: 2px 0;
+    min-height: 22px;
 }
 
 .bt-value__label {
-    min-width: 60px;
-    width: 60px;
+    min-width: 90px;
+    width: 90px;
     color: #9d9d9d;
     padding-left: 1px;
 }
@@ -243,7 +244,7 @@
 
 .bt-value__bound {
     flex-grow: 1;
-    height: 18px;
+    height: 22px;
     padding: 0 5px;
     -unity-text-align: middle-left;
     background-color: #242424;
@@ -259,11 +260,11 @@
 }
 
 .bt-value__menu {
-    width: 16px;
-    height: 18px;
+    width: 20px;
+    height: 22px;
     margin: 0 0 0 2px;
     padding: 0;
-    font-size: 9px;
+    font-size: 11px;
     color: #9d9d9d;
 }
 

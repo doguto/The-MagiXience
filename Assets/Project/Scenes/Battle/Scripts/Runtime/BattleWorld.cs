@@ -61,7 +61,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         // 追加はそのフレームの終わりに反映する (Tick 中に敵が生まれても列挙が壊れないように)
         public void Register(IBattleTickable tickable)
         {
-            if (tickable != null) pending.Add(tickable);
+            // プールで使い回す敵は、前の回の登録が残っているうちに付け直されることがあるため重複を避ける
+            if (tickable == null || pending.Contains(tickable) || tickables.Contains(tickable)) return;
+            pending.Add(tickable);
         }
 
         // frame 後に action を実行する。owner を渡すと、その敵が倒れた/消えた時点で取り消す
@@ -140,7 +142,11 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public ActorSpawner Spawner { get; set; }
         public BulletClearReceiver Clearer { get; set; }
         public BattleActor Boss { get; set; }
+        public IBossHost BossHost { get; set; }
+        public IScenarioService Scenario { get; set; }
+        public StageProgress Progress { get; } = new();
         public Action<SeType> PlaySe { get; set; }
+        public Action<BgmType> PlayBgm { get; set; }
         public UnityEngine.AudioSource BgmSource { get; set; }
         // ステージのサービスが自機や背景へ働きかけるときに使う
         public PlayerEntityPresenter Player { get; set; }

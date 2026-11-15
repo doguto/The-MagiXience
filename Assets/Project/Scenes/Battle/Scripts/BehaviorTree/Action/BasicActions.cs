@@ -78,6 +78,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class SubTreeNodeDefinition : ActionNodeDefinition
     {
         [SerializeField] BehaviorTreeAsset tree;
+        [SerializeField, Tooltip("ツリーの Object パラメータ名。指定するとその値のツリーを実行する (値が空なら何もしない)")] string treeParam;
         [SerializeField] List<TreeParameter> overrides = new();
 
         public BehaviorTreeAsset Tree
@@ -86,18 +87,38 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             set => tree = value;
         }
 
+        public string TreeParam
+        {
+            get => treeParam;
+            set => treeParam = value;
+        }
+
         public List<TreeParameter> Overrides => overrides;
 
-        public override string Summary => tree ? tree.name + (overrides.Count > 0 ? $"  ({overrides.Count} override)" : "") : "(未設定)";
+        public override string Summary =>
+            (!string.IsNullOrEmpty(treeParam) ? "$" + treeParam : tree ? tree.name : "(未設定)") + (overrides.Count > 0 ? $"  ({overrides.Count} override)" : "");
 
         public override INode Build(BuildScope scope)
         {
-            if (tree == null)
+            var resolved = ParamObjects.Resolve(scope, treeParam, tree);
+            if (resolved == null)
             {
-                Debug.LogWarning("[BehaviorTree] SubTree asset is not assigned.");
+                if (string.IsNullOrEmpty(treeParam)) Debug.LogWarning("[BehaviorTree] SubTree asset is not assigned.");
                 return new SucceedNode();
             }
-            return tree.Build(scope, overrides);
+            return resolved.Build(scope, overrides);
+        }
+    }
+
+    // ノードの「〜Param」欄 (パラメータ名) から Object パラメータの値を引く。名前が空なら固定値を使う
+    public static class ParamObjects
+    {
+        public static T Resolve<T>(BuildScope scope, string param, T fallback) where T : UnityEngine.Object
+        {
+            if (string.IsNullOrEmpty(param)) return fallback;
+            if (scope != null && scope.TryGet(param, out var p)) return p.ObjectValue as T;
+            Debug.LogWarning($"[BehaviorTree] パラメータ '{param}' が見つかりません");
+            return fallback;
         }
     }
 }

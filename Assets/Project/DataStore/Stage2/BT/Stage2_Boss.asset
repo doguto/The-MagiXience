@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a92d008439a060a47b6c55611a1614ef, type: 3}
+  m_Name: Stage2_Boss
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 5846423284816155308, guid: 2547cec9d2b889841984267e5a4822ec, type: 3}
+  spawnPosition: {x: 10, y: 0, z: 0}
+  entrance:
+  - rid: 8540147960821842138
+  tree: {fileID: 11400000, guid: 554342848badc7a41aa887738bcc2a24, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147960821842138
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 3.7, y: 0, z: 0}
+        isRelative: 0
+        duration: 2
+        ease:
+          easeValue: 6
+          customCurve:
+            serializedVersion: 2
+            m_Curve: []
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}

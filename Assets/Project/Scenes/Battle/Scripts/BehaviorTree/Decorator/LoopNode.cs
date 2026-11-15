@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
@@ -20,11 +19,11 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public override string Summary => count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞ 無限" : "× " + count;
     }
 
-    [Serializable, NodeInfo("子を Interval フレームおきに開始する。前の回が終わっていなくても次を始める (重なってよい)")]
+    [Serializable, NodeInfo("子を Interval フレームの周期で繰り返す。子が早く終われば周期まで待ち、最後の回の後は待たない")]
     public sealed class RepeatNodeDefinition : DecoratorNodeDefinition
     {
-        [SerializeField, Tooltip("開始する回数。0 = 無限")] BtInt count;
-        [SerializeField, Tooltip("開始の間隔 (フレーム)")] BtInt interval = new(60);
+        [SerializeField, Tooltip("回数。0 = 無限")] BtInt count;
+        [SerializeField, Tooltip("周期: ある回の開始から次の回の開始までのフレーム数。子がこれより長ければ終わり次第すぐ次を始める")] BtInt interval = new(60);
 
         public BtInt Count
         {
@@ -39,72 +38,74 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public override INode Build(BuildScope scope) =>
-            new RepeatNode(() => BuildChild(scope), Mathf.Max(0, count.Resolve(scope)), Mathf.Max(1, interval.Resolve(scope)));
+            new RepeatNode(BuildChild(scope), Mathf.Max(0, count.Resolve(scope)), Mathf.Max(1, interval.Resolve(scope)));
 
         public override string Summary =>
-            (count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞" : "× " + count) + " / " + interval.ToFrameString() + " おき";
+            (count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞" : "× " + count) + " / 周期 " + interval.ToFrameString();
     }
 
-    // 子を一定間隔で開始し、実行中の回はすべて並行して進める。指定回数を開始し、全て終わったら Success
+    // 子を直列に繰り返す。各回の開始は周期どおりに揃え、子が周期より長ければ終わったフレームに次を始める
     public sealed class RepeatNode : Node
     {
-        readonly Func<INode> factory;
+        readonly INode child;
         readonly int count;
-        readonly int interval;
-        readonly List<INode> running = new();
-        readonly Stack<INode> idle = new();
-        int started;
+        readonly int period;
+        int completed;
         int elapsed;
+        bool waiting;
 
-        public RepeatNode(Func<INode> factory, int count, int interval)
+        public RepeatNode(INode child, int count, int period)
         {
-            this.factory = factory;
+            this.child = child;
             this.count = count;
-            this.interval = interval;
+            this.period = period;
         }
 
         protected override void OnEnter(BattleContext ctx)
         {
-            started = 0;
+            completed = 0;
             elapsed = 0;
+            waiting = false;
         }
 
         protected override NodeStatus OnTick(BattleContext ctx)
         {
-            if ((count == 0 || started < count) && elapsed == started * interval)
+            if (waiting)
             {
-                running.Add(idle.Count > 0 ? idle.Pop() : factory());
-                started++;
-            }
-
-            for (var i = 0; i < running.Count; i++)
-            {
-                var status = running[i].Tick(ctx);
-                if (status == NodeStatus.Running) continue;
-                if (status == NodeStatus.Failure)
+                if (elapsed < period)
                 {
-                    AbortRunning(ctx);
-                    return NodeStatus.Failure;
+                    elapsed++;
+                    return NodeStatus.Running;
                 }
-                idle.Push(running[i]);
-                running.RemoveAt(i--);
+                waiting = false;
+                elapsed = 0;
             }
 
-            elapsed++;
-            return count > 0 && started >= count && running.Count == 0 ? NodeStatus.Success : NodeStatus.Running;
-        }
-
-        protected override void OnAbort(BattleContext ctx) => AbortRunning(ctx);
-
-        void AbortRunning(BattleContext ctx)
-        {
-            foreach (var node in running)
+            while (true)
             {
-                node.Abort(ctx);
-                idle.Push(node);
+                var status = child.Tick(ctx);
+                if (status == NodeStatus.Running)
+                {
+                    elapsed++;
+                    return NodeStatus.Running;
+                }
+                if (status == NodeStatus.Failure) return NodeStatus.Failure;
+
+                completed++;
+                if (count > 0 && completed >= count) return NodeStatus.Success;
+
+                if (elapsed < period)
+                {
+                    waiting = true;
+                    elapsed++;
+                    return NodeStatus.Running;
+                }
+                // period >= 1 なので、ここに来るのは前フレーム以前に始まった回だけ (同フレームで無限に回らない)
+                elapsed = 0;
             }
-            running.Clear();
         }
+
+        protected override void OnAbort(BattleContext ctx) => child.Abort(ctx);
     }
 
     // 子を指定回数繰り返す。子が Failure を返したら Failure。

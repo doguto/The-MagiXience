@@ -18,9 +18,9 @@ namespace Project.Scripts.Infra
         public string charaStillAddress;
         public string backgroundAddress;
         public string title;
-        [Header("Battle Flow")]
-        public string waySequenceAddress;
-        public string bossSequenceAddress;
+        [Header("Battle")]
+        [Tooltip("BattleStageAsset の Addressable アドレス")]
+        public string stageAddress;
         [Header("Scenario")]
         [Tooltip("シナリオ中の敵立ち絵の表示位置の補正(UI座標)。立ち絵ごとに顔の位置などが違うのを揃えるために使う")]
         public Vector2 scenarioEnemyStillOffset;

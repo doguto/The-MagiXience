@@ -1,25 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
-using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scenes.Battle.Scripts.View.Entity;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
+    // 弾の見た目・当たり判定・寿命・画面外判定を受け持つ。位置は BulletSystem が毎フレーム与える
     [RequireComponent(typeof(BulletEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
     public class BulletEntityPresenter : MonoBehaviour, IEntityPresenter
     {
-        [SerializeReference, SubclassSelector]
-        List<IMovementStep> movementSteps = new() { new InfiniteMovementConfig() };
-
         [SerializeField] BulletEntityView view;
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField, Tooltip("弾のライフタイム（秒）。0以下で無制限")]
@@ -54,62 +46,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         Vector3 travelOrigin;
         Vector2 travelAxis;
         float travelRange;
-        Tween currentTween;
-        CancellationTokenSource movementCts;
         float lifetimeElapsed;
         float screenMargin;
         bool isInPool;
         bool hasRuntimeKinematicBody;
-        Transform authoredMovementTarget;
-        bool simulateWind;
-        bool movementStarted;
-        Vector3 previousAuthoredPosition;
-        Vector2 windVelocityCorrection;
-        Vector2 windPositionCorrection;
         Quaternion baseRotation = Quaternion.identity;
-        readonly IMovementStep[] movementOverrideBuffer = new IMovementStep[1];
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
         public bool IsActive => !isInPool && model != null && model.IsAlive;
         public float WindInfluence => windInfluence;
 
+        /// <param name="rotation">Prefab本来の回転に対するオフセット</param>
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>
-        /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
-        /// <param name="movementOverride">この弾に限り使う移動ステップ。nullならPrefab側のmovementStepsを使う(従来動作)</param>
-        /// <param name="movementPresetOverride">この弾に限り使うMovement Stepsのプリセット。movementOverrideが指定されていればそちらを優先する</param>
-        public void Initialize(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null, bool affectedByWind = true)
-        {
-            var resolvedRotation = Setup(damage, position, direction, objectPool, isPlayerBullet, rotation, range);
-            simulateWind = affectedByWind && BattleWind.Enabled;
-            if (simulateWind)
-            {
-                if (authoredMovementTarget == null)
-                {
-                    var proxy = new GameObject("Bullet authored trajectory");
-                    proxy.hideFlags = HideFlags.HideInHierarchy;
-                    authoredMovementTarget = proxy.transform;
-                }
-                authoredMovementTarget.SetPositionAndRotation(position, resolvedRotation);
-                authoredMovementTarget.localScale = transform.lossyScale;
-                previousAuthoredPosition = position;
-            }
-            StartMovementSequence(direction, startDelay, movementOverride, movementPresetOverride);
-        }
-
-        // BulletSystem が位置を毎フレーム与える弾として初期化する (自前の移動・風処理は行わない)
+        /// <returns>Prefab本来の回転を合成した、実際の回転</returns>
         public Quaternion InitializeDriven(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, Quaternion rotation, float range, bool isPlayerBullet = false)
         {
-            var resolvedRotation = Setup(damage, position, direction, objectPool, isPlayerBullet, rotation, range);
-            simulateWind = false;
-            StopMovement();
-            return resolvedRotation;
-        }
-
-        Quaternion Setup(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, bool isPlayerBullet, Quaternion rotation, float range)
-        {
             pool = objectPool;
-            // 渡された回転はPrefab本来の回転に対するオフセットとして加算する
             var offsetRotation = rotation == default ? Quaternion.identity : rotation;
             var resolvedRotation = offsetRotation * baseRotation;
             transform.SetPositionAndRotation(position, resolvedRotation);
@@ -129,9 +82,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
 
             isInPool = false;
-            movementStarted = false;
-            windVelocityCorrection = windPositionCorrection = Vector2.zero;
-
             view.ResetView();
 
             // 画面外判定の余白は毎フレームbounds計算するとコストが高いため生成時に求める。
@@ -141,91 +91,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             return resolvedRotation;
         }
 
-        void StartMovementSequence(Vector2 direction, float startDelay, IMovementStep movementOverride, MovementPreset movementPresetOverride)
-        {
-            StopMovement();
-
-            // Select per launch. Never replace the prefab's list or retain a previous pooled launch's override.
-            bool isOverride = movementOverride != null;
-            IReadOnlyList<IMovementStep> steps = movementPresetOverride != null ? movementPresetOverride.Steps : movementSteps;
-            if (isOverride)
-            {
-                movementOverrideBuffer[0] = movementOverride;
-                steps = movementOverrideBuffer;
-            }
-            if (steps == null || steps.Count == 0) return;
-
-            movementCts = new CancellationTokenSource();
-            RunMovementStepsAsync(steps, direction, startDelay, isOverride, movementCts.Token).Forget();
-        }
-
-        // movementOverride経由(AttackEvent.BulletMovement)の一時的な移動は、完了と同時に役目を終えるため
-        // Prefab固定のlifetimeを待たずに自分でプールへ返す。通常のmovementSteps(Prefab固定)やプリセットによる置き換えはそのまま留まる。
-        async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Vector2 direction, float startDelay, bool returnToPoolWhenDone, CancellationToken ct)
-        {
-            if (startDelay > 0f)
-                await UniTask.Delay(TimeSpan.FromSeconds(startDelay), cancellationToken: ct);
-
-            foreach (var step in steps)
-            {
-                if (step == null) continue;
-                ct.ThrowIfCancellationRequested();
-
-                bool grantsInvincibility = step is IInvincibilityGrantingStep;
-                if (grantsInvincibility) model.SetInvincible(true);
-
-                try
-                {
-                    movementStarted = true;
-                    currentTween = step.Play(simulateWind ? authoredMovementTarget : transform, direction, null);
-                    if (currentTween == null)
-                    {
-                        // Let Initialize finish before returning an invalid movement to the pool.
-                        await UniTask.Yield(PlayerLoopTiming.Update, ct);
-                        ReturnToPool();
-                        return;
-                    }
-                    await currentTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
-                }
-                finally
-                {
-                    if (grantsInvincibility) model.SetInvincible(false);
-                }
-            }
-
-            if (returnToPoolWhenDone) ReturnToPool();
-        }
-
-        void StopMovement()
-        {
-            movementCts?.Cancel();
-            movementCts?.Dispose();
-            movementCts = null;
-            currentTween = null;
-        }
-
         // modelはプールから再利用されても同一インスタンスのため、購読は生成時の1回のみ行う
         void BindModelToView()
         {
             model.CurrentHp
                 .Where(hp => hp <= 0)
-                .Subscribe(_ => HandleDestruction())
+                .Subscribe(_ => ReturnToPool())
                 .AddTo(disposables);
         }
 
         void LateUpdate()
         {
             if (isInPool || model == null || !model.IsAlive) return;
-
-            if (simulateWind && movementStarted && Time.deltaTime > 0f)
-            {
-                var authoredPosition = authoredMovementTarget.position;
-                var velocity = (Vector2)(authoredPosition - previousAuthoredPosition) / Time.deltaTime;
-                BattleWind.IntegrateBullet(velocity, Time.deltaTime, ref windVelocityCorrection, ref windPositionCorrection);
-                // 加速度側に掛けると抵抗で本来の速度まで打ち消されるため、積分後の補正量に掛ける
-                transform.SetPositionAndRotation(authoredPosition + (Vector3)(windPositionCorrection * windInfluence), authoredMovementTarget.rotation);
-                previousAuthoredPosition = authoredPosition;
-            }
 
             if (lifetime > 0f)
             {
@@ -262,15 +139,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                    position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
         }
 
-        void HandleDestruction() => ReturnToPool();
-
         public void ReturnToPool()
         {
             // 寿命・画面外・被弾が同フレームに重なった場合の二重返却を防ぐ
             if (isInPool) return;
             isInPool = true;
 
-            StopMovement();
             if (pool != null)
                 pool.Release(this);
             else
@@ -293,7 +167,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         public void OnReturnedToPool()
         {
             isInPool = true;
-            StopMovement();
             view.SetVisible(false);
             gameObject.SetActive(false);
         }
@@ -305,8 +178,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            StopMovement();
-            if (authoredMovementTarget != null) Destroy(authoredMovementTarget.gameObject);
             disposables.Dispose();
             model?.Dispose();
         }

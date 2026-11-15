@@ -1,7 +1,5 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-using System;
 using Project.Scripts.Extensions.Message;
-using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using UniRx;
 using UnityEngine;
@@ -11,8 +9,7 @@ namespace Project.Commons.Debugger.Scripts.Presenter
     public class DebugRuntimeModelInitializer : MonoBehaviour
     {
         [SerializeField] [Min(1)] int stageNumber = 1;
-        [SerializeField] BattleSituation situation = BattleSituation.Way;
-        [SerializeField] [Min(0)] int startPhaseIndex;
+        [SerializeField, Min(0), Tooltip("開始する Section の番号 (ステージツリーの Stage 直下の並び順)")] int startSection;
 
         void Awake()
         {
@@ -23,8 +20,8 @@ namespace Project.Commons.Debugger.Scripts.Presenter
                 return;
             }
 
-            runtimeModel.SetForDebug(stageNumber, situation, startPhaseIndex);
-            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, Situation={situation}, StartPhaseIndex={startPhaseIndex} に設定しました");
+            runtimeModel.SetForDebug(stageNumber, startSection);
+            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, StartSection={startSection} に設定しました");
         }
 
         void Start()

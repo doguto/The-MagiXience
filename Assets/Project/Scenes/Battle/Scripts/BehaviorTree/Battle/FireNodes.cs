@@ -18,19 +18,19 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable]
     public abstract class ShotPattern
     {
-        public abstract void Build(Vector2 baseDirection, List<Shot> shots);
+        public abstract void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots);
         public virtual string Summary => GetType().Name.Replace("Shot", "");
 
-        protected static Vector2 Rotate(float degrees)
+        internal static Vector2 Rotate(float degrees)
         {
             var rad = degrees * Mathf.Deg2Rad;
             return new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
         }
 
-        protected static float Angle(Vector2 v) => Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg;
+        internal static float Angle(Vector2 v) => Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg;
 
         // 旧 NWay の角度。奇数は中央に 1 発、偶数は中央を空ける
-        protected static float FanAngle(float baseAngle, int count, float spread, int i) =>
+        internal static float FanAngle(float baseAngle, int count, float spread, int i) =>
             count % 2 == 1
                 ? baseAngle - spread * (count - 1) / 2f + spread * i
                 : baseAngle - spread / 2f - spread * (count / 2 - 1) + spread * i;
@@ -39,7 +39,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable]
     public sealed class SingleShot : ShotPattern
     {
-        public override void Build(Vector2 baseDirection, List<Shot> shots) => shots.Add(new Shot { Direction = baseDirection });
+        public override void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots) => shots.Add(new Shot { Direction = baseDirection });
         public override string Summary => "単発";
     }
 
@@ -53,7 +53,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Min(0), Tooltip("動き出すまでのフレーム数")] int startDelayFrames;
         [SerializeField, Tooltip("基準方向からの回転 (度, 反時計回り)")] float rotationOffset;
 
-        public override void Build(Vector2 baseDirection, List<Shot> shots)
+        public override void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots)
         {
             var baseAngle = Angle(baseDirection) + rotationOffset;
             for (var i = 0; i < wayCount; i++)
@@ -80,7 +80,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Min(0)] int spawnIntervalFrames = 6;
         [SerializeField, Min(0), Tooltip("最後の 1 発を出してから動き出すまで")] int releaseDelayFrames = 18;
 
-        public override void Build(Vector2 baseDirection, List<Shot> shots)
+        public override void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots)
         {
             var baseAngle = Angle(baseDirection);
             for (var i = 0; i < wayCount; i++)
@@ -106,7 +106,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Min(0)] int spawnIntervalFrames = 5;
         [SerializeField, Min(0)] int releaseDelayFrames = 12;
 
-        public override void Build(Vector2 baseDirection, List<Shot> shots)
+        public override void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots)
         {
             var baseAngle = Angle(baseDirection);
             for (var i = 0; i < wayCount; i++)
@@ -129,25 +129,69 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable]
     public sealed class ChargeShot : ShotPattern
     {
-        [SerializeField, Min(1)] int wayCount = 16;
-        [SerializeField, Min(0f)] float radius = 3.5f;
-        [SerializeField, Min(0f)] float targetRadius;
-        [SerializeField, Min(0.01f), Tooltip("秒")] float gatherDuration = 1.2f;
-        [SerializeField, Tooltip("度/秒。負で時計回り")] float rotationSpeed = 480f;
-        [SerializeField, Min(0)] int startDelayFrames;
+        [SerializeField] BtInt count = 16;
+        [SerializeField] BtFloat radius = 1.5f;
+        [SerializeField] BtFloat targetRadius = 0f;
+        [SerializeField] BtInt gatherFrames = 60;
+        [SerializeField, Tooltip("度/秒。負で時計回り")] BtFloat rotationSpeed = 480f;
+        [SerializeField] BtInt startDelayFrames = 0;
 
-        public override void Build(Vector2 baseDirection, List<Shot> shots)
+        public ChargeShot() { }
+
+        public ChargeShot(int count, float radius, float targetRadius, int gatherFrames, float rotationSpeed, int startDelayFrames)
         {
+            this.count = count;
+            this.radius = radius;
+            this.targetRadius = targetRadius;
+            this.gatherFrames = gatherFrames;
+            this.rotationSpeed = rotationSpeed;
+            this.startDelayFrames = startDelayFrames;
+        }
+
+        public override void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots)
+        {
+            var n = Mathf.Max(1, count.Resolve(scope));
+            var r = Mathf.Max(0f, radius.Resolve(scope));
+            var seconds = Mathf.Max(1, gatherFrames.Resolve(scope)) / (float)BattleContext.FramesPerSecond;
+            var delay = Mathf.Max(0, startDelayFrames.Resolve(scope));
             var baseAngle = Angle(baseDirection);
-            var motion = new MotionStep[] { new SpiralMotion(radius, targetRadius, gatherDuration, rotationSpeed) };
-            for (var i = 0; i < wayCount; i++)
+            var motion = new MotionStep[] { new SpiralMotion(r, Mathf.Max(0f, targetRadius.Resolve(scope)), seconds, rotationSpeed.Resolve(scope)) };
+            for (var i = 0; i < n; i++)
             {
-                var dir = Rotate(baseAngle + 360f / wayCount * i);
-                shots.Add(new Shot { Direction = dir, Offset = dir * radius, StartDelayFrames = startDelayFrames, Motion = motion });
+                var dir = Rotate(baseAngle + 360f / n * i);
+                shots.Add(new Shot { Direction = dir, Offset = dir * r, StartDelayFrames = delay, Motion = motion });
             }
         }
 
-        public override string Summary => $"チャージ {wayCount}発";
+        public override string Summary => $"チャージ {count}発 / {gatherFrames.ToFrameString()}";
+    }
+
+    // 同じ扇を間隔をあけて何度か撃つ。発射位置の半径は1発目から最後へ線形に変わる
+    [Serializable]
+    public sealed class BurstShot : ShotPattern
+    {
+        [SerializeField, Min(1)] int wayCount = 5;
+        [SerializeField, Tooltip("隣り合う弾の角度 (度)")] float spreadAngle = 72f;
+        [SerializeField, Min(1)] int shotCount = 3;
+        [SerializeField, Min(0)] int intervalFrames = 6;
+        [SerializeField] float startRadius;
+        [SerializeField] float endRadius;
+
+        public override void Build(BuildScope scope, Vector2 baseDirection, List<Shot> shots)
+        {
+            var baseAngle = Angle(baseDirection);
+            for (var k = 0; k < shotCount; k++)
+            {
+                var radius = shotCount == 1 ? startRadius : Mathf.Lerp(startRadius, endRadius, k / (float)(shotCount - 1));
+                for (var i = 0; i < wayCount; i++)
+                {
+                    var dir = wayCount == 1 ? Rotate(baseAngle) : Rotate(FanAngle(baseAngle, wayCount, spreadAngle, i));
+                    shots.Add(new Shot { Direction = dir, Offset = dir * radius, SpawnDelayFrames = k * intervalFrames });
+                }
+            }
+        }
+
+        public override string Summary => $"{wayCount}way {spreadAngle:0.#}° × {shotCount}連 / {intervalFrames}f";
     }
 
     [Serializable, NodeInfo("弾を撃つ。撃ち方 (Pattern) と方向・弾の設定を指定する", "Action/Attack")]
@@ -165,14 +209,15 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public override INode Build(BuildScope scope)
         {
             var shots = new List<Shot>();
+            var spec = bullet.Resolve(scope);
             return new ActionNode(ctx =>
             {
-                Fire(ctx, shots);
+                Fire(ctx, scope, spec, shots);
                 return NodeStatus.Success;
             });
         }
 
-        void Fire(BattleContext ctx, List<Shot> shots)
+        void Fire(BattleContext ctx, BuildScope scope, BulletSpec spec, List<Shot> shots)
         {
             var e = new EmitContext(ctx, muzzleOffset);
             var dirSource = direction ?? new FixedDirection();
@@ -181,7 +226,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var rot = rotation?.GetRotation(e) ?? Quaternion.identity;
 
             shots.Clear();
-            (pattern ?? new SingleShot()).Build(baseDirection, shots);
+            (pattern ?? new SingleShot()).Build(scope, baseDirection, shots);
             Emitter.PlaySe(ctx, se);
 
             foreach (var shot in shots)
@@ -190,7 +235,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
                 Func<EmitContext, Vector2> position = worldOrigin.HasValue
                     ? _ => worldOrigin.Value + offset
                     : at => at.Origin + offset;
-                Emitter.Spawn(ctx, bullet, muzzleOffset, position, shot.Direction, rot, shot.SpawnDelayFrames, shot.StartDelayFrames, shot.Motion);
+                Emitter.Spawn(ctx, spec, muzzleOffset, position, shot.Direction, rot, shot.SpawnDelayFrames, shot.StartDelayFrames, shot.Motion);
             }
         }
     }

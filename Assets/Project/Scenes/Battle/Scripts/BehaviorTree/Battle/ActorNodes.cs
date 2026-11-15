@@ -59,31 +59,46 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class SetMovementNodeDefinition : ActionNodeDefinition
     {
         [SerializeField, Tooltip("指定するとインラインより優先")] MotionPreset preset;
+        [SerializeField, Tooltip("ツリーの Object パラメータ名。指定するとその値の MotionPreset を使う")] string presetParam;
         [SerializeReference, SubclassSelector] List<MotionStep> steps = new();
         [SerializeField, Tooltip("同じ移動が再生中ならやり直さない (フェーズをまたいで続く移動)")] bool continueIfSame;
 
         public IReadOnlyList<MotionStep> Steps => preset != null ? preset.Steps : steps;
-        public override string Summary => preset != null ? preset.name : steps.Count == 0 ? "移動を止める" : steps.Count == 1 ? steps[0]?.Summary : $"{steps.Count} ステップ";
 
-        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        public override string Summary =>
+            !string.IsNullOrEmpty(presetParam) ? "$" + presetParam
+            : preset != null ? preset.name : steps.Count == 0 ? "移動を止める" : steps.Count == 1 ? steps[0]?.Summary : $"{steps.Count} ステップ";
+
+        public override INode Build(BuildScope scope)
         {
-            ctx.Self?.SetMovement(Steps, continueIfSame);
-            return NodeStatus.Success;
-        });
+            var resolved = ParamObjects.Resolve(scope, presetParam, preset);
+            IReadOnlyList<MotionStep> resolvedSteps = resolved != null ? resolved.Steps : string.IsNullOrEmpty(presetParam) ? steps : null;
+            return new ActionNode(ctx =>
+            {
+                ctx.Self?.SetMovement(resolvedSteps, continueIfSame);
+                return NodeStatus.Success;
+            });
+        }
     }
 
     [Serializable, NodeInfo("この敵が倒されたときに 1 回だけ実行するツリーを設定する", "Action/Actor")]
     public sealed class SetDeathBehaviorNodeDefinition : ActionNodeDefinition
     {
         [SerializeField] BehaviorTreeAsset tree;
+        [SerializeField, Tooltip("ツリーの Object パラメータ名。指定するとその値のツリーを使う (値が空なら撃破時の行動なし)")] string treeParam;
 
-        public override string Summary => tree ? $"撃破時: {tree.name}" : "撃破時の行動なし";
+        public override string Summary =>
+            !string.IsNullOrEmpty(treeParam) ? $"撃破時: ${treeParam}" : tree ? $"撃破時: {tree.name}" : "撃破時の行動なし";
 
-        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        public override INode Build(BuildScope scope)
         {
-            ctx.Self?.SetDeathBehavior(tree);
-            return NodeStatus.Success;
-        });
+            var resolved = ParamObjects.Resolve(scope, treeParam, tree);
+            return new ActionNode(ctx =>
+            {
+                ctx.Self?.SetDeathBehavior(resolved);
+                return NodeStatus.Success;
+            });
+        }
     }
 
     [Serializable, NodeInfo("この敵の無敵を切り替える", "Action/Actor")]
@@ -110,7 +125,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             if (ctx.Self != null)
             {
                 ctx.World.CancelScheduled(ctx.Self);
-                UnityEngine.Object.Destroy(ctx.Self.gameObject);
+                ActorDespawn.Despawn(ctx.Self.gameObject);
             }
             return NodeStatus.Success;
         });

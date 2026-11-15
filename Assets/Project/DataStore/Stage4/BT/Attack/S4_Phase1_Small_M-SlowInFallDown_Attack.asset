@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S4_Phase1_Small_M-SlowInFallDown_Attack
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147961671975342
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147961671975342
+      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 0971e394bf404ceaac6a1f8a84e64fba
+        graphPosition: {x: 345, y: 300}
+        comment: Phase 0
+        child:
+          rid: 8540147961671975343
+        condition:
+          rid: 8540147961671975344
+        onChildCompleted: 0
+    - rid: 8540147961671975343
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 5e84b1e9bf5e4b94a11e5cc80ba2650e
+        graphPosition: {x: 345, y: 450}
+        comment: 
+        children:
+        - rid: 8540147961671975345
+        - rid: 8540147961671975346
+    - rid: 8540147961671975344
+      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        frames:
+          value: 241
+          param: 
+    - rid: 8540147961671975345
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 11209c4c0d774e1794f7fffd70d10a74
+        graphPosition: {x: 230, y: 600}
+        comment: 
+        frames:
+          value: 48
+          param: 
+    - rid: 8540147961671975346
+      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 91a8a24d818644bab89ef98dce123a8f
+        graphPosition: {x: 460, y: 600}
+        comment: 
+        child:
+          rid: 8540147961671975347
+        count:
+          value: 0
+          param: 
+        interval:
+          value: 78
+          param: 
+    - rid: 8540147961671975347
+      type: {class: FireNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b41c74944dec4ffcbcb196f50efb2fdd
+        graphPosition: {x: 460, y: 750}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: 67ed420ca909000448078ddced7509ff, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 3362cc4e4f4613543b2a44525fe9fece, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        pattern:
+          rid: 8540147961671975348
+        direction:
+          rid: 8540147961671975349
+        rotation:
+          rid: 8540147961671975350
+        muzzleOffset: {x: -0.375, y: 0}
+        se: 0
+    - rid: 8540147961671975348
+      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147961671975349
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147961671975350
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0

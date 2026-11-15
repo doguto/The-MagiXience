@@ -21,6 +21,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public IReadOnlyList<MotionStep> Motion;
         public float AttackTime;
         public bool AffectedByForce;
+        public bool IsPlayerBullet;
     }
 
     // 敵弾を固定フレームで動かす。弾の見た目・当たり判定・寿命・画面外判定は BulletEntityPresenter が担う。
@@ -74,7 +75,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
             var pool = BulletPool.GetOrCreateSharedPool(spawn.Prefab);
             var presenter = pool.Get();
-            var rotation = presenter.InitializeDriven(spawn.Damage, spawn.Position, spawn.Direction, pool, spawn.Rotation, spawn.Range);
+            var rotation = presenter.InitializeDriven(spawn.Damage, spawn.Position, spawn.Direction, pool, spawn.Rotation, spawn.Range, spawn.IsPlayerBullet);
 
             var bullet = free.Count > 0 ? free.Pop() : new Bullet();
             bullet.Presenter = presenter;

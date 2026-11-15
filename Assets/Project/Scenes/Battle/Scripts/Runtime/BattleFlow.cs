@@ -1,26 +1,33 @@
 using System;
-using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Presenter;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scenes.Battle.Scripts.Runtime.Motion;
 using Project.Scripts.Extensions;
+using Project.Scripts.Model;
+using UniRx;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Runtime
 {
-    // バトル 1 回分 (道中またはボス戦) の BehaviorTree 実行を管理する。
-    // シナリオ遷移・BGM・リトライなどシーンをまたぐ処理は BattleScenePresenter に残す。
-    public sealed class BattleFlow
+    // バトル 1 回分 (1 ステージ) の BehaviorTree 実行を管理する。ボスの生成と戦闘開始もここが受け持つ。
+    // シナリオ遷移・BGM・リトライなどシーンをまたぐ処理は BattleScenePresenter が、このクラスのイベントに反応して行う。
+    public sealed class BattleFlow : IBossHost
     {
         readonly BattleClock clock;
         readonly EnemyTracker tracker;
         readonly BulletClearReceiver clearer;
         readonly Func<AudioSource> bgmSource;
         readonly Action<SeType> playSe;
+        readonly CompositeDisposable bossSubscriptions = new();
         BattleWorld world;
+        BehaviorTreeRunner stageRunner;
+        ActorPool actorPool;
         MotionTickable entrance;
+        BossEntityPresenter boss;
+        BossDefinition bossDefinition;
+        bool bossDefeated;
 
         public BattleFlow(BattleClock clock, EnemyTracker tracker, BulletClearReceiver clearer, Func<AudioSource> bgmSource, Action<SeType> playSe)
         {
@@ -32,67 +39,132 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         }
 
         public BattleWorld World => world;
-        public event Action<string> PhaseStarted;
         public PlayerEntityPresenter Player { get; set; }
         public BackgroundPresenter Background { get; set; }
+        public IScenarioService Scenario { get; set; }
+        public Action<BgmType> PlayBgm { get; set; }
+        public BossEntityPresenter SpawnedBoss => boss;
 
-        // ステージで宣言されたサービスを生成して有効にする
-        public void BeginStage(BattleStageAsset stage)
+        public event Action<string> PhaseStarted;
+        public event Action<int, BattleSituation, bool> SectionStarted;
+        public event Action<BossEntityPresenter> BossSpawned;
+        public event Action<BossEntityPresenter> BossBattleStarted;
+
+        // ステージのツリーを startSection から始める。resume ならその Section の会話を飛ばす
+        public void StartStage(BattleStageAsset stage, int startSection, bool resume, Action<NodeStatus> onFinished)
         {
             EnsureWorld();
-            world.Services.Player = Player;
-            world.Services.Background = Background;
             world.SetStage(new StageContext(world, stage != null ? stage.Services : null));
-        }
+            world.Services.Progress.StartSection = startSection;
+            world.Services.Progress.ResumeStart = resume;
 
-        // 道中などステージ直下のツリーを開始する。完了したら onFinished を呼ぶ
-        public void StartStageTree(BehaviorTreeAsset tree, Action onFinished)
-        {
-            if (tree == null)
+            if (stage == null || stage.Tree == null)
             {
-                onFinished?.Invoke();
+                Debug.LogError("[BattleFlow] BattleStageAsset または Tree が設定されていません");
                 return;
             }
 
-            EnsureWorld();
-            var runner = new BehaviorTreeRunner(tree, new BattleContext(world));
-            runner.Finished += _ => onFinished?.Invoke();
-            world.Register(new RunnerTickable(runner));
+            Prewarm(stage);
+
+            stageRunner = new BehaviorTreeRunner(stage.Tree, new BattleContext(world));
+            stageRunner.Finished += status => onFinished?.Invoke(status);
+            world.Register(new RunnerTickable(stageRunner));
         }
 
-        public void PlayEntrance(Transform boss, IReadOnlyList<MotionStep> steps)
-        {
-            if (boss == null || steps == null || steps.Count == 0) return;
-            EnsureWorld();
-            entrance?.Stop();
-            entrance = new MotionTickable(new MotionSequence(steps, new TransformBody(boss), default));
-            world.Register(entrance);
-        }
+        // 1 種類あたりに先に作っておく数。同時に出る数の目安で、足りなければプールが増やす
+        const int BulletPrewarmCount = 30;
+        const int ActorPrewarmCount = 4;
 
-        public BattleActor StartBossTree(GameObject boss, BehaviorTreeAsset tree)
+        void Prewarm(BattleStageAsset stage)
         {
-            if (boss == null) return null;
-            EnsureWorld();
-            // 旧実装と同じく、登場の動きは途中で止めず終点まで一気に進める
-            entrance?.Complete();
-            entrance = null;
-
-            var actor = BattleActor.Attach(boss, world, tree);
-            world.Services.Boss = actor;
-            return actor;
+            var collected = StagePrefabCollector.Collect(stage);
+            foreach (var bullet in collected.Bullets) Presenter.Entity.BulletPool.Prewarm(bullet, BulletPrewarmCount);
+            foreach (var actor in collected.Actors)
+            {
+                if (ActorPool.IsPoolable(actor)) actorPool.Prewarm(actor, ActorPrewarmCount);
+            }
         }
 
         public void Stop()
         {
+            // 実行中の会話などを Abort で後始末させる
+            stageRunner?.Stop();
+            stageRunner = null;
             entrance?.Stop();
             entrance = null;
+            bossSubscriptions.Clear();
+            if (boss != null) UnityEngine.Object.Destroy(boss.gameObject);
+            boss = null;
+            bossDefinition = null;
+            bossDefeated = false;
+
             if (world != null)
             {
                 world.Services.Bullets.Clear();
                 world.Services.PhaseStarted -= OnPhaseStarted;
+                world.Services.Progress.SectionStarted -= OnSectionStarted;
+                world.Clear();
             }
             clock.End();
             world = null;
+            Player?.BindBulletSystem(null);
+        }
+
+        // ---------- IBossHost ----------
+
+        public BossDefinition Current => bossDefinition;
+        public bool IsDefeated => bossDefeated;
+
+        public bool Spawn(BossDefinition definition)
+        {
+            if (definition == null || definition.Prefab == null)
+            {
+                Debug.LogError("[BattleFlow] BossDefinition の Prefab が設定されていません");
+                return false;
+            }
+            if (boss != null)
+            {
+                Debug.LogWarning("[BattleFlow] ボスは既に出ています", boss);
+                return false;
+            }
+
+            EnsureWorld();
+            var instance = UnityEngine.Object.Instantiate(definition.Prefab, definition.SpawnPosition, Quaternion.identity);
+            boss = instance.GetComponent<BossEntityPresenter>();
+            if (boss == null)
+            {
+                Debug.LogError("[BattleFlow] ボスの Prefab に BossEntityPresenter がありません", instance);
+                UnityEngine.Object.Destroy(instance);
+                return false;
+            }
+
+            bossDefinition = definition;
+            bossDefeated = false;
+            boss.OnDeath.Take(1).Subscribe(_ => world?.Services.Boss?.Stop()).AddTo(bossSubscriptions);
+            boss.OnDeathSequenceCompleted.Take(1).Subscribe(_ => bossDefeated = true).AddTo(bossSubscriptions);
+
+            if (definition.Entrance != null && definition.Entrance.Count > 0)
+            {
+                entrance = new MotionTickable(new MotionSequence(definition.Entrance, new TransformBody(boss.transform), default));
+                world.Register(entrance);
+            }
+
+            BossSpawned?.Invoke(boss);
+            return true;
+        }
+
+        public BattleActor StartBattle(BehaviorTreeAsset tree)
+        {
+            if (boss == null || tree == null) return null;
+
+            // 旧実装と同じく、登場の動きは途中で止めず終点まで一気に進める
+            entrance?.Complete();
+            entrance = null;
+
+            var actor = BattleActor.Attach(boss.gameObject, world, tree);
+            world.Services.Boss = actor;
+            BossBattleStarted?.Invoke(boss);
+            return actor;
         }
 
         void EnsureWorld()
@@ -100,16 +172,26 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             if (world != null) return;
 
             world = new BattleWorld(Environment.TickCount, () => bgmSource?.Invoke() is { } s ? s.time : 0f);
+            // プールはリトライをまたいで使い回す。Battle シーンと一緒に破棄される
+            if (actorPool == null) actorPool = ActorPool.Create();
             var services = world.Services;
-            services.Spawner = new ActorSpawner(world, tracker);
+            services.Spawner = new ActorSpawner(world, tracker, actorPool);
             services.Clearer = clearer;
             services.PlaySe = playSe;
+            services.PlayBgm = type => PlayBgm?.Invoke(type);
             services.BgmSource = bgmSource?.Invoke();
+            services.BossHost = this;
+            services.Scenario = Scenario;
+            services.Player = Player;
+            services.Background = Background;
+            Player?.BindBulletSystem(services.Bullets);
             services.PhaseStarted += OnPhaseStarted;
+            services.Progress.SectionStarted += OnSectionStarted;
             clock.Begin(world);
         }
 
         void OnPhaseStarted(string phaseId) => PhaseStarted?.Invoke(phaseId);
+        void OnSectionStarted(int index, BattleSituation situation, bool resumed) => SectionStarted?.Invoke(index, situation, resumed);
 
         sealed class RunnerTickable : IBattleTickable
         {

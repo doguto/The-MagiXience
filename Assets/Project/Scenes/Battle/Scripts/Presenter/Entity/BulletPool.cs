@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.SceneManagement;
-using Project.Scenes.Battle.Scripts.Model.Movement;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
@@ -15,35 +14,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         // 敵ごとにプールを持つと、短命な敵は毎回Instantiateから始まり、死亡時に弾が破棄されてしまう。
         // 同じ弾Prefabを使う全BulletPoolで1つのプールを共有し、敵の生成・破棄をまたいで弾を再利用する。
         static readonly Dictionary<BulletEntityPresenter, IObjectPool<BulletEntityPresenter>> sharedPools = new();
+        // 弾はプールを作った時点のアクティブシーンのルートに生成される。そのシーンが閉じたときだけ捨てる
+        // (会話シーンなど別シーンのアンロードで捨てると、事前生成した弾が失われ、飛行中の弾も古いプールへ戻ってしまう)
+        static readonly Dictionary<BulletEntityPresenter, Scene> poolScenes = new();
         static bool isSceneHookRegistered;
 
-        IObjectPool<BulletEntityPresenter> pool;
-        bool affectedByWind;
+        // 撃ち手が持つ弾の Prefab。実際の発射は BulletSystem が共有プールから行う
+        public BulletEntityPresenter BulletPrefab => bulletPrefab;
 
         void Awake()
         {
-            affectedByWind = GetComponentInParent<PlayerEntityPresenter>() == null;
-            pool = GetOrCreateSharedPool(bulletPrefab, defaultCapacity, maxSize);
-        }
-
-        /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限。ビームの終点表現に使う</param>
-        /// <param name="startDelay">生成後、移動を開始するまでの待機秒数。0で従来通り即座に移動開始</param>
-        /// <param name="movementOverride">この弾に限り使う移動ステップ。nullならPrefab側のmovementStepsを使う(従来動作)</param>
-        /// <param name="movementPresetOverride">この弾に限り使うMovement Stepsのプリセット。movementOverrideが指定されていればそちらを優先する</param>
-        public BulletEntityPresenter SpawnBullet(int damage, Vector3 position, Vector2 direction = default, bool isPlayerBullet = false, Quaternion rotation = default, float range = 0f, float startDelay = 0f, IMovementStep movementOverride = null, MovementPreset movementPresetOverride = null)
-        {
-            var bullet = pool.Get();
-            bullet.Initialize(damage, position, direction, pool, isPlayerBullet, rotation, range, startDelay, movementOverride, movementPresetOverride, affectedByWind);
-            return bullet;
+            GetOrCreateSharedPool(bulletPrefab, defaultCapacity, maxSize);
         }
 
         public static IObjectPool<BulletEntityPresenter> GetOrCreateSharedPool(BulletEntityPresenter prefab, int defaultCapacity = 20, int maxSize = 100)
         {
             if (!isSceneHookRegistered)
             {
-                // 弾はシーンのルートに生成されるため、シーン破棄で待機中の弾も破棄される。
-                // 破棄済みの弾を取り出さないよう、シーン破棄のたびに待機中の弾を捨てる。
-                SceneManager.sceneUnloaded += _ => ClearSharedPools();
+                SceneManager.sceneUnloaded += ClearPoolsOf;
                 isSceneHookRegistered = true;
             }
 
@@ -53,9 +41,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             {
                 shared = CreatePool(prefab, defaultCapacity, maxSize);
                 sharedPools.Add(prefab, shared);
+                poolScenes[prefab] = SceneManager.GetActiveScene();
             }
 
             return shared;
+        }
+
+        // 最初の発射で生成が集中しないよう、指定数を先に作って待機させておく
+        public static void Prewarm(BulletEntityPresenter prefab, int count)
+        {
+            if (prefab == null || count <= 0) return;
+            var pool = GetOrCreateSharedPool(prefab);
+            var missing = count - pool.CountInactive;
+            if (missing <= 0) return;
+
+            var taken = new List<BulletEntityPresenter>(missing);
+            for (var i = 0; i < missing; i++) taken.Add(pool.Get());
+            foreach (var bullet in taken) pool.Release(bullet);
         }
 
         static IObjectPool<BulletEntityPresenter> CreatePool(BulletEntityPresenter prefab, int defaultCapacity, int maxSize)
@@ -78,13 +80,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             );
         }
 
-        static void ClearSharedPools()
+        static void ClearPoolsOf(Scene unloaded)
         {
-            foreach (var shared in sharedPools.Values)
+            var targets = new List<BulletEntityPresenter>();
+            foreach (var (prefab, scene) in poolScenes)
             {
-                shared.Clear();
+                if (scene == unloaded || !scene.IsValid()) targets.Add(prefab);
             }
-            sharedPools.Clear();
+
+            foreach (var prefab in targets)
+            {
+                if (sharedPools.TryGetValue(prefab, out var shared)) shared.Clear();
+                sharedPools.Remove(prefab);
+                poolScenes.Remove(prefab);
+            }
         }
     }
 }

@@ -55,12 +55,12 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var shots = new List<Shot>();
             return new ActionNode(ctx =>
             {
-                Fire(ctx, shots);
+                Fire(ctx, scope, shots);
                 return NodeStatus.Success;
             });
         }
 
-        void Fire(BattleContext ctx, List<Shot> shots)
+        void Fire(BattleContext ctx, BuildScope scope, List<Shot> shots)
         {
             var world = ctx.World;
             var self = ctx.Self;
@@ -71,7 +71,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var fixedOrigin = origin == BeamOrigin.World ? position : e.Origin;
 
             shots.Clear();
-            (pattern ?? new SingleShot()).Build(baseDirection, shots);
+            (pattern ?? new SingleShot()).Build(scope, baseDirection, shots);
             var snapshot = shots.ToArray();
 
             if (warningPrefab != null)

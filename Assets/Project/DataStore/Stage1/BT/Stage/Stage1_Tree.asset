@@ -1,0 +1,1296 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: Stage1_Tree
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147960821842032
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8540147960821842032
+      type: {class: StageNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 5b8e0d52f5974152883e77cb68929d05
+        graphPosition: {x: -110, y: 150}
+        comment: 
+        children:
+        - rid: 8540147960821842033
+        - rid: 8540147960821842034
+    - rid: 8540147960821842033
+      type: {class: SectionNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: e6052fc38ebc45859fea404f789c1332
+        graphPosition: {x: -760, y: 300}
+        comment: 
+        child:
+          rid: 8540147960821842035
+        label: Way
+        situation: 0
+    - rid: 8540147960821842034
+      type: {class: SectionNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3d84d7e6062a4c46bb7d7c142333657c
+        graphPosition: {x: 2620, y: 300}
+        comment: 
+        child:
+          rid: 8540147960821842036
+        label: Boss
+        situation: 1
+    - rid: 8540147960821842035
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d29c462881124306b921e3d690a82bb0
+        graphPosition: {x: -760, y: 450}
+        comment: 
+        children:
+        - rid: 8540147960821842037
+        - rid: 8540147960821842038
+        - rid: 8540147960821842039
+    - rid: 8540147960821842036
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: fc630419a49a4b0a93f1615f7b6d2734
+        graphPosition: {x: 2620, y: 450}
+        comment: 
+        children:
+        - rid: 8540147960821842040
+        - rid: 8540147960821842041
+        - rid: 8540147960821842042
+        - rid: 8540147960821842043
+    - rid: 8540147960821842037
+      type: {class: PlayBgmNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2b4bfa92976b42fe9b4602b8bd5b2fcb
+        graphPosition: {x: -3360, y: 600}
+        comment: 
+        bgm: 1
+    - rid: 8540147960821842038
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: df6c8c2e301a4a219cae4587c65ec013
+        graphPosition: {x: -760, y: 600}
+        comment: Group 0
+        children:
+        - rid: 8540147960821842806
+        - rid: 8540147960821842807
+        - rid: 8540147960821842046
+        - rid: 8540147960821842047
+        - rid: 8540147960821842808
+        - rid: 8540147960821842809
+        - rid: 8540147960821842050
+    - rid: 8540147960821842039
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2022e8d2815d48f483d43a805cae23df
+        graphPosition: {x: 1840, y: 600}
+        comment: 
+        frames:
+          value: 120
+          param: 
+    - rid: 8540147960821842040
+      type: {class: ScenarioNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: ed90e82d3cb94f12b50b07850384e2a2
+        graphPosition: {x: 2230, y: 600}
+        comment: "\u30DC\u30B9\u524D\u306E\u4F1A\u8A71"
+        children:
+        - rid: 8540147960821842051
+        - rid: 8540147960821842052
+        scenario: {fileID: 11400000, guid: cec996f6568f8af4fb9a296164d7e172, type: 2}
+        skipOnResume: 1
+        restorePlayerControl: 1
+    - rid: 8540147960821842041
+      type: {class: BossBattleNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 93d126ed8c2a4b9e9530271e9ba2c95e
+        graphPosition: {x: 2620, y: 600}
+        comment: 
+        tree: {fileID: 0}
+    - rid: 8540147960821842042
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 860a5673cc1c421297a2228a88a3c068
+        graphPosition: {x: 2880, y: 600}
+        comment: 
+        frames:
+          value: 120
+          param: 
+    - rid: 8540147960821842043
+      type: {class: ScenarioNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7532a2ce99d14070b579b9cf501350ee
+        graphPosition: {x: 3140, y: 600}
+        comment: "\u6483\u7834\u5F8C\u306E\u4F1A\u8A71"
+        children: []
+        scenario: {fileID: 11400000, guid: 2f9130952c2461c4fa42598358634941, type: 2}
+        skipOnResume: 0
+        restorePlayerControl: 0
+    - rid: 8540147960821842046
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 410ae18788b143b7aefa56057fa47cbb
+        graphPosition: {x: -2060, y: 750}
+        comment: 1_Phase2-5
+        children:
+        - rid: 8540147960821842075
+        - rid: 8540147960821842076
+        - rid: 8540147960821842077
+    - rid: 8540147960821842047
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 366ceda77cb14aa0b50000e8d991d978
+        graphPosition: {x: -760, y: 750}
+        comment: 1_Phase3
+        children:
+        - rid: 8540147960821842078
+        - rid: 8540147960821842079
+        - rid: 8540147960821842080
+    - rid: 8540147960821842050
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 16aae6aa07bb470b8b37bc5d5636411d
+        graphPosition: {x: 1060, y: 750}
+        comment: 1_Phase6
+        children:
+        - rid: 8540147960821842091
+        - rid: 8540147960821842092
+        - rid: 8540147960821842093
+    - rid: 8540147960821842051
+      type: {class: OnCommandNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 1c1d086bd81549f3807f500eaf75019e
+        graphPosition: {x: 2100, y: 750}
+        comment: 
+        child:
+          rid: 8540147960821842094
+        command: SpawnBoss
+    - rid: 8540147960821842052
+      type: {class: OnCommandNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d8b9269188ae49d4bd5e4d9fc84ec05c
+        graphPosition: {x: 2360, y: 750}
+        comment: 
+        child:
+          rid: 8540147960821842095
+        command: PlayBossBgm
+    - rid: 8540147960821842054
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a2c4ad27d2ae41ca97e061f4f043e6be
+        graphPosition: {x: -7417.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 009be7b31e38e8442a0c53b201d7b238, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: e679201a8c558404e94ca833792c9fa4, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842096
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842056
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7e34739d61394d2d855f25687dfd2c42
+        graphPosition: {x: -7172.337, y: 680.6666}
+        comment: 
+        prefab: {fileID: 652520770807285153, guid: 016ce088ee03a3e4baf81a1689dd2734, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 2ed6ea8f2855f384aacebac4f1a79ba3, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842097
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842058
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 26ddc46514c54030bd14b40b1d89716c
+        graphPosition: {x: -6925.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 765762794420967600, guid: 9fcb9ea807f82c045bef0e428aff2d89, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 883abb557790fa94188493d3d54f3a8f, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842098
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842060
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d888046878284ffc843c5154fca14661
+        graphPosition: {x: -6677.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: e361e13d3ec8efe4fbb89f9a668d17a2, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: edd429f5061f5e1458596f4b8ccb3e19, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 1.7}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842099
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842062
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 718df829963948f1b707a3b64068edc6
+        graphPosition: {x: -6433.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7531062236620257531, guid: 2656c65256a36c347ba695d1cae3b4b9, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: a3f26e2fe7893b44983397ed21f7b676, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 1.7}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842100
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842064
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: de5bf539289e4d52a98f8e1d2874701e
+        graphPosition: {x: -6186.337, y: 680.6666}
+        comment: 
+        prefab: {fileID: 4930288187931677416, guid: b9f1cfcf8ec95b14c98681019ab51155, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 0c1b291fe0da04b4294ed9bcdb171969, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 1.7}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842101
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842067
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: e54705bce859444f93ec5f46442a2abe
+        graphPosition: {x: -5719.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 90af0f7499e076c4189313388577767c, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 912c70e777747ad46aecfe05d4490e1e, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: bf73ace327832f04e8267bd4631e626a, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -4}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842103
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842069
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 6b8834c888b54620a6ca6eb38afdcba7
+        graphPosition: {x: -5499.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 90af0f7499e076c4189313388577767c, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 912c70e777747ad46aecfe05d4490e1e, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: bf73ace327832f04e8267bd4631e626a, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -1}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842104
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842071
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7c0b01c2ada24db9aad2789a0c22b6fb
+        graphPosition: {x: -5279.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 90af0f7499e076c4189313388577767c, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 912c70e777747ad46aecfe05d4490e1e, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: bf73ace327832f04e8267bd4631e626a, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842105
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842073
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 781e6005e9d942418af252e35dd61bd8
+        graphPosition: {x: -5059.0034, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 90af0f7499e076c4189313388577767c, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 912c70e777747ad46aecfe05d4490e1e, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: bf73ace327832f04e8267bd4631e626a, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -0.5}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842106
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842075
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 663c8cf047ba4990a431ab4e2422a761
+        graphPosition: {x: -2580, y: 900}
+        comment: 
+        frames:
+          value: 60
+          param: 
+    - rid: 8540147960821842076
+      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2375f3fff4c44579ad4c20c56075c436
+        graphPosition: {x: -2060, y: 900}
+        comment: 
+        child:
+          rid: 8540147960821842108
+        count:
+          value: 2
+          param: 
+        interval:
+          value: 240
+          param: 
+    - rid: 8540147960821842077
+      type: {class: WaitUntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d4e6f774e5404e07b583008bb56b57d3
+        graphPosition: {x: -1540, y: 900}
+        comment: 
+        condition:
+          rid: 8540147960821842109
+    - rid: 8540147960821842078
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: aa9ffaecffe04aaca352cfc2ed73d1fe
+        graphPosition: {x: -1280, y: 900}
+        comment: 
+        frames:
+          value: 60
+          param: 
+    - rid: 8540147960821842079
+      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 61aa7823e63745e0b4275c0afb03dd28
+        graphPosition: {x: -760, y: 900}
+        comment: 
+        child:
+          rid: 8540147960821842110
+        count:
+          value: 2
+          param: 
+        interval:
+          value: 348
+          param: 
+    - rid: 8540147960821842080
+      type: {class: WaitUntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 48a04ca449e74ac6ab87480b69a50f6e
+        graphPosition: {x: -240, y: 900}
+        comment: 
+        condition:
+          rid: 8540147960821842111
+    - rid: 8540147960821842082
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f5d32e821db34f77bb158e1faaab5e98
+        graphPosition: {x: 3959.6636, y: 530.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 050f89e6f7af3ed4f95c822bae3ccf9b, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 1951fa6f0eb680147a28e856798082ae, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: bdba16b6c69a00a45b1db66a43c97683, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 0}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842112
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842085
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f65d1c583fb44095946b317d6e32d1db
+        graphPosition: {x: 4452.9976, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: e7ef7b5be31495648b59e8f8294b63e3, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: ef6b54130514e174cb4e7f93fba0b927, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 3bf273d51b3cf3d4388af06878f5be65, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842114
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842086
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 00f83b5cd409421ea14d3a02dd8b004b
+        graphPosition: {x: 4685.6646, y: 680.6666}
+        comment: 
+        prefab: {fileID: 2965039115330987464, guid: d3b38eba729cea045904d6de1632e877, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 6552068c6dc4d384597d92e9025a57c4, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 3bf273d51b3cf3d4388af06878f5be65, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 1.7}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842115
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842088
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 38e0e057349c41d5b08fedf8e756219f
+        graphPosition: {x: 4920.9985, y: 680.6666}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: e7ef7b5be31495648b59e8f8294b63e3, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: ef6b54130514e174cb4e7f93fba0b927, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 3bf273d51b3cf3d4388af06878f5be65, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842116
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842089
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 47148d4205044fee95c4c4f77188e71e
+        graphPosition: {x: 5153.6655, y: 680.6666}
+        comment: 
+        prefab: {fileID: 2965039115330987464, guid: d3b38eba729cea045904d6de1632e877, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 6552068c6dc4d384597d92e9025a57c4, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 3bf273d51b3cf3d4388af06878f5be65, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 1.7}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842117
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842091
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 10838164c46c49d8b63568d28d99f785
+        graphPosition: {x: 540, y: 900}
+        comment: 
+        frames:
+          value: 60
+          param: 
+    - rid: 8540147960821842092
+      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 4886bee0aea04f0986d5d901b0c74dc9
+        graphPosition: {x: 1060, y: 900}
+        comment: 
+        child:
+          rid: 8540147960821842119
+        count:
+          value: 3
+          param: 
+        interval:
+          value: 180
+          param: 
+    - rid: 8540147960821842093
+      type: {class: WaitUntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 46605bfc917043289af45c39dedc3775
+        graphPosition: {x: 1580, y: 900}
+        comment: 
+        condition:
+          rid: 8540147960821842120
+    - rid: 8540147960821842094
+      type: {class: SpawnBossNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 96fa64498c0f46e686f8514fa9734442
+        graphPosition: {x: 2100, y: 900}
+        comment: 
+        boss: {fileID: 11400000, guid: be4554accaab95640b2b09156f42d093, type: 2}
+    - rid: 8540147960821842095
+      type: {class: PlayBgmNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 8d09d236dc804c5aa803102c7b267b90
+        graphPosition: {x: 2360, y: 900}
+        comment: 
+        bgm: 2
+    - rid: 8540147960821842096
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842097
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842098
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842099
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842100
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842101
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842102
+      type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147960821842103
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842104
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842105
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842106
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842107
+      type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147960821842108
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3960d96a8bec4f9898baeea680df284a
+        graphPosition: {x: -2060, y: 1050}
+        comment: 
+        children:
+        - rid: 8540147960821842121
+        - rid: 8540147960821842122
+        - rid: 8540147960821842123
+    - rid: 8540147960821842109
+      type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147960821842110
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: fc71b37a9eed40668d8feb1079a88046
+        graphPosition: {x: -760, y: 1050}
+        comment: 
+        children:
+        - rid: 8540147960821842124
+        - rid: 8540147960821842125
+        - rid: 8540147960821842126
+    - rid: 8540147960821842111
+      type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147960821842112
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842113
+      type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147960821842114
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842115
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842116
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842117
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842118
+      type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147960821842119
+      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a164067281364890bb304194665560a2
+        graphPosition: {x: 1060, y: 1050}
+        comment: 
+        children:
+        - rid: 8540147960821842127
+        - rid: 8540147960821842128
+        - rid: 8540147960821842129
+    - rid: 8540147960821842120
+      type: {class: NoActiveEnemiesConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147960821842121
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 84c434fa26e1431ea86bb0c0d03b5460
+        graphPosition: {x: -2320, y: 1200}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: f23a9c0e66332994caec26b3c56558eb, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 0fe6de31b05c59246b57f12db803d445, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: df2ad295457ff674e8a85c8babc305d4, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 1.3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842130
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842122
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 030d6cbc5ce34e6a9fb83ac3661ec150
+        graphPosition: {x: -2060, y: 1200}
+        comment: 
+        frames:
+          value: 120
+          param: 
+    - rid: 8540147960821842123
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 0b7c935cb731499a8879c4a516a1c6e7
+        graphPosition: {x: -1800, y: 1200}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: f23a9c0e66332994caec26b3c56558eb, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 53acacc91373eaa46b19939bb30de96b, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: df2ad295457ff674e8a85c8babc305d4, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -1.3}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842131
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842124
+      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 17842f83918146d79aef7fb33f121d92
+        graphPosition: {x: -1020, y: 1200}
+        comment: 
+        child:
+          rid: 8540147960821842132
+        count:
+          value: 8
+          param: 
+        interval:
+          value: 18
+          param: 
+    - rid: 8540147960821842125
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 5b038dc4b5fe4f0b8a3492e80cf6aa2e
+        graphPosition: {x: -760, y: 1200}
+        comment: 
+        frames:
+          value: 48
+          param: 
+    - rid: 8540147960821842126
+      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 19c034513bfd40d48192cc4ffd80cc77
+        graphPosition: {x: -500, y: 1200}
+        comment: 
+        child:
+          rid: 8540147960821842133
+        count:
+          value: 8
+          param: 
+        interval:
+          value: 18
+          param: 
+    - rid: 8540147960821842127
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 33725305ddec4cfca9be5be71167ac41
+        graphPosition: {x: 800, y: 1200}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 1b4d7cf37b56d904db1335dca6e9ae52, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: ea8c7520d03dde348a6c11ff88849353, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 9b73e91a715014646bd9c5cee6b46858, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 1.5}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842134
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842128
+      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: dc72f195e6504702a00d0c8a2ecc82e2
+        graphPosition: {x: 1060, y: 1200}
+        comment: 
+        frames:
+          value: 90
+          param: 
+    - rid: 8540147960821842129
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9e45c5a388664da88ffdb653f5a29592
+        graphPosition: {x: 1320, y: 1200}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: 1b4d7cf37b56d904db1335dca6e9ae52, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 308cea3ef597c334da3811c510bd0d65, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 0e9a060864acbec4f8954df649988a19, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -2.8}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842135
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842130
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842131
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842132
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 19aead8ff67641fc9f6725aa0f297db2
+        graphPosition: {x: -1020, y: 1350}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: b0f3712f59a64c14cba90e923f911d92, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: ecf68dee1504a744c8e6e0ca4642b42d, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 6cc232bee39d4dd46b8f7124eb5d12c9, type: 2}
+          bindToParent: 
+        position: {x: 10, y: 2}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842136
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842133
+      type: {class: SpawnNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d9aea59f437c43ab89d9f8a810bdbe84
+        graphPosition: {x: -500, y: 1350}
+        comment: 
+        prefab: {fileID: 7074045735317373604, guid: b0f3712f59a64c14cba90e923f911d92, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: ecf68dee1504a744c8e6e0ca4642b42d, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 6cc232bee39d4dd46b8f7124eb5d12c9, type: 2}
+          bindToParent: 
+        position: {x: 10, y: -4}
+        worldSpace: 0
+        layout:
+          rid: 8540147960821842137
+        rotation:
+          rid: -2
+        direction:
+          rid: -2
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540147960821842134
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842135
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842136
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842137
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: 0, y: 0}
+    - rid: 8540147960821842806
+      type: {class: WaveNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 19083ed6a2f2435494d31a5dff444643
+        graphPosition: {x: -3100, y: 750}
+        comment: 1_Phase1
+        entries:
+        - frame: 150
+          spawn:
+            rid: 8540147960821842054
+        - frame: 195
+          spawn:
+            rid: 8540147960821842056
+        - frame: 240
+          spawn:
+            rid: 8540147960821842058
+        - frame: 360
+          spawn:
+            rid: 8540147960821842060
+        - frame: 405
+          spawn:
+            rid: 8540147960821842062
+        - frame: 450
+          spawn:
+            rid: 8540147960821842064
+        until:
+          rid: 8540147960821842102
+    - rid: 8540147960821842807
+      type: {class: WaveNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2bbc4e3e7b904a5a872e27971e3e0444
+        graphPosition: {x: -2840, y: 750}
+        comment: 1_Phase2
+        entries:
+        - frame: 60
+          spawn:
+            rid: 8540147960821842067
+        - frame: 240
+          spawn:
+            rid: 8540147960821842069
+        - frame: 420
+          spawn:
+            rid: 8540147960821842071
+        - frame: 600
+          spawn:
+            rid: 8540147960821842073
+        until:
+          rid: 8540147960821842107
+    - rid: 8540147960821842808
+      type: {class: WaveNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 485d60bc7cdc4eaaa83939d0ee40f5d4
+        graphPosition: {x: 20, y: 750}
+        comment: 1_Phase4
+        entries:
+        - frame: 60
+          spawn:
+            rid: 8540147960821842082
+        until:
+          rid: 8540147960821842113
+    - rid: 8540147960821842809
+      type: {class: WaveNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3ab4c8eda5824398a1b00528b36d348e
+        graphPosition: {x: 280, y: 750}
+        comment: 1_Phase5
+        entries:
+        - frame: 60
+          spawn:
+            rid: 8540147960821842085
+        - frame: 60
+          spawn:
+            rid: 8540147960821842086
+        - frame: 390
+          spawn:
+            rid: 8540147960821842088
+        - frame: 390
+          spawn:
+            rid: 8540147960821842089
+        until:
+          rid: 8540147960821842118

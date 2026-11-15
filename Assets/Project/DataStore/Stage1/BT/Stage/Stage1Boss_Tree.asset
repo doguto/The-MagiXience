@@ -126,6 +126,7 @@ MonoBehaviour:
         graphPosition: {x: -8025, y: 665.3334}
         comment: 
         preset: {fileID: 11400000, guid: c9247e36d646d9e4ca6de295de2ab871, type: 2}
+        presetParam: 
         steps: []
         continueIfSame: 1
     - rid: 8540147884261900710
@@ -360,6 +361,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 6c4c5a8baea65b34693a3743dda73630, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: dc1fabd2fb42eaa43b8172a3d6f372bc, type: 2}
           motion: []
@@ -441,6 +443,7 @@ MonoBehaviour:
         graphPosition: {x: -5249, y: 1082}
         comment: 
         preset: {fileID: 11400000, guid: c2811441a45f6ff4e827228baa821b1c, type: 2}
+        presetParam: 
         steps: []
         continueIfSame: 1
     - rid: 8540147884261900764
@@ -457,6 +460,7 @@ MonoBehaviour:
         graphPosition: {x: -1996.333, y: 1082}
         comment: 
         preset: {fileID: 11400000, guid: ca581ba4cf5bd4746a03116992579977, type: 2}
+        presetParam: 
         steps: []
         continueIfSame: 1
     - rid: 8540147884261900771
@@ -493,6 +497,7 @@ MonoBehaviour:
         graphPosition: {x: 6407.667, y: 1082}
         comment: 
         preset: {fileID: 11400000, guid: ad4a279b73333dd4aa3298c4957614a0, type: 2}
+        presetParam: 
         steps: []
         continueIfSame: 1
     - rid: 8540147884261900776
@@ -502,6 +507,7 @@ MonoBehaviour:
         graphPosition: {x: -6464.334, y: 1215.3334}
         comment: 
         preset: {fileID: 11400000, guid: c2811441a45f6ff4e827228baa821b1c, type: 2}
+        presetParam: 
         steps: []
         continueIfSame: 1
     - rid: 8540147884261900780
@@ -511,6 +517,7 @@ MonoBehaviour:
         graphPosition: {x: -3653.6665, y: 1215.3334}
         comment: 
         preset: {fileID: 11400000, guid: ca581ba4cf5bd4746a03116992579977, type: 2}
+        presetParam: 
         steps: []
         continueIfSame: 1
     - rid: 8540147884261900787
@@ -547,6 +554,7 @@ MonoBehaviour:
         graphPosition: {x: 2316.6667, y: 1215.3333}
         comment: 
         preset: {fileID: 11400000, guid: ad4a279b73333dd4aa3298c4957614a0, type: 2}
+        presetParam: 
         steps: []
         continueIfSame: 1
     - rid: 8540147884261900792
@@ -692,8 +700,24 @@ MonoBehaviour:
         graphPosition: {x: -4809, y: 1232}
         comment: 
         prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
-        behavior: {fileID: 11400000, guid: c7e0fe8c1e8860a44aa031a89dc93b1a, type: 2}
-        overrides: []
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 54bc5ce9e753e8946962a24fd6b31bb7, type: 2}
+          bindToParent: 
         position: {x: 0, y: 0}
         worldSpace: 0
         layout:
@@ -770,6 +794,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 9b8f46c44dfa7b7458323dd597f8b282, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 00672ee08b2171043b7545424d75d8d0, type: 2}
           motion: []
@@ -791,6 +816,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
@@ -811,8 +837,24 @@ MonoBehaviour:
         graphPosition: {x: -6024.334, y: 1498.6667}
         comment: 
         prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
-        behavior: {fileID: 11400000, guid: c7e0fe8c1e8860a44aa031a89dc93b1a, type: 2}
-        overrides: []
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 54bc5ce9e753e8946962a24fd6b31bb7, type: 2}
+          bindToParent: 
         position: {x: 0, y: 0}
         worldSpace: 0
         layout:
@@ -832,8 +874,24 @@ MonoBehaviour:
         graphPosition: {x: -5747.0005, y: 1498.6667}
         comment: 
         prefab: {fileID: 2191354779743736906, guid: 33482601f496c5d4488d3c72cfe3cc21, type: 3}
-        behavior: {fileID: 11400000, guid: c7e0fe8c1e8860a44aa031a89dc93b1a, type: 2}
-        overrides: []
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
+          bindToParent: 
+        - name: attack
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 54bc5ce9e753e8946962a24fd6b31bb7, type: 2}
+          bindToParent: 
         position: {x: 0, y: 0}
         worldSpace: 0
         layout:
@@ -854,6 +912,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 9b8f46c44dfa7b7458323dd597f8b282, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 00672ee08b2171043b7545424d75d8d0, type: 2}
           motion: []
@@ -890,6 +949,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 59e6b1c0001e69640b35edbedc0cebf5, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
@@ -911,6 +971,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 59e6b1c0001e69640b35edbedc0cebf5, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
@@ -932,6 +993,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 59e6b1c0001e69640b35edbedc0cebf5, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
@@ -953,6 +1015,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 59e6b1c0001e69640b35edbedc0cebf5, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
@@ -974,6 +1037,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 59e6b1c0001e69640b35edbedc0cebf5, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
@@ -995,6 +1059,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
@@ -1031,6 +1096,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
@@ -1091,6 +1157,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: 59e6b1c0001e69640b35edbedc0cebf5, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
@@ -1202,6 +1269,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
@@ -1223,6 +1291,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
@@ -1244,6 +1313,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
@@ -1265,6 +1335,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
@@ -1286,6 +1357,7 @@ MonoBehaviour:
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: e40dc2861583a6b49a921f741b43e087, type: 3}
+          prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []

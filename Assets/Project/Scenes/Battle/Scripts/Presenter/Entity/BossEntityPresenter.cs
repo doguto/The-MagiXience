@@ -1,21 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UniRx;
 using UnityEngine;
-using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
-using Project.Scenes.Battle.Scripts.Model.Attack;
-using Project.Scenes.Battle.Scripts.Model.Movement;
-using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Battle.Scripts.View.Entity;
-using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
+    // ボスの HP・被弾・撃破演出を受け持つ。攻撃と移動は BattleActor が実行する BehaviorTree が行う
     [RequireComponent(typeof(BossEntityView))]
     public class BossEntityPresenter : MonoPresenter, IEntityPresenter
     {
@@ -27,11 +21,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Tooltip("シナリオ→ボス戦突入直後、ボスのColliderを無効化して接触ダメージを防ぐ秒数")]
         [SerializeField, Min(0f)] float entryColliderDisableSeconds = 1f;
 
-        [Header("Attack")]
-        [SerializeField] BulletPool[] bulletPools;
-        [SerializeField] int bulletDamage = 10;
-        [SerializeField] GameObject[] enemySpawnPrefabs;
-
         [Header("Damage Flash")]
         [SerializeField] float damageFlashInterval = 0.05f;
         [SerializeField] float damageFlashDuration = 0.2f;
@@ -39,73 +28,25 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Component References")]
         [SerializeField] BossEntityView view;
         [SerializeField] BossDeathDirector deathDirector;
-        EnemyTracker enemyTracker;
 
         void Reset()
         {
             view = GetComponent<BossEntityView>();
         }
 
-#if UNITY_EDITOR
-        void OnValidate()
-        {
-            if (Application.isPlaying) return;
-            UnityEditor.EditorApplication.delayCall += AppendChildBulletPools;
-        }
-
-        void AppendChildBulletPools()
-        {
-            if (this == null) return;
-
-            var children = GetComponentsInChildren<BulletPool>(true);
-            if (children == null || children.Length == 0) return;
-
-            var current = bulletPools ?? Array.Empty<BulletPool>();
-            var appended = new List<BulletPool>(current);
-            bool changed = false;
-
-            foreach (var child in children)
-            {
-                if (child == null) continue;
-                if (Array.IndexOf(current, child) >= 0) continue;
-                appended.Add(child);
-                changed = true;
-            }
-
-            if (!changed) return;
-
-            bulletPools = appended.ToArray();
-            UnityEditor.EditorUtility.SetDirty(this);
-        }
-#endif
-
         BossEntityModel model;
-        PlayerEntityPresenter playerPresenter;
-        readonly List<IMovementStep> activeMovementSteps = new();
-        IReadOnlyList<IMovementStep> currentPhaseMovementSteps;
-        Tween entranceTween;
-        CancellationTokenSource movementCts;
         CancellationTokenSource deathCts;
-        // 撃破時にキャンセルされる。spawnDelay等で予約済みの弾生成を、撃破後(BulletClear後)に実行させないために使う
         CancellationTokenSource aliveCts;
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
-        readonly SerialDisposable attackTimingSubscription = new();
-        Animator animator;
         readonly Subject<Unit> deathSequenceCompleted = new();
 
         public BossEntityModel Model => model;
         public IObservable<Unit> OnDeath => model?.OnDeath;
         public IObservable<Unit> OnDeathSequenceCompleted => deathSequenceCompleted;
-        public event Action<BattlePhaseModelBase, BattleTimelineBuilderAsset> PhaseStarted;
 
         void Awake()
         {
-            if (bulletPools == null || bulletPools.Length == 0) Debug.LogError("[BossEntityPresenter] BulletPools is not assigned!");
-            playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
-            enemyTracker = FindFirstObjectByType<EnemyTracker>();
-            animator = GetComponent<Animator>();
-
             aliveCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
             model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
 
@@ -169,323 +110,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 });
         }
 
-        public void OnPhaseStarted(BattlePhaseModelBase phase, BattleTimelineBuilderAsset builder)
-        {
-            if (builder == null)
-            {
-                ApplyAttackTimeline(null);
-                currentPhaseMovementSteps = null;
-                StartMovementSequence(null);
-                PhaseStarted?.Invoke(phase, builder);
-                return;
-            }
-
-            var attackPreset = builder.BossAttackPreset;
-            var attackTimeline = attackPreset != null
-                ? attackPreset.CreateTimeline()
-                : null;
-            ApplyAttackTimeline(attackTimeline);
-
-            var nextMovementSteps = builder.BossMovementPreset != null
-                ? builder.BossMovementPreset.Steps
-                : null;
-            // 同じ無期限の移動は時計を戻さず継続する。攻撃と風のフェーズ切替は通常通り行う。
-            bool continueMovement = ReferenceEquals(currentPhaseMovementSteps, nextMovementSteps)
-                && activeMovementSteps.Count == 1
-                && activeMovementSteps[0] is IPhaseContinuousMovementStep continuous
-                && continuous.ContinueAcrossPhases;
-            currentPhaseMovementSteps = nextMovementSteps;
-            if (!continueMovement) StartMovementSequence(currentPhaseMovementSteps);
-            PhaseStarted?.Invoke(phase, builder);
-        }
-
-        void ApplyAttackTimeline(AttackTimeline attackTimeline)
-        {
-            model.AttackStrategy?.Dispose();
-
-            if (attackTimeline == null)
-            {
-                model.SetAttackStrategy(null);
-                return;
-            }
-
-            Func<Vector3> getPlayerPos = () => playerPresenter != null ? playerPresenter.transform.position : Vector3.zero;
-            attackTimeline.InitializeProviders(getPlayerPos, () => transform.position, () => transform.rotation, model.CurrentHp, model.MaxHp);
-            model.SetAttackStrategy(attackTimeline);
-
-            // Phase毎に購読し直すため、presenter寿命のdisposablesへ積み上げず前回分を置き換える
-            attackTimingSubscription.Disposable = model.AttackStrategy.OnAttackTiming
-                .TakeUntil(model.OnDeath)
-                .Subscribe(ev => HandleAttackEvent(ev));
-        }
-
-        void StartMovementSequence(IReadOnlyList<IMovementStep> steps)
-        {
-            StopMovement();
-
-            if (steps == null || steps.Count == 0) return;
-
-            movementCts = new CancellationTokenSource();
-            RunMovementStepsAsync(steps, animator, movementCts.Token).Forget();
-        }
-
-        public void PlayEntranceMovement(IReadOnlyList<IMovementStep> steps)
-        {
-            if (steps == null || steps.Count == 0) return;
-
-            var sequence = DOTween.Sequence();
-            foreach (var step in steps)
-            {
-                if (step == null) continue;
-                sequence.Append(step.Play(transform, Vector2.zero, animator));
-            }
-            entranceTween = sequence;
-        }
-
-        async UniTaskVoid RunMovementStepsAsync(IReadOnlyList<IMovementStep> steps, Animator animator, CancellationToken ct)
-        {
-            foreach (var step in steps)
-            {
-                if (step == null) continue;
-                ct.ThrowIfCancellationRequested();
-
-                activeMovementSteps.Add(step);
-                var tween = step.Play(transform, Vector2.zero, animator);
-                if (tween == null)
-                {
-                    activeMovementSteps.Remove(step);
-                    continue;
-                }
-
-                try
-                {
-                    await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, ct);
-                }
-                finally
-                {
-                    activeMovementSteps.Remove(step);
-                }
-            }
-        }
-
-        void StopMovement()
-        {
-            if (entranceTween != null && entranceTween.IsActive())
-            {
-                entranceTween.Complete();
-            }
-            entranceTween = null;
-
-            // ScriptableObject由来でTween.OnKill経由のキャンセルが効かないケースに備え、
-            // movementCts.Cancel()より先に、裏で非同期ループを抱える可能性があるLoopMovementのStepに
-            // 明示的な停止を依頼する。先にCancelすると、RunMovementStepsAsyncのfinallyで
-            // activeMovementSteps.Remove()が走ってしまい、ここでForceStopできなくなる。
-            //
-            // ListのスナップショットをとってからForceStopする。ForceStop経由でawaitが解決し
-            // RunMovementStepsAsyncのfinallyが同期実行されてリストが変動する可能性があるため。
-            var stepsSnapshot = activeMovementSteps.ToArray();
-            for (int i = 0; i < stepsSnapshot.Length; i++)
-            {
-                if (stepsSnapshot[i] is LoopMovementConfig loop)
-                {
-                    loop.ForceStop();
-                }
-            }
-
-            movementCts?.Cancel();
-            movementCts?.Dispose();
-            movementCts = null;
-
-            activeMovementSteps.Clear();
-        }
-
-        void Update()
-        {
-            if (model == null || !model.IsAlive) return;
-
-            model.UpdateAttack(Time.deltaTime);
-        }
-
-        void HandleAttackEvent(AttackEvent ev)
-        {
-            switch (ev.Type)
-            {
-                case AttackEventType.Bullet:
-                    if (ev.MovementStep != null)
-                    {
-                        PlayMovementThenResume(ev.MovementStep).Forget();
-                    }
-                    FireBullet(ev);
-                    break;
-                case AttackEventType.EnemySpawn:
-                    SpawnEnemy(ev);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 通常の移動ループ(bossMovementPreset)を止めてMovementStepを再生する。
-        /// FireBulletとは並行実行され待ち合わせない(移動軌道上に弾が配置されるトレイル演出のため)。
-        /// 移動完了後は元のphaseの移動ループを最初から再開する(継続再生ではない。フェーズ開始時と同じ挙動)。
-        /// </summary>
-        async UniTaskVoid PlayMovementThenResume(IMovementStep step)
-        {
-            StopMovement();
-
-            var tween = step.Play(transform, Vector2.zero, animator);
-            if (tween != null)
-            {
-                await tween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, aliveCts.Token);
-            }
-
-            if (!model.IsAlive) return;
-            StartMovementSequence(currentPhaseMovementSteps);
-        }
-
-        void FireBullet(AttackEvent ev)
-        {
-            var pool = GetBulletPool(ev.SourceIndex);
-            if (pool == null) return;
-
-            if (ev.SeType != SeType.None)
-            {
-                soundManager?.PlaySE(ev.SeType);
-            }
-
-            if (ev.SpawnAlongMovementPath && ev.MovementStep is TweenMovementConfig trailPath)
-            {
-                SpawnBulletsAlongPathAsync(pool, ev, trailPath).Forget();
-                return;
-            }
-
-            for (int i = 0; i < ev.Directions.Count; i++)
-            {
-                var spawnDelay = ev.GetSpawnDelayAt(i);
-                if (spawnDelay > 0f)
-                {
-                    SpawnBulletDelayed(pool, ev, i, spawnDelay).Forget();
-                }
-                else
-                {
-                    pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, i), ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: ev.GetStartDelayAt(i), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
-                }
-            }
-        }
-
-        async UniTaskVoid SpawnBulletDelayed(BulletPool pool, AttackEvent ev, int index, float spawnDelay)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(spawnDelay), cancellationToken: aliveCts.Token);
-            if (pool == null) return;
-
-            pool.SpawnBullet(bulletDamage, GetSpawnPosition(ev, pool.transform.position, index), ev.Directions[index], rotation: GetRotationAt(ev, index), range: ev.Range, startDelay: ev.GetStartDelayAt(index), movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
-        }
-
-        /// <summary>
-        /// 移動の軌道(始点→終点)を弾数で等分した座標を事前に求め、本体がその座標を通過した時点で、
-        /// 通過時の位置ではなく事前計算した座標へ弾を生成する。
-        /// 時間駆動だとフレーム落ちで配置間隔が不均等になるため、座標の均等性を優先する(生成時刻はズレうる)。
-        /// 一斉発射の時刻は SpawnDelays + StartDelays の合計(全弾共通)を絶対時刻として維持し、生成が遅れた分は待機を短縮する。
-        /// </summary>
-        async UniTaskVoid SpawnBulletsAlongPathAsync(BulletPool pool, AttackEvent ev, TweenMovementConfig path)
-        {
-            const float ReachEpsilon = 1e-4f;
-            const float TimeoutGraceSeconds = 0.5f;
-
-            var ct = aliveCts.Token;
-            var count = ev.Directions.Count;
-            var origin = transform.position;
-            var destination = path.ResolveDestination(origin);
-            var pathVector = destination - origin;
-            var pathLengthSqr = pathVector.sqrMagnitude;
-            var poolOffset = pool.transform.position - origin;
-            var startTime = Time.time;
-            // 移動が途中で中断された場合に待ち続けないための保険。期限を過ぎたら残りは事前計算座標へ一括生成する
-            var timeoutAt = startTime + path.Duration + TimeoutGraceSeconds;
-
-            for (int i = 0; i < count; i++)
-            {
-                var ratio = count > 1 ? (float)i / (count - 1) : 0f;
-
-                while (Time.time < timeoutAt && pathLengthSqr > 0f &&
-                       Vector3.Dot(transform.position - origin, pathVector) / pathLengthSqr < ratio - ReachEpsilon)
-                {
-                    await UniTask.Yield(PlayerLoopTiming.Update, ct);
-                }
-
-                if (pool == null || ct.IsCancellationRequested) return;
-
-                var releaseAt = startTime + ev.GetSpawnDelayAt(i) + ev.GetStartDelayAt(i);
-                var startDelay = Mathf.Max(0f, releaseAt - Time.time);
-                var spawnPosition = Vector3.Lerp(origin, destination, ratio) + poolOffset;
-
-                pool.SpawnBullet(bulletDamage, spawnPosition, ev.Directions[i], rotation: GetRotationAt(ev, i), range: ev.Range, startDelay: startDelay, movementOverride: ev.BulletMovement, movementPresetOverride: ev.BulletMovementOverride);
-            }
-        }
-
-        static Vector3 GetSpawnPosition(AttackEvent ev, Vector3 basePosition, int index)
-        {
-            if (ev.SpawnOffsets == null || index >= ev.SpawnOffsets.Count) return basePosition;
-
-            var offset = ev.SpawnOffsets[index];
-            // World指定のとき SpawnOffsets は発射元からの相対ではなくワールド座標そのもの。
-            // zは発射元のものを引き継いで、描画順が変わらないようにする。
-            if (ev.SpawnSpace == AttackSpawnSpace.World) return new Vector3(offset.x, offset.y, basePosition.z);
-
-            return basePosition + (Vector3)offset;
-        }
-
-        void SpawnEnemy(AttackEvent ev)
-        {
-            var prefab = GetEnemySpawnPrefab(ev.SourceIndex);
-            if (prefab == null) return;
-
-            if (ev.SeType != SeType.None)
-            {
-                soundManager?.PlaySE(ev.SeType);
-            }
-
-            if (ev.SpawnOffsets == null) return;
-            for (int i = 0; i < ev.SpawnOffsets.Count; i++)
-            {
-                // Instantiateの3引数版ではrotationが反映されないため、生成後にSetPositionAndRotationで明示的に設定する
-                var instance = Instantiate(prefab);
-                instance.transform.SetPositionAndRotation(GetSpawnPosition(ev, transform.position, i), GetRotationAt(ev, i));
-
-                // 予告線のように「線分の長さ」を生成後に教える必要があるViewへ、Startが走る前に流し込む
-                if (instance.TryGetComponent<IBeamVisualReceiver>(out var beamVisual))
-                {
-                    beamVisual.ConfigureBeam(ev.Range, ev.Duration, ev.Width);
-                }
-
-                if (instance.TryGetComponent<EnemyEntityPresenter>(out var enemyPresenter))
-                {
-                    enemyPresenter.OverrideBulletMovement(ev.BulletMovementOverride);
-                    if (ev.MovementOverride != null) enemyPresenter.OverrideMovement(ev.MovementOverride);
-                    enemyTracker?.RegisterEnemy(enemyPresenter);
-                }
-            }
-        }
-
-        static Quaternion GetRotationAt(AttackEvent ev, int index)
-        {
-            if (ev.Rotations == null || ev.Rotations.Count == 0) return Quaternion.identity;
-            return index < ev.Rotations.Count ? ev.Rotations[index] : ev.Rotations[ev.Rotations.Count - 1];
-        }
-
-        BulletPool GetBulletPool(int index)
-        {
-            if (bulletPools == null || bulletPools.Length == 0) return null;
-            if (index < 0 || index >= bulletPools.Length) return bulletPools[0];
-            return bulletPools[index];
-        }
-
-        GameObject GetEnemySpawnPrefab(int index)
-        {
-            if (enemySpawnPrefabs == null || enemySpawnPrefabs.Length == 0) return null;
-            if (index < 0 || index >= enemySpawnPrefabs.Length) return enemySpawnPrefabs[0];
-            return enemySpawnPrefabs[index];
-        }
-
         /// <summary>
         /// ボス戦突入直後の接触ダメージを防ぐため、一定時間ボスのColliderを無効化する。
         /// 無効化中はプレイヤーの弾も当たらない。撃破・破棄された場合は再有効化しない。
@@ -509,8 +133,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void HandleDeath()
         {
             aliveCts?.Cancel();
-            StopMovement();
-            model.AttackStrategy?.Dispose();
             var col = GetComponent<Collider2D>();
             if (col != null) col.enabled = false;
 
@@ -550,7 +172,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            StopMovement();
             deathCts?.Cancel();
             deathCts?.Dispose();
             deathCts = null;
@@ -559,9 +180,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             aliveCts = null;
             damageFlashSubscription?.Dispose();
             disposables.Dispose();
-            attackTimingSubscription.Dispose();
             deathSequenceCompleted.Dispose();
-            model?.AttackStrategy?.Dispose();
             model?.Dispose();
         }
 

@@ -56,7 +56,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             while (it.Next(true))
             {
                 if (it.propertyType != SerializedPropertyType.String) continue;
-                if (it.name != "param" && it.name != "bindToParent") continue;
+                if (it.name != "param" && it.name != "bindToParent" && !it.name.EndsWith("Param")) continue;
                 if (it.propertyPath.StartsWith("parameters.")) continue;
                 if (it.stringValue == name) result.Add(it.propertyPath);
             }

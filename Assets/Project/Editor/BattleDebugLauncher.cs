@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using System.Linq;
 using Project.Commons.Debugger.Scripts.Presenter;
-using Project.Scenes.Battle.Scripts.Model;
+using Project.Scenes.Battle.Scripts.BehaviorTree;
 using Project.Scripts.Infra;
-using Project.Scripts.Model;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -15,21 +13,19 @@ namespace Project.Editor
         const string BattleScenePath = "Assets/Project/Scenes/Battle.unity";
         const string StageDataAssetPath = "Assets/Project/DataStore/StageData.asset";
         const string PrefKeyStageNumber = "BattleDebugLauncher.StageNumber";
-        const string PrefKeySituation = "BattleDebugLauncher.Situation";
-        const string PrefKeyStartPhaseIndex = "BattleDebugLauncher.StartPhaseIndex";
+        const string PrefKeyStartSection = "BattleDebugLauncher.StartSection";
 
-        static readonly Vector2 WindowMinSize = new(360f, 220f);
-        static readonly Vector2 WindowInitialSize = new(420f, 260f);
+        static readonly Vector2 WindowMinSize = new(360f, 200f);
+        static readonly Vector2 WindowInitialSize = new(420f, 240f);
 
         int stageNumber = 1;
-        BattleSituation situation = BattleSituation.Way;
-        int startPhaseIndex;
+        int startSection;
         StageData[] stages = System.Array.Empty<StageData>();
 
-        // 選択中のStage/Situationに対応するシーケンスから作ったフェーズ一覧のキャッシュ
-        string[] phaseLabels = System.Array.Empty<string>();
-        string phaseCacheKey;
-        string phaseUnavailableReason;
+        // 選択中のステージのツリーから作った Section 一覧のキャッシュ
+        string[] sectionLabels = System.Array.Empty<string>();
+        int sectionCacheStage = -1;
+        string sectionUnavailableReason;
 
         [MenuItem("Tools/Battle Debug Launcher")]
         public static void ShowWindow()
@@ -42,32 +38,27 @@ namespace Project.Editor
         void OnEnable()
         {
             stageNumber = EditorPrefs.GetInt(PrefKeyStageNumber, 1);
-            situation = (BattleSituation)EditorPrefs.GetInt(PrefKeySituation, (int)BattleSituation.Way);
-            startPhaseIndex = EditorPrefs.GetInt(PrefKeyStartPhaseIndex, 0);
+            startSection = EditorPrefs.GetInt(PrefKeyStartSection, 0);
 
             var dataObject = AssetDatabase.LoadAssetAtPath<StageDataObject>(StageDataAssetPath);
             stages = dataObject != null ? dataObject.stageData.ToArray() : System.Array.Empty<StageData>();
-
-            phaseCacheKey = null;
+            sectionCacheStage = -1;
         }
 
-        // アセットを編集して戻ってきたときにフェーズ一覧を取り直す
+        // アセットを編集して戻ってきたときに一覧を取り直す
         void OnFocus()
         {
-            phaseCacheKey = null;
+            sectionCacheStage = -1;
             Repaint();
         }
 
         void OnGUI()
         {
             // 描画中にコントロール数が変わらないよう、一覧の再構築はLayoutパスに限定する
-            if (Event.current.type == EventType.Layout)
-            {
-                RefreshPhaseLabelsIfNeeded();
-            }
+            if (Event.current.type == EventType.Layout) RefreshSectionLabelsIfNeeded();
 
             EditorGUILayout.LabelField("Battle Debug Launcher", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("選択したステージ・シーケンス・開始フェーズからBattleシーンを単独で起動します。", MessageType.Info);
+            EditorGUILayout.HelpBox("選択したステージ・開始 Section からBattleシーンを単独で起動します。途中の Section から始めると、その Section の会話は飛ばします（リトライと同じ）。", MessageType.Info);
             EditorGUILayout.Space();
 
             if (stages.Length > 0)
@@ -83,18 +74,12 @@ namespace Project.Editor
                 stageNumber = EditorGUILayout.IntField("Stage Number", stageNumber);
             }
 
-            situation = (BattleSituation)EditorGUILayout.EnumPopup("Situation", situation);
-
-            DrawStartPhaseField();
-
+            DrawStartSectionField();
             EditorGUILayout.Space();
 
             using (new EditorGUI.DisabledScope(EditorApplication.isPlaying))
             {
-                if (GUILayout.Button("Battleシーンを起動"))
-                {
-                    Launch();
-                }
+                if (GUILayout.Button("Battleシーンを起動")) Launch();
             }
 
             if (EditorApplication.isPlaying)
@@ -102,95 +87,68 @@ namespace Project.Editor
                 EditorGUILayout.HelpBox("再生中は起動できません。再生を停止してから実行してください。", MessageType.Warning);
             }
 
-            // Stage/Situationが変わった直後は次のLayoutパスで一覧を作り直す必要があるため再描画を促す
-            if (phaseCacheKey != BuildPhaseCacheKey())
-            {
-                Repaint();
-            }
+            // ステージが変わった直後は次のLayoutパスで一覧を作り直す必要があるため再描画を促す
+            if (sectionCacheStage != stageNumber) Repaint();
         }
 
-        void DrawStartPhaseField()
+        void DrawStartSectionField()
         {
-            if (phaseLabels.Length == 0)
+            if (sectionLabels.Length == 0)
             {
                 using (new EditorGUI.DisabledScope(true))
                 {
-                    EditorGUILayout.Popup("Start Phase", 0, new[] { "(なし)" });
+                    EditorGUILayout.Popup("Start Section", 0, new[] { "(なし)" });
                 }
-
-                if (!string.IsNullOrEmpty(phaseUnavailableReason))
-                {
-                    EditorGUILayout.HelpBox(phaseUnavailableReason, MessageType.Warning);
-                }
-
-                startPhaseIndex = 0;
+                if (!string.IsNullOrEmpty(sectionUnavailableReason)) EditorGUILayout.HelpBox(sectionUnavailableReason, MessageType.Warning);
+                startSection = 0;
                 return;
             }
 
-            startPhaseIndex = Mathf.Clamp(startPhaseIndex, 0, phaseLabels.Length - 1);
-            startPhaseIndex = EditorGUILayout.Popup("Start Phase", startPhaseIndex, phaseLabels);
+            startSection = Mathf.Clamp(startSection, 0, sectionLabels.Length - 1);
+            startSection = EditorGUILayout.Popup("Start Section", startSection, sectionLabels);
         }
 
-        string BuildPhaseCacheKey()
+        void RefreshSectionLabelsIfNeeded()
         {
-            return $"{stageNumber}/{situation}";
-        }
+            if (sectionCacheStage == stageNumber) return;
 
-        void RefreshPhaseLabelsIfNeeded()
-        {
-            var cacheKey = BuildPhaseCacheKey();
-            if (phaseCacheKey == cacheKey) return;
-
-            phaseCacheKey = cacheKey;
-            phaseLabels = System.Array.Empty<string>();
-            phaseUnavailableReason = null;
+            sectionCacheStage = stageNumber;
+            sectionLabels = System.Array.Empty<string>();
+            sectionUnavailableReason = null;
 
             var stage = stages.FirstOrDefault(s => s.stageNumber == stageNumber);
             if (stage == null)
             {
-                phaseUnavailableReason = $"StageData に Stage {stageNumber} の定義がありません。";
+                sectionUnavailableReason = $"StageData に Stage {stageNumber} の定義がありません。";
+                return;
+            }
+            if (string.IsNullOrEmpty(stage.stageAddress))
+            {
+                sectionUnavailableReason = $"Stage {stageNumber} の stageAddress が StageData に設定されていません。";
                 return;
             }
 
-            var address = situation == BattleSituation.Boss ? stage.bossSequenceAddress : stage.waySequenceAddress;
-            if (string.IsNullOrEmpty(address))
+            var asset = AssetDatabase.LoadAssetAtPath<BattleStageAsset>(stage.stageAddress);
+            if (asset == null || asset.Tree == null)
             {
-                phaseUnavailableReason = $"Stage {stageNumber} の {situation} シーケンスが StageData に設定されていません。";
+                sectionUnavailableReason = $"BattleStageAsset またはそのツリーを読み込めませんでした: {stage.stageAddress}";
+                return;
+            }
+            if (asset.Tree.Root is not StageNodeDefinition root)
+            {
+                sectionUnavailableReason = $"{asset.Tree.name} のルートが Stage ノードではありません。";
                 return;
             }
 
-            var sequenceAsset = AssetDatabase.LoadAssetAtPath<BattleSequenceAsset>(address);
-            if (sequenceAsset == null)
-            {
-                phaseUnavailableReason = $"シーケンスアセットを読み込めませんでした: {address}";
-                return;
-            }
-
-            phaseLabels = BuildPhaseLabels(sequenceAsset);
-            if (phaseLabels.Length == 0)
-            {
-                phaseUnavailableReason = $"{sequenceAsset.name} にフェーズが登録されていません。";
-            }
-        }
-
-        // シーケンス内の全グループを平坦化し、TimelineBuilderアセット名をそのままラベルにする。
-        // Popupの選択値は「実行順の通し番号」なので、ラベルが重複していても選択自体は破綻しない。
-        static string[] BuildPhaseLabels(BattleSequenceAsset sequenceAsset)
-        {
-            var labels = new List<string>();
-
-            foreach (var group in sequenceAsset.SequenceGroups)
-            foreach (var phase in group.Phases)
-                labels.Add(phase.TimelineBuilder != null ? phase.TimelineBuilder.name : "(no timeline)");
-
-            return labels.ToArray();
+            sectionLabels = root.Children
+                                .Select((c, i) => c is SectionNodeDefinition s ? $"{i}: {s.Label} [{s.Situation}]" : $"{i}: (Section ではない)")
+                                .ToArray();
         }
 
         void Launch()
         {
             EditorPrefs.SetInt(PrefKeyStageNumber, stageNumber);
-            EditorPrefs.SetInt(PrefKeySituation, (int)situation);
-            EditorPrefs.SetInt(PrefKeyStartPhaseIndex, startPhaseIndex);
+            EditorPrefs.SetInt(PrefKeyStartSection, startSection);
 
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
@@ -205,8 +163,7 @@ namespace Project.Editor
 
             var serialized = new SerializedObject(initializer);
             serialized.FindProperty("stageNumber").intValue = stageNumber;
-            serialized.FindProperty("situation").enumValueIndex = (int)situation;
-            serialized.FindProperty("startPhaseIndex").intValue = startPhaseIndex;
+            serialized.FindProperty("startSection").intValue = startSection;
             serialized.ApplyModifiedProperties();
 
             // シーンファイルへは保存しない（デバッグ用の一時的な配置のため）
