@@ -134,14 +134,14 @@ namespace Project.Editor
                 sectionUnavailableReason = $"BattleStageAsset またはそのツリーを読み込めませんでした: {stage.stageAddress}";
                 return;
             }
-            if (asset.Tree.Root is not StageNodeDefinition root)
+            if (asset.Tree.Root is not Scenes.Battle.Scripts.BehaviorTree.Stage root)
             {
                 sectionUnavailableReason = $"{asset.Tree.name} のルートが Stage ノードではありません。";
                 return;
             }
 
             sectionLabels = root.Children
-                                .Select((c, i) => c is SectionNodeDefinition s ? $"{i}: {s.Label} [{s.Situation}]" : $"{i}: (Section ではない)")
+                                .Select((c, i) => c is Scenes.Battle.Scripts.BehaviorTree.Section s ? $"{i}: {s.Label} [{s.Situation}]" : $"{i}: (Section ではない)")
                                 .ToArray();
         }
 

@@ -42,7 +42,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             this.kind = kind;
         }
 
-        internal TreeParameter ResolveAgainst(BuildScope parentScope)
+        internal TreeParameter ResolveAgainst(TreeScope parentScope)
         {
             if (string.IsNullOrEmpty(bindToParent) || parentScope == null) return this;
             return parentScope.TryGet(bindToParent, out var p) ? p : this;
@@ -61,7 +61,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             param = null;
         }
 
-        public float Resolve(BuildScope scope)
+        public float Resolve(TreeScope scope)
         {
             if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
             return p.Kind == TreeParameterKind.Int ? p.IntValue : p.FloatValue;
@@ -84,7 +84,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             param = null;
         }
 
-        public int Resolve(BuildScope scope)
+        public int Resolve(TreeScope scope)
         {
             if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
             return p.Kind == TreeParameterKind.Float ? Mathf.RoundToInt(p.FloatValue) : p.IntValue;
@@ -109,7 +109,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             param = null;
         }
 
-        public bool Resolve(BuildScope scope)
+        public bool Resolve(TreeScope scope)
         {
             if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
             return p.BoolValue;
@@ -130,7 +130,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             param = null;
         }
 
-        public Vector2 Resolve(BuildScope scope)
+        public Vector2 Resolve(TreeScope scope)
         {
             if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
             return p.Vector2Value;
@@ -145,7 +145,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public T value;
         public string param;
 
-        public T Resolve(BuildScope scope)
+        public T Resolve(TreeScope scope)
         {
             if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
             return p.ObjectValue as T ?? value;

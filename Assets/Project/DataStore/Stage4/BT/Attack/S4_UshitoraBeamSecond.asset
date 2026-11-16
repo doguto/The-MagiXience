@@ -20,7 +20,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147961671975472
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: ac37f38952634ce8af84b671efbf4a2f
         graphPosition: {x: 345, y: 300}
@@ -31,7 +31,7 @@ MonoBehaviour:
           rid: 8540147961671975474
         onChildCompleted: 0
     - rid: 8540147961671975473
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 8918ef9a95d44edba3c493948710271a
         graphPosition: {x: 345, y: 450}
@@ -40,13 +40,13 @@ MonoBehaviour:
         - rid: 8540147961671975475
         - rid: 8540147961671975476
     - rid: 8540147961671975474
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 487
           param: 
     - rid: 8540147961671975475
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 12ebb7ca1053410b8c82b30f52b01f59
         graphPosition: {x: 230, y: 600}
@@ -55,7 +55,7 @@ MonoBehaviour:
           value: 8
           param: 
     - rid: 8540147961671975476
-      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: e07e06d75b78475585c8515428b396ea
         graphPosition: {x: 460, y: 600}
@@ -69,7 +69,7 @@ MonoBehaviour:
           value: 130
           param: 
     - rid: 8540147961671975477
-      type: {class: SpriteBeamNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: SpriteBeam, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 9e482a668340487e9d5123b36c16fb74
         graphPosition: {x: 460, y: 750}
@@ -81,7 +81,7 @@ MonoBehaviour:
         bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
         bodyDuration: 0.81447965
     - rid: 8540147961671975490
-      type: {class: WarningLineNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: WarningLine, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 58b8ea84a6b64451a2101a721b98f3ce
         graphPosition: {x: 460, y: 750}

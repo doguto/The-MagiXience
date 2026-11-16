@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using BtNode = Project.Scenes.Battle.Scripts.BehaviorTree.Node;
 
 namespace Project.Scenes.Battle.Editor.BehaviorTree
 {
@@ -58,7 +59,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 var foldout = CreateFoldout(group.Key);
                 foreach (var entry in items)
                 {
-                    foldout.Add(CreateItem(entry.Name, entry.Description, NodeCatalog.CategoryKey((NodeDefinition)Activator.CreateInstance(entry.Type)),
+                    foldout.Add(CreateItem(entry.Name, entry.Description, NodeCatalog.CategoryKey((BtNode)Activator.CreateInstance(entry.Type)),
                         () => StartDrag(NodeTypeKey, entry.Type, entry.Name)));
                 }
                 scroll.Add(foldout);

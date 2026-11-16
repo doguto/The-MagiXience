@@ -20,7 +20,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147961671974921
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 9336e7d9871e467884d6602f01dfbd5a
         graphPosition: {x: 460, y: 300}
@@ -31,7 +31,7 @@ MonoBehaviour:
           rid: 8540147961671974923
         onChildCompleted: 0
     - rid: 8540147961671974922
-      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: d7badb54cfaf4d69b5f69aafbb8324b6
         graphPosition: {x: 460, y: 450}
@@ -45,7 +45,7 @@ MonoBehaviour:
           value: 120
           param: 
     - rid: 8540147961671974923
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 481
@@ -60,7 +60,7 @@ MonoBehaviour:
       data:
         degrees: 0
     - rid: 8540147961671975623
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 85d17cbe3e0345e8adb39d6f99669673
         graphPosition: {x: 460, y: 600}

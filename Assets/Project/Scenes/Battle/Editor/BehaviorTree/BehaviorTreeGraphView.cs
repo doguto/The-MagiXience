@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using BtNode = Project.Scenes.Battle.Scripts.BehaviorTree.Node;
 
 namespace Project.Scenes.Battle.Editor.BehaviorTree
 {
@@ -14,12 +15,48 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
     {
         readonly EditorWindow window;
         readonly NodeSearchWindowProvider searchProvider;
-        readonly Dictionary<NodeDefinition, BehaviorTreeNodeView> views = new();
+        readonly Dictionary<BtNode, BehaviorTreeNodeView> views = new();
         BehaviorTreeAsset asset;
         SerializedObject serializedObject;
         BehaviorTreeNodeView rootView;
         bool isReloading;
         readonly MiniMap miniMap;
+
+        // 選択が変わったとき、または選択中のノードの入力欄を作り直すべきとき (構造変更・パラメータ改名) に 1 フレームにまとめて通知する
+        public event Action SelectionChanged;
+        bool selectionChangeQueued;
+
+        public IReadOnlyList<BehaviorTreeNodeView> SelectedNodes =>
+            selection.OfType<BehaviorTreeNodeView>().Where(v => !v.IsRoot).ToList();
+
+        void QueueSelectionChanged()
+        {
+            if (selectionChangeQueued) return;
+            selectionChangeQueued = true;
+            schedule.Execute(() =>
+            {
+                selectionChangeQueued = false;
+                SelectionChanged?.Invoke();
+            });
+        }
+
+        public override void AddToSelection(ISelectable selectable)
+        {
+            base.AddToSelection(selectable);
+            QueueSelectionChanged();
+        }
+
+        public override void RemoveFromSelection(ISelectable selectable)
+        {
+            base.RemoveFromSelection(selectable);
+            QueueSelectionChanged();
+        }
+
+        public override void ClearSelection()
+        {
+            base.ClearSelection();
+            QueueSelectionChanged();
+        }
 
         public void ToggleMiniMap() =>
             miniMap.style.display = miniMap.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
@@ -106,14 +143,14 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             DragAndDrop.AcceptDrag();
             var localPos = contentViewContainer.WorldToLocal(evt.mousePosition);
 
-            NodeDefinition def;
+            BtNode def;
             if (nodeType != null)
             {
-                def = (NodeDefinition)Activator.CreateInstance(nodeType);
+                def = (BtNode)Activator.CreateInstance(nodeType);
             }
             else
             {
-                def = new SubTreeNodeDefinition { Tree = subTree };
+                def = new SubTree { Tree = subTree };
             }
 
             CreateNode(def, localPos, parent);
@@ -173,12 +210,13 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             serializedObject?.Update();
             foreach (var view in views.Values) view.RefreshTexts();
             foreach (var view in selection.OfType<BehaviorTreeNodeView>()) view.RefreshFields();
+            QueueSelectionChanged();
         }
 
-        Dictionary<NodeDefinition, string> pathCache;
+        Dictionary<BtNode, string> pathCache;
 
         // 入力欄の対象プロパティ。構造が変わるとパスがずれるため、必要になった時点で引き直す
-        SerializedProperty FindPropertyFor(NodeDefinition def)
+        SerializedProperty FindPropertyFor(BtNode def)
         {
             if (serializedObject == null) return null;
             if (pathCache == null)
@@ -198,7 +236,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             pathCache = null;
             isReloading = true;
 
-            var alive = new HashSet<NodeDefinition>(AllDefinitions());
+            var alive = new HashSet<BtNode>(AllNodes());
             var removed = views.Keys.Where(d => !alive.Contains(d)).ToList();
             foreach (var def in removed)
             {
@@ -249,6 +287,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             // 選択中のノードの入力欄は構造変更でパスがずれている可能性があるため作り直す
             foreach (var view in selection.OfType<BehaviorTreeNodeView>()) view.RefreshFields();
+            QueueSelectionChanged();
         }
 
         void RefreshOrderBadges()
@@ -258,7 +297,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 if (def.ChildCapacity != NodeChildCapacity.Multiple) continue;
                 var order = 1;
-                var showTime = def is SequenceNodeDefinition && def.Children.Any(c => c is WaitNodeDefinition);
+                var showTime = def is Sequence && def.Children.Any(c => c is Wait);
                 int? time = 0;
                 foreach (var child in def.Children)
                 {
@@ -270,18 +309,18 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         }
 
         // Sequence の子が開始から何フレーム目に動くか。時間の読めない子より後ろは表示しない
-        static int? NextTime(int? time, NodeDefinition child)
+        static int? NextTime(int? time, BtNode child)
         {
             if (time == null || child == null) return time;
-            if (child is WaitNodeDefinition wait)
+            if (child is Wait wait)
                 return string.IsNullOrEmpty(wait.Frames.param) ? time + Mathf.Max(0, wait.Frames.value) : null;
             return IsInstant(child) ? time : null;
         }
 
         // 実行したフレームのうちに Success を返すノード
-        public static bool IsInstant(NodeDefinition node) =>
-            node is ActionNodeDefinition
-            && node is not (SubTreeNodeDefinition or WaitNodeDefinition or WaitUntilNodeDefinition or MoveNodeDefinition or MoveTrailFanNodeDefinition or MovePathNodeDefinition or PlaceAlongPathNodeDefinition or WaveNodeDefinition or BossBattleNodeDefinition);
+        public static bool IsInstant(BtNode node) =>
+            node is ActionNode
+            && node is not (SubTree or Wait or Scripts.BehaviorTree.WaitUntil or Move or MoveTrailFan or MovePath or PlaceAlongPath or Wave or BossBattle);
 
         const float HorizontalGap = 40f;
         const float VerticalGap = 70f;
@@ -311,7 +350,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             schedule.Execute(FrameWholeGraph).ExecuteLater(50);
         }
 
-        void Place(NodeDefinition def, float centerX, float y)
+        void Place(BtNode def, float centerX, float y)
         {
             var view = views[def];
             var size = SizeOf(view);
@@ -333,7 +372,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             }
         }
 
-        float SubtreeWidth(NodeDefinition def)
+        float SubtreeWidth(BtNode def)
         {
             var own = SizeOf(views[def]).x;
             var children = def.Children.Where(c => c != null && views.ContainsKey(c)).ToList();
@@ -396,12 +435,12 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             base.BuildContextualMenu(evt);
-            if (evt.target is BehaviorTreeNodeView { Definition: SubTreeNodeDefinition { Tree: { } tree } })
+            if (evt.target is BehaviorTreeNodeView { TreeNode: SubTree { Tree: { } tree } })
             {
                 evt.menu.AppendAction("Open SubTree", _ => BehaviorTreeEditorWindow.Open(tree));
             }
 
-            if (evt.target is BehaviorTreeNodeView { Definition: ScenarioNodeDefinition scenario })
+            if (evt.target is BehaviorTreeNodeView { TreeNode: PlayScenario scenario })
             {
                 var missing = scenario.MissingCommands().ToList();
                 evt.menu.AppendAction("会話のコマンドから OnCommand を作る", _ => AddOnCommands(scenario, missing),
@@ -410,7 +449,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         }
 
         // 子の並びは x 座標で決まるので、既存の子の右側へ順に置く
-        void AddOnCommands(ScenarioNodeDefinition scenario, List<string> commands)
+        void AddOnCommands(PlayScenario scenario, List<string> commands)
         {
             if (commands.Count == 0) return;
             Undo.RecordObject(asset, "Add OnCommand Nodes");
@@ -421,17 +460,17 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             foreach (var command in commands)
             {
                 x += 220f;
-                children.Add(new OnCommandNodeDefinition { Command = command, GraphPosition = new Vector2(x, y) });
+                children.Add(new OnCommand { Command = command, GraphPosition = new Vector2(x, y) });
             }
             scenario.SetChildren(children);
             EditorUtility.SetDirty(asset);
             Reload();
         }
 
-        IEnumerable<NodeDefinition> AllDefinitions()
+        IEnumerable<BtNode> AllNodes()
         {
-            var visited = new HashSet<NodeDefinition>();
-            var stack = new Stack<NodeDefinition>();
+            var visited = new HashSet<BtNode>();
+            var stack = new Stack<BtNode>();
             if (asset.Root != null) stack.Push(asset.Root);
             foreach (var d in asset.DetachedNodes) if (d != null) stack.Push(d);
 
@@ -444,14 +483,14 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             }
         }
 
-        static Dictionary<NodeDefinition, string> CollectPropertyPaths(SerializedObject so)
+        static Dictionary<BtNode, string> CollectPropertyPaths(SerializedObject so)
         {
-            var result = new Dictionary<NodeDefinition, string>();
+            var result = new Dictionary<BtNode, string>();
             var it = so.GetIterator();
             while (it.Next(true))
             {
                 if (it.propertyType != SerializedPropertyType.ManagedReference) continue;
-                if (it.managedReferenceValue is NodeDefinition def && !result.ContainsKey(def))
+                if (it.managedReferenceValue is BtNode def && !result.ContainsKey(def))
                 {
                     result[def] = it.propertyPath;
                 }
@@ -477,7 +516,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 foreach (var view in change.elementsToRemove.OfType<BehaviorTreeNodeView>())
                 {
                     if (view.IsRoot) continue;
-                    RemoveDefinition(view.Definition);
+                    RemoveNode(view.TreeNode);
                     structural = true;
                 }
             }
@@ -496,7 +535,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 foreach (var view in change.movedElements.OfType<BehaviorTreeNodeView>())
                 {
                     if (view.IsRoot) continue;
-                    view.Definition.GraphPosition = view.GetPosition().position;
+                    view.TreeNode.GraphPosition = view.GetPosition().position;
                 }
                 SortAllChildrenByPosition();
                 RefreshOrderBadges();
@@ -516,33 +555,33 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             if (edge.output.node is not BehaviorTreeNodeView parent || edge.input.node is not BehaviorTreeNodeView child) return;
 
-            DetachFromCurrentParent(child.Definition);
-            asset.DetachedNodes.Remove(child.Definition);
+            DetachFromCurrentParent(child.TreeNode);
+            asset.DetachedNodes.Remove(child.TreeNode);
 
             if (parent.IsRoot)
             {
                 if (asset.Root != null) asset.DetachedNodes.Add(asset.Root);
-                asset.Root = child.Definition;
+                asset.Root = child.TreeNode;
                 return;
             }
 
-            var children = parent.Definition.Children.Where(c => c != null).ToList();
-            if (parent.Definition.ChildCapacity == NodeChildCapacity.Single)
+            var children = parent.TreeNode.Children.Where(c => c != null).ToList();
+            if (parent.TreeNode.ChildCapacity == NodeChildCapacity.Single)
             {
                 asset.DetachedNodes.AddRange(children);
                 children.Clear();
             }
-            children.Add(child.Definition);
-            parent.Definition.SetChildren(SortByPosition(children));
+            children.Add(child.TreeNode);
+            parent.TreeNode.SetChildren(SortByPosition(children));
         }
 
         void Disconnect(Edge edge)
         {
             if (edge.input.node is not BehaviorTreeNodeView child) return;
-            if (DetachFromCurrentParent(child.Definition)) asset.DetachedNodes.Add(child.Definition);
+            if (DetachFromCurrentParent(child.TreeNode)) asset.DetachedNodes.Add(child.TreeNode);
         }
 
-        bool DetachFromCurrentParent(NodeDefinition target)
+        bool DetachFromCurrentParent(BtNode target)
         {
             if (asset.Root == target)
             {
@@ -550,7 +589,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 return true;
             }
 
-            foreach (var def in AllDefinitions().ToList())
+            foreach (var def in AllNodes().ToList())
             {
                 var children = def.Children.ToList();
                 if (!children.Remove(target)) continue;
@@ -560,7 +599,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             return false;
         }
 
-        void RemoveDefinition(NodeDefinition target)
+        void RemoveNode(BtNode target)
         {
             DetachFromCurrentParent(target);
             asset.DetachedNodes.Remove(target);
@@ -568,12 +607,12 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 if (child != null) asset.DetachedNodes.Add(child);
             }
-            target.SetChildren(Array.Empty<NodeDefinition>());
+            target.SetChildren(Array.Empty<BtNode>());
         }
 
         void SortAllChildrenByPosition()
         {
-            foreach (var def in AllDefinitions().ToList())
+            foreach (var def in AllNodes().ToList())
             {
                 if (def.ChildCapacity != NodeChildCapacity.Multiple) continue;
                 var sorted = SortByPosition(def.Children.ToList());
@@ -582,7 +621,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         }
 
         // 子の実行順は左から右。Timeline 等の子ごとの設定値もこの順に対応する。
-        static List<NodeDefinition> SortByPosition(List<NodeDefinition> children) =>
+        static List<BtNode> SortByPosition(List<BtNode> children) =>
             children.OrderBy(c => c.GraphPosition.x).ToList();
 
         Port pendingPort;
@@ -601,7 +640,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             if (asset == null) return;
             var windowPos = screenPosition - window.position.position;
             var localPos = contentViewContainer.WorldToLocal(windowPos);
-            var def = (NodeDefinition)Activator.CreateInstance(type);
+            var def = (BtNode)Activator.CreateInstance(type);
 
             var port = pendingPort;
             pendingPort = null;
@@ -616,19 +655,19 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 && def.ChildCapacity != NodeChildCapacity.None && !child.IsRoot)
             {
                 Undo.RecordObject(asset, "Connect Behavior Tree Node");
-                DetachFromCurrentParent(child.Definition);
-                asset.DetachedNodes.Remove(child.Definition);
+                DetachFromCurrentParent(child.TreeNode);
+                asset.DetachedNodes.Remove(child.TreeNode);
                 if (asset.Root == null) asset.Root = def;
                 else if (asset.Root != def && !asset.DetachedNodes.Contains(def)) asset.DetachedNodes.Add(def);
-                def.SetChildren(new[] { child.Definition });
-                def.GraphPosition = child.Definition.GraphPosition + new Vector2(0, -(SizeOf(child).y + VerticalGap + 60f));
+                def.SetChildren(new[] { child.TreeNode });
+                def.GraphPosition = child.TreeNode.GraphPosition + new Vector2(0, -(SizeOf(child).y + VerticalGap + 60f));
                 EditorUtility.SetDirty(asset);
                 Sync();
             }
         }
 
         // parent を指定した場合はその最後の子として接続し、親の下に配置する
-        void CreateNode(NodeDefinition def, Vector2 localPos, BehaviorTreeNodeView parent)
+        void CreateNode(BtNode def, Vector2 localPos, BehaviorTreeNodeView parent)
         {
             Undo.RecordObject(asset, "Create Behavior Tree Node");
             def.GraphPosition = localPos;
@@ -641,15 +680,15 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             }
             else if (parent != null)
             {
-                var children = parent.Definition.Children.Where(c => c != null).ToList();
-                if (parent.Definition.ChildCapacity == NodeChildCapacity.Single)
+                var children = parent.TreeNode.Children.Where(c => c != null).ToList();
+                if (parent.TreeNode.ChildCapacity == NodeChildCapacity.Single)
                 {
                     asset.DetachedNodes.AddRange(children);
                     children.Clear();
                 }
                 def.GraphPosition = BelowOf(parent, children.LastOrDefault());
                 children.Add(def);
-                parent.Definition.SetChildren(children);
+                parent.TreeNode.SetChildren(children);
             }
             else if (asset.Root == null)
             {
@@ -670,7 +709,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         }
 
         // 親の真下、既存の子がいればその右隣
-        Vector2 BelowOf(BehaviorTreeNodeView parent, NodeDefinition lastChild)
+        Vector2 BelowOf(BehaviorTreeNodeView parent, BtNode lastChild)
         {
             var p = parent.GetPosition();
             var y = p.y + SizeOf(parent).y + VerticalGap;
@@ -683,7 +722,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         string SerializeForCopy(IEnumerable<GraphElement> elements)
         {
-            var defs = elements.OfType<BehaviorTreeNodeView>().Where(v => !v.IsRoot).Select(v => v.Definition).ToList();
+            var defs = elements.OfType<BehaviorTreeNodeView>().Where(v => !v.IsRoot).Select(v => v.TreeNode).ToList();
             if (defs.Count == 0) return null;
             var holder = new CopyHolder { nodes = defs.Select(d => new CopyEntry { node = d }).ToList() };
             return JsonUtility.ToJson(holder);
@@ -699,7 +738,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 if (entry.node == null) continue;
                 // 子は別エントリとして貼り付けるため、ここでは単体ノードとして扱う
-                entry.node.SetChildren(Array.Empty<NodeDefinition>());
+                entry.node.SetChildren(Array.Empty<BtNode>());
                 entry.node.RegenerateGuid();
                 entry.node.GraphPosition += new Vector2(40, 40);
                 asset.DetachedNodes.Add(entry.node);
@@ -717,7 +756,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         [Serializable]
         class CopyEntry
         {
-            [SerializeReference] public NodeDefinition node;
+            [SerializeReference] public BtNode node;
         }
     }
 }

@@ -7,14 +7,14 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     // 1 本のツリーを固定フレームで駆動する。ルートが完了したら停止する。
     public sealed class BehaviorTreeRunner
     {
-        readonly INode root;
+        readonly Node root;
         readonly BattleContext context;
 
         public BehaviorTreeRunner(BehaviorTreeAsset asset, BattleContext context, IReadOnlyList<TreeParameter> overrides = null)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
             this.context = context;
-            root = asset.Build(null, overrides);
+            root = asset.Instantiate(null, overrides);
             Name = asset.name;
         }
 

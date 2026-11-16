@@ -20,7 +20,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147961671975342
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 0971e394bf404ceaac6a1f8a84e64fba
         graphPosition: {x: 345, y: 300}
@@ -31,7 +31,7 @@ MonoBehaviour:
           rid: 8540147961671975344
         onChildCompleted: 0
     - rid: 8540147961671975343
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 5e84b1e9bf5e4b94a11e5cc80ba2650e
         graphPosition: {x: 345, y: 450}
@@ -40,13 +40,13 @@ MonoBehaviour:
         - rid: 8540147961671975345
         - rid: 8540147961671975346
     - rid: 8540147961671975344
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 241
           param: 
     - rid: 8540147961671975345
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 11209c4c0d774e1794f7fffd70d10a74
         graphPosition: {x: 230, y: 600}
@@ -55,7 +55,7 @@ MonoBehaviour:
           value: 48
           param: 
     - rid: 8540147961671975346
-      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 91a8a24d818644bab89ef98dce123a8f
         graphPosition: {x: 460, y: 600}
@@ -78,7 +78,7 @@ MonoBehaviour:
       data:
         degrees: 0
     - rid: 8540147961671975626
-      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 572348ef256547e5a371d827adcc0e33
         graphPosition: {x: 460, y: 750}

@@ -13,8 +13,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     {
         BehaviorTreeRunner runner;
         bool destroyed;
-        MotionSequence movement;
-        IReadOnlyList<MotionStep> movementSteps;
         // プールへ戻された。次に Attach されるまで生きていない扱いにする
         bool released;
         BehaviorTreeAsset deathBehavior;
@@ -30,17 +28,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public float AttackTime => (World.Frame - StartFrame) * BattleWorld.DeltaTime;
         public bool IsAlive => !destroyed && !released && this != null && (Model == null || Model.IsAlive);
 
-        public bool IsFinished => !IsAlive || ((runner == null || runner.IsFinished) && (movement == null || movement.IsFinished));
-
-        // ツリーとは独立して流し続ける移動。continueIfSame なら同じ移動が再生中のとき作り直さない
-        public void SetMovement(IReadOnlyList<MotionStep> steps, bool continueIfSame = false)
-        {
-            if (continueIfSame && ReferenceEquals(steps, movementSteps) && movement != null && !movement.IsFinished) return;
-            movement?.Stop();
-            movementSteps = steps;
-            movement = steps == null || steps.Count == 0 ? null
-                : new MotionSequence(steps, Body, new MotionLaunch { AttackTime = AttackTime });
-        }
+        public bool IsFinished => !IsAlive || runner == null || runner.IsFinished;
 
         // ツリーが最初に動く前に呼ばれる。付与先の部品 (進行ゲージなど) が購読の準備に使う
         public static event System.Action<BattleActor> Attached;
@@ -80,9 +68,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             World?.CancelScheduled(this);
             runner?.Stop();
             runner = null;
-            movement?.Stop();
-            movement = null;
-            movementSteps = null;
             deathBehavior = null;
             deathSubscription?.Dispose();
             deathSubscription = null;
@@ -95,7 +80,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 runner?.Stop();
                 return;
             }
-            movement?.Tick(BattleWorld.DeltaTime);
             if (runner != null && !runner.IsFinished) runner.Tick();
         }
 
@@ -113,8 +97,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public void Stop()
         {
             runner?.Stop();
-            movement?.Stop();
-            movement = null;
         }
 
         void OnDestroy()
@@ -122,7 +104,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             destroyed = true;
             deathSubscription?.Dispose();
             runner?.Stop();
-            movement?.Stop();
         }
     }
 }

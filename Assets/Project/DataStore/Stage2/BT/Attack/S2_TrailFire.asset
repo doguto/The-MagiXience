@@ -52,7 +52,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147960821841999
-      type: {class: ParallelNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Parallel, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 56c4855d55c04916aefd94eb5f2c6232
         graphPosition: {x: -110, y: 150}
@@ -65,7 +65,7 @@ MonoBehaviour:
           value: 0
           param: 
     - rid: 8540147960821842000
-      type: {class: MovePathNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: MovePath, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 7b7a39990bcc483c992590c5f8201917
         graphPosition: {x: -240, y: 300}
@@ -74,7 +74,7 @@ MonoBehaviour:
           value: {fileID: 0}
           param: path
     - rid: 8540147960821842001
-      type: {class: PlaceAlongPathNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: PlaceAlongPath, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: d62263d179a74a06bf8cc7d7ba746f23
         graphPosition: {x: 20, y: 300}

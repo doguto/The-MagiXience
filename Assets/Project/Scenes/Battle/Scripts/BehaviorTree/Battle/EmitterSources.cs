@@ -186,7 +186,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public override string ToString() => !string.IsNullOrEmpty(prefabParam) ? "$" + prefabParam : prefab ? prefab.name : "(弾未設定)";
 
         // 定義は共有されるので、パラメータで差し替えるときは複製を返す
-        public BulletSpec Resolve(BuildScope scope)
+        public BulletSpec Resolve(TreeScope scope)
         {
             if (string.IsNullOrEmpty(prefabParam) || scope == null || !scope.TryGet(prefabParam, out var p)) return this;
             var resolved = p.ObjectValue as BulletEntityPresenter

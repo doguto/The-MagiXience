@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
+using BtNode = Project.Scenes.Battle.Scripts.BehaviorTree.Node;
 
 namespace Project.Scenes.Battle.Editor.BehaviorTree
 {
@@ -16,7 +17,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         readonly System.Action<Port, UnityEngine.Vector2> onDropOutsidePort;
         VisualElement commentRow;
 
-        public NodeDefinition Definition { get; }
+        public BtNode TreeNode { get; }
         public bool IsRoot { get; }
         public event System.Action ValuesChanged;
         public Port Input { get; }
@@ -26,11 +27,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         readonly System.Func<SerializedProperty> resolveProperty;
         VisualElement fields;
 
-        public BehaviorTreeNodeView(NodeDefinition definition, System.Func<SerializedProperty> resolveProperty, System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
+        public BehaviorTreeNodeView(BtNode definition, System.Func<SerializedProperty> resolveProperty, System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
         {
             this.onDropOutsidePort = onDropOutsidePort;
             this.resolveProperty = resolveProperty;
-            Definition = definition;
+            TreeNode = definition;
             viewDataKey = definition.Guid;
             AddToClassList("bt-node");
             AddToClassList("bt-node--" + NodeCatalog.CategoryKey(definition));
@@ -90,11 +91,20 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             RefreshPorts();
         }
 
+        public SerializedProperty ResolveProperty() => resolveProperty?.Invoke();
+        public bool IsRuntimeActive => ClassListContains("bt-running");
+
+        public void NotifyValuesChanged()
+        {
+            RefreshTexts();
+            ValuesChanged?.Invoke();
+        }
+
         public override void OnSelected()
         {
             base.OnSelected();
             if (fields == null || fields.childCount > 0) return;
-            BuildFields(resolveProperty?.Invoke(), fields);
+            BuildInlineFields();
         }
 
         public void RefreshFields()
@@ -102,7 +112,18 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             if (fields == null || !selected) return;
             fields.Clear();
             commentRow = null;
-            BuildFields(resolveProperty?.Invoke(), fields);
+            BuildInlineFields();
+        }
+
+        void BuildInlineFields()
+        {
+            var commentProp = BuildFields(ResolveProperty(), fields, NotifyValuesChanged);
+            if (commentProp == null) return;
+            // コメントは書かれている時だけ表示し、空なら右クリックの Edit Comment で出す
+            commentRow = BindField(commentProp, NotifyValuesChanged);
+            commentRow.AddToClassList("bt-comment");
+            commentRow.style.display = string.IsNullOrEmpty(commentProp.stringValue) ? DisplayStyle.None : DisplayStyle.Flex;
+            fields.Add(commentRow);
         }
 
         public override void OnUnselected()
@@ -138,8 +159,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         public void RefreshTexts()
         {
-            if (Definition == null) return;
-            var summary = Definition.Summary;
+            if (TreeNode == null) return;
+            var summary = TreeNode.Summary;
             summaryLabel.text = summary ?? "";
             summaryLabel.style.display = string.IsNullOrEmpty(summary) ? DisplayStyle.None : DisplayStyle.Flex;
         }
@@ -164,9 +185,10 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         }
 
         // 子ノード配列が HideInInspector のため NextVisible では中に入れない。Next で直下のフィールドを列挙する。
-        void BuildFields(SerializedProperty property, VisualElement body)
+        // コメント以外の設定欄を body に並べ、コメントのプロパティを返す (置き方は呼び出し側で決める)
+        public static SerializedProperty BuildFields(SerializedProperty property, VisualElement body, System.Action onChanged)
         {
-            if (property == null) return;
+            if (property == null) return null;
 
             var fields = new List<SerializedProperty>();
             var it = property.Copy();
@@ -195,19 +217,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                     continue;
                 }
                 if (HiddenFields.Contains(field.name)) continue;
-                var element = BindField(field);
+                var element = BindField(field, onChanged);
                 body.Add(element);
                 ApplyShowWhen(nodeType, field, fields, element);
             }
-
-            // コメントは書かれている時だけ表示し、空なら右クリックの Edit Comment で出す
-            if (commentProp != null)
-            {
-                commentRow = BindField(commentProp);
-                commentRow.AddToClassList("bt-comment");
-                commentRow.style.display = string.IsNullOrEmpty(commentProp.stringValue) ? DisplayStyle.None : DisplayStyle.Flex;
-                body.Add(commentRow);
-            }
+            return commentProp;
         }
 
         static void ApplyShowWhen(System.Type nodeType, SerializedProperty field, List<SerializedProperty> fields, VisualElement element)
@@ -240,24 +254,14 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             element.TrackPropertyValue(controller, Refresh);
         }
 
-        PropertyField BindField(SerializedProperty prop)
+        public static PropertyField BindField(SerializedProperty prop, System.Action onChanged)
         {
             var field = new PropertyField(prop.Copy());
             field.Bind(prop.serializedObject);
-            field.RegisterValueChangeCallback(_ =>
-            {
-                RefreshTexts();
-                ValuesChanged?.Invoke();
-            });
+            field.RegisterValueChangeCallback(_ => onChanged?.Invoke());
             return field;
         }
 
-        public static string DisplayName(System.Type type)
-        {
-            var name = type.Name;
-            if (name.EndsWith("NodeDefinition")) name = name[..^"NodeDefinition".Length];
-            else if (name.EndsWith("Definition")) name = name[..^"Definition".Length];
-            return ObjectNames.NicifyVariableName(name);
-        }
+        public static string DisplayName(System.Type type) => ObjectNames.NicifyVariableName(type.Name);
     }
 }

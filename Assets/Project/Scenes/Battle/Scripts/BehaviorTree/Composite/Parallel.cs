@@ -10,14 +10,19 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [Tooltip("Duration のフレーム数が経過したら、実行中の子を中断して完了。子が先に終わっても Duration まで待つ")] Duration,
     }
 
+    // Duration 指定時は攻撃パターンの 1 周期を表せるため、移動と攻撃の周期を同じ長さで揃えられる
     [Serializable, NodeInfo("子を同時に実行する。終了は Policy で選択。子の開始時刻は Delay で指定")]
-    public sealed class ParallelNodeDefinition : CompositeNodeDefinition
+    public sealed class Parallel : CompositeNode
     {
         [SerializeField, Tooltip("All: 全て完了で終了 / Any: どれか1つ完了で終了 / Duration: 指定フレーム経過で終了")]
         ParallelPolicy policy = ParallelPolicy.All;
 
         [SerializeField, ShowWhen(nameof(policy), ParallelPolicy.Duration), Tooltip("Policy が Duration のときの長さ (フレーム)")]
         BtInt duration;
+
+        [NonSerialized] int frames;
+        [NonSerialized] bool[] finished;
+        [NonSerialized] int elapsed;
 
         public ParallelPolicy Policy
         {
@@ -31,35 +36,17 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             set => duration = value;
         }
 
-        public override INode Build(BuildScope scope)
-        {
-            var frames = policy == ParallelPolicy.Duration ? Mathf.Max(0, duration.Resolve(scope)) : 0;
-            return new ParallelNode(BuildChildren(scope), policy, frames);
-        }
-
         public override string Summary => policy switch
         {
             ParallelPolicy.All => "全て完了で終了",
             ParallelPolicy.Any => "どれか1つ完了で終了",
             _ => "長さ " + duration.ToFrameString(),
         };
-    }
 
-    // Duration 指定時は攻撃パターンの 1 周期を表せるため、移動と攻撃の周期を同じ長さで揃えられる。
-    public sealed class ParallelNode : Node
-    {
-        readonly INode[] children;
-        readonly ParallelPolicy policy;
-        readonly int duration;
-        readonly bool[] finished;
-        int elapsed;
-
-        public ParallelNode(INode[] children, ParallelPolicy policy, int duration = 0)
+        protected override void OnSetup(TreeScope scope)
         {
-            this.children = children;
-            this.policy = policy;
-            this.duration = policy == ParallelPolicy.Duration ? duration : 0;
-            finished = new bool[children.Length];
+            frames = policy == ParallelPolicy.Duration ? Mathf.Max(0, duration.Resolve(scope)) : 0;
+            finished = new bool[Children.Count];
         }
 
         protected override void OnEnter(BattleContext ctx)
@@ -70,18 +57,18 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override NodeStatus OnTick(BattleContext ctx)
         {
-            if (duration > 0 && elapsed >= duration)
+            if (frames > 0 && elapsed >= frames)
             {
                 AbortRunning(ctx);
                 return NodeStatus.Success;
             }
 
             var allDone = true;
-            for (var i = 0; i < children.Length; i++)
+            for (var i = 0; i < Children.Count; i++)
             {
                 if (finished[i]) continue;
 
-                var status = children[i].Tick(ctx);
+                var status = Children[i].Tick(ctx);
                 if (status == NodeStatus.Running)
                 {
                     allDone = false;
@@ -103,7 +90,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             }
 
             elapsed++;
-            if (duration > 0) return NodeStatus.Running;
+            if (frames > 0) return NodeStatus.Running;
             return allDone ? NodeStatus.Success : NodeStatus.Running;
         }
 
@@ -111,9 +98,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         void AbortRunning(BattleContext ctx)
         {
-            for (var i = 0; i < children.Length; i++)
+            for (var i = 0; i < Children.Count; i++)
             {
-                if (!finished[i]) children[i].Abort(ctx);
+                if (!finished[i]) Children[i].Abort(ctx);
             }
         }
     }

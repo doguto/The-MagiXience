@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
 using UnityEditor;
+using BtNode = Project.Scenes.Battle.Scripts.BehaviorTree.Node;
 
 namespace Project.Scenes.Battle.Editor.BehaviorTree
 {
@@ -21,8 +22,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         static List<Entry> cache;
 
-        public static IReadOnlyList<Entry> All => cache ??= TypeCache.GetTypesDerivedFrom<NodeDefinition>()
-            .Where(t => !t.IsAbstract && !t.IsGenericType && t != typeof(SubTreeNodeDefinition))
+        public static IReadOnlyList<Entry> All => cache ??= TypeCache.GetTypesDerivedFrom<BtNode>()
+            .Where(t => t.IsPublic && !t.IsAbstract && !t.IsGenericType && t != typeof(SubTree))
             .Select(t =>
             {
                 var info = t.GetCustomAttribute<NodeInfoAttribute>();
@@ -41,15 +42,15 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         public static string DefaultCategory(Type type)
         {
-            if (typeof(CompositeNodeDefinition).IsAssignableFrom(type)) return "Composite";
-            if (typeof(DecoratorNodeDefinition).IsAssignableFrom(type)) return "Decorator";
-            if (type == typeof(CheckConditionNodeDefinition) || type == typeof(WaitUntilNodeDefinition)) return "Condition";
+            if (typeof(CompositeNode).IsAssignableFrom(type)) return "Composite";
+            if (typeof(DecoratorNode).IsAssignableFrom(type)) return "Decorator";
+            if (type == typeof(CheckCondition) || type == typeof(Scripts.BehaviorTree.WaitUntil)) return "Condition";
             return "Action";
         }
 
-        public static string CategoryKey(NodeDefinition definition)
+        public static string CategoryKey(BtNode definition)
         {
-            if (definition is SubTreeNodeDefinition) return "subtree";
+            if (definition is SubTree) return "subtree";
             var info = definition.GetType().GetCustomAttribute<NodeInfoAttribute>();
             var category = info?.Category ?? DefaultCategory(definition.GetType());
             return category.Split('/')[0].ToLowerInvariant();

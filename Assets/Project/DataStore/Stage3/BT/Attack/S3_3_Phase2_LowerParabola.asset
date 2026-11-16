@@ -20,7 +20,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147961671974994
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 1187538b80994e24bb690fd16f4cfa03
         graphPosition: {x: 230, y: 300}
@@ -31,7 +31,7 @@ MonoBehaviour:
           rid: 8540147961671974996
         onChildCompleted: 0
     - rid: 8540147961671974995
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: bb334e4a92e74316b5f4419c7a230ac2
         graphPosition: {x: 0, y: 0}
@@ -40,13 +40,13 @@ MonoBehaviour:
         - rid: 8540147961671974997
         - rid: 8540147961671974998
     - rid: 8540147961671974996
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 481
           param: 
     - rid: 8540147961671974997
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 9c1627a3fe354e8286804c5cc46c7916
         graphPosition: {x: 0, y: 0}
@@ -55,7 +55,7 @@ MonoBehaviour:
           value: 30
           param: 
     - rid: 8540147961671974998
-      type: {class: RepeatNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 8b4730ce936c44aea61a5e1ed94aa459
         graphPosition: {x: 0, y: 0}
@@ -76,7 +76,7 @@ MonoBehaviour:
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
     - rid: 8540147961671975508
-      type: {class: SingleShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 1c2920c6c1ac4e5b85d0bd2281e06b6f
         graphPosition: {x: 230, y: 900}

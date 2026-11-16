@@ -15,6 +15,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         ObjectField assetField;
         NodePaletteView palette;
         ParameterPanelView parameterPanel;
+        NodeInspectorView nodeInspector;
 
         [MenuItem("Window/Battle/Behavior Tree Editor")]
         public static void OpenEmpty() => Open(null);
@@ -43,7 +44,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             toolbar.Add(assetField);
             toolbar.Add(new ToolbarButton(() => graphView?.AutoLayout()) { text = "Auto Layout" });
             toolbar.Add(new ToolbarButton(() => graphView?.FrameWholeGraph()) { text = "Frame All" });
-            var blackboardToggle = new ToolbarToggle { text = "Blackboard", value = true };
+            var blackboardToggle = new ToolbarToggle { text = "Side Panel", value = true };
             toolbar.Add(blackboardToggle);
             toolbar.Add(new ToolbarButton(() => graphView?.ToggleMiniMap()) { text = "MiniMap" });
             toolbar.Add(new ToolbarSpacer { flex = true });
@@ -58,7 +59,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             palette.SetAssetProvider(() => asset);
             split.Add(palette);
 
-            var rightSplit = new TwoPaneSplitView(1, 250, TwoPaneSplitViewOrientation.Horizontal) { viewDataKey = "bt-editor-split-right" };
+            var rightSplit = new TwoPaneSplitView(1, 320, TwoPaneSplitViewOrientation.Horizontal) { viewDataKey = "bt-editor-split-right" };
             graphView = new BehaviorTreeGraphView(this);
             graphView.style.flexGrow = 1;
             rightSplit.Add(graphView);
@@ -66,7 +67,19 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             parameterPanel = new ParameterPanelView();
             parameterPanel.UsageClicked += name => graphView.SelectNodesUsingParameter(name);
             parameterPanel.Changed += () => graphView.RefreshTexts();
-            rightSplit.Add(parameterPanel);
+
+            nodeInspector = new NodeInspectorView();
+            graphView.SelectionChanged += () => nodeInspector.Show(graphView.SelectedNodes);
+
+            var tabs = new TabView { viewDataKey = "bt-editor-side-tabs" };
+            tabs.AddToClassList("bt-side-tabs");
+            var nodeTab = new Tab("Node");
+            nodeTab.Add(nodeInspector);
+            tabs.Add(nodeTab);
+            var parameterTab = new Tab("Parameters");
+            parameterTab.Add(parameterPanel);
+            tabs.Add(parameterTab);
+            rightSplit.Add(tabs);
 
             split.Add(rightSplit);
             blackboardToggle.RegisterValueChangedCallback(e =>
@@ -108,7 +121,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         void OnInspectorUpdate()
         {
-            if (EditorApplication.isPlaying) graphView?.RefreshRuntimeState();
+            if (!EditorApplication.isPlaying) return;
+            graphView?.RefreshRuntimeState();
+            nodeInspector?.RefreshRuntime();
         }
     }
 }

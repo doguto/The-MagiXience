@@ -492,3 +492,84 @@
     height: 18px;
     margin: 0;
 }
+
+/* ---------- 右ペインのタブ (Node / Parameters) ---------- */
+
+.bt-side-tabs {
+    flex-grow: 1;
+    min-width: 240px;
+    background-color: #2f2f2f;
+    border-left-width: 1px;
+    border-left-color: #232323;
+}
+
+.bt-side-tabs .unity-tab-view__content-container,
+.bt-side-tabs .unity-tab__content-container {
+    flex-grow: 1;
+}
+
+.bt-side-tabs .bt-params {
+    flex-grow: 1;
+    border-left-width: 0;
+}
+
+.bt-inspector,
+.bt-inspector__scroll {
+    flex-grow: 1;
+}
+
+.bt-inspector__header {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px 4px 10px;
+}
+
+.bt-inspector__title {
+    color: #e6e6e6;
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.bt-inspector__category {
+    color: #8c8c8c;
+    font-size: 11px;
+}
+
+.bt-inspector__description {
+    color: #c8c8c8;
+    white-space: normal;
+    padding: 2px 10px 6px 10px;
+}
+
+.bt-inspector__state {
+    color: #8c8c8c;
+    padding: 0 10px 4px 10px;
+}
+
+.bt-inspector__state--active {
+    color: #6fcf6f;
+}
+
+.bt-inspector__summary {
+    color: #b0b0b0;
+    white-space: normal;
+    padding: 0 10px 6px 10px;
+}
+
+.bt-inspector__fields {
+    padding: 6px 10px 10px 10px;
+    border-top-width: 1px;
+    border-top-color: #232323;
+}
+
+.bt-inspector__fields .unity-base-field__label {
+    min-width: 110px;
+    width: 110px;
+    color: #9d9d9d;
+}
+
+.bt-inspector__empty {
+    color: #8c8c8c;
+    white-space: normal;
+    padding: 12px 10px;
+}

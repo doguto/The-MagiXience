@@ -12,58 +12,49 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     // ---------- ステージの進行 ----------
 
     [Serializable, NodeInfo("ステージツリーの一番上に置く。子の Section を順に実行し、リトライ時は記録した Section から始める", "Flow")]
-    public sealed class StageNodeDefinition : CompositeNodeDefinition
+    public sealed class Stage : CompositeNode
     {
+        [NonSerialized] int index;
+
         public override string Summary => $"{Children.Count} Section";
 
-        public override INode Build(BuildScope scope)
+        protected override void OnSetup(TreeScope scope)
         {
-            var sections = new List<(INode node, BattleSituation situation)>();
             foreach (var child in Children)
             {
-                if (child == null) continue;
-                var situation = child is SectionNodeDefinition section ? section.Situation : BattleSituation.Way;
-                if (child is not SectionNodeDefinition) Debug.LogWarning($"[BehaviorTree] Stage の子は Section にしてください: {child.GetType().Name}");
-                sections.Add((child.Create(scope), situation));
+                if (child is not Section) Debug.LogWarning($"[BehaviorTree] Stage の子は Section にしてください: {child.GetType().Name}");
             }
-            return new StageNode(sections.ToArray());
         }
 
-        sealed class StageNode : Node
+        static BattleSituation SituationOf(Node child) => child is Section section ? section.Situation : BattleSituation.Way;
+
+        protected override void OnEnter(BattleContext ctx)
         {
-            readonly (INode node, BattleSituation situation)[] sections;
-            int index;
+            var progress = ctx.Services.Progress;
+            index = Mathf.Clamp(progress.StartSection, 0, Mathf.Max(0, Children.Count - 1));
+            if (index < Children.Count) progress.Enter(index, SituationOf(Children[index]), progress.ResumeStart);
+        }
 
-            public StageNode((INode, BattleSituation)[] sections) => this.sections = sections;
-
-            protected override void OnEnter(BattleContext ctx)
+        protected override NodeStatus OnTick(BattleContext ctx)
+        {
+            while (index < Children.Count)
             {
-                var progress = ctx.Services.Progress;
-                index = Mathf.Clamp(progress.StartSection, 0, Mathf.Max(0, sections.Length - 1));
-                if (index < sections.Length) progress.Enter(index, sections[index].situation, progress.ResumeStart);
+                var status = Children[index].Tick(ctx);
+                if (status != NodeStatus.Success) return status;
+                index++;
+                if (index < Children.Count) ctx.Services.Progress.Enter(index, SituationOf(Children[index]), false);
             }
+            return NodeStatus.Success;
+        }
 
-            protected override NodeStatus OnTick(BattleContext ctx)
-            {
-                while (index < sections.Length)
-                {
-                    var status = sections[index].node.Tick(ctx);
-                    if (status != NodeStatus.Success) return status;
-                    index++;
-                    if (index < sections.Length) ctx.Services.Progress.Enter(index, sections[index].situation, false);
-                }
-                return NodeStatus.Success;
-            }
-
-            protected override void OnAbort(BattleContext ctx)
-            {
-                if (index < sections.Length) sections[index].node.Abort(ctx);
-            }
+        protected override void OnAbort(BattleContext ctx)
+        {
+            if (index < Children.Count) Children[index].Abort(ctx);
         }
     }
 
     [Serializable, NodeInfo("ステージの区切り。リトライするとこの Section の頭からやり直す。Situation は BGM・背景などシーン側の扱いに使う", "Flow")]
-    public sealed class SectionNodeDefinition : DecoratorNodeDefinition
+    public sealed class Section : DecoratorNode
     {
         [SerializeField] string label;
         [SerializeField] BattleSituation situation;
@@ -72,7 +63,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public BattleSituation Situation => situation;
         public override string Summary => $"{(string.IsNullOrEmpty(label) ? "(名前なし)" : label)} [{situation}]";
 
-        public override INode Build(BuildScope scope) => BuildChild(scope);
+        protected override NodeStatus OnTick(BattleContext ctx) => Child.Tick(ctx);
+        protected override void OnAbort(BattleContext ctx) => Child.Abort(ctx);
     }
 
     // ---------- 道中 ----------
@@ -81,18 +73,22 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class WaveEntry
     {
         [Min(0), Tooltip("Wave の開始から数えたフレーム")] public int frame;
-        [SerializeReference] public SpawnNodeDefinition spawn = new();
+        [SerializeReference] public Spawn spawn = new();
     }
 
     [Serializable, NodeInfo("出現一覧を時刻どおりに出し、全部出したあと終了条件が成立したら完了する", "Flow")]
-    public sealed class WaveNodeDefinition : ActionNodeDefinition
+    public sealed class Wave : ActionNode
     {
         [SerializeField] List<WaveEntry> entries = new();
-        [SerializeReference, SubclassSelector, Tooltip("全部出したあとに待つ条件。未設定なら最後の出現で完了")] ConditionDefinition until;
+        [SerializeReference, SubclassSelector, Tooltip("全部出したあとに待つ条件。未設定なら最後の出現で完了")] Condition until;
+
+        [NonSerialized] WaveEntry[] ordered;
+        [NonSerialized] int elapsed;
+        [NonSerialized] int next;
 
         public List<WaveEntry> Entries => entries;
 
-        public ConditionDefinition Until
+        public Condition Until
         {
             get => until;
             set => until = value;
@@ -107,76 +103,59 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             }
         }
 
-        public override INode Build(BuildScope scope)
+        protected override void OnSetup(TreeScope scope)
         {
-            var ordered = entries.Where(e => e?.spawn != null).OrderBy(e => e.frame).ToArray();
-            var frames = ordered.Select(e => e.frame).ToArray();
-            var spawns = ordered.Select(e => e.spawn.Create(scope)).ToArray();
-            return new WaveNode(frames, spawns, until?.Build(scope));
+            ordered = entries.Where(e => e?.spawn != null).OrderBy(e => e.frame).ToArray();
+            foreach (var entry in ordered) entry.spawn.Setup(scope);
+            until?.Setup(scope);
         }
 
-        sealed class WaveNode : Node
+        protected override void OnEnter(BattleContext ctx)
         {
-            readonly int[] frames;
-            readonly INode[] spawns;
-            readonly ICondition until;
-            int elapsed;
-            int next;
+            elapsed = 0;
+            next = 0;
+            until?.Reset(ctx);
+        }
 
-            public WaveNode(int[] frames, INode[] spawns, ICondition until)
+        protected override NodeStatus OnTick(BattleContext ctx)
+        {
+            while (next < ordered.Length && ordered[next].frame <= elapsed)
             {
-                this.frames = frames;
-                this.spawns = spawns;
-                this.until = until;
+                ordered[next].spawn.Tick(ctx);
+                next++;
             }
-
-            protected override void OnEnter(BattleContext ctx)
-            {
-                elapsed = 0;
-                next = 0;
-                until?.Reset(ctx);
-            }
-
-            protected override NodeStatus OnTick(BattleContext ctx)
-            {
-                while (next < spawns.Length && frames[next] <= elapsed)
-                {
-                    spawns[next].Tick(ctx);
-                    next++;
-                }
-                elapsed++;
-                if (next < spawns.Length) return NodeStatus.Running;
-                return until == null || until.Evaluate(ctx) ? NodeStatus.Success : NodeStatus.Running;
-            }
+            elapsed++;
+            if (next < ordered.Length) return NodeStatus.Running;
+            return until == null || until.Evaluate(ctx) ? NodeStatus.Success : NodeStatus.Running;
         }
     }
 
     // ---------- BGM ----------
 
     [Serializable, NodeInfo("このステージの BGM を流す (曲名の表示はシーン側)", "Action/Stage")]
-    public sealed class PlayBgmNodeDefinition : ActionNodeDefinition
+    public sealed class PlayBgm : ActionNode
     {
         [SerializeField] BgmType bgm = BgmType.BattleWay;
 
         public override string Summary => bgm.ToString();
 
-        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        protected override NodeStatus OnTick(BattleContext ctx)
         {
             ctx.Services.PlayBgm?.Invoke(bgm);
             return NodeStatus.Success;
-        });
+        }
     }
 
     // ---------- ボス ----------
 
     [Serializable, NodeInfo("ボスを出して登場の移動を流す。ツリーはまだ付けない (BossBattle で付ける)", "Action/Boss")]
-    public sealed class SpawnBossNodeDefinition : ActionNodeDefinition
+    public sealed class SpawnBoss : ActionNode
     {
         [SerializeField] BossDefinition boss;
 
         public override string Summary => boss ? boss.name : "(ボス未設定)";
 
-        public override INode Build(BuildScope scope) => new ActionNode(ctx =>
+        protected override NodeStatus OnTick(BattleContext ctx)
         {
             var host = ctx.Services.BossHost;
             if (host == null || boss == null)
@@ -185,51 +164,47 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
                 return NodeStatus.Failure;
             }
             return host.Spawn(boss) ? NodeStatus.Success : NodeStatus.Failure;
-        });
+        }
     }
 
     [Serializable, NodeInfo("出ているボスにツリーを付けて戦闘を始め、撃破演出が終わるまで待つ", "Action/Boss")]
-    public sealed class BossBattleNodeDefinition : ActionNodeDefinition
+    public sealed class BossBattle : ActionNode
     {
         [SerializeField, Tooltip("未指定なら BossDefinition のツリー")] BehaviorTreeAsset tree;
 
+        [NonSerialized] bool started;
+
         public override string Summary => tree ? tree.name : "(BossDefinition のツリー)";
 
-        public override INode Build(BuildScope scope) => new BossBattleNode(tree);
-
-        sealed class BossBattleNode : Node
+        protected override void OnEnter(BattleContext ctx)
         {
-            readonly BehaviorTreeAsset tree;
-            bool started;
+            var host = ctx.Services.BossHost;
+            var resolved = tree != null ? tree : host?.Current != null ? host.Current.Tree : null;
+            started = host != null && host.Current != null && host.StartBattle(resolved) != null;
+            if (!started) Debug.LogWarning("[BehaviorTree] BossBattle: ボスが出ていないか、ツリーがありません");
+        }
 
-            public BossBattleNode(BehaviorTreeAsset tree) => this.tree = tree;
-
-            protected override void OnEnter(BattleContext ctx)
-            {
-                var host = ctx.Services.BossHost;
-                var resolved = tree != null ? tree : host?.Current != null ? host.Current.Tree : null;
-                started = host != null && host.Current != null && host.StartBattle(resolved) != null;
-                if (!started) Debug.LogWarning("[BehaviorTree] BossBattle: ボスが出ていないか、ツリーがありません");
-            }
-
-            protected override NodeStatus OnTick(BattleContext ctx)
-            {
-                if (!started) return NodeStatus.Failure;
-                return ctx.Services.BossHost.IsDefeated ? NodeStatus.Success : NodeStatus.Running;
-            }
+        protected override NodeStatus OnTick(BattleContext ctx)
+        {
+            if (!started) return NodeStatus.Failure;
+            return ctx.Services.BossHost.IsDefeated ? NodeStatus.Success : NodeStatus.Running;
         }
     }
 
     // ---------- 会話 ----------
 
     [Serializable, NodeInfo("会話を流し、終わるまで待つ。会話中のコマンドは同じ名前の OnCommand の子を実行する", "Flow")]
-    public sealed class ScenarioNodeDefinition : CompositeNodeDefinition
+    public sealed class PlayScenario : CompositeNode
     {
         [SerializeField] ScenarioData scenario;
         [SerializeField, Tooltip("リトライでこの Section を途中から始めたときは会話を見せず、コマンドだけ実行する")] bool skipOnResume = true;
         [SerializeField, Tooltip("会話の後に自機の攻撃を戻す。ステージ最後の会話では OFF")] bool restorePlayerControl = true;
 
-        public ScenarioData Scenario => scenario;
+        [NonSerialized] Dictionary<string, OnCommand> handlers;
+        [NonSerialized] List<OnCommand> running;
+        [NonSerialized] IScenarioHandle handle;
+
+        public ScenarioData Data => scenario;
 
         public override string Summary
         {
@@ -245,7 +220,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         IEnumerable<string> HandledCommands() =>
-            Children.OfType<OnCommandNodeDefinition>().Select(c => c.Command).Where(c => !string.IsNullOrEmpty(c));
+            Children.OfType<OnCommand>().Select(c => c.Command).Where(c => !string.IsNullOrEmpty(c));
 
         // 会話に出てくるのに、受け取る OnCommand が無いコマンド
         public IEnumerable<string> MissingCommands()
@@ -262,81 +237,62 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             return HandledCommands().Where(c => !used.Contains(c));
         }
 
-        public override INode Build(BuildScope scope)
+        protected override void OnSetup(TreeScope scope)
         {
-            var handlers = new Dictionary<string, INode>();
-            foreach (var child in Children)
+            handlers = new Dictionary<string, OnCommand>();
+            foreach (var onCommand in Children.OfType<OnCommand>())
             {
-                if (child is not OnCommandNodeDefinition onCommand || string.IsNullOrEmpty(onCommand.Command)) continue;
-                handlers[onCommand.Command] = onCommand.Create(scope);
+                if (!string.IsNullOrEmpty(onCommand.Command)) handlers[onCommand.Command] = onCommand;
             }
-            return new ScenarioNode(scenario, skipOnResume, restorePlayerControl, handlers);
+            running = new List<OnCommand>();
         }
 
-        sealed class ScenarioNode : Node
+        protected override void OnEnter(BattleContext ctx)
         {
-            readonly ScenarioData scenario;
-            readonly bool skipOnResume;
-            readonly bool restorePlayerControl;
-            readonly Dictionary<string, INode> handlers;
-            readonly List<INode> running = new();
-            IScenarioHandle handle;
+            running.Clear();
+            var skip = skipOnResume && ctx.Services.Progress.CurrentSectionResumed;
+            var service = ctx.Services.Scenario;
+            if (service == null && !skip) Debug.LogWarning("[BehaviorTree] PlayScenario: 会話サービスが無いため、コマンドだけ実行します");
+            handle = service != null ? service.Play(scenario, skip, restorePlayerControl) : ScenarioCommandQueue.Skipped(scenario);
+        }
 
-            public ScenarioNode(ScenarioData scenario, bool skipOnResume, bool restorePlayerControl, Dictionary<string, INode> handlers)
+        protected override NodeStatus OnTick(BattleContext ctx)
+        {
+            while (handle.TryDequeueCommand(out var command))
             {
-                this.scenario = scenario;
-                this.skipOnResume = skipOnResume;
-                this.restorePlayerControl = restorePlayerControl;
-                this.handlers = handlers;
-            }
-
-            protected override void OnEnter(BattleContext ctx)
-            {
-                running.Clear();
-                var skip = skipOnResume && ctx.Services.Progress.CurrentSectionResumed;
-                var service = ctx.Services.Scenario;
-                if (service == null && !skip) Debug.LogWarning("[BehaviorTree] Scenario: 会話サービスが無いため、コマンドだけ実行します");
-                handle = service != null ? service.Play(scenario, skip, restorePlayerControl) : ScenarioCommandQueue.Skipped(scenario);
-            }
-
-            protected override NodeStatus OnTick(BattleContext ctx)
-            {
-                while (handle.TryDequeueCommand(out var command))
+                if (!handlers.TryGetValue(command.function, out var handler))
                 {
-                    if (!handlers.TryGetValue(command.function, out var handler))
-                    {
-                        Debug.LogWarning($"[BehaviorTree] Scenario: コマンド '{command.function}' に対応する OnCommand がありません ({scenario?.name})");
-                        continue;
-                    }
-                    if (running.Contains(handler))
-                    {
-                        Debug.LogWarning($"[BehaviorTree] Scenario: '{command.function}' の前の実行が終わっていないため無視しました");
-                        continue;
-                    }
-                    running.Add(handler);
+                    Debug.LogWarning($"[BehaviorTree] PlayScenario: コマンド '{command.function}' に対応する OnCommand がありません ({scenario?.name})");
+                    continue;
                 }
-
-                for (var i = 0; i < running.Count; i++)
+                if (running.Contains(handler))
                 {
-                    var status = running[i].Tick(ctx);
-                    if (status == NodeStatus.Running) continue;
-                    running.RemoveAt(i--);
+                    Debug.LogWarning($"[BehaviorTree] PlayScenario: '{command.function}' の前の実行が終わっていないため無視しました");
+                    continue;
                 }
-
-                return handle.IsCompleted && running.Count == 0 ? NodeStatus.Success : NodeStatus.Running;
+                running.Add(handler);
             }
 
-            protected override void OnAbort(BattleContext ctx)
+            for (var i = 0; i < running.Count; i++)
             {
-                foreach (var node in running) node.Abort(ctx);
-                running.Clear();
-                handle?.Cancel();
+                var status = running[i].Tick(ctx);
+                if (status == NodeStatus.Running) continue;
+                running.RemoveAt(i--);
             }
+
+            return handle.IsCompleted && running.Count == 0 ? NodeStatus.Success : NodeStatus.Running;
+        }
+
+        protected override void OnAbort(BattleContext ctx)
+        {
+            foreach (var node in running) node.Abort(ctx);
+            running.Clear();
+            handle?.Cancel();
         }
     }
 
-    [Serializable, NodeInfo("Scenario の子に置く。会話がこのコマンドの行に来たら子を実行する", "Flow")]
-    public sealed class OnCommandNodeDefinition : DecoratorNodeDefinition
+    [Serializable, NodeInfo("PlayScenario の子に置く。会話がこのコマンドの行に来たら子を実行する", "Flow")]
+    public sealed class OnCommand : DecoratorNode
     {
         [SerializeField, Tooltip("シナリオの function 名 (例: SpawnBoss)")] string command;
 
@@ -348,6 +304,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         public override string Summary => string.IsNullOrEmpty(command) ? "(コマンド未設定)" : "On " + command;
 
-        public override INode Build(BuildScope scope) => BuildChild(scope);
+        protected override NodeStatus OnTick(BattleContext ctx) => Child.Tick(ctx);
+        protected override void OnAbort(BattleContext ctx) => Child.Abort(ctx);
     }
 }

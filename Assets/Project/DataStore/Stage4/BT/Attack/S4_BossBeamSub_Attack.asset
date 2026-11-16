@@ -20,7 +20,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147961671975180
-      type: {class: UntilNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 28c5449a3bbb4fa09758078f01d75327
         graphPosition: {x: 1150, y: 300}
@@ -31,7 +31,7 @@ MonoBehaviour:
           rid: 8540147961671975182
         onChildCompleted: 0
     - rid: 8540147961671975181
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: f87452634bf64f78819ed9a343ecd09b
         graphPosition: {x: 1150, y: 450}
@@ -40,13 +40,13 @@ MonoBehaviour:
         - rid: 8540147961671975183
         - rid: 8540147961671975184
     - rid: 8540147961671975182
-      type: {class: FrameElapsedConditionDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 430
           param: 
     - rid: 8540147961671975183
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 37654935eab549899fd56f5cd1b9f03a
         graphPosition: {x: 230, y: 600}
@@ -55,7 +55,7 @@ MonoBehaviour:
           value: 45
           param: 
     - rid: 8540147961671975184
-      type: {class: LoopNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Loop, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: fd00da5b5b3a458696fe4a7ab7b244c6
         graphPosition: {x: 2070, y: 600}
@@ -66,7 +66,7 @@ MonoBehaviour:
           value: 0
           param: 
     - rid: 8540147961671975185
-      type: {class: SequenceNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: b627bf4e7bd146ab9bbc78ed65e491e8
         graphPosition: {x: 2070, y: 750}
@@ -103,7 +103,7 @@ MonoBehaviour:
         - rid: 8540147961671975582
         - rid: 8540147961671975215
     - rid: 8540147961671975187
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6ab03218fc394987a8eb12d2b5a0e003
         graphPosition: {x: 0, y: 0}
@@ -112,7 +112,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975189
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: d61c4644e9b34b54a8cf2bdc0d010f8a
         graphPosition: {x: 0, y: 0}
@@ -121,7 +121,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975191
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: ac24490dbf5d4ffcb08e96c77b328e56
         graphPosition: {x: 0, y: 0}
@@ -130,7 +130,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975193
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: ee2a91a3a9cf46e291211ddde04928d9
         graphPosition: {x: 0, y: 0}
@@ -139,7 +139,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975195
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 7ade96d8e17f4011ba586dadc424f75d
         graphPosition: {x: 0, y: 0}
@@ -148,7 +148,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975197
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 0b6ff7e778aa40cca20584c422748661
         graphPosition: {x: 0, y: 0}
@@ -157,7 +157,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975199
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 03df1f958bbc4be6a25498de66a5b57f
         graphPosition: {x: 0, y: 0}
@@ -166,7 +166,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975201
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: eb2d229d35c14820b5cd8de03b1b6a1d
         graphPosition: {x: 0, y: 0}
@@ -175,7 +175,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975203
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: eb6a2b1157b84ea8b02e0f3383090e7d
         graphPosition: {x: 0, y: 0}
@@ -184,7 +184,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975205
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: e3b93e966d604b17ab26af41f0bb948a
         graphPosition: {x: 0, y: 0}
@@ -193,7 +193,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975207
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 936466b2abdd4da19059d08f6b9c7d98
         graphPosition: {x: 0, y: 0}
@@ -202,7 +202,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975209
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 0d323f54810042868a1d5244ebbb3893
         graphPosition: {x: 0, y: 0}
@@ -211,7 +211,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975211
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: a3c8d4ddd34748e2bf4b40fd30657745
         graphPosition: {x: 0, y: 0}
@@ -220,7 +220,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975213
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: a2cf705e026c49c4bd53f82a76891252
         graphPosition: {x: 0, y: 0}
@@ -229,7 +229,7 @@ MonoBehaviour:
           value: 12
           param: 
     - rid: 8540147961671975215
-      type: {class: WaitNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: d346d01a9d44473bb84b025eaeecee20
         graphPosition: {x: 0, y: 0}
@@ -343,7 +343,7 @@ MonoBehaviour:
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
     - rid: 8540147961671975568
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 4aaab0d987a547e7b52c604e6f7b44aa
         graphPosition: {x: 460, y: 900}
@@ -369,7 +369,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975569
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 5dab05ee4a334cc8ad5d56d521acaf8c
         graphPosition: {x: 690, y: 1050}
@@ -395,7 +395,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975570
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 84d4aa012aba41608e9ff65ac3927b23
         graphPosition: {x: 920, y: 1050}
@@ -421,7 +421,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975571
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 2bda6bc7706442de8c3e81336c81bb1e
         graphPosition: {x: 1150, y: 1050}
@@ -447,7 +447,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975572
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6073384db92b450cb44609f6583fc475
         graphPosition: {x: 1380, y: 1050}
@@ -473,7 +473,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975573
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 303c1ee2242b409dba137a466dd13ad9
         graphPosition: {x: 1610, y: 1050}
@@ -499,7 +499,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975574
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 49726baee7b8436da1b7a750cf36e015
         graphPosition: {x: 1840, y: 1050}
@@ -525,7 +525,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975575
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: b42db0ccbfb64437bb244740310850a4
         graphPosition: {x: 2070, y: 1050}
@@ -551,7 +551,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975576
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 7ce4080a0bc24268a722fcb38ea221e4
         graphPosition: {x: 2300, y: 1050}
@@ -577,7 +577,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975577
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6ba1b7a5c356408ab39fc79781e5f5f3
         graphPosition: {x: 2530, y: 1050}
@@ -603,7 +603,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975578
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6fe3b51e1f454b41b7130e4fe7861317
         graphPosition: {x: 2760, y: 1050}
@@ -629,7 +629,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975579
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: b23ae6f2cf2247818f2da8c9bcbf3e5f
         graphPosition: {x: 2990, y: 1050}
@@ -655,7 +655,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975580
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 58a33435286f49558439eac544af5e5c
         graphPosition: {x: 3220, y: 1050}
@@ -681,7 +681,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975581
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 9c49df4bbbd442c39b45dbbf617d3081
         graphPosition: {x: 3450, y: 1050}
@@ -707,7 +707,7 @@ MonoBehaviour:
           startDelayFrames: 0
           rotationOffset: 0
     - rid: 8540147961671975582
-      type: {class: NWayShotNodeDefinition, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 0cbbc297826a4790aeabd816364659c1
         graphPosition: {x: 3680, y: 1050}

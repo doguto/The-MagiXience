@@ -5,6 +5,7 @@ using Project.Scenes.Battle.Scripts.BehaviorTree;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using BtNode = Project.Scenes.Battle.Scripts.BehaviorTree.Node;
 
 namespace Project.Scenes.Battle.Editor.BehaviorTree
 {
@@ -18,8 +19,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             var tree = new List<SearchTreeEntry> { new SearchTreeGroupEntry(new GUIContent("Create Node")) };
 
-            var types = TypeCache.GetTypesDerivedFrom<NodeDefinition>()
-                                 .Where(t => !t.IsAbstract && !t.IsGenericType)
+            var types = TypeCache.GetTypesDerivedFrom<BtNode>()
+                                 .Where(t => t.IsPublic && !t.IsAbstract && !t.IsGenericType)
                                  .ToList();
 
             foreach (var group in types.GroupBy(Category).OrderBy(g => CategoryOrder(g.Key)))
@@ -44,8 +45,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         static string Category(Type type)
         {
             var path = type.Namespace ?? "";
-            var group = typeof(CompositeNodeDefinition).IsAssignableFrom(type) ? "Composite"
-                : typeof(DecoratorNodeDefinition).IsAssignableFrom(type) ? "Decorator"
+            var group = typeof(CompositeNode).IsAssignableFrom(type) ? "Composite"
+                : typeof(DecoratorNode).IsAssignableFrom(type) ? "Decorator"
                 : "Action";
             var lastSegment = path.Split('.').LastOrDefault();
             return lastSegment is "BehaviorTree" or null or "" ? group : $"{group}/{lastSegment}";
