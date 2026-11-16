@@ -32,24 +32,24 @@ StageData.asset (stageNumber ごとに stageAddress)
        └─ Tree: Stage{N}_Tree                … ステージツリー。Success で完了するとステージクリア
             Stage
               ├─ Section "Way"  [Way]  : Sequence[ PlayBgm(BattleWay), Wave..., Wait 120 ]
-              └─ Section "Boss" [Boss] : Sequence[ Scenario(ボス前の会話, skipOnResume=ON)
+              └─ Section "Boss" [Boss] : Sequence[ PlayScenario(ボス前の会話, skipOnResume=ON)
                                                      ├─ OnCommand "SpawnBoss"   → SpawnBoss(Stage{N}_Boss)
                                                      └─ OnCommand "PlayBossBgm" → PlayBgm(BattleBoss)
                                                   , BossBattle, Wait 120
-                                                  , Scenario(撃破後の会話, skipOnResume=OFF, restorePlayerControl=OFF) ]
+                                                  , PlayScenario(撃破後の会話, skipOnResume=OFF, restorePlayerControl=OFF) ]
 
 BossDefinition (Stage{N}_Boss)  … Prefab / 出現位置 / 登場移動 / ボスのツリー (Stage{N}Boss_Tree)
 
 Commons/BT/Enemy  … 全ステージ共通の雑魚ツリー
-  Sequence[ SetDeathBehavior($death), SetMovement($movement), SubTree($attack) ]
+  Parallel(All)[ Move($movement), Sequence[ SetDeathBehavior($death), SubTree($attack) ] ]
 
 BehaviorTreeAsset
-  ├─ Root: NodeDefinition (Composite / Decorator / Action)
+  ├─ Root: Node (CompositeNode / DecoratorNode / ActionNode)
   └─ Parameters: $名前 で参照できる値 (SubTree・Spawn から上書き可)
 ```
 
 - **時間**: BT のノードは **フレーム（60fps 固定）**。移動（`MotionStep`）の時間は **秒**。
-- **進行**: 道中・会話・ボス戦の順序はすべてステージツリーに書く。Section はリトライ地点。会話中のコマンド（`SpawnBoss` など）は Scenario ノードの子の OnCommand で処理する。
+- **進行**: 道中・会話・ボス戦の順序はすべてステージツリーに書く。Section はリトライ地点。会話中のコマンド（`SpawnBoss` など）は PlayScenario ノードの子の OnCommand で処理する。
 - **敵**: `Wave` の entries（または `Spawn` ノード）で Prefab と Behavior を指定して出す。雑魚の Behavior は共通ツリー `Commons/BT/Enemy` にし、Overrides で `movement`（`Motion/` の MotionPreset）/ `attack`（`Attack/` の攻撃ツリー）/ `death`（撃破時のツリー、任意）を渡す。攻撃中に移動を変えるなど、この形に収まらない特殊な敵だけ `Enemy/` に専用ツリーを作る。雑魚 Prefab は `ActorPool` で使い回される（使い回せない Prefab には `NoActorPool` を付ける）。
 - **弾**: BT の外の `BulletSystem` が動かす（自機の弾も同じ）。BT からは `NWayShot` などの弾を撃つノード（撃ち方ごとに別ノード）や `BulletBeam` で撃つだけ。
 - **割り込み・フェーズ**: `Until(条件)` で表す。BGM 同期は `BgmSamples`、HP 閾値は `HpBelow`、発狂は `NormalHpDepleted` → `EnterStrongMode`。
@@ -63,7 +63,7 @@ BehaviorTreeAsset
    1. `MotionPreset` / `EaseCurve`（必要なものだけ）
    2. 攻撃ツリー（`Attack/`）。特殊な敵がいるときだけ専用ツリー（`Enemy/`）
    3. ボスのツリー（`Stage/Stage{N}Boss_Tree`）と `BossDefinition`（`Stage{N}_Boss`）
-   4. ステージツリー（`Stage/Stage{N}_Tree`）。Stage → Section を組み、会話は Scenario ノードで参照して OnCommand を付ける
+   4. ステージツリー（`Stage/Stage{N}_Tree`）。Stage → Section を組み、会話は PlayScenario ノードで参照して OnCommand を付ける
    5. `BattleStageAsset`（`Stage{N}_BT`）。必要ならサービスを宣言する
 4. **登録**: `StageData.stageAddress` と Addressables を設定し、BGM の登録を確認する → [stage-registration.md](references/stage-registration.md)
 5. **検証**: コンパイルエラーとコンソールを確認し、`Tools/Battle Debug Launcher` でステージと開始 Section を選んで再生する。検証のコツは [authoring.md](references/authoring.md) の「動作確認」を参照。

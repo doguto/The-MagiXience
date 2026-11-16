@@ -30,10 +30,11 @@ Sequence
 
 ```
 Commons/BT/Enemy (パラメータ: movement / attack / death)
-  Sequence
-    SetDeathBehavior ($death)     … 空なら撃破時の行動なし
-    SetMovement ($movement)       … 空なら動かない
-    SubTree ($attack)             … 空なら攻撃しない
+  Parallel (All)
+    Move ($movement)              … 空なら動かない
+    Sequence
+      SetDeathBehavior ($death)   … 空なら撃破時の行動なし
+      SubTree ($attack)           … 空なら攻撃しない
 
 Stage{N}/BT/Attack/S{N}_xxx (攻撃ツリー)
   Sequence
@@ -43,9 +44,9 @@ Stage{N}/BT/Attack/S{N}_xxx (攻撃ツリー)
 ```
 - 雑魚は敵ごとのツリーを作らない。Wave の entries / Spawn で Behavior = `Enemy` とし、Overrides で `movement`（`Motion/` の MotionPreset）、`attack`（`Attack/` の攻撃ツリー）、`death`（撃破時のツリー）を渡す。
 - 攻撃ツリーは中身が同じなら 1 つを使い回す。移動だけが違う敵は `movement` だけ変える。
-- 移動は `SetMovement` で「背景で流し続ける」。移動の完了を待ちたいときだけ `Move` を使う。
+- 移動は `Move` だけで行う（ツリーの外で流れる移動はない）。攻撃と同時に動かすときは `Parallel{ Move, 攻撃 }`、移動してから一定時間待つときは `Parallel{ Move, Wait N }` と並べる（`Sequence[Move, Wait]` は移動の長さぶん後ろがずれる）。
 - 攻撃の途中で移動を変える、HP で行動を変えるなど、共通ツリーの形に収まらない敵だけ `Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。専用ツリーでも攻撃部分は `Attack/` を `SubTree` で参照し、中身を複製しない。
-- ツリーのパラメータ（`$名前`）を使えるのは、数値では `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` と `ChargeEffect` / `MovePath` / `PlaceAlongPath` の一部、アセット参照では `*Param` 欄（`ChargeEffect.prefabParam` / `SetMovement.presetParam` / `SubTree.treeParam` / `SetDeathBehavior.treeParam` / `BulletSpec.prefabParam`）だけ。弾を撃つノードの向きや本数などはパラメータにできない。
+- ツリーのパラメータ（`$名前`）を使えるのは、数値では `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` と `ChargeEffect` / `MovePath` / `PlaceAlongPath` の一部、アセット参照では `*Param` 欄（`ChargeEffect.prefabParam` / `Move.presetParam` / `SubTree.treeParam` / `SetDeathBehavior.treeParam` / `BulletSpec.prefabParam`）だけ。弾を撃つノードの向きや本数などはパラメータにできない。
 - `Spawn` の overrides には固定値を書く。親ツリーのパラメータを渡す（bind to parent）は敵ツリーでは効かない。
 - 撃破時のツリーは 1 フレームだけ実行される。`NWayShot` などの発射や `Spawn` など、即時に終わるものだけを書く。
 
@@ -55,8 +56,8 @@ BGM の区切りでフェーズを進める例:
 ```
 Sequence
   Until #Intro (BgmSamples)
-    Sequence
-      SetMovement BossIntro (Continue If Same)
+    Parallel (All)
+      Move BossIntro
       Repeat ∞ / 60f おき → NWayShot …
   Until #MelodyA (BgmSamples) …
 ```
@@ -76,14 +77,15 @@ HP が閾値を切るまでフェーズをランダムに回す例:
 Sequence
   Until #Group0 (HpBelow Self 40%)
     Loop ∞
-      Random
+      RandomSelect
         Sequence [Until #PhaseA (FrameElapsed), Until #Interlude …]
         Sequence [Until #PhaseB (FrameElapsed), Until #Interlude …]
-  Until #Interlude (FrameElapsed) → SetMovement 定位置へ戻る
+  Until #Interlude (FrameElapsed) → Move 定位置へ戻る
   …次のグループ
 ```
 - HP の判定は外側の `Until` 1 か所に置く。各フェーズの条件に同じ `HpBelow` を `Or` で重ねない。
-- ボスの攻撃周期と移動の周期は自動では揃わない。周期攻撃は 1 周の長さ（Sequence の Wait の合計や `Parallel(Duration)`）か `Repeat` の間隔を、移動プリセットの 1 周の長さに合わせる。
+- 移動はフェーズの中で `Parallel{ Move, 攻撃 }` と並べる。いくつかのフェーズにまたがって同じ移動を続けるときは、そのフェーズをまとめた外側に `Parallel{ Move, Sequence[フェーズ…] }` と置く（Stage3 ボスの横揺れ）。フェーズごとに同じ Move を書くと、フェーズが変わるたびに移動が最初からやり直しになる。
+- 移動と攻撃の周期をきっちり揃えたいときは `Loop{ Parallel(Duration 1 周){ Move 1 周分, 攻撃 } }` と書き、両方を毎周同じフレームから始める。無限に繰り返す移動プリセットと `Repeat` を別々に流すと、周期は手で合わせるしかない。
 - 進行ゲージ（`BossPhaseProgressGauge`）を持つボスは、各フェーズの先頭に `PhaseMarker` を置く。
 
 ## 攻撃ツリー（`Attack/`）

@@ -21,7 +21,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 | 基本 Action | `Scripts/BehaviorTree/Action/BasicActions.cs` |
 | バトル Action | `Scripts/BehaviorTree/Battle/ShotNodes.cs` / `BeamNodes.cs` / `ActorNodes.cs` / `StageNodes.cs` |
 | ステージ進行 | `Scripts/BehaviorTree/Battle/FlowNodes.cs`、`BossDefinition.cs` |
-| 発射の部品 | `Scripts/BehaviorTree/Battle/EmitterSources.cs`、`FireNodes.cs`（ShotPattern） |
+| 発射の部品 | `Scripts/BehaviorTree/Battle/EmitterSources.cs`、`ShotPatterns.cs`（ShotPattern） |
 | MotionStep | `Scripts/Runtime/Motion/MotionSteps.Basic.cs` / `MotionSteps.Advanced.cs` |
 
 ## 1. Composite
@@ -55,9 +55,9 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 - どのポリシーでも、子が 1 つでも Failure したら残りを Abort して Failure。
 - 完了した子は以後 Tick しない。
 - `Duration` の場合、子は f 〜 f+duration−1 の duration フレームだけ Tick され、f+duration のフレームで Success を返す。子が全て早く終わっても duration までは Running のまま。
-- `Duration` を Loop の子に置くと、Loop の同フレーム再開規則（後述）により **ちょうど duration フレーム周期** で繰り返す。攻撃パターンの 1 周期と、`SetMovement` の移動 1 周の長さを揃える用途で使う。
+- `Duration` を Loop の子に置くと、Loop の同フレーム再開規則（後述）により **ちょうど duration フレーム周期** で繰り返す。`Loop{ Parallel(Duration 1 周){ Move 1 周分, 攻撃 } }` と書くと、移動と攻撃が毎周同じフレームから始まり、ずれない。
 
-### Random
+### RandomSelect
 
 開始時（Enter）に子を 1 つ抽選し、その子の結果をそのまま返す。
 
@@ -103,7 +103,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 | フィールド | 説明 |
 |---|---|
-| `condition` | 条件（`ConditionDefinition`）。未設定なら成立しない |
+| `condition` | 条件（`Condition`）。未設定なら成立しない |
 | `onChildCompleted` | 子が条件成立より先に完了したときの扱い（下表） |
 
 | `onChildCompleted` | 動作 |
@@ -157,7 +157,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 開始時に Instantiate、終了・中断時に Destroy する。子の結果をそのまま返す。
 
-## 3. 条件 (ConditionDefinition)
+## 3. 条件 (Condition)
 
 Until / CheckCondition / WaitUntil の `condition` に設定する。
 
@@ -215,7 +215,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 ### 弾を撃つノード: SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot（Action/Attack）
 
-撃ち方ごとに別のノードになっている（グラフ上でノードの種類を見れば何を撃つか分かる）。共通部分は `ShotNodeDefinition`（`ShotNodes.cs`）。即 Success。
+撃ち方ごとに別のノードになっている（グラフ上でノードの種類を見れば何を撃つか分かる）。共通部分は `ShotNode`（`ShotNodes.cs`）。即 Success。
 
 | ノード | 撃ち方 (`pattern`) |
 |---|---|
@@ -240,7 +240,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 ### WarningLine（Decorator）
 
-予測線を出して `frames` 待ってから、子のビームを実行する。子は `IBeamShape` を実装するビーム（`BulletBeam` / `SpriteBeam`）。予測線とビームの位置・向きは、WarningLine の開始時に子のビームから 1 回だけ決めて（`CreateAim`）、そのまま子に渡す（`IAimableBeam.UseAim`）。自機狙いのビームでも予測線と撃つ向きがずれない。
+予測線を出して `frames` 待ってから、子のビームを実行する。子は `IBeam` を実装するビーム（`BulletBeam` / `SpriteBeam`）。予測線とビームの位置・向きは、WarningLine の開始時に子のビームから 1 回だけ決めて（`CreateAim`）、そのまま子に渡す（`IBeam.UseAim`）。自機狙いのビームでも予測線と撃つ向きがずれない。
 
 | フィールド | 単位 | 説明 |
 |---|---|---|
@@ -359,15 +359,15 @@ Parallel(All)
 
 ### 発射の部品: ShotPattern
 
-基準方向から弾ごとの方向・ずれ・遅延を作る。弾を撃つノードがそれぞれ 1 つずつ持つ（`NWayShot` ノードなら `NWayShot` パターン）。`BulletBeam` はビームの本数と角度に使う。
+基準方向から弾ごとの方向・ずれ・遅延を作る。弾を撃つノードがそれぞれ 1 つずつ持つ（`NWayShot` ノードなら `NWayPattern`）。`BulletBeam` はビームの本数と角度に使う。
 
 | パターン | フィールド | 動作 |
 |---|---|---|
-| `SingleShot` | なし | 基準方向に 1 発 |
-| `NWayShot` | `wayCount`、`spreadAngle`(度、隣り合う弾の角度)、`radius`(発射位置を各方向へずらす距離)、`startDelayFrames`(f、動き出すまで)、`rotationOffset`(度、反時計回り) | 同時に扇状に撃つ。奇数は中央に 1 発、偶数は中央を空ける |
-| `SequentialFanShot` | `wayCount`、`spreadAngle`(度)、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 扇状に 1 発ずつ `spawnIntervalFrames` おきに出し、最後の 1 発から `releaseDelayFrames` 後に全弾同時に動き出す |
-| `SequentialCircleShot` | `wayCount`、`radius`、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 円周上（360°/wayCount 間隔、半径 radius）に 1 発ずつ出し、全弾同時に動き出す |
-| `BurstShot` | `wayCount`、`spreadAngle`(度)、`shotCount`、`intervalFrames`(f)、`startRadius`、`endRadius` | 同じ扇を `intervalFrames` おきに `shotCount` 回撃つ。発射位置の半径は 1 回目の `startRadius` から最後の `endRadius` へ線形に変わる。向きは最初に 1 回だけ決める |
+| `SinglePattern` | なし | 基準方向に 1 発 |
+| `NWayPattern` | `wayCount`、`spreadAngle`(度、隣り合う弾の角度)、`radius`(発射位置を各方向へずらす距離)、`startDelayFrames`(f、動き出すまで)、`rotationOffset`(度、反時計回り) | 同時に扇状に撃つ。奇数は中央に 1 発、偶数は中央を空ける |
+| `SequentialFanPattern` | `wayCount`、`spreadAngle`(度)、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 扇状に 1 発ずつ `spawnIntervalFrames` おきに出し、最後の 1 発から `releaseDelayFrames` 後に全弾同時に動き出す |
+| `SequentialCirclePattern` | `wayCount`、`radius`、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 円周上（360°/wayCount 間隔、半径 radius）に 1 発ずつ出し、全弾同時に動き出す |
+| `BurstPattern` | `wayCount`、`spreadAngle`(度)、`shotCount`、`intervalFrames`(f)、`startRadius`、`endRadius` | 同じ扇を `intervalFrames` おきに `shotCount` 回撃つ。発射位置の半径は 1 回目の `startRadius` から最後の `endRadius` へ線形に変わる。向きは最初に 1 回だけ決める |
 
 ### 発射の部品: DirectionSource
 
@@ -406,9 +406,13 @@ Parallel(All)
 | フィールド | 説明 |
 |---|---|
 | `preset` | `MotionPreset`。指定するとインラインより優先 |
+| `presetParam` | ツリーの Object パラメータ名。指定するとその値の `MotionPreset` を使う。値が空なら動かずに Success |
 | `steps` | インラインの `List<MotionStep>` |
 
-中断・完了時に移動を止める。ツリーと移動を独立させたい場合は SetMovement を使う。
+敵の移動は必ずこのノードで行う（ツリーの外で流れる移動はない）。中断・完了時に移動を止める。
+- 攻撃と同時に動かすときは `Parallel{ Move, 攻撃 }` と並べる（Move を先頭に置くと、そのフレームの発射は移動後の位置になる）。
+- 移動の後に一定時間待つときは `Parallel{ Move, Wait N }` にする。`Sequence[Move, Wait]` だと移動の長さぶん後ろがずれる。
+- 複数のフェーズにまたがって続ける移動は、そのフェーズをまとめた外側に `Parallel{ Move, Sequence[フェーズ…] }` と置く（例: Stage3 ボスの横揺れ）。
 
 ### MovePath（Action/Move）
 
@@ -417,16 +421,6 @@ Parallel(All)
 | フィールド | 説明 |
 |---|---|
 | `path` | `TrailPath`（パラメータ可） |
-
-### SetMovement（Action/Move）
-
-この敵の移動を差し替える。移動はツリーと独立して流れ続け、ノードは即 Success。
-
-| フィールド | 説明 |
-|---|---|
-| `preset` / `steps` | Move と同じ。空なら移動を止める |
-| `presetParam` | ツリーの Object パラメータ名。指定するとその値の `MotionPreset` を使う。値が空なら移動を止める |
-| `continueIfSame` | ON なら、同じ移動（同じリスト参照）が再生中のときはやり直さない。フェーズをまたいで続く移動に使う |
 
 ### SetDeathBehavior（Action/Actor）
 
@@ -558,7 +552,7 @@ entries は `frame` 順に並べ替えて実行する。
 - ボスが出ていない、またはツリーが無ければ警告して Failure。
 - ボスツリーの結果は見ない。ボスツリーが先に完了しても撃破まで待つ。
 
-### Scenario（Flow）
+### PlayScenario（Flow）
 
 会話を流し、終わるまで待つ Composite。子には OnCommand だけを置く。
 
@@ -572,11 +566,11 @@ entries は `frame` 順に並べ替えて実行する。
 - 会話が終わり、かつ実行中の子が全て終わったら Success。
 - 対応する OnCommand が無いコマンドは警告して無視する。
 - 要約欄に、OnCommand が無いコマンド（`⚠ OnCommand が無い`）と会話に出てこない OnCommand（`⚠ 会話に無いコマンド`）を表示する。
-- BT エディタで Scenario ノードを右クリック →「会話のコマンドから OnCommand を作る」で、足りない OnCommand をまとめて作れる。
+- BT エディタで PlayScenario ノードを右クリック →「会話のコマンドから OnCommand を作る」で、足りない OnCommand をまとめて作れる。
 
 ### OnCommand（Flow）
 
-Scenario の子に置く Decorator。会話が `command`（シナリオの `function` 名。例: `SpawnBoss`）の行に来たら子を実行する。子の結果をそのまま返す。
+PlayScenario の子に置く Decorator。会話が `command`（シナリオの `function` 名。例: `SpawnBoss`）の行に来たら子を実行する。子の結果をそのまま返す。
 
 ### BossDefinition（ScriptableObject、Create → Battle/Boss Definition）
 
@@ -589,7 +583,7 @@ Scenario の子に置く Decorator。会話が `command`（シナリオの `func
 
 ## 8. MotionStep
 
-敵・ボス・弾の移動の 1 ステップ。`Move` / `SetMovement` / `BulletSpec.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
+敵・ボス・弾の移動の 1 ステップ。`Move` / `BulletSpec.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
 **時間はすべて秒**。`duration` が「0 で無限」のステップは終わらないため、後ろのステップに進まない。
 
 「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに旧実装の OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.2 参照）。
@@ -646,8 +640,8 @@ Scenario の子に置く Decorator。会話が `command`（シナリオの `func
 
 ```text
 Until [onChildCompleted=Hold]  cond: BgmSamples(422391)
- └─ Sequence
-     ├─ SetMovement (continueIfSame)
+ └─ Parallel [All]
+     ├─ Move BossIntro
      └─ Until [Finish]  cond: FrameElapsed(601)
          └─ Sequence
              ├─ Wait 60
@@ -702,7 +696,7 @@ Selector
 Sequence
  ├─ Until #Group0  cond: HpBelow(Self, 40%)
  │   └─ Loop ∞
- │       └─ Random (avoidRepeat)
+ │       └─ RandomSelect (avoidRepeat)
  │           ├─ Sequence [Until #PhaseA (FrameElapsed), Until #Interlude]
  │           ├─ Sequence [Until #PhaseB (FrameElapsed), Until #Interlude]
  │           └─ ...
@@ -716,10 +710,11 @@ HP が閾値を下回った瞬間に Until が中のフェーズを中断して 
 
 ```text
 Commons/BT/Enemy
- └─ Sequence
-     ├─ SetDeathBehavior  $death      … 撃破時のツリー (空なら無し)
-     ├─ SetMovement       $movement   … Stage{N}/BT/Motion/*
-     └─ SubTree           $attack     … Stage{N}/BT/Attack/S{N}_*
+ └─ Parallel [All]
+     ├─ Move              $movement   … Stage{N}/BT/Motion/*
+     └─ Sequence
+         ├─ SetDeathBehavior  $death  … 撃破時のツリー (空なら無し)
+         └─ SubTree           $attack … Stage{N}/BT/Attack/S{N}_*
 
 Stage{N}/BT/Attack/S{N}_*
  └─ Until cond: FrameElapsed(N)
@@ -727,7 +722,7 @@ Stage{N}/BT/Attack/S{N}_*
          └─ NWayShot
 ```
 
-Spawn（Wave の entries を含む）で `behavior = Enemy` とし、`overrides` で `movement` / `attack` / `death` を渡す。移動は SetMovement でツリーと独立させ、攻撃ツリーは攻撃だけを書く。攻撃の途中で移動を変える、HP で行動を変える（`Sequence[Until(HpBelow){通常}, 後半]`）など、この形に収まらない敵だけ `Stage{N}/BT/Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。
+Spawn（Wave の entries を含む）で `behavior = Enemy` とし、`overrides` で `movement` / `attack` / `death` を渡す。移動と攻撃は Parallel で同時に進み、両方が終わるまで敵は残る。攻撃ツリーは攻撃だけを書く。攻撃の途中で移動を変える、HP で行動を変える（`Sequence[Until(HpBelow){通常}, 後半]`）など、この形に収まらない敵だけ `Stage{N}/BT/Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。
 
 ### 道中 = Section "Way" [ PlayBgm, Wave..., Wait ]
 

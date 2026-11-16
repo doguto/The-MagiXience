@@ -74,12 +74,12 @@ soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
 
 ## 会話の接続
 
-会話（`ScenarioData`）はステージツリーの Scenario ノードが直接参照する。命名規則による自動ロードや Addressables への登録は無い。
+会話（`ScenarioData`）はステージツリーの PlayScenario ノードが直接参照する。命名規則による自動ロードや Addressables への登録は無い。
 
 - ボス前: Section "Boss" の最初の Scenario（`skipOnResume` ON）に `Stage{N}WayScenario` を設定する。会話中の `SpawnBoss` / `PlayBossBgm` は子の OnCommand で処理する。
 - 撃破後: Section "Boss" の最後の Scenario（`skipOnResume` OFF、`restorePlayerControl` OFF）に `Stage{N}BossScenario` を設定する。
-- 会話シーンが処理する演出関数は `ScenarioData` の一覧（`ShowCastMessage` / `ShowMessage` / `TypeWriter` / `AutoAdvance` / `ShowCast` / `HideCast` / `ChangeCastAnimation` / `ShakeCastV`）だけ。それ以外の行はコマンドとしてツリーへ通知され、同名の OnCommand が無ければ警告が出て何も起きない。Scenario ノードの要約欄の ⚠ で過不足を確認する。
-- `.txt` からの取り込み（`Assets/Project/Editor/ScenarioImporter.cs`）は、`{N}面ボス前` / `{N}面ボス後` を `Stage{N}/Scenario/Stage{N}WayScenario.asset` / `Stage{N}BossScenario.asset` に上書きする。既存アセットを上書きするので Scenario ノードの参照は保たれる。
+- 会話シーンが処理する演出関数は `ScenarioData` の一覧（`ShowCastMessage` / `ShowMessage` / `TypeWriter` / `AutoAdvance` / `ShowCast` / `HideCast` / `ChangeCastAnimation` / `ShakeCastV`）だけ。それ以外の行はコマンドとしてツリーへ通知され、同名の OnCommand が無ければ警告が出て何も起きない。PlayScenario ノードの要約欄の ⚠ で過不足を確認する。
+- `.txt` からの取り込み（`Assets/Project/Editor/ScenarioImporter.cs`）は、`{N}面ボス前` / `{N}面ボス後` を `Stage{N}/Scenario/Stage{N}WayScenario.asset` / `Stage{N}BossScenario.asset` に上書きする。既存アセットを上書きするので PlayScenario ノードの参照は保たれる。
 
 `ScenarioData` の中身自体（会話ステップ等）はこのスキルの対象外（必要なら `Assets/Project/Scenes/Scenario/` 配下を別途調査すること）。
 

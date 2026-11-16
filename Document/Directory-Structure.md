@@ -263,7 +263,7 @@ Battle/
 ├── Prefabs/                           # Player/敵/ステージ用バトルプレハブ。
 └── Scripts/
     ├── BehaviorTree/                  # BT のコアとノード定義。
-    │   ├── Core/                      # Node / NodeDefinition / BehaviorTreeAsset / BattleStageAsset / パラメータ / Runner。
+    │   ├── Core/                      # Node (ノードの基底) / BehaviorTreeAsset / BattleStageAsset / パラメータと複製 / Runner。
     │   ├── Composite/                 # Sequence / Selector / Parallel / Random。
     │   ├── Decorator/                 # Loop / Repeat / Until / Delay / Inverter / ForceSuccess。
     │   ├── Condition/                 # 条件定義と CheckCondition / WaitUntil。
@@ -284,13 +284,13 @@ Battle BehaviorTree:
 
 - `Core/BattleStageAsset.cs`: 1 ステージ (道中・会話・ボス戦) 全体の定義 (ステージサービス、ステージツリー)。
 - `Core/BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject (root、未接続ノード、パラメータ)。
-- `Core/NodeDefinition.cs` / `Core/Node.cs`: 保存用の不変定義と、Enter/Tick/Abort/Exit を保証する実行時ノードの基底。
-- `Core/BuildScope.cs` / `Core/TreeParameter.cs`: パラメータ解決 (`BtInt` などの `$param`) と SubTree の循環検出。
+- `Core/Node.cs`: ノードの基底 (`Node` / `CompositeNode` / `DecoratorNode` / `ActionNode`)。設定・実行中の状態・処理を 1 クラスに持ち、Enter/Tick/Abort/Exit の順を保証する。
+- `Core/TreeScope.cs` / `Core/TreeParameter.cs`: パラメータ解決 (`BtInt` などの `$param`)・SubTree の循環検出と、実行用にノードを複製する `NodeCloner`。
 - `Core/BattleContext.cs` / `Core/BehaviorTreeRunner.cs`: ツリー 1 本の実行文脈と駆動。
-- `Battle/EmitterSources.cs` / `Battle/FireNodes.cs` / `Battle/ShotNodes.cs` / `Battle/BeamNodes.cs`: 方向・回転・弾設定・撃ち方（ShotPattern）と、撃ち方ごとの弾を撃つノード（SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot）、溜めの演出 ChargeEffect、WarningLine / BulletBeam / SpriteBeam / MoveTrailFan。
-- `Battle/ActorNodes.cs`: Move / SetMovement / SetDeathBehavior / SetInvincible / Despawn / PlaySe / Spawn。
+- `Battle/EmitterSources.cs` / `Battle/ShotPatterns.cs` / `Battle/ShotNodes.cs` / `Battle/BeamNodes.cs`: 方向・回転・弾設定・撃ち方（ShotPattern）と、撃ち方ごとの弾を撃つノード（SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot）、溜めの演出 ChargeEffect、WarningLine / BulletBeam / SpriteBeam / MoveTrailFan。
+- `Battle/ActorNodes.cs`: Move / SetDeathBehavior / SetInvincible / Despawn / PlaySe / Spawn。
 - `Battle/TrailNodes.cs` / `Battle/TrailPath.cs`: MovePath / PlaceAlongPath と経路アセット。
-- `Battle/FlowNodes.cs` / `Battle/BossDefinition.cs`: Stage / Section / Wave / PlayBgm / SpawnBoss / BossBattle / Scenario / OnCommand と、ボスの定義。
+- `Battle/FlowNodes.cs` / `Battle/BossDefinition.cs`: Stage / Section / Wave / PlayBgm / SpawnBoss / BossBattle / PlayScenario / OnCommand と、ボスの定義。
 - `Battle/StageNodes.cs`: HP・敵全滅・BGM 位置の条件、EnterStrongMode / ClearBullets / WithWind / BossWindCue / PhaseMarker / WithPrefab。
 
 Battle Runtime:
@@ -311,6 +311,7 @@ Battle BehaviorTree Editor:
 - `BehaviorTreeEditorWindow.cs`: `Window > Battle > Behavior Tree Editor`。BT アセットのダブルクリックでも開く。
 - `BehaviorTreeGraphView.cs` / `BehaviorTreeNodeView.cs` / `BehaviorTreePort.cs` / `BehaviorTreeEdge.cs`: グラフ表示と編集。
 - `NodePaletteView.cs` / `NodeCatalog.cs` / `NodeSearchWindowProvider.cs`: ノード一覧・検索・ドラッグ作成。
+- `NodeInspectorView.cs`: 右ペイン Node タブ。選択中のノードの説明と設定欄。
 - `ParameterPanelView.cs` / `BtValueDrawer.cs` / `ParameterUtility.cs`: パラメータ一覧と値欄の結びつけ。パラメータ名の変更は値欄・`bindToParent`・`*Param` 欄に追従する。
 
 Battle Model:

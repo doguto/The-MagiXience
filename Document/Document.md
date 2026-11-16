@@ -763,7 +763,7 @@ Battle 全体の中心 Presenter。
 - Pause 入力で PauseModal を開閉する。
 - GameOver/Pause から Retry/Title 戻りを処理する。
 - StageModel から `BattleStageAsset` をロードし、`BattleFlow.StartStage` でステージツリーを開始する。
-- `IScenarioService` として、Scenario ノードからの依頼で会話シーンを開き、会話中のコマンドをツリーへ渡す。
+- `IScenarioService` として、PlayScenario ノードからの依頼で会話シーンを開き、会話中のコマンドをツリーへ渡す。
 - PlayBgm ノードからの依頼で BGM を再生し、曲名を表示する。
 - `BattleFlow` のイベント（Section 開始・ボス出現・ボス戦開始）に応じて背景・自機アニメ・ボスの当たり判定を切り替える。
 - ステージツリーの完了で DemoClear シーンを表示する。
@@ -782,7 +782,7 @@ Battle 全体の中心 Presenter。
 - `BattleFlow.cs`: バトル 1 回分の BT 実行を管理する。`StartStage`（ステージサービスの開始、弾・敵の事前生成、ステージツリーの開始）と `Stop` を提供し、`IBossHost`（ボスの生成 `Spawn` と戦闘開始 `StartBattle`）を実装する。自機に `BulletSystem` を渡す（`BindBulletSystem`）。
 - `BattleWorld.cs`: 全ツリーで共有するフレーム番号・乱数・予約実行 (`Schedule`)・`BattleServices`・`StageContext` を持ち、`Step()` で 1 フレーム進める。
 - `BattleClock.cs`: `Update` で `Time.deltaTime` を蓄積し、固定 60fps で `BattleWorld.Step()` を呼ぶ（1 描画フレーム最大 4 ステップ、ポーズ中は停止）。
-- `BattleActor.cs`: 敵/ボスの GameObject に付けるコンポーネント。自分のツリーと、ツリーと独立した移動（SetMovement）を毎フレーム進める。
+- `BattleActor.cs`: 敵/ボスの GameObject に付けるコンポーネント。自分のツリーを毎フレーム進める（移動もツリーの Move ノードで行う）。
 - `ActorSpawner.cs`: Spawn ノードから敵・ビーム・障害物 Prefab を生成し、ツリー指定時は `BattleActor` を付ける。プール対象の敵は `ActorPool` から出す。
 - `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs`: 敵を Prefab ごとに使い回すプール。敵を消すときの共通の入口 `ActorDespawn.Despawn`（プール品はプールへ戻し、それ以外は Destroy）と、出し入れ時の状態を戻す `IPoolableActor` も `ActorPool.cs` にある。`NoActorPool` を付けた Prefab はプールしない。
 - `StagePrefabCollector.cs`: `BattleStageAsset` からシリアライズされた参照をたどり、事前生成する弾 Prefab と出現物 Prefab を集める（Prefab の中身はたどらない）。
@@ -830,9 +830,9 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 
 - `BattleStageAsset.cs`: 1 ステージ（道中・会話・ボス戦）全体の定義。`services`（ステージサービス）と `tree`（ステージツリー）を持つ。
 - `BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject。`root`、`detachedNodes`、`parameters` を持つ。
-- `NodeDefinition.cs`: アセットに保存する不変のノード定義（Composite / Decorator / Action の基底）。実行時は `Create(scope)` で `Node` を毎回生成する。
+- `Node.cs`: ノードの基底（`Node` / `CompositeNode` / `DecoratorNode` / `ActionNode`）。ノード 1 種類 = 1 クラスで、設定・実行中の状態（`[NonSerialized]`）・処理を持つ。アセット上のノードは雛形で、実行するツリーごとに複製する。
 - `Node.cs`: 実行時ノードの基底。`OnEnter` / `OnTick` / `OnAbort` / `OnExit` の呼び出し順を保証する。
-- `BuildScope.cs` / `TreeParameter.cs`: ツリーパラメータの解決（`BtInt` / `BtFloat` などの `$param` 参照、SubTree からの上書き）と SubTree の循環検出。
+- `TreeScope.cs` / `TreeParameter.cs`: 実行用の複製（`NodeCloner`）、ツリーパラメータの解決（`BtInt` / `BtFloat` などの `$param` 参照、SubTree からの上書き）と SubTree の循環検出。
 - `BattleContext.cs`: ツリー 1 本の実行文脈（`World` と、ツリーを持つアクター `Self`）。
 - `BehaviorTreeRunner.cs`: ツリー 1 本を毎フレーム Tick し、完了を通知する。
 
@@ -842,7 +842,7 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 - `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Delay、Inverter、ForceSuccess。
 - `Condition/Condition.cs`: Constant、FrameElapsed、BgmReached、And / Or / Not と、CheckCondition / WaitUntil ノード。
 - `Action/BasicActions.cs`: Wait、Log、SubTree と、`*Param` 欄から Object パラメータを引く `ParamObjects`。
-- `Battle/`: 発射（SingleShot / NWayShot などの弾を撃つノードと ShotPattern / DirectionSource / RotationSource / BulletSpec、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetMovement、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples 条件、EnterStrongMode、ClearBullets、WithWind、BossWindCue、PhaseMarker、WithPrefab）、進行（Stage、Section、Wave、PlayBgm、SpawnBoss、BossBattle、Scenario、OnCommand）。
+- `Battle/`: 発射（SingleShot / NWayShot などの弾を撃つノードと ShotPattern / DirectionSource / RotationSource / BulletSpec、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples 条件、EnterStrongMode、ClearBullets、WithWind、BossWindCue、PhaseMarker、WithPrefab）、進行（Stage、Section、Wave、PlayBgm、SpawnBoss、BossBattle、Scenario、OnCommand）。
 
 ### 設計方針
 
@@ -1194,6 +1194,7 @@ BehaviorTree エディタ（`Assets/Project/Scenes/Battle/Editor/BehaviorTree/`�
 - `BehaviorTreeEditorWindow.cs`: `Window > Battle > Behavior Tree Editor`、または `BehaviorTreeAsset` のダブルクリックで開くウィンドウ。左にノードパレット、中央にグラフ、右にパラメータ一覧を並べる。
 - `BehaviorTreeGraphView.cs` / `BehaviorTreeNodeView.cs` / `BehaviorTreePort.cs` / `BehaviorTreeEdge.cs`: GraphView によるツリー表示と編集（ドラッグ & ドロップ作成、コピー & ペースト、Auto Layout、再生中の実行ノードのハイライト）。入力欄は選択中のノードにだけ作り、大きなツリーでも重くならないようにしている。
 - `NodePaletteView.cs` / `NodeCatalog.cs` / `NodeSearchWindowProvider.cs`: ノード一覧と検索。`NodeInfoAttribute` の説明・分類を表示する。BT アセット一覧から SubTree を作成できる。
+- `NodeInspectorView.cs`: 右ペインの Node タブ。選択中のノードの種類・説明・要約・コメント・設定欄を出す（設定欄の作り方はノード内と共通の `BehaviorTreeNodeView.BuildFields`）。
 - `ParameterPanelView.cs` / `BtValueDrawer.cs` / `ParameterUtility.cs`: ツリーパラメータの追加・改名・削除と、`BtInt` などの値欄の `$param` 結びつけ（`▾` メニューまたはドラッグ）。改名は値欄・`bindToParent`・`*Param` 欄に追従する（`ParameterUtility.FindReferencePaths`）。
 
 使い方は [Battle/BehaviorTree.md](./Battle/BehaviorTree.md) の「エディタ」を参照。
@@ -1238,7 +1239,7 @@ SE 一覧の親データ。
 - `BT/Enemy/`: 共通ツリーに収まらない敵の専用ツリー（Stage2 のみ中身あり）。
 - `BT/Trail/`: `TrailPath`（Stage2 のみ）。
 
-- `Scenario/Stage{N}WayScenario.asset` / `Scenario/Stage{N}BossScenario.asset`: ボス前・撃破後の会話。ステージツリーの Scenario ノードが直接参照する。
+- `Scenario/Stage{N}WayScenario.asset` / `Scenario/Stage{N}BossScenario.asset`: ボス前・撃破後の会話。ステージツリーの PlayScenario ノードが直接参照する。
 
 旧方式のデータ（`Stage{N}` 直下の `Attack` / `Movement` / `Ease` / `Bullet` など）は削除済み。詳細は [Battle/DataStore.md](./Battle/DataStore.md)。
 
@@ -1317,8 +1318,8 @@ Editor 実行では `Assets/Project/DataStore/UserData.json` を使う。
 
 - 既存ドキュメントにある `BattleWay` / `BattleBoss` シーン分割は現状の実装とは異なる。現在は `Battle` シーンに統合されている。
 - `RuntimeModel.CurrentSituation` が Way/Boss の進行を表す中心状態である。
-- `ScenarioScenePresenter` は BattleScenePresenter を直接呼ばない。演出関数以外の行は `ScenarioCommandMessage` として通知し、ステージツリーの Scenario ノードが同名の OnCommand で処理する（Boss 生成や Boss BGM 再生）。
-- Battle の進行は BehaviorTree で行う。ツリーの定義 (`NodeDefinition`) は不変で、実行時は Build のたびに実行時ノードを生成するため、同じ `BehaviorTreeAsset` を複数の敵が同時に使っても状態は共有されない。
+- `ScenarioScenePresenter` は BattleScenePresenter を直接呼ばない。演出関数以外の行は `ScenarioCommandMessage` として通知し、ステージツリーの PlayScenario ノードが同名の OnCommand で処理する（Boss 生成や Boss BGM 再生）。
+- Battle の進行は BehaviorTree で行う。アセット上のノードは雛形で、ツリーを実行するたびに複製して動かすため、同じ `BehaviorTreeAsset` を複数の敵が同時に使っても状態は共有されない。
 - BT の時間はフレーム基準（固定 60fps）、`MotionStep` の時間は秒指定である。混在しているので単位に注意する（[Battle/BehaviorTree-Nodes.md](./Battle/BehaviorTree-Nodes.md)）。
 - Spawn ノードで出す雑魚は `ActorPool` で使い回す。敵を消すときは `Destroy` ではなく `ActorDespawn.Despawn` を通し、使い回すと状態が残るコンポーネントを持つ Prefab には `NoActorPool` を付ける（[Battle/BehaviorTree.md](./Battle/BehaviorTree.md) 4.5）。
 - `UserData.Validate` は現在 `clearedStageNumber` を 0-1 に丸めるため、Stage2 以降を正式開放する場合は修正が必要になる可能性が高い。
@@ -1335,7 +1336,7 @@ Editor 実行では `Assets/Project/DataStore/UserData.json` を使う。
 - 新しい敵移動を作る: `MotionPreset`（`BT/Motion/`）を作るか、`MotionStep` 実装を `Runtime/Motion/` に追加する。
 - 新しい敵 Prefab を作る: `EnemyEntityPresenter`, `EnemyEntityView` を設定する。行動は Spawn ノードの `behavior` に共通ツリー `Commons/BT/Enemy` を指定し、`overrides` で `movement`（`BT/Motion/`）/ `attack`（`BT/Attack/`）/ `death` を渡す。この形に収まらない敵だけ `BT/Enemy/` に専用ツリーを作る。
 - 新しいボス挙動を作る: Boss Prefab（`BossEntityPresenter`）と、`BossDefinition` の `prefab` / `spawnPosition` / `entrance` / `tree` を設定する。
-- 新しいノードを作る: `Scripts/BehaviorTree/` 配下に `NodeDefinition` 派生（定義）と実行時ノードを追加する。`NodeInfoAttribute` を付けるとパレットに説明が出る。
+- 新しいノードを作る: `Scripts/BehaviorTree/` 配下に `CompositeNode` / `DecoratorNode` / `ActionNode` の派生クラスを 1 つ追加する（設定は保存するフィールド、状態は `[NonSerialized]`）。`NodeInfoAttribute` を付けるとパレットに説明が出る。
 - ステージ固有の機能を作る: `IStageService` と `StageServiceDefinition` を `Runtime/Stage/` に追加し、使うステージの `BattleStageAsset.services` に宣言する（[Battle/BehaviorTree.md](./Battle/BehaviorTree.md) の「ステージサービス」）。
 - 新しいシナリオコマンドを作る: `ScenarioScenePresenter.ExecuteSteps` に function 分岐を追加し、必要なら `ScenarioView` / Battle Presenter へ処理を追加する。
 - 新しい UI モーダルを作る: `Commons/UI/Scripts/View`, `Commons/UI/Scripts/Presenter`, `GlobalScenePresenter` への参照追加。

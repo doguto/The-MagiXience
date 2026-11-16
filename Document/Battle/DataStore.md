@@ -23,12 +23,12 @@ StageData.asset
                                    │    ├─ prefab    ──► 敵 Prefab
                                    │    ├─ behavior  ──► Commons/BT/Enemy.asset (共通の雑魚ツリー。特殊な敵は Stage{N}/BT/Enemy/*.asset)
                                    │    └─ overrides ──► movement: Stage{N}/BT/Motion/*.asset, attack: Stage{N}/BT/Attack/*.asset, death: 撃破時のツリー
-                                   ├─ Scenario ノード ──► Stage{N}/Scenario/Stage{N}WayScenario.asset / Stage{N}BossScenario.asset
+                                   ├─ PlayScenario ノード ──► Stage{N}/Scenario/Stage{N}WayScenario.asset / Stage{N}BossScenario.asset
                                    └─ SpawnBoss / BossBattle ノード ──► Stage{N}/BT/Stage{N}_Boss.asset (BossDefinition)
                                         ├─ prefab / spawnPosition / entrance (MotionStep[])
                                         └─ tree ──► Stage{N}/BT/Stage/Stage{N}Boss_Tree.asset
                                                      ├─ SubTree ノード ──► Stage{N}/BT/Attack/*.asset
-                                                     └─ SetMovement / Move / BulletSpec.motionPreset ──► Stage{N}/BT/Motion/*.asset
+                                                     └─ Move / BulletSpec.motionPreset ──► Stage{N}/BT/Motion/*.asset
 
 BgmData.asset / SeData.asset
  └─ BgmData のループ位置 (サンプル) が BgmSamples 条件の thresholdSamples と、
@@ -163,17 +163,17 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 
 役割ごとの典型的な形:
 
-- `Stage/Stage{N}_Tree`: `Stage[ Section "Way"[ PlayBgm, Wave..., Wait ], Section "Boss"[ Scenario{OnCommand SpawnBoss / PlayBossBgm}, BossBattle, Wait, Scenario ] ]`（[BehaviorTree.md](./BehaviorTree.md) 6.1）
-- `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / Random / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP 閾値（`HpBelow`）、発狂（`NormalHpDepleted` + `EnterStrongMode`）など
-- `Commons/BT/Enemy`: `Sequence[ SetDeathBehavior($death), SetMovement($movement), SubTree($attack) ]`。パラメータ `movement`（MotionPreset）/ `attack` / `death`（BehaviorTreeAsset）を Spawn の `overrides` で渡す
+- `Stage/Stage{N}_Tree`: `Stage[ Section "Way"[ PlayBgm, Wave..., Wait ], Section "Boss"[ PlayScenario{OnCommand SpawnBoss / PlayBossBgm}, BossBattle, Wait, PlayScenario ] ]`（[BehaviorTree.md](./BehaviorTree.md) 6.1）
+- `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / RandomSelect / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP 閾値（`HpBelow`）、発狂（`NormalHpDepleted` + `EnterStrongMode`）など
+- `Commons/BT/Enemy`: `Parallel(All)[ Move($movement), Sequence[ SetDeathBehavior($death), SubTree($attack) ] ]`。パラメータ `movement`（MotionPreset）/ `attack` / `death`（BehaviorTreeAsset）を Spawn の `overrides` で渡す
 - `Attack/*`: 雑魚の攻撃（`Until(FrameElapsed){ Repeat{NWayShot} }` など）やボスの 1 フェーズ分の攻撃（`Sequence` + `Wait` / `Repeat` / `NWayShot` などの弾を撃つノード / `BulletBeam` など）
-- `Enemy/*`: 共通ツリーで表せない敵の専用ツリー（攻撃の途中で `SetMovement` を差し替えるなど）
+- `Enemy/*`: 共通ツリーで表せない敵の専用ツリー（攻撃の途中で移動を変えるなど）
 
 ### MotionPreset（`Motion/`）
 
 - 定義: `Assets/Project/Scenes/Battle/Scripts/Runtime/Motion/MotionAssets.cs`（`Create > Battle > Motion Preset`）
 - `[SerializeReference] List<MotionStep> steps` を持つだけ。時間は秒指定。
-- `Move` / `SetMovement` の `preset`、共通ツリー `Enemy` の `movement` パラメータ、`BulletSpec.motionPreset`、`LoopMotion` のエントリから参照する。`Bullet_{弾Prefab名}` という名前のものは、旧形式で弾 Prefab 側に設定されていた移動を移行時に切り出したもの。
+- `Move` の `preset`、共通ツリー `Enemy` の `movement` パラメータ、`BulletSpec.motionPreset`、`LoopMotion` のエントリから参照する。`Bullet_{弾Prefab名}` という名前のものは、旧形式で弾 Prefab 側に設定されていた移動を移行時に切り出したもの。
 
 ### EaseCurveAsset
 
@@ -210,17 +210,17 @@ public class ScenarioStep
 - `@関数名,引数1,引数2,...` の形式（カンマ区切り）がコマンド行。
 - `ShowCastMessage` / `ShowMessage` は特別扱いで、コマンド行の直後にある地の文（複数行可）を改行結合して最後の引数（メッセージ本文）に追加する。これにより会話テキストを複数行で書ける。
 
-ファイル名が `{N}面ボス前` / `{N}面ボス後` の場合、生成された `.asset` は `Stage{N}/Scenario/Stage{N}WayScenario.asset` / `Stage{N}/Scenario/Stage{N}BossScenario.asset` に上書き保存される。既存アセットを上書きするので、ステージツリーの Scenario ノードからの参照はそのまま保たれる。それ以外のファイル名は保存先をダイアログで選ぶ。
+ファイル名が `{N}面ボス前` / `{N}面ボス後` の場合、生成された `.asset` は `Stage{N}/Scenario/Stage{N}WayScenario.asset` / `Stage{N}/Scenario/Stage{N}BossScenario.asset` に上書き保存される。既存アセットを上書きするので、ステージツリーの PlayScenario ノードからの参照はそのまま保たれる。それ以外のファイル名は保存先をダイアログで選ぶ。
 
 ### 実データの配置と参照
 
 ```text
 Assets/Project/DataStore/Stage{N}/Scenario/
-├── Stage{N}WayScenario.asset    # ボス前の会話 (Section "Boss" の最初の Scenario ノード)
-└── Stage{N}BossScenario.asset   # 撃破後の会話 (Section "Boss" の最後の Scenario ノード)
+├── Stage{N}WayScenario.asset    # ボス前の会話 (Section "Boss" の最初の PlayScenario ノード)
+└── Stage{N}BossScenario.asset   # 撃破後の会話 (Section "Boss" の最後の PlayScenario ノード)
 ```
 
-会話はステージツリーの Scenario ノードが直接参照する。Addressables への登録は不要。流す会話は Scenario ノードから `ScenarioModelRepository.SetData(ScenarioData)` で指定される（ステージ番号と Way/Boss からの自動決定は廃止）。
+会話はステージツリーの PlayScenario ノードが直接参照する。Addressables への登録は不要。流す会話は PlayScenario ノードから `ScenarioModelRepository.SetData(ScenarioData)` で指定される（ステージ番号と Way/Boss からの自動決定は廃止）。
 
 ### 実行時の解釈: `ScenarioScenePresenter.cs`
 
@@ -237,9 +237,9 @@ Assets/Project/DataStore/Stage{N}/Scenario/
 | `ChangeCastAnimation` | キャラ名, 表情差分 | 表情差し替え |
 | `ShakeCastV` | | 演出として扱うが、現状は処理が無く何もしない（コマンドとしても通知しない） |
 
-それ以外の行（実データでは `SpawnBoss` / `PlayBossBgm`）は **コマンド** として `MessageBroker` の `ScenarioCommandMessage` で通知されるだけで、会話シーンは処理しない。処理はステージツリーの Scenario ノードが、同名の OnCommand の子で行う（[BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md) 7.5）。
+それ以外の行（実データでは `SpawnBoss` / `PlayBossBgm`）は **コマンド** として `MessageBroker` の `ScenarioCommandMessage` で通知されるだけで、会話シーンは処理しない。処理はステージツリーの PlayScenario ノードが、同名の OnCommand の子で行う（[BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md) 7.5）。
 
-> **注意**: 会話に書いたコマンドに対応する OnCommand が無いと、実行時に警告が出るだけで何も起きない。Scenario ノードの要約欄に過不足が ⚠ で表示されるので、BT エディタで確認すること。
+> **注意**: 会話に書いたコマンドに対応する OnCommand が無いと、実行時に警告が出るだけで何も起きない。PlayScenario ノードの要約欄に過不足が ⚠ で表示されるので、BT エディタで確認すること。
 
 
 ---

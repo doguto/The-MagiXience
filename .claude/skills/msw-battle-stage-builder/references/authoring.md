@@ -33,10 +33,10 @@ Inspector で `BehaviorTreeAsset` を直接触るより、エディタの方が�
 
 1. ルートに `Stage`、その子に `Section` を道中・ボスの順に置く。Section の `label` と `situation`（Way / Boss）を設定する。
 2. 道中の Section の下に `Sequence[ PlayBgm(BattleWay), Wave..., Wait 120 ]` を置く。Wave の `entries` に出現フレームと Spawn の内容を並べ、`until` に `NoActiveEnemies` などを入れる。雑魚の Spawn は Behavior に `Commons/BT/Enemy` を指定し、Overrides の `+` で `movement`（MotionPreset）/ `attack`（攻撃ツリー）/ `death`（撃破時のツリー、任意）を追加して値を入れる。
-3. ボスの Section の下に `Sequence[ Scenario, BossBattle, Wait 120, Scenario ]` を置く。
-4. 1 つ目の Scenario にボス前の会話を設定し、ノードを右クリック →「会話のコマンドから OnCommand を作る」で OnCommand を作る。`SpawnBoss` の下に `SpawnBoss`（`Stage{N}_Boss` を指定）、`PlayBossBgm` の下に `PlayBgm(BattleBoss)` を繋ぐ。
-5. 2 つ目の Scenario に撃破後の会話を設定し、`skipOnResume` と `restorePlayerControl` を OFF にする。
-6. Scenario ノードの要約欄に ⚠ が出ていないことを確認する（コマンドと OnCommand の過不足）。
+3. ボスの Section の下に `Sequence[ PlayScenario, BossBattle, Wait 120, PlayScenario ]` を置く。
+4. 1 つ目の PlayScenario にボス前の会話を設定し、ノードを右クリック →「会話のコマンドから OnCommand を作る」で OnCommand を作る。`SpawnBoss` の下に `SpawnBoss`（`Stage{N}_Boss` を指定）、`PlayBossBgm` の下に `PlayBgm(BattleBoss)` を繋ぐ。
+5. 2 つ目の PlayScenario に撃破後の会話を設定し、`skipOnResume` と `restorePlayerControl` を OFF にする。
+6. PlayScenario ノードの要約欄に ⚠ が出ていないことを確認する（コマンドと OnCommand の過不足）。
 
 ## エージェントが Unity MCP で作る場合
 
@@ -66,20 +66,20 @@ System.Action<object, string, object> set = (o, n, v) => field(o.GetType(), n).S
 
 var tree = UnityEngine.ScriptableObject.CreateInstance<Project.Scenes.Battle.Scripts.BehaviorTree.BehaviorTreeAsset>();
 
-var fire = new Project.Scenes.Battle.Scripts.BehaviorTree.NWayShotNodeDefinition();
-var nway = new Project.Scenes.Battle.Scripts.BehaviorTree.NWayShot();
+var fire = new Project.Scenes.Battle.Scripts.BehaviorTree.NWayShot();
+var nway = new Project.Scenes.Battle.Scripts.BehaviorTree.NWayPattern();
 set(nway, "wayCount", 3);
 set(nway, "spreadAngle", 20f);
 set(fire, "pattern", nway);   // 撃ち方はノードの種類で決まる。pattern はその種類のパターン
 set(fire, "direction", new Project.Scenes.Battle.Scripts.BehaviorTree.AimDirection());
 // set(fire, "bullet", new Project.Scenes.Battle.Scripts.BehaviorTree.BulletSpec { prefab = ..., damage = 10, motionPreset = ... });
 
-var repeat = new Project.Scenes.Battle.Scripts.BehaviorTree.RepeatNodeDefinition
+var repeat = new Project.Scenes.Battle.Scripts.BehaviorTree.Repeat
 {
     Count = new Project.Scenes.Battle.Scripts.BehaviorTree.BtInt(0),
     Interval = new Project.Scenes.Battle.Scripts.BehaviorTree.BtInt(60),
 };
-repeat.SetChildren(new Project.Scenes.Battle.Scripts.BehaviorTree.NodeDefinition[] { fire });
+repeat.SetChildren(new Project.Scenes.Battle.Scripts.BehaviorTree.Node[] { fire });
 tree.Root = repeat;
 
 UnityEditor.AssetDatabase.CreateAsset(tree, "Assets/Project/DataStore/Stage5/BT/Attack/S5_Sample.asset");
@@ -89,7 +89,7 @@ UnityEditor.AssetDatabase.SaveAssets();
 雑魚に使うときは、Spawn の `behavior` に `Commons/BT/Enemy` を、`overrides` に Object パラメータを入れる（`TreeParameter` の `objectValue` は private なので同じヘルパーで設定する）:
 
 ```csharp
-var spawn = new Project.Scenes.Battle.Scripts.BehaviorTree.SpawnNodeDefinition();
+var spawn = new Project.Scenes.Battle.Scripts.BehaviorTree.Spawn();
 set(spawn, "behavior", UnityEditor.AssetDatabase.LoadAssetAtPath<Project.Scenes.Battle.Scripts.BehaviorTree.BehaviorTreeAsset>("Assets/Project/DataStore/Commons/BT/Enemy.asset"));
 var attack = new Project.Scenes.Battle.Scripts.BehaviorTree.TreeParameter("attack", Project.Scenes.Battle.Scripts.BehaviorTree.TreeParameterKind.Object);
 set(attack, "objectValue", tree);
