@@ -15,14 +15,14 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 | 種類 | ファイル |
 |---|---|
-| Composite | `Scripts/BehaviorTree/Composite/*.cs` |
-| Decorator | `Scripts/BehaviorTree/Decorator/*.cs`、`Battle/StageNodes.cs`（WithWind, WithPrefab） |
-| 条件 | `Scripts/BehaviorTree/Condition/Condition.cs`、`Battle/StageNodes.cs` |
-| 基本 Action | `Scripts/BehaviorTree/Action/BasicActions.cs` |
-| バトル Action | `Scripts/BehaviorTree/Battle/ShotNodes.cs` / `BeamNodes.cs` / `ActorNodes.cs` / `StageNodes.cs` |
-| ステージ進行 | `Scripts/BehaviorTree/Battle/FlowNodes.cs`、`BossDefinition.cs` |
-| 発射の部品 | `Scripts/BehaviorTree/Battle/EmitterSources.cs`、`ShotPatterns.cs`（ShotPattern） |
-| MotionStep | `Scripts/Runtime/Motion/MotionSteps.Basic.cs` / `MotionSteps.Advanced.cs` |
+| Composite | `Scripts/BehaviorTree/Composite/<型名>.cs` |
+| Decorator | `Scripts/BehaviorTree/Decorator/<型名>.cs` |
+| 条件 | `Scripts/BehaviorTree/Condition/<型名>.cs` |
+| Action | `Scripts/BehaviorTree/Action/<型名>.cs` |
+| 部品 (ShotPattern / DirectionSource / BulletSpec / BossDefinition など) | `Scripts/BehaviorTree/Parts/<型名>.cs` |
+| MotionStep | `Scripts/Runtime/Motion/<型名>.cs` |
+
+1 ファイルに 1 型。1 つの型からしか使われない enum などの付属型だけ、その型のファイルに同居させる。
 
 ## 1. Composite
 
@@ -215,7 +215,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 ### 弾を撃つノード: SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot（Action/Attack）
 
-撃ち方ごとに別のノードになっている（グラフ上でノードの種類を見れば何を撃つか分かる）。共通部分は `ShotNode`（`ShotNodes.cs`）。即 Success。
+撃ち方ごとに別のノードになっている（グラフ上でノードの種類を見れば何を撃つか分かる）。共通部分は `ShotNode`（`Action/ShotNode.cs`）。即 Success。
 
 | ノード | 撃ち方 (`pattern`) |
 |---|---|
@@ -497,11 +497,11 @@ Parallel(All)
 
 ### PhaseMarker（Action/Stage）
 
-`phaseId` を `BattleServices.PhaseStarted` で通知する。即 Success。`BossPhaseProgressGauge` がボスのフェーズ区切りの検出に使う（現状 `phaseId` の値は見ていない）。
+`phaseId` を `BattleServices.OnPhaseStarted` に流す。即 Success。`BossPhaseProgressGauge` がボスのフェーズ区切りの検出に使う（現状 `phaseId` の値は見ていない）。
 
 ## 7.5 ステージ進行
 
-ステージツリー（`BattleStageAsset.tree`）で道中・会話・ボス戦を並べるノード。ソースは `Battle/FlowNodes.cs`。ツリー全体の形は [BehaviorTree.md](./BehaviorTree.md) 6.1 を参照。
+ステージツリー（`BattleStageAsset.tree`）で道中・会話・ボス戦を並べるノード。ソースは `Composite/` (Stage / PlayScenario)、`Decorator/` (Section / OnCommand)、`Action/` (Wave / PlayBgm / SpawnBoss / BossBattle)。ツリー全体の形は [BehaviorTree.md](./BehaviorTree.md) 6.1 を参照。
 
 ### Stage（Flow）
 
@@ -588,7 +588,7 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 
 「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに旧実装の OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.2 参照）。
 
-### 基本 (`MotionSteps.Basic.cs`)
+### 基本
 
 | ステップ | フィールド | 動作 |
 |---|---|---|
@@ -606,7 +606,7 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 | `AimRotateMotion` | `duration`(s)、`ease`(DOTween の `Ease`) | 位置は動かさず、自機の方向へ回転する |
 | `AnimationMotion` | `clip`、`layerIndex` | Animator の先頭のクリップを `clip` に差し替えて `Base` ステートを再生し、クリップの長さだけ待つ |
 
-### 応用 (`MotionSteps.Advanced.cs`)
+### 応用
 
 | ステップ | フィールド | 動作 |
 |---|---|---|

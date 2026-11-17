@@ -33,7 +33,7 @@ BattleScenePresenter (IScenarioService を実装)
          │   ├─ ActorSpawner   … 敵・ビーム・障害物 Prefab の生成 (プール対象の敵は ActorPool から出す)
          │   ├─ BossHost (= BattleFlow) / Scenario (= BattleScenePresenter) / Progress (StageProgress)
          │   ├─ BulletClearReceiver / Boss / PlaySe / PlayBgm / BgmSource / Player / Background
-         │   └─ PhaseStarted イベント (PhaseMarker ノードが通知)
+         │   └─ OnPhaseStarted (PhaseMarker ノードが通知)
          └─ StageContext  … BattleStageAsset.services から生成した IStageService 群
 ```
 
@@ -49,14 +49,14 @@ BT の適用範囲は次の 2 層である。
 | パス | 内容 |
 |---|---|
 | `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/` | `Node`（基底と `CompositeNode` / `DecoratorNode` / `ActionNode`）/ `BehaviorTreeAsset` / `TreeScope`（`NodeCloner` を含む）/ `TreeParameter` / `BattleContext` / `BehaviorTreeRunner` / `BattleStageAsset` |
-| `.../BehaviorTree/Composite/` | Sequence / Selector / Parallel / RandomSelect |
-| `.../BehaviorTree/Decorator/` | Loop / Repeat / Until / Delay / Inverter / ForceSuccess |
-| `.../BehaviorTree/Condition/Condition.cs` | 条件の基底 `Condition` と Constant / FrameElapsed / BgmReached / And / Or / Not、CheckCondition / WaitUntil ノード |
-| `.../BehaviorTree/Action/BasicActions.cs` | Wait / Log / SubTree |
-| `.../BehaviorTree/Battle/` | バトル固有ノード (発射・ビーム・移動・出現・ステージ演出)。ステージ進行は `FlowNodes.cs`、ボスの定義は `BossDefinition.cs` |
-| `Assets/Project/Scenes/Battle/Scripts/Runtime/` | `BattleWorld` / `BattleClock` / `BattleFlow` / `BattleActor` / `ActorSpawner` / `BulletSystem`、`StageHosts.cs`（`IScenarioService` / `IBossHost` / `StageProgress`）、敵のプール（`ActorPool.cs`（`IPoolableActor` / `ActorDespawn` を含む）/ `PooledActor` / `NoActorPool`）、事前生成用の `StagePrefabCollector` |
-| `.../Runtime/Stage/` | `StageContext` / `IStageService` / `WindService` / 外力の受け口 (`ExternalForces.cs`) |
-| `.../Runtime/Motion/` | `MotionStep` 定義と実行器 (`MotionCore.cs` / `MotionSteps.Basic.cs` / `MotionSteps.Advanced.cs`)、`MotionPreset` / `EaseCurveAsset` / `BattleTargets`（自機の Transform） |
+| `.../BehaviorTree/Composite/` | Sequence / Selector / Parallel / RandomSelect と、ステージ進行の Stage / PlayScenario |
+| `.../BehaviorTree/Decorator/` | Loop / Repeat / Until / Delay / Inverter / ForceSuccess / WarningLine / Section / OnCommand / WithWind / WithPrefab |
+| `.../BehaviorTree/Condition/` | 条件の基底 `Condition` と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies など |
+| `.../BehaviorTree/Action/` | Wait / Log / SubTree / CheckCondition / WaitUntil、発射・ビーム・移動・出現・ステージ演出・ステージ進行の Action ノード |
+| `.../BehaviorTree/Parts/` | ノードではない部品 (ShotPattern / DirectionSource / RotationSource / SpawnLayout / BulletSpec / Emitter / BeamAim など) と `BossDefinition` / `TrailPath` |
+| `Assets/Project/Scenes/Battle/Scripts/Runtime/` | `BattleWorld` / `BattleServices` / `BattleClock` / `BattleFlow` / `BattleActor` / `ActorSpawner` / `BulletSystem`、`IScenarioService` / `IBossHost` / `StageProgress`、敵のプール（`ActorPool` / `IPoolableActor` / `ActorDespawn` / `PooledActor` / `NoActorPool`）、事前生成用の `StagePrefabCollector` |
+| `.../Runtime/Stage/` | `StageContext` / `IStageService` / `WindService` / 外力の受け口 (`IMoveModifier` / `IBulletForce`) |
+| `.../Runtime/Motion/` | `MotionStep` と各ステップ (`*Motion.cs`)、実行器 (`MotionRunner` / `PullRunner` / `MotionSequence`)、`MotionPreset` / `EaseCurveAsset` / `BattleTargets`（自機の Transform） |
 | `Assets/Project/Scenes/Battle/Editor/BehaviorTree/` | GraphView ベースの BT エディタ |
 | `Assets/Project/DataStore/Stage{N}/BT/` | 各ステージの BT データ（[DataStore.md](./DataStore.md) 参照） |
 
@@ -194,7 +194,7 @@ Abort(ctx):
 
 `Runtime/BattleActor.cs` は敵/ボスの GameObject に付けるコンポーネント。
 
-- 付与: `BattleActor.Attach(gameObject, world, tree, overrides)`。`ActorSpawner`（Spawn ノード経由）と `BattleFlow.StartBattle`（BossBattle ノード経由）が呼ぶ。付与時に static イベント `BattleActor.Attached` が発火する（`BossPhaseProgressGauge` が購読に使う）。
+- 付与: `BattleActor.Attach(gameObject, world, tree, overrides)`。`ActorSpawner`（Spawn ノード経由）と `BattleFlow.StartBattle`（BossBattle ノード経由）が呼ぶ。付与時に static な `BattleActor.OnAttached` (IObservable) に流れる（`BossPhaseProgressGauge` が購読に使う）。
 - `Model`: 同じ GameObject の `BossEntityPresenter` または `EnemyEntityPresenter` の Model。HP 系条件はこれを見る。
 - `AttackTime`: 付与されてからの経過秒数（`(Frame - StartFrame) / 60`）。発射時刻で変わる移動（頂点の揺らぎなど）に渡す。
 - `SetDeathBehavior(tree)`: 倒されたときに 1 回だけ実行するツリーを登録する。`Model.OnDeath` で新しい Runner を作り、**1 回だけ Tick して即 Stop** する。そのため死亡時ツリーで意味を持つのは、その 1 フレームで完了する処理（Fire、Spawn など）に限られる。
@@ -233,7 +233,7 @@ Spawn ノードで出す敵は `ActorPool`（`Runtime/ActorPool.cs`）で Prefab
 
 現状 `Bt*` 型になっているのは、Parallel.duration / Loop.count / Repeat.count, interval / Delay.frames / Wait.frames / FrameElapsed.frames / BgmReached.seconds、`ChargeEffect` の各フィールド、MovePath.path / PlaceAlongPath.path, spacing, fireDelayFrames のみである。弾を撃つノードや Move などバトルノードのその他のフィールドは通常の値で、パラメータ化できない。
 
-例外として、次のアセット参照は `*Param` 欄（Object パラメータ名）で差し替えられる。値の解決は `ParamObjects.Resolve`（`Action/BasicActions.cs`）で、欄が空なら固定値を使う。
+例外として、次のアセット参照は `*Param` 欄（Object パラメータ名）で差し替えられる。値の解決は `ParamObjects.Resolve`（`Parts/ParamObjects.cs`）で、欄が空なら固定値を使う。
 
 | 欄 | 差し替える対象 | パラメータの値が空のとき |
 |---|---|---|
@@ -257,7 +257,7 @@ Spawn ノードで出す敵は `ActorPool`（`Runtime/ActorPool.cs`）で Prefab
 
 ### 5.3 SubTree
 
-`SubTree`（`Action/BasicActions.cs`）は別の `BehaviorTreeAsset` を自分の位置で実行する。
+`SubTree`（`Action/SubTree.cs`）は別の `BehaviorTreeAsset` を自分の位置で実行する。
 
 - `tree`: 実行するツリー
 - `treeParam`: 指定すると、その Object パラメータの値のツリーを実行する（5.1）
@@ -311,14 +311,14 @@ InitializeAndStart()
 ツリーが Success で完了 → CompleteStage() (ステージクリア)
 ```
 
-`BattleFlow` のイベントと Presenter の反応:
+`BattleFlow` の通知 (IObservable) と Presenter の反応:
 
 | 出来事 | 発生元 | Presenter の反応 |
 |---|---|---|
-| `SectionStarted` | Stage ノードが Section に入った | `RuntimeModel.CheckpointSection` に記録。`StartStage` 後の最初の Section なら背景スクロールを初期化（Way なら流す） |
-| `BossSpawned` | SpawnBoss ノード（`IBossHost.Spawn`） | 自機の走りアニメを止め、背景を減速 |
-| `BossBattleStarted` | BossBattle ノード（`IBossHost.StartBattle`） | ボスの当たり判定を一時的に切り、自機のアニメを再開 |
-| `PhaseStarted` | PhaseMarker ノード | Presenter は使わない（`BossPhaseProgressGauge` が使う） |
+| `OnSectionStarted` | Stage ノードが Section に入った | `RuntimeModel.CheckpointSection` に記録。`StartStage` 後の最初の Section なら背景スクロールを初期化（Way なら流す） |
+| `OnBossSpawned` | SpawnBoss ノード（`IBossHost.Spawn`） | 自機の走りアニメを止め、背景を減速 |
+| `OnBossBattleStarted` | BossBattle ノード（`IBossHost.StartBattle`） | ボスの当たり判定を一時的に切り、自機のアニメを再開 |
+| `OnStageFinished` | ステージツリーの完了 | Success ならステージクリア |
 
 BGM と会話はサービス経由で Presenter が直接受ける。
 
@@ -374,7 +374,7 @@ public abstract class StageServiceDefinition
 - `StageContext.Tick(dt)` は `BattleWorld.Step` の手順 5 で毎フレーム呼ばれる。
 - ノードからは `ctx.Stage?.Get<T>()` / `TryGet<T>()` で取得する。宣言されていないサービスを使おうとしたノードは `StageContext.WarnMissing<T>()` で 1 回だけ警告を出し、何もしない（Success は返す）。
 
-設計方針として、サービスは自分から自機・敵弾・表示へ働きかける。自機や弾の側はサービスを知らず、汎用の受け口だけを公開する（`Runtime/Stage/ExternalForces.cs`）。
+設計方針として、サービスは自分から自機・敵弾・表示へ働きかける。自機や弾の側はサービスを知らず、汎用の受け口だけを公開する（`Runtime/Stage/IMoveModifier.cs` / `IBulletForce.cs`）。
 
 | 受け口 | 実装側 | 内容 |
 |---|---|---|
@@ -392,7 +392,7 @@ public abstract class StageServiceDefinition
 | `initial` (`BattleWindSettings`) | ステージ開始時の風。`intervals` が空なら無風で始まる |
 | `arrowsPrefab` (`WindArrowsPresenter`) | 風向きを示す矢印。Begin 時に背景 (`Services.Background`) の子として生成する |
 
-`BattleWindSettings`（`Scripts/Model/BattleWind.cs`）: `enabled`、`startSe`、`playerSpeedRatio`、`intervals`（`WindDirection` × `seconds` のリスト。順に繰り返す。秒単位、最小 0.1）、`bulletAcceleration`（ワールド単位/秒²）、`bulletDrag`（1/秒）。
+`BattleWindSettings`（`Scripts/Model/BattleWindSettings.cs`）: `enabled`、`startSe`、`playerSpeedRatio`、`intervals`（`WindDirection` × `seconds` のリスト。順に繰り返す。秒単位、最小 0.1）、`bulletAcceleration`（ワールド単位/秒²）、`bulletDrag`（1/秒）。
 
 `WindService` の動作:
 
@@ -408,14 +408,14 @@ public abstract class StageServiceDefinition
 1. `Runtime/Stage/` に `IStageService` を実装したクラスと、それを生成する `[Serializable] StageServiceDefinition` 派生クラスを作る。設定値は定義側、状態はサービス側に持つ。
 2. 自機や弾に作用する場合は、既存の受け口（`IMoveModifier` / `IBulletForce`）を使う。足りなければ自機/弾側には汎用の受け口だけを追加し、ステージ固有の知識は持たせない。
 3. 必要な参照（`Player`、`Background`、`PlaySe` など）は `StageContext.World.Services` から取る。
-4. サービスを操作するノードが必要なら `BehaviorTree/Battle/` に追加し、`ctx.Stage?.Get<T>()` が `null` のときは `WarnMissing<T>()` を出して何もしないようにする。
+4. サービスを操作するノードが必要なら `BehaviorTree/Action/` などノードの種類のフォルダに追加し、`ctx.Stage?.Get<T>()` が `null` のときは `WarnMissing<T>()` を出して何もしないようにする。
 5. 使うステージの `BattleStageAsset.services` に定義を追加する。宣言しないステージでは存在しない扱いになる。
 
 ## 8. 弾と移動
 
 ### 8.1 弾の発射
 
-発射系ノード（SingleShot / NWayShot などの弾を撃つノード、BulletBeam、MoveTrailFan、PlaceAlongPath）はすべて `Battle/EmitterSources.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
+発射系ノード（SingleShot / NWayShot などの弾を撃つノード、BulletBeam、MoveTrailFan、PlaceAlongPath）はすべて `Parts/Emitter.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
 
 - 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletSpec`、撃ち方は `ShotPattern` で指定する（詳細はノードリファレンス）。
 - 発射位置は「撃つ敵の位置 + muzzleOffset + パターンごとのずれ」。ステージ直下（`Self == null`）なら原点基準。
@@ -444,7 +444,7 @@ public abstract class StageServiceDefinition
 - `MotionPreset`（`Create > Battle > Motion Preset`）はステップ列の共有用アセット。`EaseCurveAsset`（`Create > Battle > Ease Curve`）はカスタム Ease カーブの共有用アセット。
 - 対象は `IMotionBody`。敵/ボスは Transform そのもの (`TransformBody`)、弾は外力補正前の「本来の軌道」。
 
-旧実装との互換のため、`StepClock`（`MotionCore.cs`）は旧 `PullMovementHelper` の挙動を再現する。旧実装では Ease 未指定の移動に DOTween 既定の OutQuad が掛かっていたため、`legacyOutQuad` が ON のステップ（Velocity、AimStraight、Forward、Homing、StraightWithHoming、Sine、Reflect、FadeMove）では実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使う。duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。この癖は意図的に残している。同様に `MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
+旧実装との互換のため、`StepClock`（`PullRunner.cs`）は旧 `PullMovementHelper` の挙動を再現する。旧実装では Ease 未指定の移動に DOTween 既定の OutQuad が掛かっていたため、`legacyOutQuad` が ON のステップ（Velocity、AimStraight、Forward、Homing、StraightWithHoming、Sine、Reflect、FadeMove）では実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使う。duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。この癖は意図的に残している。同様に `MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
 
 ## 9. エディタ
 
@@ -501,5 +501,5 @@ public abstract class StageServiceDefinition
 - **ツリー開始は翌フレーム**: 出現させた敵のツリー、`StartStage` で登録したステージツリーは次の `Step` から動く。
 - **秒とフレームの混在**: BT ノードの時間はフレーム、`MotionStep` と一部のバトルノードのフィールド（Spawn.beamDuration、SpriteBeam.bodyDuration、MoveTrailFan.moveDuration、ScreenEdgeDirection など）は秒。各フィールドの単位はノードリファレンスを参照。
 - **PhaseMarker の phaseId は現状使われていない**: `BossPhaseProgressGauge` は通知の回数だけを見て、BGM のサンプル位置から現在フェーズを推定する。
-- **型の置き場所**: `WindDirection` / `WindInterval` / `BattleWindSettings` は `Model/BattleWind.cs`、`BossWindCueSettings` は `Model/BossWindCueSettings.cs`、自機の Transform を持つ `BattleTargets` は `Runtime/Motion/MotionAssets.cs` にある。
+- **型の置き場所**: `WindDirection` / `WindInterval` / `BattleWindSettings` は `Model/` に 1 型 1 ファイルで、`BossWindCueSettings` は `Model/BossWindCueSettings.cs`、自機の Transform を持つ `BattleTargets` は `Runtime/Motion/BattleTargets.cs` にある。
 - `BossEntityPresenter` は HP・被弾・撃破演出・登場直後の当たり判定オフだけを持つ。`Stage3WindBossController` は BossWindCue ノードの腕上げ演出の受け手（`IWindCueReceiver`）として残っている。

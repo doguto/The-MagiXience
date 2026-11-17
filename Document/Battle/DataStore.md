@@ -140,7 +140,7 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 
 ### BossDefinition（`Stage{N}_Boss.asset`）
 
-- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Battle/BossDefinition.cs`（`Create > Battle > Boss Definition`）
+- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Parts/BossDefinition.cs`（`Create > Battle > Boss Definition`）
 
 | フィールド | 型 | 説明 |
 |---|---|---|
@@ -171,13 +171,13 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 
 ### MotionPreset（`Motion/`）
 
-- 定義: `Assets/Project/Scenes/Battle/Scripts/Runtime/Motion/MotionAssets.cs`（`Create > Battle > Motion Preset`）
+- 定義: `Assets/Project/Scenes/Battle/Scripts/Runtime/Motion/MotionPreset.cs`（`Create > Battle > Motion Preset`）
 - `[SerializeReference] List<MotionStep> steps` を持つだけ。時間は秒指定。
 - `Move` の `preset`、共通ツリー `Enemy` の `movement` パラメータ、`BulletSpec.motionPreset`、`LoopMotion` のエントリから参照する。`Bullet_{弾Prefab名}` という名前のものは、旧形式で弾 Prefab 側に設定されていた移動を移行時に切り出したもの。
 
 ### EaseCurveAsset
 
-- 定義: 同じく `MotionAssets.cs`（`Create > Battle > Ease Curve`）。現状のデータには無い
+- 定義: `Runtime/Motion/EaseCurveAsset.cs`（`Create > Battle > Ease Curve`）。現状のデータには無い
 - `AnimationCurve curve` を 1 つ持つだけ。`MotionEase.easeValue = -1`（カスタムカーブ）のときに `curvePreset` として参照される。
 
 ---

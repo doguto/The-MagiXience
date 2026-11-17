@@ -29,7 +29,7 @@ Assets/Project/DataStore/Stage{N}/
 | Services | このステージでだけ有効な機能（`WindService` など）。ステージ単位で、道中からボス戦まで続く。宣言しないものは存在しない扱い |
 | Tree | ステージツリー。ルートは Stage ノード。Success で完了するとステージクリア |
 
-`BossDefinition`（`.../BehaviorTree/Battle/BossDefinition.cs`）の項目:
+`BossDefinition`（`.../BehaviorTree/Parts/BossDefinition.cs`）の項目:
 
 | 項目 | 内容 |
 |---|---|

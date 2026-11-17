@@ -284,14 +284,15 @@ Battle BehaviorTree:
 
 - `Core/BattleStageAsset.cs`: 1 ステージ (道中・会話・ボス戦) 全体の定義 (ステージサービス、ステージツリー)。
 - `Core/BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject (root、未接続ノード、パラメータ)。
-- `Core/Node.cs`: ノードの基底 (`Node` / `CompositeNode` / `DecoratorNode` / `ActionNode`)。設定・実行中の状態・処理を 1 クラスに持ち、Enter/Tick/Abort/Exit の順を保証する。
-- `Core/TreeScope.cs` / `Core/TreeParameter.cs`: パラメータ解決 (`BtInt` などの `$param`)・SubTree の循環検出と、実行用にノードを複製する `NodeCloner`。
+- `Core/Node.cs` / `Core/CompositeNode.cs` / `Core/DecoratorNode.cs` / `Core/ActionNode.cs`: ノードの基底。設定・実行中の状態・処理を 1 クラスに持ち、Enter/Tick/Abort/Exit の順を保証する。
+- `Core/TreeScope.cs` / `Core/TreeParameter.cs` / `Core/Bt*.cs` / `Core/NodeCloner.cs`: パラメータ解決 (`BtInt` などの `$param`)・SubTree の循環検出と、実行用にノードを複製する `NodeCloner`。
 - `Core/BattleContext.cs` / `Core/BehaviorTreeRunner.cs`: ツリー 1 本の実行文脈と駆動。
-- `Battle/EmitterSources.cs` / `Battle/ShotPatterns.cs` / `Battle/ShotNodes.cs` / `Battle/BeamNodes.cs`: 方向・回転・弾設定・撃ち方（ShotPattern）と、撃ち方ごとの弾を撃つノード（SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot）、溜めの演出 ChargeEffect、WarningLine / BulletBeam / SpriteBeam / MoveTrailFan。
-- `Battle/ActorNodes.cs`: Move / SetDeathBehavior / SetInvincible / Despawn / PlaySe / Spawn。
-- `Battle/TrailNodes.cs` / `Battle/TrailPath.cs`: MovePath / PlaceAlongPath と経路アセット。
-- `Battle/FlowNodes.cs` / `Battle/BossDefinition.cs`: Stage / Section / Wave / PlayBgm / SpawnBoss / BossBattle / PlayScenario / OnCommand と、ボスの定義。
-- `Battle/StageNodes.cs`: HP・敵全滅・BGM 位置の条件、EnterStrongMode / ClearBullets / WithWind / BossWindCue / PhaseMarker / WithPrefab。
+- 1 ファイル 1 型。ノードは基底クラスごとのフォルダ (`Composite/` / `Decorator/` / `Action/` / `Condition/`) に置き、ファイル名は型名と同じ。
+- `Composite/`: Sequence / Selector / Parallel / RandomSelect、ステージ進行の Stage / PlayScenario。
+- `Decorator/`: Loop / Repeat / Until / Delay / Inverter / ForceSuccess、WarningLine、Section / OnCommand、WithWind / WithPrefab。
+- `Action/`: Wait / Log / SubTree、弾を撃つノード (SingleShot / NWayShot など)、ChargeEffect、BulletBeam / SpriteBeam / MoveTrailFan、Move / MovePath / PlaceAlongPath、Spawn / Despawn / SetDeathBehavior / SetInvincible / PlaySe、Wave / PlayBgm / SpawnBoss / BossBattle、EnterStrongMode / ClearBullets / BossWindCue / PhaseMarker、CheckCondition / WaitUntil。
+- `Condition/`: 条件の基底と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies / NormalHpDepleted / BgmSamples。
+- `Parts/`: ノードではない部品 (ShotPattern 系、DirectionSource / RotationSource 系、SpawnLayout 系、BulletSpec、Emitter、EmitContext、BeamAim / BeamLine / IBeam、TrailPolyline) と、ScriptableObject の `BossDefinition` / `TrailPath`。
 
 Battle Runtime:
 
@@ -300,11 +301,11 @@ Battle Runtime:
 - `BattleClock.cs`: 固定 60fps で BattleWorld を進める MonoBehaviour。
 - `BattleActor.cs`: 敵/ボスに付けてツリーと移動を毎フレーム進める。
 - `ActorSpawner.cs`: 敵・ビーム・障害物 Prefab を生成 (プール対象は ActorPool から取得) し、必要ならツリーを付ける。
-- `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs`: 敵を Prefab ごとに使い回すプール。`IPoolableActor` と、敵を消す共通の入口 `ActorDespawn` も `ActorPool.cs` にある。
+- `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs` / `IPoolableActor.cs` / `ActorDespawn.cs`: 敵を Prefab ごとに使い回すプールと、敵を消す共通の入口 `ActorDespawn`。
 - `StagePrefabCollector.cs`: BattleStageAsset から参照をたどり、事前生成する弾・出現物の Prefab を集める。
 - `BulletSystem.cs`: 敵弾・自機弾を MotionStep に従って固定フレームで動かす。
-- `Stage/StageContext.cs` / `Stage/WindService.cs` / `Stage/ExternalForces.cs`: ステージサービスの仕組み、風、自機・弾への外力の受け口。
-- `Motion/MotionCore.cs` / `Motion/MotionSteps.Basic.cs` / `Motion/MotionSteps.Advanced.cs` / `Motion/MotionAssets.cs`: MotionStep の定義・実行、MotionPreset / EaseCurveAsset / BattleTargets (自機の Transform)。
+- `Stage/`: ステージサービスの仕組み (`StageContext` / `IStageService` / `StageServiceDefinition`)、風 (`WindService` / `WindServiceDefinition`)、自機・弾への外力の受け口 (`IMoveModifier` / `IBulletForce`)。
+- `Motion/`: MotionStep の基底と各ステップ (`*Motion.cs`)、実行器 (`MotionRunner` / `PullRunner` / `DelegatePullRunner` / `TweenRunner` / `MotionSequence`)、MotionPreset / EaseCurveAsset / BattleTargets (自機の Transform)。
 
 Battle BehaviorTree Editor:
 
@@ -316,7 +317,7 @@ Battle BehaviorTree Editor:
 
 Battle Model:
 
-- `BattleWind.cs`: 風の設定型 (`WindDirection` / `WindInterval` / `BattleWindSettings`)。
+- `BattleWindSettings.cs` / `WindInterval.cs` / `WindDirection.cs`: 風の設定型。
 - `BossWindCueSettings.cs`: BossWindCue ノードの設定。
 - `BattleBackgroundModel.cs`: 背景の状態。
 - `ScreenBoundsCache.cs`: Battle シーンの画面境界をキャッシュする。

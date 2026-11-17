@@ -784,11 +784,11 @@ Battle 全体の中心 Presenter。
 - `BattleClock.cs`: `Update` で `Time.deltaTime` を蓄積し、固定 60fps で `BattleWorld.Step()` を呼ぶ（1 描画フレーム最大 4 ステップ、ポーズ中は停止）。
 - `BattleActor.cs`: 敵/ボスの GameObject に付けるコンポーネント。自分のツリーを毎フレーム進める（移動もツリーの Move ノードで行う）。
 - `ActorSpawner.cs`: Spawn ノードから敵・ビーム・障害物 Prefab を生成し、ツリー指定時は `BattleActor` を付ける。プール対象の敵は `ActorPool` から出す。
-- `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs`: 敵を Prefab ごとに使い回すプール。敵を消すときの共通の入口 `ActorDespawn.Despawn`（プール品はプールへ戻し、それ以外は Destroy）と、出し入れ時の状態を戻す `IPoolableActor` も `ActorPool.cs` にある。`NoActorPool` を付けた Prefab はプールしない。
+- `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs`: 敵を Prefab ごとに使い回すプール。敵を消すときの共通の入口 `ActorDespawn.Despawn`（プール品はプールへ戻し、それ以外は Destroy）と、出し入れ時の状態を戻す `IPoolableActor` はそれぞれ別ファイル。`NoActorPool` を付けた Prefab はプールしない。
 - `StagePrefabCollector.cs`: `BattleStageAsset` からシリアライズされた参照をたどり、事前生成する弾 Prefab と出現物 Prefab を集める（Prefab の中身はたどらない）。
 - `BulletSystem.cs`: 敵弾・自機弾を固定フレームで動かす。弾の移動は BT の外で、`MotionStep` に従う。外力（風）の受け口 `IBulletForce` を持つ。
-- `Stage/StageContext.cs`, `Stage/WindService.cs`, `Stage/ExternalForces.cs`: ステージ固有機能（ステージサービス）の仕組みと、その実装例である風、自機・弾への汎用の受け口。
-- `Motion/`: 敵・ボス・弾で共通の移動定義（`MotionStep` / `MotionPreset` / `EaseCurveAsset`）と実行器。自機の Transform は `BattleTargets.Player`（`MotionAssets.cs`）が持つ。
+- `Stage/`: ステージ固有機能（ステージサービス）の仕組みと、その実装例である風、自機・弾への汎用の受け口（`IMoveModifier` / `IBulletForce`）。
+- `Motion/`: 敵・ボス・弾で共通の移動定義（`MotionStep` / `MotionPreset` / `EaseCurveAsset`）と実行器。自機の Transform は `BattleTargets.Player`（`BattleTargets.cs`）が持つ。
 
 ### `BackgroundPresenter.cs` / `BackgroundView.cs`
 
@@ -838,11 +838,13 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 
 ### Nodes
 
-- `Composite/`: Sequence、Selector、Parallel（All / Any / Duration。Duration は指定フレームで打ち切る）、Random（重み・連続回避）。
-- `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Delay、Inverter、ForceSuccess。
-- `Condition/Condition.cs`: Constant、FrameElapsed、BgmReached、And / Or / Not と、CheckCondition / WaitUntil ノード。
-- `Action/BasicActions.cs`: Wait、Log、SubTree と、`*Param` 欄から Object パラメータを引く `ParamObjects`。
-- `Battle/`: 発射（SingleShot / NWayShot などの弾を撃つノードと ShotPattern / DirectionSource / RotationSource / BulletSpec、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples 条件、EnterStrongMode、ClearBullets、WithWind、BossWindCue、PhaseMarker、WithPrefab）、進行（Stage、Section、Wave、PlayBgm、SpawnBoss、BossBattle、Scenario、OnCommand）。
+1 ファイル 1 型で、ノードは基底クラスごとのフォルダに置く。
+
+- `Composite/`: Sequence、Selector、Parallel（All / Any / Duration。Duration は指定フレームで打ち切る）、Random（重み・連続回避）、進行の Stage / PlayScenario。
+- `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Delay、Inverter、ForceSuccess、WarningLine、Section、OnCommand、WithWind、WithPrefab。
+- `Condition/`: Constant、FrameElapsed、BgmReached、And / Or / Not、NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples。
+- `Action/`: Wait、Log、SubTree、CheckCondition / WaitUntil、発射（SingleShot / NWayShot など、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（EnterStrongMode、ClearBullets、BossWindCue、PhaseMarker）、進行（Wave、PlayBgm、SpawnBoss、BossBattle）。
+- `Parts/`: ノードではない部品。ShotPattern / DirectionSource / RotationSource / BulletSpec / Emitter、`*Param` 欄から Object パラメータを引く `ParamObjects`、BossDefinition / TrailPath など。
 
 ### 設計方針
 
@@ -1048,7 +1050,7 @@ EntityPresenter として EntityModel を提供しつつ、接触時の押し出
 ### `BossPhaseProgressGauge.cs`
 
 ボスフェーズの進行状況を表示する Presenter。
-`BattleActor.Attached` で自分を含むボスにツリーが付与されたことを検知し、`BattleServices.PhaseStarted`（BT の `PhaseMarker` ノードが通知）を購読する。フェーズの位置は BGM のサンプル位置と閾値テーブルから求める。
+`BattleActor.OnAttached` で自分を含むボスにツリーが付与されたことを検知し、`BattleServices.OnPhaseStarted`（BT の `PhaseMarker` ノードが通知）を購読する。フェーズの位置は BGM のサンプル位置と閾値テーブルから求める。
 
 ### Death Directors
 
