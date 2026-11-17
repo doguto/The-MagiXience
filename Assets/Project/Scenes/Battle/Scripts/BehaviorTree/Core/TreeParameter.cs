@@ -3,15 +3,6 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    public enum TreeParameterKind
-    {
-        Float,
-        Int,
-        Bool,
-        Vector2,
-        Object,
-    }
-
     // ツリーが公開するパラメータ。SubTree 側では同じ型で上書き値を持つ。
     [Serializable]
     public class TreeParameter
@@ -46,109 +37,6 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         {
             if (string.IsNullOrEmpty(bindToParent) || parentScope == null) return this;
             return parentScope.TryGet(bindToParent, out var p) ? p : this;
-        }
-    }
-
-    [Serializable]
-    public struct BtFloat
-    {
-        public float value;
-        public string param;
-
-        public BtFloat(float value)
-        {
-            this.value = value;
-            param = null;
-        }
-
-        public float Resolve(TreeScope scope)
-        {
-            if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
-            return p.Kind == TreeParameterKind.Int ? p.IntValue : p.FloatValue;
-        }
-
-        public static implicit operator BtFloat(float v) => new(v);
-
-        public override string ToString() => string.IsNullOrEmpty(param) ? value.ToString("0.##") : "$" + param;
-    }
-
-    [Serializable]
-    public struct BtInt
-    {
-        public int value;
-        public string param;
-
-        public BtInt(int value)
-        {
-            this.value = value;
-            param = null;
-        }
-
-        public int Resolve(TreeScope scope)
-        {
-            if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
-            return p.Kind == TreeParameterKind.Float ? Mathf.RoundToInt(p.FloatValue) : p.IntValue;
-        }
-
-        public static implicit operator BtInt(int v) => new(v);
-
-        public override string ToString() => string.IsNullOrEmpty(param) ? value.ToString() : "$" + param;
-
-        public string ToFrameString() => string.IsNullOrEmpty(param) ? $"{value}f ({value / (float)BattleContext.FramesPerSecond:0.##}s)" : "$" + param;
-    }
-
-    [Serializable]
-    public struct BtBool
-    {
-        public bool value;
-        public string param;
-
-        public BtBool(bool value)
-        {
-            this.value = value;
-            param = null;
-        }
-
-        public bool Resolve(TreeScope scope)
-        {
-            if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
-            return p.BoolValue;
-        }
-
-        public static implicit operator BtBool(bool v) => new(v);
-    }
-
-    [Serializable]
-    public struct BtVector2
-    {
-        public Vector2 value;
-        public string param;
-
-        public BtVector2(Vector2 value)
-        {
-            this.value = value;
-            param = null;
-        }
-
-        public Vector2 Resolve(TreeScope scope)
-        {
-            if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
-            return p.Vector2Value;
-        }
-
-        public static implicit operator BtVector2(Vector2 v) => new(v);
-    }
-
-    [Serializable]
-    public struct BtObject<T> where T : UnityEngine.Object
-    {
-        public T value;
-        public string param;
-
-        public T Resolve(TreeScope scope)
-        {
-            if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
-            return p.ObjectValue as T ?? value;
         }
     }
 }

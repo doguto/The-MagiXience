@@ -70,9 +70,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             flow.Background = backgroundPresenter;
             flow.Scenario = this;
             flow.PlayBgm = PlayBgm;
-            flow.SectionStarted += OnSectionStarted;
-            flow.BossSpawned += OnBossSpawned;
-            flow.BossBattleStarted += OnBossBattleStarted;
+            flow.OnSectionStarted.Subscribe(x => OnSectionStarted(x.Index, x.Situation)).AddTo(disposables);
+            flow.OnBossSpawned.Subscribe(_ => OnBossSpawned()).AddTo(disposables);
+            flow.OnBossBattleStarted.Subscribe(OnBossBattleStarted).AddTo(disposables);
+            flow.OnStageFinished.Subscribe(OnStageFinished).AddTo(disposables);
             ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
@@ -299,10 +300,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void StartStage(int section, bool resume)
         {
             awaitingFirstSection = true;
-            flow.StartStage(stage, section, resume, OnStageFinished);
+            flow.StartStage(stage, section, resume);
         }
 
-        void OnSectionStarted(int index, BattleSituation situation, bool resumed)
+        void OnSectionStarted(int index, BattleSituation situation)
         {
             RuntimeModelRepository.Get().CheckpointSection = index;
 
@@ -311,7 +312,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             backgroundPresenter?.ResetScroll(situation == BattleSituation.Way);
         }
 
-        void OnBossSpawned(BossEntityPresenter boss)
+        void OnBossSpawned()
         {
             playerPresenter?.FreezeRunAnimation();
             backgroundPresenter?.StartDeceleration();

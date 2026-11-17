@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
+using UniRx;
 using UnityEditor;
 using UnityEngine.UIElements;
 
@@ -10,6 +11,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
     public class NodeInspectorView : VisualElement
     {
         readonly ScrollView scroll;
+        readonly SerialDisposable valuesSubscription = new();
         BehaviorTreeNodeView target;
         Label summaryLabel;
         Label stateLabel;
@@ -64,7 +66,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             if (commentProp != null) body.Insert(0, BehaviorTreeNodeView.BindField(commentProp, OnEdited));
             scroll.Add(body);
 
-            target.ValuesChanged += RefreshSummary;
+            valuesSubscription.Disposable = target.OnValuesChanged.Subscribe(_ => RefreshSummary());
         }
 
         public void RefreshRuntime()
@@ -90,7 +92,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         void Detach()
         {
-            if (target != null) target.ValuesChanged -= RefreshSummary;
+            valuesSubscription.Disposable = null;
             target = null;
             summaryLabel = null;
             stateLabel = null;

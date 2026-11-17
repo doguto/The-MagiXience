@@ -6,25 +6,6 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Runtime
 {
-    // プールから出し入れされるときに状態を戻すコンポーネントが実装する
-    public interface IPoolableActor
-    {
-        // 2 回目以降に出されたとき (初回は Awake で初期化されるので呼ばない)
-        void OnTakenFromPool();
-        void OnReturnedToPool();
-    }
-
-    // 敵を消すときの共通の入口。プールから出したものはプールへ戻し、それ以外は Destroy する
-    public static class ActorDespawn
-    {
-        public static void Despawn(GameObject actor)
-        {
-            if (actor == null) return;
-            if (actor.TryGetComponent<PooledActor>(out var pooled) && pooled.Pool != null) pooled.Pool.Release(actor);
-            else UnityEngine.Object.Destroy(actor);
-        }
-    }
-
     // Spawn ノードで出す敵を Prefab ごとに使い回す。Battle シーンに 1 つ置き、シーンと一緒に破棄される
     public sealed class ActorPool : MonoBehaviour
     {

@@ -39,15 +39,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         float lastLogTime;
 
         readonly CompositeDisposable disposables = new();
+        readonly SerialDisposable phaseSubscription = new();
 
         protected override void Start()
         {
             base.Start();
 
             SetVisible(false);
-            BattleActor.Attached += OnActorAttached;
+            BattleActor.OnAttached.Subscribe(OnActorAttached).AddTo(disposables);
+            phaseSubscription.AddTo(disposables);
 
-            // 生成と同じフレームでツリーが付与された場合は Attached を取り逃がすため、既に付いていればここで拾う
+            // 生成と同じフレームでツリーが付与された場合は OnAttached を取り逃がすため、既に付いていればここで拾う
             var existing = GetComponentInParent<BattleActor>();
             if (existing != null && existing.World != null)
             {
@@ -64,12 +66,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             var services = actor.World?.Services;
             if (services == null || services == subscribedServices) return;
 
-            if (subscribedServices != null) subscribedServices.PhaseStarted -= HandlePhaseStarted;
             subscribedServices = services;
-            subscribedServices.PhaseStarted += HandlePhaseStarted;
+            phaseSubscription.Disposable = services.OnPhaseStarted.Subscribe(_ => OnPhaseStarted());
         }
-
-        void HandlePhaseStarted(string phaseId) => OnPhaseStarted();
 
         void OnPhaseStarted()
         {
@@ -151,8 +150,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            BattleActor.Attached -= OnActorAttached;
-            if (subscribedServices != null) subscribedServices.PhaseStarted -= HandlePhaseStarted;
             disposables.Dispose();
         }
     }

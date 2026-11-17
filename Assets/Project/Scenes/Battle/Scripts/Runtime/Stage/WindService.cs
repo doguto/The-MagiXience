@@ -1,4 +1,3 @@
-using System;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Presenter;
 using Project.Scripts.Extensions;
@@ -6,17 +5,6 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Runtime
 {
-    [Serializable]
-    public sealed class WindServiceDefinition : StageServiceDefinition
-    {
-        [SerializeField, Tooltip("ステージ開始時の風。Intervals が空なら無風で始まる")] BattleWindSettings initial = new();
-        [SerializeField, Tooltip("風向きを示す矢印。ステージ開始時に背景の下へ生成する")] WindArrowsPresenter arrowsPrefab;
-
-        public BattleWindSettings Initial => initial;
-
-        public override IStageService Create() => new WindService(initial, arrowsPrefab);
-    }
-
     // 風の予定表 (向き × 秒数を順に繰り返す) を進め、開始時に自機・敵弾・矢印表示へ自分を登録する。
     // Enabled が OFF でも予定表は進み、自機狙い放物線の曲げる向きなどには使われる
     public sealed class WindService : IStageService, IMoveModifier, IBulletForce

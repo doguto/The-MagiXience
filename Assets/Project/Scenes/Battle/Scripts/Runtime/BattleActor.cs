@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scenes.Battle.Scripts.Runtime.Motion;
+using UniRx;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Runtime
@@ -31,14 +33,15 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public bool IsFinished => !IsAlive || runner == null || runner.IsFinished;
 
         // ツリーが最初に動く前に呼ばれる。付与先の部品 (進行ゲージなど) が購読の準備に使う
-        public static event System.Action<BattleActor> Attached;
+        static readonly Subject<BattleActor> attached = new();
+        public static IObservable<BattleActor> OnAttached => attached;
 
         public static BattleActor Attach(GameObject target, BattleWorld world, BehaviorTreeAsset tree, IReadOnlyList<TreeParameter> overrides = null)
         {
             var actor = target.GetComponent<BattleActor>();
             if (actor == null) actor = target.AddComponent<BattleActor>();
             actor.Setup(world, tree, overrides);
-            Attached?.Invoke(actor);
+            attached.OnNext(actor);
             return actor;
         }
 

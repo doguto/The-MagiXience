@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+using UniRx;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using BtNode = Project.Scenes.Battle.Scripts.BehaviorTree.Node;
@@ -19,7 +21,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         public BtNode TreeNode { get; }
         public bool IsRoot { get; }
-        public event System.Action ValuesChanged;
+        readonly Subject<Unit> valuesChanged = new();
+        public IObservable<Unit> OnValuesChanged => valuesChanged;
         public Port Input { get; }
         public Port Output { get; }
 
@@ -97,7 +100,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public void NotifyValuesChanged()
         {
             RefreshTexts();
-            ValuesChanged?.Invoke();
+            valuesChanged.OnNext(Unit.Default);
         }
 
         public override void OnSelected()

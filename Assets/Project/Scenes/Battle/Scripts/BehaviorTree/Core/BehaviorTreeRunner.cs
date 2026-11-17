@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
@@ -9,6 +10,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         readonly Node root;
         readonly BattleContext context;
+        readonly AsyncSubject<NodeStatus> finished = new();
 
         public BehaviorTreeRunner(BehaviorTreeAsset asset, BattleContext context, IReadOnlyList<TreeParameter> overrides = null)
         {
@@ -22,7 +24,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public BattleContext Context => context;
         public NodeStatus? Result { get; private set; }
         public bool IsFinished => Result.HasValue;
-        public event Action<NodeStatus> Finished;
+        // 完了したときだけ値を流す。Stop で打ち切った場合は値なしで完了する
+        public IObservable<NodeStatus> OnFinished => finished;
 
         public void Tick()
         {
@@ -41,7 +44,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
             if (status == NodeStatus.Running) return;
             Result = status;
-            Finished?.Invoke(status);
+            finished.OnNext(status);
+            finished.OnCompleted();
         }
 
         public void Stop()
@@ -49,6 +53,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             if (IsFinished) return;
             root.Abort(context);
             Result = NodeStatus.Failure;
+            finished.OnCompleted();
         }
     }
 }

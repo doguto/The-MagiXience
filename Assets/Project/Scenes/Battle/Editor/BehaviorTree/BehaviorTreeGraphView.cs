@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
+using UniRx;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -23,7 +24,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         readonly MiniMap miniMap;
 
         // 選択が変わったとき、または選択中のノードの入力欄を作り直すべきとき (構造変更・パラメータ改名) に 1 フレームにまとめて通知する
-        public event Action SelectionChanged;
+        readonly Subject<Unit> selectionChanged = new();
+        public IObservable<Unit> OnSelectionChanged => selectionChanged;
         bool selectionChangeQueued;
 
         public IReadOnlyList<BehaviorTreeNodeView> SelectedNodes =>
@@ -36,7 +38,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             schedule.Execute(() =>
             {
                 selectionChangeQueued = false;
-                SelectionChanged?.Invoke();
+                selectionChanged.OnNext(Unit.Default);
             });
         }
 
@@ -251,7 +253,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 if (views.ContainsKey(def)) continue;
                 var target = def;
                 var view = new BehaviorTreeNodeView(def, () => FindPropertyFor(target), OnDropOutsidePort);
-                view.ValuesChanged += RefreshOrderBadges;
+                view.OnValuesChanged.Subscribe(_ => RefreshOrderBadges());
                 view.SetPosition(new Rect(def.GraphPosition, Vector2.zero));
                 views[def] = view;
                 AddElement(view);

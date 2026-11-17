@@ -1,4 +1,5 @@
 using Project.Scenes.Battle.Scripts.BehaviorTree;
+using UniRx;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
@@ -65,11 +66,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             rightSplit.Add(graphView);
 
             parameterPanel = new ParameterPanelView();
-            parameterPanel.UsageClicked += name => graphView.SelectNodesUsingParameter(name);
-            parameterPanel.Changed += () => graphView.RefreshTexts();
+            parameterPanel.OnUsageClicked.Subscribe(graphView.SelectNodesUsingParameter);
+            parameterPanel.OnChanged.Subscribe(_ => graphView.RefreshTexts());
 
             nodeInspector = new NodeInspectorView();
-            graphView.SelectionChanged += () => nodeInspector.Show(graphView.SelectedNodes);
+            graphView.OnSelectionChanged.Subscribe(_ => nodeInspector.Show(graphView.SelectedNodes));
 
             var tabs = new TabView { viewDataKey = "bt-editor-side-tabs" };
             tabs.AddToClassList("bt-side-tabs");

@@ -1,5 +1,6 @@
 using System;
 using Project.Scenes.Battle.Scripts.BehaviorTree;
+using UniRx;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -20,8 +21,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         int lastArraySize = -1;
         string selectedName;
 
-        public event Action<string> UsageClicked;
-        public event Action Changed;
+        readonly Subject<string> usageClicked = new();
+        readonly Subject<Unit> changed = new();
+
+        public IObservable<string> OnUsageClicked => usageClicked;
+        public IObservable<Unit> OnChanged => changed;
 
         public ParameterPanelView()
         {
@@ -59,7 +63,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             footer = new Label();
             footer.AddToClassList("bt-params__footer-text");
             footerRow.Add(footer);
-            selectUsagesButton = new Button(() => { if (selectedName != null) UsageClicked?.Invoke(selectedName); }) { text = "Select" };
+            selectUsagesButton = new Button(() => { if (selectedName != null) usageClicked.OnNext(selectedName); }) { text = "Select" };
             selectUsagesButton.AddToClassList("bt-params__select");
             footerRow.Add(selectUsagesButton);
             Add(footerRow);
@@ -164,7 +168,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             row.AddManipulator(new ContextualMenuManipulator(evt =>
             {
-                evt.menu.AppendAction("Select Usages", _ => UsageClicked?.Invoke(name));
+                evt.menu.AppendAction("Select Usages", _ => usageClicked.OnNext(name));
                 evt.menu.AppendAction("Delete", _ => RemoveParameter(index));
             }));
 
@@ -209,7 +213,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                     selectedName = created.FindPropertyRelative("name").stringValue;
                     serializedObject.ApplyModifiedProperties();
                     Rebuild();
-                    Changed?.Invoke();
+                    changed.OnNext(Unit.Default);
                 });
             }
             menu.ShowAsContext();
@@ -238,7 +242,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             serializedObject.ApplyModifiedProperties();
             if (selectedName == oldName) selectedName = newName;
             Rebuild();
-            Changed?.Invoke();
+            changed.OnNext(Unit.Default);
         }
 
         void RemoveParameter(int index)
@@ -261,7 +265,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             serializedObject.ApplyModifiedProperties();
             if (selectedName == name) selectedName = null;
             Rebuild();
-            Changed?.Invoke();
+            changed.OnNext(Unit.Default);
         }
     }
 }

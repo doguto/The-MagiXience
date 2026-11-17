@@ -4,20 +4,6 @@ using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    public enum NodeStatus
-    {
-        Running,
-        Success,
-        Failure,
-    }
-
-    public enum NodeChildCapacity
-    {
-        None,
-        Single,
-        Multiple,
-    }
-
     // ノード 1 種類 = 1 クラス。設定はアセットに保存し、実行中の状態は [NonSerialized] に持つ。
     // アセット上のノードは雛形で、実行するツリーごとに NodeCloner で複製し、Setup でパラメータを解決してから Tick する。
     [Serializable]
@@ -97,49 +83,5 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected abstract NodeStatus OnTick(BattleContext ctx);
         protected virtual void OnAbort(BattleContext ctx) { }
         protected virtual void OnExit(BattleContext ctx) { }
-    }
-
-    [Serializable]
-    public abstract class CompositeNode : Node
-    {
-        [SerializeReference, HideInInspector] List<Node> children = new();
-
-        public override NodeChildCapacity ChildCapacity => NodeChildCapacity.Multiple;
-        public override IReadOnlyList<Node> Children => children;
-
-        public override void SetChildren(IList<Node> newChildren)
-        {
-            children = new List<Node>(newChildren);
-        }
-
-        private protected override void PrepareChildren() => children.RemoveAll(c => c == null);
-    }
-
-    [Serializable]
-    public abstract class DecoratorNode : Node
-    {
-        [SerializeReference, HideInInspector] Node child;
-
-        public Node Child => child;
-        public override NodeChildCapacity ChildCapacity => NodeChildCapacity.Single;
-        public override IReadOnlyList<Node> Children => child == null ? Array.Empty<Node>() : new[] { child };
-
-        public override void SetChildren(IList<Node> newChildren)
-        {
-            child = newChildren.Count > 0 ? newChildren[0] : null;
-        }
-
-        private protected override void PrepareChildren() => child ??= new EmptyNode();
-    }
-
-    [Serializable]
-    public abstract class ActionNode : Node
-    {
-    }
-
-    // 子が無いデコレータや、ツリーが空のときの代わり
-    sealed class EmptyNode : Node
-    {
-        protected override NodeStatus OnTick(BattleContext ctx) => NodeStatus.Success;
     }
 }

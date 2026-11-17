@@ -21,6 +21,11 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         readonly Func<AudioSource> bgmSource;
         readonly Action<SeType> playSe;
         readonly CompositeDisposable bossSubscriptions = new();
+        readonly CompositeDisposable worldSubscriptions = new();
+        readonly Subject<NodeStatus> stageFinished = new();
+        readonly Subject<(int Index, BattleSituation Situation, bool Resumed)> sectionStarted = new();
+        readonly Subject<BossEntityPresenter> bossSpawned = new();
+        readonly Subject<BossEntityPresenter> bossBattleStarted = new();
         BattleWorld world;
         BehaviorTreeRunner stageRunner;
         ActorPool actorPool;
@@ -45,13 +50,13 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public Action<BgmType> PlayBgm { get; set; }
         public BossEntityPresenter SpawnedBoss => boss;
 
-        public event Action<string> PhaseStarted;
-        public event Action<int, BattleSituation, bool> SectionStarted;
-        public event Action<BossEntityPresenter> BossSpawned;
-        public event Action<BossEntityPresenter> BossBattleStarted;
+        public IObservable<NodeStatus> OnStageFinished => stageFinished;
+        public IObservable<(int Index, BattleSituation Situation, bool Resumed)> OnSectionStarted => sectionStarted;
+        public IObservable<BossEntityPresenter> OnBossSpawned => bossSpawned;
+        public IObservable<BossEntityPresenter> OnBossBattleStarted => bossBattleStarted;
 
         // ステージのツリーを startSection から始める。resume ならその Section の会話を飛ばす
-        public void StartStage(BattleStageAsset stage, int startSection, bool resume, Action<NodeStatus> onFinished)
+        public void StartStage(BattleStageAsset stage, int startSection, bool resume)
         {
             EnsureWorld();
             world.SetStage(new StageContext(world, stage != null ? stage.Services : null));
@@ -67,7 +72,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             Prewarm(stage);
 
             stageRunner = new BehaviorTreeRunner(stage.Tree, new BattleContext(world));
-            stageRunner.Finished += status => onFinished?.Invoke(status);
+            stageRunner.OnFinished.Subscribe(stageFinished.OnNext).AddTo(worldSubscriptions);
             world.Register(new RunnerTickable(stageRunner));
         }
 
@@ -101,10 +106,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             if (world != null)
             {
                 world.Services.Bullets.Clear();
-                world.Services.PhaseStarted -= OnPhaseStarted;
-                world.Services.Progress.SectionStarted -= OnSectionStarted;
                 world.Clear();
             }
+            worldSubscriptions.Clear();
             clock.End();
             world = null;
             Player?.BindBulletSystem(null);
@@ -149,7 +153,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 world.Register(entrance);
             }
 
-            BossSpawned?.Invoke(boss);
+            bossSpawned.OnNext(boss);
             return true;
         }
 
@@ -163,7 +167,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
             var actor = BattleActor.Attach(boss.gameObject, world, tree);
             world.Services.Boss = actor;
-            BossBattleStarted?.Invoke(boss);
+            bossBattleStarted.OnNext(boss);
             return actor;
         }
 
@@ -185,13 +189,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             services.Player = Player;
             services.Background = Background;
             Player?.BindBulletSystem(services.Bullets);
-            services.PhaseStarted += OnPhaseStarted;
-            services.Progress.SectionStarted += OnSectionStarted;
+            services.Progress.OnSectionStarted.Subscribe(sectionStarted.OnNext).AddTo(worldSubscriptions);
             clock.Begin(world);
         }
-
-        void OnPhaseStarted(string phaseId) => PhaseStarted?.Invoke(phaseId);
-        void OnSectionStarted(int index, BattleSituation situation, bool resumed) => SectionStarted?.Invoke(index, situation, resumed);
 
         sealed class RunnerTickable : IBattleTickable
         {

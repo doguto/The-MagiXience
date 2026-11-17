@@ -1,24 +1,8 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.Runtime
 {
-    // ステージ (道中/ボス戦) 単位で有効になる機能。宣言したステージでだけ生成され、終了時に破棄される
-    public interface IStageService
-    {
-        void Begin(StageContext stage);
-        void Tick(float dt);
-        void End();
-    }
-
-    // BattleStageAsset に並べるサービスの定義。実行時の状態は Create で作る別インスタンスに持たせる
-    [Serializable]
-    public abstract class StageServiceDefinition
-    {
-        public abstract IStageService Create();
-    }
-
     public sealed class StageContext
     {
         readonly List<IStageService> services = new();
