@@ -17,7 +17,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         readonly Label orderLabel;
         readonly Label summaryLabel;
         readonly System.Action<Port, UnityEngine.Vector2> onDropOutsidePort;
-        VisualElement commentRow;
 
         public BtNode TreeNode { get; }
         public bool IsRoot { get; }
@@ -26,9 +25,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public Port Input { get; }
         public Port Output { get; }
 
-        // 入力欄は重いため、選択中のノードにだけ作る。それ以外はヘッダーと要約のみ表示する
+        // 入力欄は右ペインの Node タブに出す。ノード自体はヘッダーと要約だけにして、選択しても大きさを変えない
         readonly System.Func<SerializedProperty> resolveProperty;
-        VisualElement fields;
 
         public BehaviorTreeNodeView(BtNode definition, System.Func<SerializedProperty> resolveProperty, System.Action<Port, UnityEngine.Vector2> onDropOutsidePort)
         {
@@ -55,8 +53,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             var body = new VisualElement();
             body.AddToClassList("bt-body");
-            fields = new VisualElement();
-            body.Add(fields);
             summaryLabel = StyledLabel("", "bt-summary");
             body.Add(summaryLabel);
             mainContainer.Add(body);
@@ -101,53 +97,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             RefreshTexts();
             valuesChanged.OnNext(Unit.Default);
-        }
-
-        public override void OnSelected()
-        {
-            base.OnSelected();
-            if (fields == null || fields.childCount > 0) return;
-            BuildInlineFields();
-        }
-
-        public void RefreshFields()
-        {
-            if (fields == null || !selected) return;
-            fields.Clear();
-            commentRow = null;
-            BuildInlineFields();
-        }
-
-        void BuildInlineFields()
-        {
-            var commentProp = BuildFields(ResolveProperty(), fields, NotifyValuesChanged);
-            if (commentProp == null) return;
-            // コメントは書かれている時だけ表示し、空なら右クリックの Edit Comment で出す
-            commentRow = BindField(commentProp, NotifyValuesChanged);
-            commentRow.AddToClassList("bt-comment");
-            commentRow.style.display = string.IsNullOrEmpty(commentProp.stringValue) ? DisplayStyle.None : DisplayStyle.Flex;
-            fields.Add(commentRow);
-        }
-
-        public override void OnUnselected()
-        {
-            base.OnUnselected();
-            if (fields == null) return;
-            fields.Clear();
-            commentRow = null;
-        }
-
-        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
-        {
-            if (!IsRoot && commentRow != null)
-            {
-                var visible = commentRow.resolvedStyle.display != DisplayStyle.None;
-                evt.menu.AppendAction(visible ? "Hide Comment" : "Edit Comment", _ =>
-                {
-                    commentRow.style.display = visible ? DisplayStyle.None : DisplayStyle.Flex;
-                });
-            }
-            base.BuildContextualMenu(evt);
         }
 
         public void SetOrder(int order, int? startFrame = null)
@@ -220,6 +169,15 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                     continue;
                 }
                 if (HiddenFields.Contains(field.name)) continue;
+                if (nodeType == typeof(SubTree) && field.name == "overrides")
+                {
+                    var tree = fields.Find(f => f.name == "tree");
+                    if (tree != null)
+                    {
+                        body.Add(SubTreeOverridesField.Create(field, tree, onChanged));
+                        continue;
+                    }
+                }
                 var element = BindField(field, onChanged);
                 body.Add(element);
                 ApplyShowWhen(nodeType, field, fields, element);

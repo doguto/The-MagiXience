@@ -173,10 +173,6 @@
     white-space: normal;
 }
 
-.bt-comment {
-    margin-top: 2px;
-}
-
 /* ---------- Category markers ---------- */
 
 .bt-node--composite .bt-marker,
@@ -270,6 +266,21 @@
 
 .bt-value--drop {
     background-color: rgba(58, 153, 255, 0.15);
+}
+
+.bt-overrides__header {
+    margin: 6px 0 2px 1px;
+    color: #9d9d9d;
+    -unity-font-style: bold;
+}
+
+.bt-overrides__note {
+    margin: 2px 0 2px 1px;
+    color: #7a7a7a;
+}
+
+.bt-override--default .bt-value__field {
+    opacity: 0.5;
 }
 
 /* ---------- Palette (左ペイン) ---------- */

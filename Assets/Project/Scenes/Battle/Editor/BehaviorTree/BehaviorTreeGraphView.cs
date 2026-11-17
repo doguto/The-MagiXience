@@ -211,7 +211,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             serializedObject?.Update();
             foreach (var view in views.Values) view.RefreshTexts();
-            foreach (var view in selection.OfType<BehaviorTreeNodeView>()) view.RefreshFields();
             QueueSelectionChanged();
         }
 
@@ -287,8 +286,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             isReloading = false;
             RefreshOrderBadges();
 
-            // 選択中のノードの入力欄は構造変更でパスがずれている可能性があるため作り直す
-            foreach (var view in selection.OfType<BehaviorTreeNodeView>()) view.RefreshFields();
             QueueSelectionChanged();
         }
 
