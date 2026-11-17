@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Name: S2_NWayRepeat
+  m_EditorClassIdentifier: 
+  root:
+    rid: 1000
+  detachedNodes: []
+  parameters:
+  - name: way
+    kind: 1
+    floatValue: 0
+    intValue: 5
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  - name: spread
+    kind: 0
+    floatValue: 72
+    intValue: 0
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  - name: count
+    kind: 1
+    floatValue: 0
+    intValue: 3
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  - name: interval
+    kind: 1
+    floatValue: 0
+    intValue: 6
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3964689a009344058aa4ca7839229974
+        graphPosition: {x: 460, y: 450}
+        comment: N-Way を count 回、interval フレームおきに自機狙いで撃つ
+        child:
+          rid: 1001
+        count:
+          value: 3
+          param: count
+        interval:
+          value: 6
+          param: interval
+    - rid: 1001
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 43389f0a28d5439f91c2167e16edf3f6
+        graphPosition: {x: 460, y: 600}
+        comment: 
+        bullet:
+          prefab: {fileID: -4487681364143076941, guid: ce0a2db3625f0224c9dd990bd86a29d1, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: f839d17faff557e4bbd27e7b0d4d6784, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 1002
+        rotation:
+          rid: 1003
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 5
+            param: way
+          spreadAngle:
+            value: 72
+            param: spread
+          radius: 0.25
+          startDelayFrames: 0
+          rotationOffset: 0
+    - rid: 1002
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 1003
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0

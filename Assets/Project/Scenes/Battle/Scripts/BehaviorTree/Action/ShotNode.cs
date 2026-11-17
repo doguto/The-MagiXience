@@ -16,6 +16,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField] SeType se;
 
         [NonSerialized] BulletSpec resolvedBullet;
+        [NonSerialized] ShotPattern resolvedPattern;
         [NonSerialized] List<Shot> shots;
 
         protected abstract ShotPattern Pattern { get; }
@@ -25,6 +26,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected override void OnSetup(TreeScope scope)
         {
             resolvedBullet = bullet.Resolve(scope);
+            resolvedPattern = Pattern?.Resolve(scope);
             shots = new List<Shot>();
         }
 
@@ -37,7 +39,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var rot = rotation?.GetRotation(e) ?? Quaternion.identity;
 
             shots.Clear();
-            Pattern?.Build(baseDirection, shots);
+            resolvedPattern?.Build(baseDirection, shots);
             Emitter.PlaySe(ctx, se);
 
             foreach (var shot in shots)

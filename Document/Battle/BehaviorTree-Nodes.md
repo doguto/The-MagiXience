@@ -213,7 +213,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 ## 5. バトル Action: 発射
 
-### 弾を撃つノード: SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot / BurstShot（Action/Attack）
+### 弾を撃つノード: SingleShot / NWayShot / SequentialFanShot / SequentialCircleShot（Action/Attack）
 
 撃ち方ごとに別のノードになっている（グラフ上でノードの種類を見れば何を撃つか分かる）。共通部分は `ShotNode`（`Action/ShotNode.cs`）。即 Success。
 
@@ -223,7 +223,8 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | `NWayShot` | 扇状に同時に撃つ |
 | `SequentialFanShot` | 扇状に 1 発ずつ並べ、最後の 1 発のあと全弾同時に動き出す |
 | `SequentialCircleShot` | 円周上に 1 発ずつ並べ、最後の 1 発のあと全弾同時に動き出す |
-| `BurstShot` | 同じ扇を間隔をあけて何回か撃つ |
+
+同じ扇を間隔をあけて何回か撃つ（連射）は、専用ノードを作らず `Repeat(回数, 間隔){ NWayShot }` で組む。Stage2 では `Stage2/BT/Attack/S2_NWayRepeat`（パラメータ `way` / `spread` / `count` / `interval`）を SubTree で呼ぶ。
 
 `pattern` の各フィールドは後述の「発射の部品: ShotPattern」を参照。どのノードも次の共通フィールドを持つ。
 
@@ -364,10 +365,9 @@ Parallel(All)
 | パターン | フィールド | 動作 |
 |---|---|---|
 | `SinglePattern` | なし | 基準方向に 1 発 |
-| `NWayPattern` | `wayCount`、`spreadAngle`(度、隣り合う弾の角度)、`radius`(発射位置を各方向へずらす距離)、`startDelayFrames`(f、動き出すまで)、`rotationOffset`(度、反時計回り) | 同時に扇状に撃つ。奇数は中央に 1 発、偶数は中央を空ける |
+| `NWayPattern` | `wayCount`(BtInt)、`spreadAngle`(BtFloat、度、隣り合う弾の角度。どちらもパラメータで差し替えられる)、`radius`(発射位置を各方向へずらす距離)、`startDelayFrames`(f、動き出すまで)、`rotationOffset`(度、反時計回り) | 同時に扇状に撃つ。奇数は中央に 1 発、偶数は中央を空ける |
 | `SequentialFanPattern` | `wayCount`、`spreadAngle`(度)、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 扇状に 1 発ずつ `spawnIntervalFrames` おきに出し、最後の 1 発から `releaseDelayFrames` 後に全弾同時に動き出す |
 | `SequentialCirclePattern` | `wayCount`、`radius`、`spawnIntervalFrames`(f)、`releaseDelayFrames`(f) | 円周上（360°/wayCount 間隔、半径 radius）に 1 発ずつ出し、全弾同時に動き出す |
-| `BurstPattern` | `wayCount`、`spreadAngle`(度)、`shotCount`、`intervalFrames`(f)、`startRadius`、`endRadius` | 同じ扇を `intervalFrames` おきに `shotCount` 回撃つ。発射位置の半径は 1 回目の `startRadius` から最後の `endRadius` へ線形に変わる。向きは最初に 1 回だけ決める |
 
 ### 発射の部品: DirectionSource
 

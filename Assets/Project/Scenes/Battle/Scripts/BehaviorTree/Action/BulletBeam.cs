@@ -28,6 +28,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField] SeType se;
 
         [NonSerialized] BulletSpec[] resolvedBullets;
+        [NonSerialized] ShotPattern resolvedPattern;
         [NonSerialized] BeamAim presetAim;
 
         public override string Summary =>
@@ -45,6 +46,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         {
             resolvedBullets = new BulletSpec[bullets.Count];
             for (var i = 0; i < bullets.Count; i++) resolvedBullets[i] = bullets[i].Resolve(scope);
+            resolvedPattern = (pattern ?? new SinglePattern()).Resolve(scope);
         }
 
         public BeamAim CreateAim(BattleContext ctx)
@@ -52,7 +54,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var muzzle = origin == BeamOrigin.Self ? position : Vector2.zero;
             var e = new EmitContext(ctx, muzzle);
             var shots = new List<Shot>();
-            (pattern ?? new SinglePattern()).Build((direction ?? new FixedDirection()).GetDirection(e), shots);
+            (resolvedPattern ?? pattern ?? new SinglePattern()).Build((direction ?? new FixedDirection()).GetDirection(e), shots);
             var aim = new Aim
             {
                 Shots = shots.ToArray(),
