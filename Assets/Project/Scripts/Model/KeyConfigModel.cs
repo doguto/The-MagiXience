@@ -304,10 +304,34 @@ namespace Project.Scripts.Model
             if (keyConfigData.bindingOverrides == null) return;
             if (keyConfigData.bindingOverrides.Count == 0) return;
 
-            foreach (var bindingOverride in keyConfigData.bindingOverrides)
+            // セーブデータは手編集・破損され得るため、キー設定の対象外や不正なパスは適用せず破棄する。
+            // 空パスを適用するとバインドが無効化され、決定/キャンセルが効かなくなり復旧できなくなる。
+            var validOverrides = keyConfigData.bindingOverrides.Where(IsValidBindingOverride).ToList();
+            keyConfigData.bindingOverrides.Clear();
+
+            foreach (var bindingOverride in validOverrides)
             {
                 ApplyBindingOverride(bindingOverride.actionPath, bindingOverride.bindingId, bindingOverride.overridePath, false);
             }
+        }
+
+        bool IsValidBindingOverride(KeyConfigData.BindingOverride bindingOverride)
+        {
+            if (bindingOverride == null) return false;
+
+            var isValid = !string.IsNullOrEmpty(bindingOverride.overridePath)
+                && !string.IsNullOrEmpty(InputControlPath.TryGetDeviceLayout(bindingOverride.overridePath))
+                && entries.Values
+                    .SelectMany(entry => entry.TargetsBySlot.Values)
+                    .SelectMany(targets => targets)
+                    .Any(target => target.ActionPath == bindingOverride.actionPath && target.BindingId == bindingOverride.bindingId);
+
+            if (!isValid)
+            {
+                Debug.LogWarning($"[KeyConfigModel] Invalid binding override discarded. actionPath={bindingOverride.actionPath}, bindingId={bindingOverride.bindingId}, overridePath={bindingOverride.overridePath}");
+            }
+
+            return isValid;
         }
 
         public IReadOnlyList<KeyConfigEntry> GetEntries()

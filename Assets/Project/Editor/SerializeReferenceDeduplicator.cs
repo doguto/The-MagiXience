@@ -126,6 +126,56 @@ namespace Project.Editor
             if (changed) property.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 通常AttackのPhase管理化に対応する重複参照の検出。
+        /// ネストした配列(outer[].inner[])の全要素を横断して、指定フィールドの重複参照を検出・修正する。
+        /// <see cref="DeduplicateAcrossNestedArrays"/> と違い、絶対パスではなく渡された親プロパティからの
+        /// 相対で outer 配列を辿るので、AttackTimeline のように別プロパティの子として埋め込まれた構造でも動く。
+        /// 例: AttackTimeline プロパティを渡し outer="phases", inner="entries", field="signal" とすると、
+        /// 全 phase の全 entry の signal を横断比較する。
+        /// </summary>
+        public static void DeduplicateAcrossNestedArraysRelative(
+            SerializedProperty parent,
+            string outerArrayFieldName,
+            string innerArrayFieldName,
+            params string[] fieldNames)
+        {
+            var outerArrayProp = parent?.FindPropertyRelative(outerArrayFieldName);
+            if (outerArrayProp == null || !outerArrayProp.isArray) return;
+
+            // 全内側配列の全要素から対象フィールドを収集
+            var allProps = new System.Collections.Generic.List<SerializedProperty>();
+
+            for (int i = 0; i < outerArrayProp.arraySize; i++)
+            {
+                var innerArrayProp = outerArrayProp.GetArrayElementAtIndex(i)
+                    .FindPropertyRelative(innerArrayFieldName);
+                if (innerArrayProp == null || !innerArrayProp.isArray) continue;
+
+                for (int j = 0; j < innerArrayProp.arraySize; j++)
+                {
+                    var element = innerArrayProp.GetArrayElementAtIndex(j);
+                    foreach (var fieldName in fieldNames)
+                    {
+                        var prop = element.FindPropertyRelative(fieldName);
+                        if (prop != null) allProps.Add(prop);
+                    }
+                }
+            }
+
+            bool changed = false;
+
+            for (int i = 0; i < allProps.Count; i++)
+            {
+                for (int j = i + 1; j < allProps.Count; j++)
+                {
+                    changed |= DeduplicateFieldPair(allProps[i], allProps[j]);
+                }
+            }
+
+            if (changed) parent.serializedObject.ApplyModifiedProperties();
+        }
+
         static bool DeduplicateFieldPair(SerializedProperty propA, SerializedProperty propB)
         {
             if (propA == null || propB == null) return false;

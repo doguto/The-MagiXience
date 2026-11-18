@@ -16,10 +16,15 @@ namespace Project.Scripts.Presenter
         // getterで static Instance を呼ぶ。
         protected StageModelRepository StageModelRepository => StageModelRepository.Instance;
 
+        // GlobalScenePresenterは常駐するため、全Presenterでシーン走査の結果を共有する。
+        // 破棄された場合はUnityのnull判定で再検索される。
+        static GlobalScenePresenter cachedGlobalScenePresenter;
+
         // RuntimeInitializeLoadType.BeforeSceneLoad より後に実行したいため、Start()
         protected virtual void Start()
         {
-            globalScenePresenter = FindFirstObjectByType<GlobalScenePresenter>();
+            if (cachedGlobalScenePresenter == null) cachedGlobalScenePresenter = FindFirstObjectByType<GlobalScenePresenter>();
+            globalScenePresenter = cachedGlobalScenePresenter;
             if (!globalScenePresenter)
             {
                 Debug.LogWarning("GlobalScenePresenterが見つかりません", this);

@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 /// <summary>
@@ -106,6 +107,19 @@ public class CreateDB : EditorWindow
                 return;
             }
 
+            // 入力値はそのままファイルパスとC#コードに埋め込まれるため、識別子として妥当なものに限定する
+            if (!IsValidIdentifier(soDataName))
+            {
+                EditorUtility.DisplayDialog("Error", "データ名は英字または_で始まる英数字/_のみ使用できます", "Ok");
+                return;
+            }
+
+            if (columnFields.Exists(column => !column.IsNullOrEmpty && !IsValidIdentifier(column.name)))
+            {
+                EditorUtility.DisplayDialog("Error", "変数名は英字または_で始まる英数字/_のみ使用できます", "Ok");
+                return;
+            }
+
             GenerateFiles();
         }
         
@@ -115,6 +129,11 @@ public class CreateDB : EditorWindow
     
 
     
+    static bool IsValidIdentifier(string value)
+    {
+        return !string.IsNullOrEmpty(value) && Regex.IsMatch(value, "^[A-Za-z_][A-Za-z0-9_]*$");
+    }
+
     //{sObjectName}.csと{repositoryName}.csを生成
     private void GenerateFiles()
     {
@@ -124,8 +143,16 @@ public class CreateDB : EditorWindow
             Directory.CreateDirectory(soPath);
         }
 
+        var soFilePath = $"{soPath}/{sObjectName}.cs";
+        var repoFilePath = $"Assets/Project/Scripts/Repository/{repositoryName}.cs";
+        if (File.Exists(soFilePath) || File.Exists(repoFilePath))
+        {
+            EditorUtility.DisplayDialog("Error", "同名のスクリプトが既に存在します", "Ok");
+            return;
+        }
+
         string soCode = GenerateScriptableObjectCode();
-        File.WriteAllText($"{soPath}/{sObjectName}.cs", soCode);
+        File.WriteAllText(soFilePath, soCode);
         
         
         const string repoPath = "Assets/Project/Scripts/Repository";
@@ -135,7 +162,7 @@ public class CreateDB : EditorWindow
         }
         
         string repoCode = GenerateRepositoryCode();
-        File.WriteAllText($"{repoPath}/{repositoryName}.cs", repoCode);
+        File.WriteAllText(repoFilePath, repoCode);
         
         AssetDatabase.Refresh();
 

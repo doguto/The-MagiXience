@@ -12,6 +12,7 @@ namespace Project.Commons.Debugger.Scripts.Presenter
     {
         [SerializeField] [Min(1)] int stageNumber = 1;
         [SerializeField] BattleSituation situation = BattleSituation.Way;
+        [SerializeField] [Min(0)] int startPhaseIndex;
 
         void Awake()
         {
@@ -22,8 +23,8 @@ namespace Project.Commons.Debugger.Scripts.Presenter
                 return;
             }
 
-            runtimeModel.SetForDebug(stageNumber, situation);
-            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, Situation={situation} に設定しました");
+            runtimeModel.SetForDebug(stageNumber, situation, startPhaseIndex);
+            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, Situation={situation}, StartPhaseIndex={startPhaseIndex} に設定しました");
         }
 
         void Start()

@@ -1,0 +1,199 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea724a92a126f174c82eefb1b61cba64, type: 3}
+  m_Name: Stage3Boss
+  m_EditorClassIdentifier: 
+  situation: 1
+  sequenceGroups:
+  - loop: 1
+    loopCount: 0
+    phases:
+    - phaseId: 01_PhaseParabolaUp
+      timelineBuilder: {fileID: 11400000, guid: debe8e28f8cb3e4409eeb5ddf86fcfe5, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: 8203b0ed30ab671468519d31a0e85ed6, type: 2}
+      exitConditionConfig:
+        rid: 1906880873211363490
+      overrideWind: 0
+      wind:
+        enabled: 0
+        startSe: 0
+        playerSpeedRatio: 0
+        intervals: []
+        bulletAcceleration: 0
+        bulletDrag: 0
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    - phaseId: 02_PhaseNWayDown
+      timelineBuilder: {fileID: 11400000, guid: bd876a97e54081b459118ff76cfbc395, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: f1eb55c862e8de946a89bd601f989c47, type: 2}
+      exitConditionConfig:
+        rid: 1906880873211363491
+      overrideWind: 0
+      wind:
+        enabled: 0
+        startSe: 0
+        playerSpeedRatio: 0
+        intervals: []
+        bulletAcceleration: 0
+        bulletDrag: 0
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    - phaseId: 03_PhaseParabolaRight
+      timelineBuilder: {fileID: 11400000, guid: 61d403f540d04c1418fadd9ad40efe6b, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: 911af7743e4563e4199df0b940cff0aa, type: 2}
+      exitConditionConfig:
+        rid: 1906880873211363492
+      overrideWind: 0
+      wind:
+        enabled: 0
+        startSe: 0
+        playerSpeedRatio: 0
+        intervals: []
+        bulletAcceleration: 0
+        bulletDrag: 0
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    - phaseId: 04_PhaseNWayUp
+      timelineBuilder: {fileID: 11400000, guid: 7eb7b8d220ccf1d4787b322cbede8d91, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: f1f51523e555d334ea8d0c26d78d6918, type: 2}
+      exitConditionConfig:
+        rid: 1906880873211363493
+      overrideWind: 0
+      wind:
+        enabled: 0
+        startSe: 0
+        playerSpeedRatio: 0
+        intervals: []
+        bulletAcceleration: 0
+        bulletDrag: 0
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    - phaseId: 05_PhaseParabolaDown
+      timelineBuilder: {fileID: 11400000, guid: a67a7cda9d6bb724391315aff91658a9, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: cb5b14b67d932d1419b44a0a4d6fb40e, type: 2}
+      exitConditionConfig:
+        rid: 1906880873211363494
+      overrideWind: 0
+      wind:
+        enabled: 0
+        startSe: 0
+        playerSpeedRatio: 0
+        intervals: []
+        bulletAcceleration: 0
+        bulletDrag: 0
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    - phaseId: 06_PhaseNWayRight
+      timelineBuilder: {fileID: 11400000, guid: fbb31cead1d392e43bdb23311b9ce98d, type: 2}
+      timelineBuilderStrong: {fileID: 11400000, guid: c0f347c6ca5eccf49b96e0865e3df259, type: 2}
+      exitConditionConfig:
+        rid: 1906880873211363495
+      overrideWind: 0
+      wind:
+        enabled: 0
+        startSe: 0
+        playerSpeedRatio: 0
+        intervals: []
+        bulletAcceleration: 0
+        bulletDrag: 0
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    randomPick: 0
+    interlude:
+      phaseId: 
+      timelineBuilder: {fileID: 0}
+      timelineBuilderStrong: {fileID: 0}
+      exitConditionConfig:
+        rid: -2
+      overrideWind: 0
+      wind:
+        enabled: 0
+        startSe: 0
+        playerSpeedRatio: 0
+        intervals: []
+        bulletAcceleration: 0
+        bulletDrag: 0
+      interludeBuilderOverride: {fileID: 0}
+      interludeTimeLimitOverride: 0
+    endBossHpPercent: 0
+  wind:
+    enabled: 0
+    startSe: 0
+    playerSpeedRatio: 0.2
+    intervals: []
+    bulletAcceleration: 3
+    bulletDrag: 0.6
+  bossPrefab: {fileID: 7069437974632321993, guid: dc6ad064f9af4a244b30b3f962ed9128, type: 3}
+  bossSpawnPosition: {x: 10, y: 0, z: 0}
+  bossEntranceMovement:
+  - rid: 1906880873211363417
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1906880873211363417
+      type: {class: TweenMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
+      data:
+        targetOffset: {x: 5.7, y: 0, z: 0}
+        duration: 2
+        easeValue: 3
+        customCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        curvePreset: {fileID: 0}
+        isRelative: 0
+    - rid: 1906880873211363490
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 7
+    - rid: 1906880873211363491
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 7
+    - rid: 1906880873211363492
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 7
+    - rid: 1906880873211363493
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 7
+    - rid: 1906880873211363494
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 7
+    - rid: 1906880873211363495
+      type: {class: TimeLimitExitConditionConfig, ns: Project.Scenes.Battle.Scripts.Model.ExitCondition, asm: Model}
+      data:
+        timeLimitSeconds: 7

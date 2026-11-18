@@ -5,6 +5,7 @@ using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scenes.Title.Scripts.View;
 using Project.Scripts.Extensions;
 using Project.Scripts.Presenter;
+using Project.Scripts.Repository.ModelRepository;
 using UniRx;
 using UnityEngine;
 
@@ -37,6 +38,12 @@ namespace Project.Scenes.Title.Scripts.Presenter
                 soundManager.PlaySEAsync(SeType.Click).Forget();
                 await StartGame(x);
             }).AddTo(this);
+            titleMenuView.OnPressedSoundRoom.SubscribeBlocking(async _ =>
+            {
+                soundManager.PlaySEAsync(SeType.Click).Forget();
+                titleModelRepository.Refresh();
+                await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.SoundRoom, gameObject.scene.name);
+            }).AddTo(this);
             titleMenuView.OnPressedOption.Subscribe(async _ =>
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
@@ -55,7 +62,8 @@ namespace Project.Scenes.Title.Scripts.Presenter
                 ExitGame();
             });
 
-            soundManager!.PlayBGMAsync(SceneType.Title, skipIfSamePlaying: true).Forget();
+            var bgmType = UserModelRepository.Instance.Get().TitleBgmType;
+            soundManager!.PlayBGMAsync(SceneType.Title, bgmType, skipIfSamePlaying: true).Forget();
         }
 
         async UniTask StartMain(Unit _)

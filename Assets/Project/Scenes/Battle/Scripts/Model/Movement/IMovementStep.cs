@@ -13,4 +13,16 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     {
         Tween Play(Transform target, Vector2 direction, Animator animator);
     }
+
+    /// <summary>同じプリセットを使う次のボスフェーズでも、再生中の移動を継続できる。</summary>
+    public interface IPhaseContinuousMovementStep
+    {
+        bool ContinueAcrossPhases { get; }
+    }
+
+    /// <summary>発射予定時刻から、共有設定を変更せず今回の弾の軌道を確定する。</summary>
+    public interface IAttackTimeMovementStep
+    {
+        IMovementStep SampleForAttackTime(float attackTime);
+    }
 }

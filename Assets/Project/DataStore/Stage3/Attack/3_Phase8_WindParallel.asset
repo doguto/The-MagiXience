@@ -1,0 +1,460 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: 3_Phase8_WindParallel
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 0
+      loopStart: 0
+      loopEnd: 5
+      cycleDuration: 2
+      entries:
+      - time: 2.5
+        signal:
+          rid: 1906880891417002214
+        directionProvider:
+          rid: 1906880891417002104
+        rotationProvider:
+          rid: 1906880891417002105
+        sourceIndexProvider:
+          rid: 1906880891417002106
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 2.5
+        signal:
+          rid: 1906880891417002215
+        directionProvider:
+          rid: 1906880891417002108
+        rotationProvider:
+          rid: 1906880891417002109
+        sourceIndexProvider:
+          rid: 1906880891417002110
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 2.5
+        signal:
+          rid: 1906880891417002216
+        directionProvider:
+          rid: 1906880891417002112
+        rotationProvider:
+          rid: 1906880891417002113
+        sourceIndexProvider:
+          rid: 1906880891417002114
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 6
+        signal:
+          rid: 1906880891417002217
+        directionProvider:
+          rid: 1906880891417002116
+        rotationProvider:
+          rid: 1906880891417002117
+        sourceIndexProvider:
+          rid: 1906880891417002118
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 6
+        signal:
+          rid: 1906880891417002218
+        directionProvider:
+          rid: 1906880891417002120
+        rotationProvider:
+          rid: 1906880891417002121
+        sourceIndexProvider:
+          rid: 1906880891417002122
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 6
+        signal:
+          rid: 1906880891417002219
+        directionProvider:
+          rid: 1906880891417002124
+        rotationProvider:
+          rid: 1906880891417002125
+        sourceIndexProvider:
+          rid: 1906880891417002126
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 9.5
+        signal:
+          rid: 1906880891417002220
+        directionProvider:
+          rid: 1906880891417002128
+        rotationProvider:
+          rid: 1906880891417002129
+        sourceIndexProvider:
+          rid: 1906880891417002130
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 9.5
+        signal:
+          rid: 1906880891417002221
+        directionProvider:
+          rid: 1906880891417002132
+        rotationProvider:
+          rid: 1906880891417002133
+        sourceIndexProvider:
+          rid: 1906880891417002134
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 9.5
+        signal:
+          rid: 1906880891417002222
+        directionProvider:
+          rid: 1906880891417002136
+        rotationProvider:
+          rid: 1906880891417002137
+        sourceIndexProvider:
+          rid: 1906880891417002138
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 13
+        signal:
+          rid: 1906880891417002223
+        directionProvider:
+          rid: 1906880891417002140
+        rotationProvider:
+          rid: 1906880891417002141
+        sourceIndexProvider:
+          rid: 1906880891417002142
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 13
+        signal:
+          rid: 1906880891417002224
+        directionProvider:
+          rid: 1906880891417002144
+        rotationProvider:
+          rid: 1906880891417002145
+        sourceIndexProvider:
+          rid: 1906880891417002146
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      - time: 13
+        signal:
+          rid: 1906880891417002225
+        directionProvider:
+          rid: 1906880891417002148
+        rotationProvider:
+          rid: 1906880891417002149
+        sourceIndexProvider:
+          rid: 1906880891417002150
+        seType: 0
+        bulletMovementOverride: {fileID: 11400000, guid: bef418852e1ac314c836e3ebe2f51c92, type: 2}
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1906880891417002104
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 3.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002105
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002106
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002108
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 5.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002109
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002110
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002112
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 7.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002113
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002114
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002116
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: -4
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002117
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002118
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002120
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: -2
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002121
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002122
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002124
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 0
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002125
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002126
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002128
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 0
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002129
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002130
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002132
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 2
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002133
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002134
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002136
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 4
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002137
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002138
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002140
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: -7.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002141
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002142
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002144
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: -5.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002145
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002146
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002148
+      type: {class: ScreenEdgeDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: -3.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 1906880891417002149
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880891417002150
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880891417002214
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002215
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002216
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002217
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002218
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002219
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002220
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002221
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002222
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002223
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002224
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0
+    - rid: 1906880891417002225
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 1
+        spreadAngle: 0
+        radius: 0
+        startDelay: 0

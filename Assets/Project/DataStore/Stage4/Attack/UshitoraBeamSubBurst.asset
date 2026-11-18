@@ -1,0 +1,352 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: UshitoraBeamSubBurst
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 1
+      loopStart: 0.753
+      loopEnd: 9.319
+      cycleDuration: 2.1
+      entries:
+      - time: 0
+        signal:
+          rid: 5211421599096111257
+        directionProvider:
+          rid: 5211421599096111258
+        rotationProvider:
+          rid: 5211421599096111259
+        sourceIndexProvider:
+          rid: 5211421599096111260
+        seType: 0
+      - time: 0.15
+        signal:
+          rid: 5211421599096111261
+        directionProvider:
+          rid: 5211421599096111262
+        rotationProvider:
+          rid: 5211421599096111263
+        sourceIndexProvider:
+          rid: 5211421599096111264
+        seType: 0
+      - time: 0.3
+        signal:
+          rid: 5211421599096111265
+        directionProvider:
+          rid: 5211421599096111266
+        rotationProvider:
+          rid: 5211421599096111267
+        sourceIndexProvider:
+          rid: 5211421599096111268
+        seType: 0
+      - time: 0.45
+        signal:
+          rid: 5211421599096111269
+        directionProvider:
+          rid: 5211421599096111270
+        rotationProvider:
+          rid: 5211421599096111271
+        sourceIndexProvider:
+          rid: 5211421599096111272
+        seType: 0
+      - time: 0.6
+        signal:
+          rid: 5211421599096111273
+        directionProvider:
+          rid: 5211421599096111274
+        rotationProvider:
+          rid: 5211421599096111275
+        sourceIndexProvider:
+          rid: 5211421599096111276
+        seType: 0
+      - time: 0.75
+        signal:
+          rid: 5211421599096111277
+        directionProvider:
+          rid: 5211421599096111278
+        rotationProvider:
+          rid: 5211421599096111279
+        sourceIndexProvider:
+          rid: 5211421599096111280
+        seType: 0
+      - time: 1.05
+        signal:
+          rid: 5211421599096111281
+        directionProvider:
+          rid: 5211421599096111282
+        rotationProvider:
+          rid: 5211421599096111283
+        sourceIndexProvider:
+          rid: 5211421599096111284
+        seType: 0
+      - time: 1.2
+        signal:
+          rid: 5211421599096111285
+        directionProvider:
+          rid: 5211421599096111286
+        rotationProvider:
+          rid: 5211421599096111287
+        sourceIndexProvider:
+          rid: 5211421599096111288
+        seType: 0
+      - time: 1.35
+        signal:
+          rid: 5211421599096111289
+        directionProvider:
+          rid: 5211421599096111290
+        rotationProvider:
+          rid: 5211421599096111291
+        sourceIndexProvider:
+          rid: 5211421599096111292
+        seType: 0
+      - time: 1.5
+        signal:
+          rid: 5211421599096111293
+        directionProvider:
+          rid: 5211421599096111294
+        rotationProvider:
+          rid: 5211421599096111295
+        sourceIndexProvider:
+          rid: 5211421599096111296
+        seType: 0
+      - time: 1.65
+        signal:
+          rid: 5211421599096111297
+        directionProvider:
+          rid: 5211421599096111298
+        rotationProvider:
+          rid: 5211421599096111299
+        sourceIndexProvider:
+          rid: 5211421599096111300
+        seType: 0
+      - time: 1.8
+        signal:
+          rid: 5211421599096111301
+        directionProvider:
+          rid: 5211421599096111302
+        rotationProvider:
+          rid: 5211421599096111303
+        sourceIndexProvider:
+          rid: 5211421599096111304
+        seType: 0
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5211421599096111257
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111258
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: -0.00000008742278}
+    - rid: 5211421599096111259
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111260
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111261
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111262
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9996101, y: -0.02792171}
+    - rid: 5211421599096111263
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111264
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111265
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111266
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9984408, y: -0.055821326}
+    - rid: 5211421599096111267
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111268
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111269
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111270
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.99649286, y: -0.08367789}
+    - rid: 5211421599096111271
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111272
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111273
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111274
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9937679, y: -0.111468725}
+    - rid: 5211421599096111275
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111276
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111277
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111278
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.99026805, y: -0.1391731}
+    - rid: 5211421599096111279
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111280
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111281
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111282
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9945219, y: -0.104528435}
+    - rid: 5211421599096111283
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111284
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111285
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111286
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9912155, y: -0.13225658}
+    - rid: 5211421599096111287
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111288
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111289
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111290
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.98713624, y: -0.15988113}
+    - rid: 5211421599096111291
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111292
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111293
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111294
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9822873, y: -0.18738124}
+    - rid: 5211421599096111295
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111296
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111297
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111298
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9766723, y: -0.21473524}
+    - rid: 5211421599096111299
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111300
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 5211421599096111301
+      type: {class: NWaySignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        wayCount: 15
+        spreadAngle: 12
+        radius: 0
+    - rid: 5211421599096111302
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -0.9702957, y: -0.2419218}
+    - rid: 5211421599096111303
+      type: {class: InheritParentRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data: 
+    - rid: 5211421599096111304
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0

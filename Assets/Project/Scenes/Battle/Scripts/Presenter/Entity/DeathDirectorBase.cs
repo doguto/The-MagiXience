@@ -68,7 +68,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             }
             finally
             {
-                cameraShakeTween?.Kill();
+                cameraShakeTween?.Kill(true);
                 cameraShakeTween = null;
                 isPlaying = false;
             }
@@ -83,7 +83,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             if (isPlaying)
             {
                 Time.timeScale = 1f;
-                cameraShakeTween?.Kill();
+                cameraShakeTween?.Kill(true);
             }
         }
     }

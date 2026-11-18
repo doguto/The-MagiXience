@@ -1,6 +1,8 @@
 ------------------------------------------------------
 ・2面ボス前
 ------------------------------------------------------
+@TypeWriter,true,default
+@ShowCast,テン,Default,Default,0.1,LL,1
 @ShowCastMessage,テン
 …………。
 
@@ -8,9 +10,12 @@
 魔力暴走は予期していたが、
 まさかこれほどまでに早いとは。
 
+@ChangeCastAnimation,テン,Additional
 @ShowCastMessage,テン
 一帯の雷は君の仕業かい？
 
+@SpawnBoss
+@ShowCast,アズマ,Crazy,Crazy_Default,0.1,RR,1
 @ShowCastMessage,アズマ
 ……アンタ誰だ？どこから来た？
 その通り！この雷はオレの魔法だ！
@@ -19,30 +24,38 @@
 オレ、いまビックリするくらい
 魔法の調子が良くてさ。
 
+@ChangeCastAnimation,アズマ,Crazy_Additional
 @ShowCastMessage,アズマ
 これ以上近付かれると、アンタを
 ケガさせちゃうような気がするんだけど。
 
+@ChangeCastAnimation,テン,Additional
 @ShowCastMessage,テン
 "八卦の担い手"なのに、
 魔法の制御が出来ていない……？
 
+@PlayBossBgm
+@ChangeCastAnimation,アズマ,Crazy_Additional
 @ShowCastMessage,アズマ
 ……アンタ、いまオレのことを
 半人前扱いしやがったか！？
 
+@ChangeCastAnimation,アズマ,Crazy_Default
 @ShowCastMessage,アズマ
 確かにオレは他のヤツらと比べると
 熟練度は劣るかもしれない。
 
+@ChangeCastAnimation,アズマ,Crazy_Additional
 @ShowCastMessage,アズマ
 けど、出力では誰にも負けねえ！
 誰か知らねえが、この雷の錆にしてやるぜ！
 
+@ChangeCastAnimation,テン,Additional
 @ShowCastMessage,テン
 すまない、決して煽るような、
 そういうつもりではなかったのだが……。
 
+@ChangeCastAnimation,テン,Default
 @ShowCastMessage,テン
 勝負になるのは都合がいい。
 制圧させていただくよ。

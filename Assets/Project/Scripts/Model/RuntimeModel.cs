@@ -46,10 +46,16 @@ namespace Project.Scripts.Model
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        public void SetForDebug(int stageNumber, BattleSituation situation)
+        /// <summary>
+        /// デバッグ起動時の開始フェーズ。シーケンス内の全グループを通した連番で、0 が先頭。
+        /// </summary>
+        public int DebugStartPhaseIndex { get; private set; }
+
+        public void SetForDebug(int stageNumber, BattleSituation situation, int startPhaseIndex = 0)
         {
             CurrentStageType = BattleStageTypeExtensions.FromInt(stageNumber);
             CurrentSituation = situation;
+            DebugStartPhaseIndex = startPhaseIndex;
         }
 #endif
     }

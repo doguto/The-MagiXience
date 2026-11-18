@@ -25,8 +25,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnTriggerStay2D(Collider2D other)
         {
             // PlayerレイヤーとSpectrumBarレイヤーの衝突のみ到達する（Physics2D設定済み）
-            var playerPresenter = other.GetComponent<PlayerEntityPresenter>();
-            if (playerPresenter == null) return;
+            // 接触中は物理ステップ毎に呼ばれるため、割り当ての無いTryGetComponentで判定する
+            if (!other.TryGetComponent<PlayerEntityPresenter>(out _)) return;
 
             MessageBroker.Default.Publish(new SpectrumBarPushMessage
             {

@@ -20,8 +20,6 @@ namespace Project.Commons.UI.Scripts.View
         Color originalColor;
         Vector3 originalLocalScale;
 
-        readonly CancellationTokenSource cancellationTokenSource = new();
-
         protected override void Awake()
         {
             myTransform = transform;
@@ -32,8 +30,6 @@ namespace Project.Commons.UI.Scripts.View
         public void Dispose()
         {
             onPressed.Dispose();
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
         }
 
         protected override void OnFocused()
@@ -45,7 +41,8 @@ namespace Project.Commons.UI.Scripts.View
 
         public override void OnSubmit(BaseEventData eventData)
         {
-            DarkenColor(cancellationTokenSource.Token).Forget();
+            // Scene遷移で破棄された後に色を戻さないよう、破棄時にキャンセルされるトークンを使う
+            DarkenColor(destroyCancellationToken).Forget();
             base.OnSubmit(eventData);
         }
 

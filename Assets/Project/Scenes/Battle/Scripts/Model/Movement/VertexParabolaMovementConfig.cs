@@ -1,0 +1,141 @@
+using System;
+using DG.Tweening;
+using UnityEngine;
+using UnityEngine.Serialization;
+
+namespace Project.Scenes.Battle.Scripts.Model.Movement
+{
+    public enum ParabolaOrientation
+    {
+        [InspectorName("縦")] Vertical = 0,
+        // Preserve the serialized value of the former Right option.
+        [InspectorName("横")] Horizontal = 2
+    }
+
+    [Serializable]
+    public class VertexParabolaMovementConfig : IMovementStep, ISerializationCallbackReceiver, IAttackTimeMovementStep
+    {
+        [SerializeField, FormerlySerializedAs("bulge"), Tooltip("縦：上下に折り返す。横：左右に折り返す。凸の向きは発射位置と頂点から自動で決まります。")]
+        ParabolaOrientation orientation = ParabolaOrientation.Vertical;
+        [SerializeField, Tooltip("頂点の座標。Is RelativeがONなら発射位置からの相対座標、OFFならワールド座標。Xは右、Yは上が正です。")]
+        Vector2 vertex = new(-3f, 4.5f);
+        [SerializeField, Min(0.01f), Tooltip("発射時の速さ（ワールド単位/秒）。軌道を保ったまま速さを変更できます。飛行中は等速ではありません。")]
+        float initialSpeed = 5f;
+
+        [SerializeField, Tooltip("ON：頂点XYは発射位置からの相対座標。OFF：頂点XYはワールド座標。風による軌道変化は補正しません。")]
+        bool isRelative = true;
+
+        [SerializeField, Tooltip("AttackPresetから発射する場合、発射予定時刻に応じて頂点を正弦波で変える。飛行中の頂点は固定。")]
+        bool oscillateVertex;
+        [SerializeField] Vector2 vertexAmplitude;
+        [SerializeField, Tooltip("頂点X・Yの角速度（ラジアン/秒）。0ならその軸は変化しない。")]
+        Vector2 vertexAngularSpeed;
+        [SerializeField, Tooltip("頂点の往復を開始するAttackPreset内の時刻（秒）。")]
+        float attackTimeOffset;
+
+        public Vector2 VertexOffset => vertex;
+        public float InitialSpeed => initialSpeed;
+
+        public IMovementStep SampleForAttackTime(float attackTime)
+        {
+            float time = Mathf.Max(0f, attackTime - attackTimeOffset);
+            var offset = oscillateVertex
+                ? new Vector2(vertexAmplitude.x * Mathf.Sin(time * vertexAngularSpeed.x),
+                    vertexAmplitude.y * Mathf.Sin(time * vertexAngularSpeed.y))
+                : Vector2.zero;
+            return new VertexParabolaMovementConfig(vertex + offset, initialSpeed, orientation)
+            {
+                isRelative = this.isRelative
+            };
+        }
+
+        public Vector2 GetWorldVertex(Vector2 start)
+            => isRelative ? start + vertex : vertex;
+
+        public VertexParabolaMovementConfig() { }
+
+        /// <summary>発射ごとに頂点を決める攻撃用。共有プリセットは変更しない。</summary>
+        public VertexParabolaMovementConfig(Vector2 vertexOffset, float speed,
+            ParabolaOrientation orientation = ParabolaOrientation.Vertical,
+            Vector2 amplitude = default, Vector2 angularSpeed = default, float timeOffset = 0f)
+        {
+            vertex = vertexOffset;
+            initialSpeed = speed;
+            this.orientation = orientation;
+            oscillateVertex = amplitude != Vector2.zero;
+            vertexAmplitude = amplitude;
+            vertexAngularSpeed = angularSpeed;
+            attackTimeOffset = timeOffset;
+        }
+
+        public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)
+        {
+            Vector2 start = target.position;
+            Vector2 worldVertex = GetWorldVertex(start);
+            if (!VertexParabola.TrySolve(start, worldVertex, orientation, initialSpeed, out var velocity, out var acceleration, out _))
+            {
+                Debug.LogWarning($"[VertexParabola] {target.name}: invalid {orientation} parabola. Start={start}, ConfiguredVertex={vertex}, IsRelative={isRelative}, Vertex={worldVertex}, InitialSpeed={initialSpeed}. " +
+                    "The vertex must differ from the start in both X and Y, with a positive finite speed.", target);
+                return null; // BulletEntityPresenter returns rejected shots to their pool.
+            }
+            float elapsed = 0f;
+            float z = target.position.z;
+            return PullMovementHelper.Create(target, 0f, (t, dt) =>
+            {
+                elapsed += dt;
+                Vector2 p = VertexParabola.Position(start, velocity, acceleration, elapsed);
+                t.position = new Vector3(p.x, p.y, z);
+            }, Ease.Linear);
+        }
+
+        public void OnBeforeSerialize() { }
+
+        public void OnAfterDeserialize()
+        {
+            // Former Up=0 and Down=1 both become Vertical; Right=2 remains Horizontal.
+            if ((int)orientation == 1) orientation = ParabolaOrientation.Vertical;
+        }
+    }
+
+    public static class VertexParabola
+    {
+        // Axis-aligned, constant-acceleration parabola, travelling towards the vertex first.
+        public static bool TrySolve(Vector2 start, Vector2 vertex, ParabolaOrientation orientation, float speed,
+            out Vector2 velocity, out Vector2 acceleration, out float vertexTime)
+        {
+            velocity = acceleration = Vector2.zero;
+            vertexTime = 0f;
+            if (!Finite(start.x) || !Finite(start.y) || !Finite(vertex.x) || !Finite(vertex.y) || !Finite(speed) || speed <= 0f)
+                return false;
+            Vector2 axis;
+            switch (orientation)
+            {
+                case ParabolaOrientation.Vertical:
+                    axis = start.y > vertex.y ? Vector2.up : Vector2.down;
+                    break;
+                case ParabolaOrientation.Horizontal:
+                    axis = start.x > vertex.x ? Vector2.right : Vector2.left;
+                    break;
+                default: return false;
+            }
+            Vector2 tangent = new(-axis.y, axis.x);
+            Vector2 offset = start - vertex;
+            float q = Vector2.Dot(offset, axis), r = Vector2.Dot(offset, tangent);
+            if (q <= 0.00001f || Mathf.Abs(r) <= 0.00001f) return false;
+
+            // q(t) = q (1 - t/T)^2; r(t) = r (1 - t/T).
+            // |v(0)| = sqrt(4q² + r²) / T, so the speed uniquely determines T.
+            vertexTime = Mathf.Sqrt(4f * q * q + r * r) / speed;
+            if (!Finite(vertexTime) || vertexTime <= 0f) return false;
+            velocity = (-2f * q * axis - r * tangent) / vertexTime;
+            acceleration = axis * (2f * q / (vertexTime * vertexTime));
+            return Finite(velocity.x) && Finite(velocity.y) && Finite(acceleration.x) && Finite(acceleration.y)
+                && acceleration.sqrMagnitude > 0f;
+        }
+
+        public static Vector2 Position(Vector2 start, Vector2 velocity, Vector2 acceleration, float time)
+            => start + velocity * time + 0.5f * acceleration * time * time;
+
+        static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+    }
+}

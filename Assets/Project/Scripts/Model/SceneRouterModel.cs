@@ -8,5 +8,6 @@ namespace Project.Scripts.Model
         public const string Scenario = "Scenario";
         public const string Battle = "Battle";
         public const string DemoClear = "DemoClear";
+        public const string SoundRoom = "SoundRoom";
     }
 }

@@ -10,8 +10,10 @@ namespace Project.Scenes.Battle.Editor
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            SerializeReferenceDeduplicator.DeduplicateField(
-                property.FindPropertyRelative("entries"), "signal", "directionProvider", "rotationProvider", "sourceIndexProvider");
+            // AttackTimeline は phases[].entries[] のネスト構造なので、
+            // 全 phase の全 entry を横断して重複参照を解消する。
+            SerializeReferenceDeduplicator.DeduplicateAcrossNestedArraysRelative(
+                property, "phases", "entries", "signal", "directionProvider", "rotationProvider", "sourceIndexProvider");
 
             EditorGUI.PropertyField(position, property, label, true);
         }

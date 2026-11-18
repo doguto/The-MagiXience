@@ -6,6 +6,15 @@ using UnityEngine;
 
 namespace Project.Scripts.Model
 {
+    // ステージのクリア評価。値が大きいほど上位
+    public enum StageClearRank
+    {
+        None = 0,
+        Normal = 1,
+        NoContinue = 2,
+        NoDamage = 3,
+    }
+
     public class StageModel : ModelBase
     {
         public StageData StageData { get; }
@@ -14,10 +23,12 @@ namespace Project.Scripts.Model
         public BattleStageType BattleStageType => BattleStageTypeExtensions.FromInt(StageData.stageNumber);
         public string WaySequenceAddress => StageData.waySequenceAddress;
         public string BossSequenceAddress => StageData.bossSequenceAddress;
+        public string BackgroundAddress => StageData.backgroundAddress;
 
         public Sprite CharaImage { get; }
         public bool IsOpened { get; private set; }
         public bool IsCleared { get; private set; }
+        public StageClearRank ClearRank => UserModel.GetStageClearRank(StageData.stageNumber);
 
         public StageModel(StageData stageData, bool isOpened = false, bool isCleared = false)
         {
@@ -36,15 +47,18 @@ namespace Project.Scripts.Model
 
         public void Open()
         {
+            // 未解放扱いにしているステージは、前のステージをクリアしても開放しない
+            if (UserModel.IsStageConcealed(StageData.stageNumber)) return;
+
             IsOpened = true;
         }
 
-        public void Clear()
+        public void Clear(StageClearRank rank)
         {
             if (!IsOpened) throw new Exception("ステージが開放されていません.");
 
             IsCleared = true;
-            UserModel.StageClear(StageData.stageNumber);
+            UserModel.StageClear(StageData.stageNumber, rank);
             // TODO: ステージ進行用と、タイトルに戻る用の２つのエントリーポイントを用意する
             // RuntimeModel.ExitStage();
         }

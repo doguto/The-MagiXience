@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72a693ccbf2a7488b40c3962407986, type: 3}
+  m_Name: 3_Boss_ParabolaStrongRightWind
+  m_EditorClassIdentifier: 
+  attackTimeline:
+    phases:
+    - loop: 0
+      loopStart: 0
+      loopEnd: 5
+      cycleDuration: 2
+      entries:
+      - time: 1.2
+        signal:
+          rid: 1906880873211363462
+        directionProvider:
+          rid: 1906880873211363463
+        rotationProvider:
+          rid: 1906880873211363464
+        sourceIndexProvider:
+          rid: 1906880873211363465
+        seType: 0
+        bulletMovementOverride: {fileID: 0}
+      - time: 0.9
+        signal:
+          rid: 1906880873211363466
+        directionProvider:
+          rid: 1906880873211363467
+        rotationProvider:
+          rid: 1906880873211363468
+        sourceIndexProvider:
+          rid: 1906880873211363469
+        seType: 0
+        bulletMovementOverride: {fileID: 0}
+      - time: 0.9
+        signal:
+          rid: 1906880873211363470
+        directionProvider:
+          rid: 1906880873211363471
+        rotationProvider:
+          rid: 1906880873211363472
+        sourceIndexProvider:
+          rid: 1906880873211363473
+        seType: 0
+        bulletMovementOverride: {fileID: 0}
+      nextPhaseTrigger:
+        rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1906880873211363462
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: b8fc174a474ce5e4497df356fc215b70, type: 2}
+        loop: 1
+        loopCount: 21
+        cycleDuration: 0.3
+    - rid: 1906880873211363463
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1906880873211363464
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880873211363465
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880873211363466
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 61d89585416d3e34eb34911575b46261, type: 2}
+        loop: 1
+        loopCount: 11
+        cycleDuration: 0.6
+    - rid: 1906880873211363467
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1906880873211363468
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880873211363469
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0
+    - rid: 1906880873211363470
+      type: {class: PresetAttackSignal, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        preset: {fileID: 11400000, guid: 2dd3ec9b986d3fa4986f7aa1e2e775d5, type: 2}
+        loop: 1
+        loopCount: 4
+        cycleDuration: 2
+    - rid: 1906880873211363471
+      type: {class: FixedDirectionConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        direction: {x: -1, y: 0}
+    - rid: 1906880873211363472
+      type: {class: FixedRotationConfig, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        degrees: 0
+    - rid: 1906880873211363473
+      type: {class: ConstantSourceIndex, ns: Project.Scenes.Battle.Scripts.Model.Attack, asm: Model}
+      data:
+        index: 0

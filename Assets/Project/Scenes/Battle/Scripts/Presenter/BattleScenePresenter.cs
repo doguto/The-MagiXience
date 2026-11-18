@@ -9,10 +9,12 @@ using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scenes.Battle.Scripts.View;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Presenter;
+using Project.Scenes.Global.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -22,6 +24,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [SerializeField] EnemyTracker enemyTracker;
         [SerializeField] BackgroundPresenter backgroundPresenter;
         [SerializeField] BulletClearReceiver bulletClearReceiver;
+        [SerializeField] BgmNameView bgmNameView;
+
+        [Header("Continue Settings")]
+        [Tooltip("コンティニュー回数に応じたPlayerの最大HP。index=コンティニュー回数（0=初回）。回数がテーブル長を超えた場合は末尾の値を使用する。")]
+        [SerializeField] int[] continueHpTable = { 100 };
 
         BattleSequenceModelRepository sequenceModelRepository;
         readonly Subject<Unit> battleCompleted = new();
@@ -30,6 +37,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         StageModel stageModel;
         BattleSequenceModel waySequence;
         BattleSequenceModel bossSequence;
+        readonly BattleBackgroundModel backgroundModel = new();
         Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
         BossEntityPresenter bossPresenter;
@@ -43,6 +51,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         bool isBattleStarted;
         bool hasResumedPlayerAnimationOnBoss;
         bool hasShownTutorial;
+
+        // コンティニュー回数。バトルシーン内でのみ保持し、シーン遷移でリセットされる。
+        int continueCount;
         CancellationTokenSource sequenceTransitionCts;
         IDisposable scenarioCompletedSubscription;
         IDisposable tutorialClosedSubscription;
@@ -53,7 +64,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
             sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
             phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
-            ScreenBoundsCache.Initialize(gameObject.scene);
+            ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
             {
@@ -169,7 +180,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
             else
             {
-                pauseModal.Open();
+                pauseModal.Open(CalculateRetryHpIncreaseRate());
             }
         }
 
@@ -179,7 +190,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                            .Subscribe(_ =>
                            {
                                var gameOverModal = globalScenePresenter?.GameOverModalPresenter;
-                               gameOverModal?.Open();
+                               gameOverModal?.Open(CalculateRetryHpIncreaseRate());
                            })
                            .AddTo(disposables);
 
@@ -197,6 +208,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var pauseModalForRetry = globalScenePresenter?.PauseModalPresenter;
             if (pauseModalForRetry != null)
             {
+                // ポーズからのリトライもコンティニュー扱い（体力増加あり）
                 pauseModalForRetry.OnRetryRequested
                                   .Subscribe(_ => Retry())
                                   .AddTo(disposables);
@@ -206,6 +218,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
+        // リトライ(コンティニュー)。ゲームオーバー・ポーズのどちらからでもコンティニュー回数を進め、最大HPを増加させる。
+        // オプション「リトライ時にステージの最初からやり直す」がONの場合は完全に初期状態へ戻す。
         void Retry()
         {
             phaseStateMachine.Stop();
@@ -251,6 +265,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             pendingScenarioCallback = null;
 
             playerPresenter?.Retry();
+            var fromStageStart = IsRetryFromStageStart();
+            if (fromStageStart)
+            {
+                // オプションON: 完全に初期状態へ戻す。コンティニュー回数・被弾履歴をリセットし、
+                // 体力は初期値のまま。クリアランク判定も通常通り行われる。
+                continueCount = 0;
+                playerPresenter?.ClearDamageHistory();
+                RuntimeModelRepository.Get().SetSituation(BattleSituation.Way);
+            }
+            // 回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
+            else continueCount++;
+            ApplyPlayerMaxHp();
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
 
@@ -324,14 +350,21 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 SubscribeToPlayerDeath();
             }
 
-            backgroundPresenter?.Initialize();
+            backgroundModel.SetStage(stageModel.BackgroundAddress);
+            backgroundPresenter?.Initialize(backgroundModel);
             playerPresenter?.Initialize();
+            ApplyPlayerMaxHp();
             playerPresenter?.SubscribeToAttackInput();
 
             waySequence = LoadSequence(stageModel.WaySequenceAddress);
             bossSequence = LoadSequence(stageModel.BossSequenceAddress);
 
             var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            ApplyDebugStartPhase(startSituation);
+#endif
+
             if (startSituation == BattleSituation.Boss && bossSequence != null)
             {
                 SpawnBoss();
@@ -349,6 +382,51 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
+        // オプション「リトライ時にステージの最初からやり直す」が有効か
+        static bool IsRetryFromStageStart()
+        {
+            return UserModelRepository.Instance.Get().IsRetryFromStageStartEnabled;
+        }
+
+        // 現在のコンティニュー回数に応じた最大HPをPlayerに適用する。
+        void ApplyPlayerMaxHp()
+        {
+            if (playerPresenter == null) return;
+            if (continueHpTable == null || continueHpTable.Length == 0) return;
+
+            var index = Mathf.Clamp(continueCount, 0, continueHpTable.Length - 1);
+            playerPresenter.SetMaxHp(continueHpTable[index]);
+        }
+
+        // 次回リトライ時の最大HPが、初期HP(テーブル先頭)から何%増加しているかを返す。
+        int CalculateRetryHpIncreaseRate()
+        {
+            if (continueHpTable == null || continueHpTable.Length == 0) return 0;
+
+            var baseHp = continueHpTable[0];
+            if (baseHp <= 0) return 0;
+
+            var nextIndex = Mathf.Clamp(continueCount + 1, 0, continueHpTable.Length - 1);
+            var nextHp = continueHpTable[nextIndex];
+            return Mathf.RoundToInt((nextHp - baseHp) * 100f / baseHp);
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // デバッグ起動で指定された開始フェーズを、起動対象のシーケンスにのみ適用する。
+        // Way から Boss へ遷移した場合、Boss 側は常に先頭から再生される。
+        void ApplyDebugStartPhase(BattleSituation startSituation)
+        {
+            var startPhaseIndex = RuntimeModelRepository.Instance.Get().DebugStartPhaseIndex;
+            if (startPhaseIndex <= 0) return;
+
+            var targetSequence = startSituation == BattleSituation.Boss ? bossSequence : waySequence;
+            if (targetSequence == null) return;
+
+            targetSequence.SetStartPhaseByFlatIndex(startPhaseIndex);
+            Debug.Log($"[BattleScenePresenter] Debug start phase index {startPhaseIndex} applied to {startSituation} sequence.", this);
+        }
+#endif
+
         public void PlayBossBgm()
         {
             PlayBgmForSituation(BattleSituation.Boss);
@@ -363,6 +441,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var sceneType = (SceneType)(stageNumber + 2);
             var bgmType = situation == BattleSituation.Boss ? BgmType.BattleBoss : BgmType.BattleWay;
             soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
+
+            // 東方風に、BGMの切り替わり時に曲名を表示する
+            if (bgmNameView != null)
+            {
+                var bgmModel = SoundModelRepository.Instance.GetBgmModel(sceneType, bgmType);
+                bgmNameView.Show(bgmModel.DisplayName);
+            }
         }
 
         StageModel ResolveStageModel()
@@ -421,11 +506,18 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             if (situation == BattleSituation.Way)
             {
+                // 制作中のステージは道中（中ボスを含む）だけでも再生できる。
+                // 本ボス未設定ならボス前シナリオへ進めず、ステージクリア扱いにもせずここで終了する。
+                if (bossSequence == null)
+                {
+                    Debug.Log("[BattleScenePresenter] 道中完了。本ボスのシーケンスは未設定のため、ボス戦への移行を停止します。", this);
+                    return;
+                }
                 TransitionToScenario(StartBossSequence);
             }
             else
             {
-                TransitionToScenario(DemoClear);
+                TransitionToScenario(CompleteStage);
             }
         }
 
@@ -582,17 +674,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // シナリオ明けにプレイヤーとボスが重なっていても即被弾しないよう、少しの間ボスの当たり判定を切る
+            bossPresenter?.DisableColliderOnEntry();
             phaseStateMachine.PlaySequence(bossSequence);
-        }
-
-        async void DemoClear()
-        {
-            stageModel?.Clear();
-            OpenNextStage(stageModel);
-
-            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
-
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
         }
 
         // クリアしたステージの次のステージを開放する。
@@ -611,39 +695,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        void CompleteStage()
+        StageClearRank ResolveClearRank()
         {
-            stageModel?.Clear();
+            if (continueCount > 0) return StageClearRank.Normal;
+            if (playerPresenter != null && playerPresenter.HasTakenDamage) return StageClearRank.NoContinue;
+            return StageClearRank.NoDamage;
+        }
+
+        async void CompleteStage()
+        {
+            stageModel?.Clear(ResolveClearRank());
             OpenNextStage(stageModel);
 
-            // 次のステージをロード
-            var nextStageModel = ResolveStageModel();
-            if (nextStageModel == null)
-            {
-                // 次のステージが存在しない（最終ステージクリア）
-                Debug.Log("[BattleScenePresenter] All stages cleared!", this);
-                battleCompleted.OnNext(Unit.Default);
-                return;
-            }
+            // 次のステージをロードせず、To be continued画面を経由してステージ選択画面へ遷移する
+            phaseStateMachine.Stop();
 
-            // 次のステージのシーケンスをロード
-            stageModel = nextStageModel;
-            waySequence = LoadSequence(stageModel.WaySequenceAddress);
-            bossSequence = LoadSequence(stageModel.BossSequenceAddress);
-
-            // 道中シーケンスを開始
-            if (waySequence != null)
-            {
-                Debug.Log($"[BattleScenePresenter] Starting next stage {stageModel.StageNumber}", this);
-                PlayBgmForSituation(BattleSituation.Way);
-                phaseStateMachine.PlaySequence(waySequence);
-                backgroundPresenter?.ResetScroll();
-            }
-            else
-            {
-                Debug.LogError("[BattleScenePresenter] Next stage way sequence is missing.", this);
-                battleCompleted.OnNext(Unit.Default);
-            }
+            // BGMの切り替え・StageListへの遷移・Battleシーンの破棄はDemoClearScenePresenterが行う
+            await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.DemoClear));
         }
 
         void OnDestroy()
@@ -673,6 +742,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             disposables.Dispose();
             bossDisposables.Dispose();
             battleCompleted.Dispose();
+            backgroundModel.Dispose();
             phaseStateMachine?.Stop();
         }
     }

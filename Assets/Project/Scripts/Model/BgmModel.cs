@@ -1,4 +1,5 @@
-﻿using Project.Scripts.Infra;
+﻿using Project.Scripts.Extensions;
+using Project.Scripts.Infra;
 using Project.Scripts.Repository.AssetRepository;
 using UnityEngine;
 
@@ -13,8 +14,15 @@ namespace Project.Scripts.Model
 
         public BgmData BgmData { get; }
         public string Name => BgmData.name;
+        public string DisplayName => string.IsNullOrEmpty(BgmData.displayName) ? BgmData.name : BgmData.displayName;
         public int LoopStartSamples => BgmData.loopStartSamples;
         public int LoopEndSamples => BgmData.loopEndSamples;
+        public SceneType SceneType => BgmData.sceneType;
+        public BgmType BgmType => BgmData.bgmType;
+        public int SoundRoomUnlockClearedStage => BgmData.soundRoomUnlockClearedStage;
+        public string Description => BgmData.description;
+        public bool IsSoundRoomSecret => BgmData.soundRoomSecret;
+        public int SoundRoomBackgroundStageNumber => BgmData.soundRoomBackgroundStageNumber;
 
         public BgmModel(BgmData bgmData)
         {
@@ -25,6 +33,14 @@ namespace Project.Scripts.Model
         {
             audioClip = soundAssetRepository.LoadBGM(BgmData.sceneType, BgmData.bgmType);
             return audioClip;
+        }
+
+        public void ReleaseAudioClip()
+        {
+            if (audioClip == null) return;
+
+            soundAssetRepository.ReleaseBGM(audioClip);
+            audioClip = null;
         }
     }
 }

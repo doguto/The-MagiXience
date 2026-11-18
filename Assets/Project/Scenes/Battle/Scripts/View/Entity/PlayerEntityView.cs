@@ -7,7 +7,7 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
     {
         [Header("Damage Flash")]
         [SerializeField] SpriteRenderer bodySpriteRenderer;
-        [SerializeField] Color flashColor = Color.black;
+        [SerializeField] Color flashColor = Color.red;
 
         
         // memo: 白光りさせたかったが、SpriteRendererはデフォルトが白だから意味ないので黄色っぽくしている

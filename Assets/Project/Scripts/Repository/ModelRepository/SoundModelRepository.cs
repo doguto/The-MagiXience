@@ -21,6 +21,13 @@ namespace Project.Scripts.Repository.ModelRepository
             seData = LoadSeData();
         }
 
+        // BgmDataの登録順で全曲のModelを返す（サウンドルームの曲一覧用）。
+        // AudioClipは読み込まないため、キャッシュには載せない
+        public IReadOnlyList<BgmModel> CreateAllBgmModels()
+        {
+            return bgmData.ConvertAll(x => new BgmModel(x));
+        }
+
         public BgmModel GetBgmModel(SceneType sceneType, BgmType bgmType = BgmType.Default)
         {
             var bgmModel = bgmModels.Find(x => x.BgmData.bgmType == bgmType && x.BgmData.sceneType == sceneType);
@@ -51,7 +58,15 @@ namespace Project.Scripts.Repository.ModelRepository
         // 逆にSEは使用頻度が高そうなためリフレッシュせずメモリにずっと置く
         public bool RefreshBgmModel(SceneType sceneType, BgmType bgmType)
         {
-            var bgmModel = bgmModels.Find(x => x.BgmData.bgmType == bgmType);
+            var bgmModel = bgmModels.Find(x => x.BgmData.bgmType == bgmType && x.BgmData.sceneType == sceneType);
+            return RefreshBgmModel(bgmModel);
+        }
+
+        public bool RefreshBgmModel(BgmModel bgmModel)
+        {
+            if (bgmModel == null) return false;
+
+            bgmModel.ReleaseAudioClip();
             return bgmModels.Remove(bgmModel);
         }
 

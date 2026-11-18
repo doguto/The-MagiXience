@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Project.Scripts.Extensions;
 using Project.Scripts.Infra;
 using UnityEngine;
 
@@ -26,6 +27,13 @@ namespace Project.Scripts.Model
         public int ClearedStageNumber => UserData.clearedStageNumber;
         public int OpenedStageNumber => UserData.clearedStageNumber - 1;
 
+        // このステージをクリアするとタイトルのBGMが変化する
+        const int TitleBgmChangedStageNumber = 4;
+
+        // タイトルで再生するBGMの種類。ステージ4クリア後は Phase2 の楽曲へ切り替わる。
+        public BgmType TitleBgmType
+            => IsClearedStage(TitleBgmChangedStageNumber) ? BgmType.Phase2 : BgmType.Default;
+
         public int BgmVolume => UserData.bgmVolume;
         public int SeVolume => UserData.seVolume;
 
@@ -36,10 +44,58 @@ namespace Project.Scripts.Model
             UserData.seVolume = Mathf.Clamp(seVolume, 0, 100);
         }
 
-        public void StageClear(int stageNumber)
+        // シナリオの文字送り速度(1秒あたりの表示文字数)。TypeWriterコマンドでdefault指定時に使用する
+        public float TextSpeed => UserData.textSpeed;
+
+        // 送り速度をメモリ上に反映する。永続化はSave()を別途呼ぶ。
+        public void SetTextSpeed(float textSpeed)
+        {
+            UserData.textSpeed = UserData.ClampTextSpeed(textSpeed);
+        }
+
+        public bool IsMashSkipEnabled => UserData.isMashSkipEnabled;
+
+        // メモリ上に反映する。永続化はSave()を別途呼ぶ。
+        public void SetMashSkipEnabled(bool isEnabled)
+        {
+            UserData.isMashSkipEnabled = isEnabled;
+        }
+
+        public bool IsRetryFromStageStartEnabled => UserData.isRetryFromStageStartEnabled;
+
+        // メモリ上に反映する。永続化はSave()を別途呼ぶ。
+        public void SetRetryFromStageStartEnabled(bool isEnabled)
+        {
+            UserData.isRetryFromStageStartEnabled = isEnabled;
+        }
+
+        public void StageClear(int stageNumber, StageClearRank rank)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);
+
+            // クリアランクは最高記録のみ保持する
+            var index = stageNumber - 1;
+            if (index >= 0)
+            {
+                if (UserData.stageClearRanks.Length <= index)
+                {
+                    Array.Resize(ref UserData.stageClearRanks, index + 1);
+                }
+                UserData.stageClearRanks[index] = Math.Max(UserData.stageClearRanks[index], (int)rank);
+            }
             Save();
+        }
+
+        // 記録が無いがクリア済みのステージ(ランク記録導入前のセーブ)はNormal扱いにする
+        public StageClearRank GetStageClearRank(int stageNumber)
+        {
+            if (!IsClearedStage(stageNumber)) return StageClearRank.None;
+
+            var index = stageNumber - 1;
+            var rank = index >= 0 && index < UserData.stageClearRanks.Length
+                ? (StageClearRank)UserData.stageClearRanks[index]
+                : StageClearRank.None;
+            return rank == StageClearRank.None ? StageClearRank.Normal : rank;
         }
 
         public bool HasEnteredStage1 => UserData.hasEnteredStage1;
@@ -58,37 +114,107 @@ namespace Project.Scripts.Model
 
         public bool IsOpenedStage(int stageNumber)
         {
-            return UserData.clearedStageNumber >= stageNumber - 1;
+            return UserData.clearedStageNumber >= stageNumber - 1 && !IsStageConcealed(stageNumber);
+        }
+
+        // 前のステージをクリアしても解放せず、未解放と同じ扱い(選択不可・情報非表示)にするステージ
+        const int ConcealedStageNumber = 5;
+
+        public bool IsStageConcealed(int stageNumber)
+        {
+            return stageNumber == ConcealedStageNumber && !IsClearedStage(stageNumber);
+        }
+
+        // 解放済みのステージのうち最も先のステージ番号
+        public int LatestOpenedStageNumber
+        {
+            get
+            {
+                var next = UserData.clearedStageNumber + 1;
+                return IsStageConcealed(next) ? UserData.clearedStageNumber : next;
+            }
         }
 
         public UserData Load()
         {
-            if (!File.Exists(saveFilePath))
+            if (!File.Exists(saveFilePath) && !File.Exists(BackupFilePath))
             {
                 UserData = new UserData();
-                if (!Directory.Exists(saveDirectoryPath))
-                {
-                    Directory.CreateDirectory(saveDirectoryPath);
-                }
-                var json = JsonUtility.ToJson(UserData, true);
-                File.WriteAllText(saveFilePath, json);
-                return new UserData();
+                Save();
+                return UserData;
+            }
+
+            if (TryLoadFrom(saveFilePath, out var data)) return data;
+
+            // 本体が壊れている場合はバックアップから復旧を試みる。
+            // 壊れたファイルは次回Save()で上書きされないよう退避しておく。
+            QuarantineCorruptFile();
+            if (TryLoadFrom(BackupFilePath, out data)) return data;
+
+            return new UserData();
+        }
+
+        string TempFilePath => saveFilePath + ".tmp";
+        string BackupFilePath => saveFilePath + ".bak";
+        string CorruptFilePath => saveFilePath + ".corrupt";
+
+        bool TryLoadFrom(string path, out UserData data)
+        {
+            data = null;
+            try
+            {
+                if (!File.Exists(path)) return false;
+
+                var json = File.ReadAllText(path);
+                if (string.IsNullOrWhiteSpace(json)) return false;
+
+                // 音量フィールドが無い旧データを読み込むと0になるため、
+                // 既定値で初期化したインスタンスへ上書きして欠損フィールドを補完する。
+                var loaded = new UserData();
+                JsonUtility.FromJsonOverwrite(json, loaded);
+                loaded.Validate();
+                data = loaded;
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to load user data ({path}): {e.Message}");
+                return false;
+            }
+        }
+
+        void QuarantineCorruptFile()
+        {
+            try
+            {
+                if (!File.Exists(saveFilePath)) return;
+                if (File.Exists(CorruptFilePath)) File.Delete(CorruptFilePath);
+                File.Move(saveFilePath, CorruptFilePath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Failed to quarantine corrupt user data: " + e.Message);
+            }
+        }
+
+        void ReplaceSaveFile()
+        {
+            if (!File.Exists(saveFilePath))
+            {
+                File.Move(TempFilePath, saveFilePath);
+                return;
             }
 
             try
             {
-                var json = File.ReadAllText(saveFilePath);
-                // 音量フィールドが無い旧データを読み込むと0になるため、
-                // 既定値で初期化したインスタンスへ上書きして欠損フィールドを補完する。
-                var data = new UserData();
-                JsonUtility.FromJsonOverwrite(json, data);
-                data.Validate();
-                return data;
+                File.Replace(TempFilePath, saveFilePath, BackupFilePath);
             }
-            catch (Exception e)
+            catch (PlatformNotSupportedException)
             {
-                Debug.LogError("Failed to load user data: " + e.Message);
-                return new UserData();
+                // File.Replace非対応のプラットフォーム向け。本体が消えた瞬間に落ちてもLoad()が.bakから復旧する。
+                File.Copy(saveFilePath, BackupFilePath, true);
+                File.Delete(saveFilePath);
+                File.Move(TempFilePath, saveFilePath);
             }
         }
 
@@ -102,15 +228,19 @@ namespace Project.Scripts.Model
                 }
 
                 var json = JsonUtility.ToJson(UserData, true);
-                Debug.Log(json);
-                File.WriteAllText(saveFilePath, json);
+
+                // 書き込み途中のクラッシュでセーブが破損しないよう、一時ファイルへ書いてから置き換える。
+                File.WriteAllText(TempFilePath, json);
+                ReplaceSaveFile();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                Debug.Log("Saved user data");
+#endif
             }
             catch (Exception e)
             {
                 Debug.LogError("Failed to save user data: " + e.Message);
             }
-
-            Debug.Log("Saved user data");
         }
     }
 }

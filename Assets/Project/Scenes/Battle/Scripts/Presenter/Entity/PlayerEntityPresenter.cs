@@ -313,6 +313,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.Initialize();
         }
 
+        public bool HasTakenDamage => model.HasTakenDamage;
+        public void ClearDamageHistory() => model.ClearDamageHistory();
+
+        // 最大HPを設定し、HPを満タンにする。コンティニュー回数に応じた体力調整に使用する。
+        public void SetMaxHp(int newMaxHp)
+        {
+            model.SetMaxHpAndRefill(newMaxHp);
+        }
+
         public void SetColliderActive(bool active)
         {
             var col = GetComponent<Collider2D>();
@@ -352,10 +361,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         Vector3 HandleMovement()
         {
-            if (currentMoveInput.sqrMagnitude < 0.01f) return Vector3.zero;
-
             var currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
-            var movement = new Vector3(currentMoveInput.x, currentMoveInput.y, 0) * currentSpeed * Time.deltaTime;
+            var input = currentMoveInput.sqrMagnitude < 0.01f ? Vector2.zero : currentMoveInput;
+            Vector3 movement = BattleWind.PlayerVelocity(input, currentSpeed) * Time.deltaTime;
             return movement;
         }
 

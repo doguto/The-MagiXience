@@ -8,13 +8,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
     public class AudioSpectrumPresenter : MonoBehaviour
     {
         [Header("Spectrum Settings")] [SerializeField]
-        int barCount = 32;
+        SpectrumBarHeightData heightData;
 
         [SerializeField] float maxBarHeight = 3f;
         [SerializeField] float lerpSpeed = 15f;
-        [SerializeField] float sensitivity = 50f;
-        [SerializeField] int spectrumRangeStart = 8;
-        [SerializeField] int spectrumRangeEnd = 21;
 
         [Header("Visual")] [SerializeField] Color barColor = new(0.2f, 0.8f, 1f, 0.8f);
 
@@ -22,18 +19,23 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] float pushForce = 8f;
         [SerializeField] int spectrumBarLayer = 11;
 
-        const int FftSize = 1024;
-
         AudioSource audioSource;
         SpectrumBarEntityModel sharedModel;
         SpectrumBarView[] barViews;
-        float[] spectrumData;
         float[] smoothedHeights;
+        int barCount;
 
         void Awake()
         {
             sharedModel = new SpectrumBarEntityModel(contactDamage);
-            spectrumData = new float[FftSize];
+
+            if (heightData == null)
+            {
+                Debug.LogError("[AudioSpectrumPresenter] heightData is not assigned.");
+                return;
+            }
+
+            barCount = heightData.BarCount;
             smoothedHeights = new float[barCount];
 
             CreateBars();
@@ -76,53 +78,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void Update()
         {
-            if (audioSource == null || !audioSource.isPlaying) return;
+            if (heightData == null || audioSource == null || !audioSource.isPlaying) return;
 
-            audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
-
-            
+            var hasFrame = heightData.TryGetFrameOffset(audioSource.timeSamples, out var frameOffset);
             var screenBottomY = ScreenBoundsCache.MinY;
-
-            // 元の32分割対数マッピングからspectrumRangeStart~spectrumRangeEndの帯域を切り出し
-            var rangeBinStart = LogarithmicBinIndex(spectrumRangeStart, barCount, FftSize);
-            var rangeBinEnd = LogarithmicBinIndex(spectrumRangeEnd + 1, barCount, FftSize);
-            var rangeBinCount = rangeBinEnd - rangeBinStart;
 
             for (var i = 0; i < barCount; i++)
             {
-                // 切り出した帯域を32本に均等割り振り（反転: 左が高周波、右が低周波）
-                var reversedIndex = barCount - 1 - i;
-                var binStart = rangeBinStart + rangeBinCount * reversedIndex / barCount;
-                var binEnd = rangeBinStart + rangeBinCount * (reversedIndex + 1) / barCount;
-                if (binEnd <= binStart) binEnd = binStart + 1;
-
-                // bin範囲の平均値を取得
-                var sum = 0f;
-                for (var b = binStart; b < binEnd && b < FftSize; b++)
-                {
-                    sum += spectrumData[b];
-                }
-                var avg = sum / (binEnd - binStart);
-
-                // 音量で正規化してから感度を適用してターゲット高さを算出
-                var normalizedAvg = avg / Mathf.Max(audioSource.volume, 0.01f);
-                var targetHeight = Mathf.Clamp(normalizedAvg * sensitivity, 0f, maxBarHeight);
+                var targetHeight = hasFrame ? heightData.GetHeightRate(frameOffset, i) * maxBarHeight : 0f;
 
                 // Lerpで滑らかに
                 smoothedHeights[i] = Mathf.Lerp(smoothedHeights[i], targetHeight, Time.deltaTime * lerpSpeed);
 
                 barViews[i].UpdateBar(smoothedHeights[i], screenBottomY);
             }
-        }
-
-        static int LogarithmicBinIndex(int barIndex, int totalBars, int fftSize)
-        {
-            // 対数スケールで0〜fftSize/2をtotalBars分割にマッピング
-            var halfFft = fftSize / 2;
-            var logMin = Mathf.Log10(1f);
-            var logMax = Mathf.Log10(halfFft);
-            var logVal = logMin + (logMax - logMin) * barIndex / totalBars;
-            return Mathf.Clamp(Mathf.RoundToInt(Mathf.Pow(10f, logVal)), 0, halfFft - 1);
         }
 
         void OnDisable()

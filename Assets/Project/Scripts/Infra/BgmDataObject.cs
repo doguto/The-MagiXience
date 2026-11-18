@@ -17,6 +17,9 @@ namespace Project.Scripts.Infra
         // 曲名を使いたいこともある気がするので、Nameも持つ
         public string name;
 
+        [Tooltip("ゲーム内で表示する曲名。空の場合はnameを使用。")]
+        public string displayName;
+
         public SceneType sceneType;
         public BgmType bgmType;
 
@@ -25,5 +28,19 @@ namespace Project.Scripts.Infra
 
         [Tooltip("ループ終了位置（サンプル数）。0の場合はクリップ全体の長さを使用。")]
         public int loopEndSamples;
+
+        [Header("Sound Room")]
+        [Tooltip("サウンドルームで解放されるのに必要なクリア済みステージ数。0なら最初から解放。")]
+        public int soundRoomUnlockClearedStage;
+
+        [Tooltip("ONにすると、解放されるまでカード自体を表示しない。通し番号も振らない。")]
+        public bool soundRoomSecret;
+
+        [Tooltip("サウンドルームのカード画像に使うステージ番号(1〜6、EXは7)。0なら黒カード。")]
+        public int soundRoomBackgroundStageNumber;
+
+        [Tooltip("サウンドルームで表示する説明文（3〜4行程度）。")]
+        [TextArea(3, 5)]
+        public string description;
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
+using Project.Scripts.Extensions;
+using Project.Scenes.Global.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
@@ -18,6 +20,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         BattleSequenceModel activeSequence;
         BattlePhaseModelBase activePhase;
+        // 直前に終了したフェーズ。そのフェーズのOnExitPhase通知の最中に破棄しないよう、次の遷移まで破棄を遅らせる
+        BattlePhaseModelBase exitedPhase;
         IDisposable exitSubscription;
         Func<BattlePhaseModelBase, TimelineAsset> timelineResolver;
 
@@ -26,6 +30,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public void SetTimelineResolver(Func<BattlePhaseModelBase, TimelineAsset> resolver)
             => timelineResolver = resolver;
+
+        SoundManagerPresenter windSoundManager;
+
+        void Update()
+        {
+            var previousDirection = BattleWind.Direction;
+            BattleWind.Tick(Time.deltaTime);
+            if (previousDirection != WindDirection.None || BattleWind.Direction == WindDirection.None ||
+                BattleWind.StartSe == SeType.None) return;
+
+            if (!windSoundManager)
+                windSoundManager = FindFirstObjectByType<SoundManagerPresenter>();
+            windSoundManager?.PlaySE(BattleWind.StartSe);
+        }
 
         public void PlaySequence(BattleSequenceModel sequence)
         {
@@ -39,9 +57,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             Stop(sequenceToKeep: sequence);
             activeSequence = sequence;
             activeSequence.Reset();
+            BattleWind.Begin(sequence.Wind);
 
             if (!activeSequence.HasPhases)
             {
+                BattleWind.Reset();
                 sequenceCompleted.OnNext(activeSequence.Situation);
                 DisposeSequence(activeSequence);
                 activeSequence = null;
@@ -62,9 +82,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
+            // Directorがまだ再生中のTimelineAssetを持つフェーズは破棄しない(次フェーズにTimelineが無い場合など)
+            if (exitedPhase != null && !(playableDirector && exitedPhase.OwnsTimeline(playableDirector.playableAsset)))
+            {
+                activeSequence.ReleasePhase(exitedPhase);
+            }
+            exitedPhase = activePhase;
+
             var nextPhase = activeSequence.MoveNext();
             if (nextPhase == null)
             {
+                BattleWind.Reset();
                 playableDirector?.Stop();
                 sequenceCompleted.OnNext(activeSequence.Situation);
                 DisposeSequence(activeSequence);
@@ -73,12 +101,27 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            activePhase = nextPhase;
-            ApplyTimeline(activePhase);
-            activePhase.Enter(playableDirector);
-            phaseStarted.OnNext(activePhase);
+            // フェーズ専用の風は入場時から開始する。未指定の既存フェーズ間では時計を維持する。
+            if (nextPhase.WindOverride != null)
+                BattleWind.Begin(nextPhase.WindOverride);
+            else if (activePhase?.WindOverride != null)
+                BattleWind.Begin(activeSequence.Wind);
 
-            exitSubscription = activePhase.OnExitPhase.Subscribe(_ => MoveNextPhase());
+            activePhase = nextPhase;
+
+            // Enter() 内で ExitCondition が即座に満たされ CompletePhase が同期発火するケースがあるため、
+            // 購読を Enter() より先に済ませておく。後から購読すると OnExitPhase の通知を取りこぼし、
+            // シーケンスがそのフェーズで止まったままになる。
+            exitSubscription = nextPhase.OnExitPhase.Subscribe(_ => MoveNextPhase());
+            ApplyTimeline(nextPhase);
+            nextPhase.Enter(playableDirector);
+
+            // Enter() 中に即完了して MoveNextPhase が再帰済みの場合、activePhase は既に
+            // 後続フェーズへ進んでいるため、このフェーズ分の開始通知は出さない。
+            if (activePhase == nextPhase)
+            {
+                phaseStarted.OnNext(nextPhase);
+            }
         }
 
         void ApplyTimeline(BattlePhaseModelBase phase)
@@ -111,6 +154,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public void Stop(BattleSequenceModel sequenceToKeep = null)
         {
+            BattleWind.Reset();
             Debug.Log($"[BattlePhaseStateMachine] Stop called, activeSequence: {activeSequence?.Situation}", this);
             exitSubscription?.Dispose();
             exitSubscription = null;
@@ -137,11 +181,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
 
-            Debug.Log($"[BattlePhaseStateMachine] Disposing sequence {sequence.Situation} with {sequence.AllCreatedPhases.Count} phases", this);
             foreach (var phase in sequence.AllCreatedPhases)
             {
-                Debug.Log($"[BattlePhaseStateMachine] Disposing phase {phase.PhaseId}", this);
                 phase.Dispose();
+            }
+
+            if (sequence == activeSequence)
+            {
+                exitedPhase = null;
             }
         }
 

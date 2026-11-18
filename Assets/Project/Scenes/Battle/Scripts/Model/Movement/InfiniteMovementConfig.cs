@@ -13,6 +13,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
     {
         [SerializeField] Vector3 velocity = Vector3.left;
 
+        public InfiniteMovementConfig() { }
+        public InfiniteMovementConfig(Vector3 velocity) => this.velocity = velocity;
+
         public Tween Play(Transform target, Vector2 overrideDirection, Animator animator)
         {
             Vector3 vel = overrideDirection != Vector2.zero

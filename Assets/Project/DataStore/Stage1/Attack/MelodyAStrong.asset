@@ -13,31 +13,32 @@ MonoBehaviour:
   m_Name: MelodyAStrong
   m_EditorClassIdentifier: 
   attackTimeline:
-    loop: 1
-    loopStart: 1.2
-    loopEnd: 30
-    cycleDuration: 3.5
-    entries:
-    - time: 0
-      signal:
-        rid: 454448157880483955
-      directionProvider:
-        rid: 454448117209104458
-      rotationProvider:
-        rid: 454448117209104583
-      sourceIndexProvider:
-        rid: 454448117209104568
-      seType: 0
-    - time: 0
-      signal:
-        rid: 454448157880483956
-      directionProvider:
-        rid: 454448157880483957
-      rotationProvider:
-        rid: 454448276944191590
-      sourceIndexProvider:
-        rid: 454448276944191591
-      seType: 0
+    phases:
+    - loop: 1
+      loopStart: 1.2
+      loopEnd: 30
+      cycleDuration: 3.5
+      entries:
+      - time: 0
+        signal:
+          rid: 454448157880483955
+        directionProvider:
+          rid: 454448117209104458
+        rotationProvider:
+          rid: 454448117209104583
+        sourceIndexProvider:
+          rid: 454448117209104568
+        seType: 0
+      - time: 0
+        signal:
+          rid: 454448157880483956
+        directionProvider:
+          rid: 454448157880483957
+        rotationProvider:
+          rid: 454448276944191590
+        sourceIndexProvider:
+          rid: 454448276944191591
+        seType: 0
   references:
     version: 2
     RefIds:

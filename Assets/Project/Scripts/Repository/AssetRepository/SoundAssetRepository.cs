@@ -20,6 +20,11 @@ namespace Project.Scripts.Repository.AssetRepository
             return audioClip;
         }
 
+        public void ReleaseBGM(AudioClip audioClip)
+        {
+            Addressables.Release(audioClip);
+        }
+
         public AudioClip LoadSE(SeType seType)
         {
             var address = ZString.Format(

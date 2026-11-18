@@ -44,6 +44,8 @@ namespace Project.Commons.UI.Scripts.Presenter
                 pauseEvent = globalScenePresenter.OptionModalPresenter.OnClosed.Subscribe(_ =>
                 {
                     gameObject.SetActive(true);
+                    // オプション画面で設定が変わっている可能性があるため反映し直す
+                    ApplyRetryOption();
                     gameOverModalView.InitStart();
                     pauseEvent?.Dispose();
                     pauseEvent = null;
@@ -57,7 +59,8 @@ namespace Project.Commons.UI.Scripts.Presenter
             }
         }
 
-        public void Open()
+        // retryHpIncreaseRate: 次回リトライ時のHP増加率(初期HP比, %)
+        public void Open(int retryHpIncreaseRate)
         {
             if (IsOpen) return;
             IsOpen = true;
@@ -66,7 +69,14 @@ namespace Project.Commons.UI.Scripts.Presenter
             AudioListener.pause = true;
 
             gameObject.SetActive(true);
+            gameOverModalView.SetRetryHpIncreaseRate(retryHpIncreaseRate);
+            ApplyRetryOption();
             gameOverModalView.InitStart();
+        }
+
+        void ApplyRetryOption()
+        {
+            gameOverModalView.SetRetryFromStageStart(UserModelRepository.Instance.Get().IsRetryFromStageStartEnabled);
         }
 
         void Retry()

@@ -39,6 +39,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
             lastCts = cts;
 
             var controlTween = DOVirtual.Float(0f, 1f, 999999f, _ => { });
+            if (target != null) controlTween.SetLink(target.gameObject);
             controlTween.OnKill(() =>
             {
                 if (!cts.IsCancellationRequested) cts.Cancel();
@@ -92,6 +93,8 @@ namespace Project.Scenes.Battle.Scripts.Model.Movement
                             {
                                 if (step == null) continue;
                                 ct.ThrowIfCancellationRequested();
+                                // 対象が破棄済みならループ終了（Tween完了コールバック経由で再開した場合に備える）
+                                if (target == null) throw new OperationCanceledException();
 
                                 var tween = step.Play(target, direction, animator);
                                 if (tween == null) continue;

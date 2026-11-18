@@ -22,6 +22,7 @@ namespace Project.Editor
             height += waypointsHeight
                 + (lines - 1) * (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing)
                 + EditorGUIUtility.standardVerticalSpacing;
+            height += EaseDrawerHelper.PreviewLayoutHeight;
             return height;
         }
 

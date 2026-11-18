@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scenes.Battle.Scripts.Model.Movement;
 using Project.Scripts.Extensions;
 using UnityEngine;
 
@@ -11,8 +12,9 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
         [SerializeField] int wayCount = 3;
         [SerializeField] float spreadAngle = 60f;
         [SerializeField] Vector2 offset;
+        [SerializeField] MovementPreset movementOverride;
 
-        public IAttackSignal Clone() => new NWayEnemySpawnAttackSignal { wayCount = wayCount, spreadAngle = spreadAngle, offset = offset };
+        public IAttackSignal Clone() => new NWayEnemySpawnAttackSignal { wayCount = wayCount, spreadAngle = spreadAngle, offset = offset, movementOverride = movementOverride };
 
         public AttackEvent CreateEvent(IDirectionProvider directionProvider, IRotationProvider rotationProvider, int sourceIndex = 0, SeType seType = SeType.None)
         {
@@ -61,7 +63,7 @@ namespace Project.Scenes.Battle.Scripts.Model.Attack
                 }
             }
 
-            return AttackEvent.SpawnMulti(directions, rotations, sourceIndex, spawnOffsets, seType);
+            return AttackEvent.SpawnMulti(directions, rotations, sourceIndex, spawnOffsets, seType, movementOverride);
         }
     }
 }

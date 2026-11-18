@@ -36,10 +36,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 Debug.LogWarning($"[EnemySpawnReceiver] Spawned prefab '{signal.Prefab.name}' has no IEntityPresenter.", this);
             }
 
-            // EnemyEntityPresenterの場合のみトラッカーに登録
-            if (presenter is EnemyEntityPresenter enemyPresenter && enemyTracker != null)
+            // EnemyEntityPresenterの場合のみ動き・攻撃の上書き、トラッカー登録を行う
+            if (presenter is EnemyEntityPresenter enemyPresenter)
             {
-                enemyTracker.RegisterEnemy(enemyPresenter);
+                enemyPresenter.OverrideBulletMovement(signal.BulletMovementOverride);
+                if (signal.MovementOverride != null) enemyPresenter.OverrideMovement(signal.MovementOverride);
+                if (signal.AttackOverride != null) enemyPresenter.OverrideAttack(signal.AttackOverride);
+                enemyTracker?.RegisterEnemy(enemyPresenter);
             }
 
             Debug.Log($"[EnemySpawnReceiver] Spawned '{signal.Prefab.name}' at {signal.SpawnPosition}", this);

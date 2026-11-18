@@ -25,6 +25,7 @@ namespace Project.Scenes.Battle.Scripts.Model
         protected CompositeDisposable Disposables { get; } = new();
 
         public string PhaseId => Definition.PhaseId;
+        public BattleWindSettings WindOverride => Definition.WindOverride;
         public BattleTimelineBuilderAsset Builder => Definition.TimelineBuilder;
         public BattleTimelineBuilderAsset BuilderStrong => Definition.TimelineBuilderStrong;
         public TimelineAsset TimelineAsset => ResolveTimeline();
@@ -56,6 +57,13 @@ namespace Project.Scenes.Battle.Scripts.Model
             resolvedTimelineStrong = asset ? asset : null;
 
             return resolvedTimelineStrong;
+        }
+
+        /// <summary>このフェーズが生成したTimelineAssetかどうか(未生成なら生成しない)</summary>
+        public bool OwnsTimeline(PlayableAsset asset)
+        {
+            if (!asset) return false;
+            return asset == resolvedTimeline || asset == resolvedTimelineStrong;
         }
 
         public void Enter(PlayableDirector director)
