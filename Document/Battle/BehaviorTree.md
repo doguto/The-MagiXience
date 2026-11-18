@@ -460,7 +460,8 @@ public abstract class StageServiceDefinition
 
 | 領域 | 内容 |
 |---|---|
-| ツールバー | 対象アセット、`Auto Layout`（ルートから下向きに整列）、`Frame All`、`Side Panel`（右ペインの表示切替）、`MiniMap` |
+| ツールバー | 対象アセット、`Frame All`、`Side Panel`（右ペインの表示切替）、`MiniMap` |
+| 配置 | 常に自動整列（ルートから下向き、高さが重なるノード同士だけを比べて左右に詰める）。構造やノードの大きさが変わるたびに並べ直す。ドラッグは兄弟の並べ替えにだけ使い、離すと整列位置に戻る |
 | 左ペイン (`NodePaletteView`) | ノード一覧（Composite / Decorator / Condition / Action とサブカテゴリ）と SubTree 用の BT アセット一覧。検索欄あり。項目をキャンバスへドラッグして作成 |
 | 中央 (`BehaviorTreeGraphView`) | ノードグラフ。上が親、子は左から右の順に実行される。ヘッダーの番号は親の中での実行順。Wait を含む Sequence の子には、Sequence 開始から何フレーム目に動くか（`@150f`）も出す。時間の読めない子（Move / SubTree など）より後ろには出さない |
 | 右ペイン `Node` タブ (`NodeInspectorView`) | 選択中のノードの種類・分類・説明・要約・コメント・設定欄。再生中は実行中かどうかも出す。設定欄はノード内の欄と同じ値に結びついており、どちらで編集してももう片方に反映される。複数選択時は個数だけを出す |

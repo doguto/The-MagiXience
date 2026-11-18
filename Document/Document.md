@@ -1194,7 +1194,7 @@ Tutorial 表示 View。
 BehaviorTree エディタ（`Assets/Project/Scenes/Battle/Editor/BehaviorTree/`）:
 
 - `BehaviorTreeEditorWindow.cs`: `Window > Battle > Behavior Tree Editor`、または `BehaviorTreeAsset` のダブルクリックで開くウィンドウ。左にノードパレット、中央にグラフ、右にパラメータ一覧を並べる。
-- `BehaviorTreeGraphView.cs` / `BehaviorTreeNodeView.cs` / `BehaviorTreePort.cs` / `BehaviorTreeEdge.cs`: GraphView によるツリー表示と編集（ドラッグ & ドロップ作成、コピー & ペースト、Auto Layout、再生中の実行ノードのハイライト）。入力欄は選択中のノードにだけ作り、大きなツリーでも重くならないようにしている。
+- `BehaviorTreeGraphView.cs` / `BehaviorTreeNodeView.cs` / `BehaviorTreePort.cs` / `BehaviorTreeEdge.cs`: GraphView によるツリー表示と編集（ドラッグ & ドロップ作成、コピー & ペースト、常時の自動整列、再生中の実行ノードのハイライト）。入力欄は選択中のノードにだけ作り、大きなツリーでも重くならないようにしている。
 - `NodePaletteView.cs` / `NodeCatalog.cs` / `NodeSearchWindowProvider.cs`: ノード一覧と検索。`NodeInfoAttribute` の説明・分類を表示する。BT アセット一覧から SubTree を作成できる。
 - `NodeInspectorView.cs`: 右ペインの Node タブ。選択中のノードの種類・説明・要約・コメント・設定欄を出す（設定欄の作り方はノード内と共通の `BehaviorTreeNodeView.BuildFields`）。
 - `ParameterPanelView.cs` / `BtValueDrawer.cs` / `ParameterUtility.cs`: ツリーパラメータの追加・改名・削除と、`BtInt` などの値欄の `$param` 結びつけ（`▾` メニューまたはドラッグ）。改名は値欄・`bindToParent`・`*Param` 欄に追従する（`ParameterUtility.FindReferencePaths`）。

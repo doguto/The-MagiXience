@@ -43,7 +43,6 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             assetField.style.width = 260;
             assetField.RegisterValueChangedCallback(e => SetAsset(e.newValue as BehaviorTreeAsset));
             toolbar.Add(assetField);
-            toolbar.Add(new ToolbarButton(() => graphView?.AutoLayout()) { text = "Auto Layout" });
             toolbar.Add(new ToolbarButton(() => graphView?.FrameWholeGraph()) { text = "Frame All" });
             var blackboardToggle = new ToolbarToggle { text = "Side Panel", value = true };
             toolbar.Add(blackboardToggle);

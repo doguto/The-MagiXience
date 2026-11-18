@@ -182,8 +182,8 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public void Load(BehaviorTreeAsset target)
         {
             asset = target;
+            frameAfterLayout = true;
             Reload();
-            schedule.Execute(FrameWholeGraph).ExecuteLater(50);
         }
 
         public void Reload()
@@ -201,6 +201,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             rootView = new BehaviorTreeNodeView(OnDropOutsidePort);
             rootView.SetPosition(new Rect(0, -150, 120, 60));
+            rootView.RegisterCallback<GeometryChangedEvent>(OnNodeGeometryChanged);
             AddElement(rootView);
 
             Sync();
@@ -254,6 +255,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 var view = new BehaviorTreeNodeView(def, () => FindPropertyFor(target), OnDropOutsidePort);
                 view.OnValuesChanged.Subscribe(_ => RefreshOrderBadges());
                 view.SetPosition(new Rect(def.GraphPosition, Vector2.zero));
+                view.RegisterCallback<GeometryChangedEvent>(OnNodeGeometryChanged);
                 views[def] = view;
                 AddElement(view);
             }
@@ -285,6 +287,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             isReloading = false;
             RefreshOrderBadges();
+            RequestLayout();
 
             QueueSelectionChanged();
         }
@@ -324,60 +327,108 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         const float HorizontalGap = 40f;
         const float VerticalGap = 70f;
 
-        // ルートから下向きに、子の部分木の幅を確保しながら整列する
-        public void AutoLayout()
+        bool layoutPending;
+        bool frameAfterLayout;
+
+        // 位置は常に自動で決める。ノードの大きさは描画後にしか分からないため、大きさが変わるたびに並べ直す
+        void OnNodeGeometryChanged(GeometryChangedEvent evt)
         {
-            if (asset?.Root == null || !views.ContainsKey(asset.Root)) return;
-
-            Undo.RecordObject(asset, "Auto Layout Behavior Tree");
-            var rootSize = SizeOf(rootView);
-            var rootPos = new Vector2(-rootSize.x / 2f, 0f);
-            rootView.SetPosition(new Rect(rootPos, rootSize));
-            Place(asset.Root, 0f, rootSize.y + VerticalGap);
-
-            var detachedX = SubtreeWidth(asset.Root) / 2f + HorizontalGap * 3f;
-            foreach (var detached in asset.DetachedNodes)
-            {
-                if (detached == null || !views.ContainsKey(detached)) continue;
-                var w = SubtreeWidth(detached);
-                Place(detached, detachedX + w / 2f, rootSize.y + VerticalGap);
-                detachedX += w + HorizontalGap * 2f;
-            }
-
-            EditorUtility.SetDirty(asset);
-            RefreshOrderBadges();
-            schedule.Execute(FrameWholeGraph).ExecuteLater(50);
+            if (evt.oldRect.size != evt.newRect.size) RequestLayout();
         }
 
-        void Place(BtNode def, float centerX, float y)
+        void RequestLayout()
+        {
+            if (layoutPending) return;
+            layoutPending = true;
+            schedule.Execute(() =>
+            {
+                layoutPending = false;
+                Layout();
+                if (!frameAfterLayout) return;
+                frameAfterLayout = false;
+                FrameWholeGraph();
+            });
+        }
+
+        // 部分木の幅を丸ごと確保すると、深い段だけが広い部分木の隣が無駄に空くため、
+        // 高さが重なるノード同士だけを比べて左右に詰める (Reingold–Tilford と同じ考え方)
+        void Layout()
+        {
+            if (asset == null || rootView == null) return;
+            var rootSize = SizeOf(rootView);
+            rootView.SetPosition(new Rect(new Vector2(-rootSize.x / 2f, 0f), rootSize));
+
+            var tops = new List<BtNode>();
+            if (asset.Root != null && views.ContainsKey(asset.Root)) tops.Add(asset.Root);
+            tops.AddRange(asset.DetachedNodes.Where(d => d != null && views.ContainsKey(d)));
+            if (tops.Count == 0) return;
+            var plan = new Dictionary<BtNode, (float offset, float y)>();
+            var y0 = rootSize.y + VerticalGap;
+            var shapes = tops.Select(t => Measure(t, y0, plan)).ToList();
+            var offsets = Pack(shapes, HorizontalGap * 3f);
+            var changed = false;
+            for (var i = 0; i < tops.Count; i++) changed |= Apply(tops[i], offsets[i] - offsets[0], plan);
+            if (changed) EditorUtility.SetDirty(asset);
+        }
+
+        // 部分木が占める矩形の一覧を、自分の中心 x を 0 として返す。子の相対位置は plan に記録する
+        List<Rect> Measure(BtNode def, float y, Dictionary<BtNode, (float offset, float y)> plan)
+        {
+            var size = SizeOf(views[def]);
+            var children = def.Children.Where(c => c != null && views.ContainsKey(c)).ToList();
+            var childY = y + size.y + VerticalGap;
+            var shapes = children.Select(c => Measure(c, childY, plan)).ToList();
+            var offsets = Pack(shapes, HorizontalGap);
+            if (children.Count > 0)
+            {
+                var mid = (offsets[0] + offsets[^1]) / 2f;
+                for (var i = 0; i < offsets.Count; i++) offsets[i] -= mid;
+            }
+
+            var result = new List<Rect> { new(-size.x / 2f, y, size.x, size.y) };
+            for (var i = 0; i < children.Count; i++)
+            {
+                plan[children[i]] = (offsets[i], childY);
+                result.AddRange(shapes[i].Select(r => new Rect(r.x + offsets[i], r.y, r.width, r.height)));
+            }
+            plan[def] = (plan.TryGetValue(def, out var p) ? p.offset : 0f, y);
+            return result;
+        }
+
+        // 左から順に、高さが重なる矩形とだけ gap を空けて詰めた各中心 x を返す
+        static List<float> Pack(List<List<Rect>> shapes, float gap)
+        {
+            var offsets = new List<float>();
+            var placed = new List<Rect>();
+            foreach (var shape in shapes)
+            {
+                var x = offsets.Count == 0 ? 0f : float.MinValue;
+                foreach (var b in shape)
+                foreach (var a in placed)
+                {
+                    if (a.yMin < b.yMax && b.yMin < a.yMax) x = Mathf.Max(x, a.xMax + gap - b.xMin);
+                }
+                if (x == float.MinValue) x = offsets[^1];
+                offsets.Add(x);
+                placed.AddRange(shape.Select(r => new Rect(r.x + x, r.y, r.width, r.height)));
+            }
+            return offsets;
+        }
+
+        // 子の順番は GraphPosition.x で決まるため、表示だけでなく定義側の位置も揃える
+        bool Apply(BtNode def, float centerX, Dictionary<BtNode, (float offset, float y)> plan)
         {
             var view = views[def];
             var size = SizeOf(view);
-            var pos = new Vector2(centerX - size.x / 2f, y);
+            var pos = new Vector2(Mathf.Round(centerX - size.x / 2f), Mathf.Round(plan[def].y));
+            var changed = def.GraphPosition != pos;
             def.GraphPosition = pos;
             view.SetPosition(new Rect(pos, size));
-
-            var children = def.Children.Where(c => c != null && views.ContainsKey(c)).ToList();
-            if (children.Count == 0) return;
-
-            var widths = children.Select(SubtreeWidth).ToList();
-            var total = widths.Sum() + HorizontalGap * (children.Count - 1);
-            var x = centerX - total / 2f;
-            var childY = y + size.y + VerticalGap;
-            for (var i = 0; i < children.Count; i++)
+            foreach (var c in def.Children)
             {
-                Place(children[i], x + widths[i] / 2f, childY);
-                x += widths[i] + HorizontalGap;
+                if (c != null && views.ContainsKey(c)) changed |= Apply(c, centerX + plan[c].offset, plan);
             }
-        }
-
-        float SubtreeWidth(BtNode def)
-        {
-            var own = SizeOf(views[def]).x;
-            var children = def.Children.Where(c => c != null && views.ContainsKey(c)).ToList();
-            if (children.Count == 0) return own;
-            var sum = children.Sum(SubtreeWidth) + HorizontalGap * (children.Count - 1);
-            return Mathf.Max(own, sum);
+            return changed;
         }
 
         static Vector2 SizeOf(GraphElement element)
@@ -536,8 +587,10 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                     if (view.IsRoot) continue;
                     view.TreeNode.GraphPosition = view.GetPosition().position;
                 }
+                // ドラッグは兄弟の並べ替えにだけ使い、離したら整列し直して元の段に戻す
                 SortAllChildrenByPosition();
                 RefreshOrderBadges();
+                RequestLayout();
             }
 
             EditorUtility.SetDirty(asset);
