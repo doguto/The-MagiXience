@@ -54,8 +54,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 6c1175f883c0188438ef26b9e24a5072, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000033
           range: 0
           affectedByWind: 1
         direction:
@@ -74,8 +75,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 0b14410a72525924ca6173bc134e1ecf, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000034
           range: 0
           affectedByWind: 1
         direction:
@@ -84,3 +86,25 @@ MonoBehaviour:
           rid: 8540147884263997664
         muzzleOffset: {x: 0, y: 0}
         se: 0
+    - rid: 8540150000000000033
+      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        orientation: 0
+        vertex: {x: -5, y: -3.6}
+        initialSpeed: 8
+        isRelative: 1
+        oscillateVertex: 1
+        vertexAmplitude: {x: 1.5, y: 1.2}
+        vertexAngularSpeed: {x: 0.75, y: 0.677}
+        attackTimeOffset: -3.74
+    - rid: 8540150000000000034
+      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        orientation: 0
+        vertex: {x: -5, y: 3.6}
+        initialSpeed: 8
+        isRelative: 1
+        oscillateVertex: 1
+        vertexAmplitude: {x: 1.5, y: -1.2}
+        vertexAngularSpeed: {x: 0.75, y: 0.677}
+        attackTimeOffset: -3.74

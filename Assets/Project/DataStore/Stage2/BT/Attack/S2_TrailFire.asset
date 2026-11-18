@@ -86,8 +86,9 @@ MonoBehaviour:
           prefab: {fileID: -4487681364143076941, guid: d1b918877e4c9a84191c8ecacbd1c714, type: 3}
           prefabParam: bullet
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 8e1bc69d60670634cb68e0d771e5ef4b, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000023
           range: 0
           affectedByWind: 1
         spacing:
@@ -102,3 +103,8 @@ MonoBehaviour:
     - rid: 8540147960821842002
       type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
+    - rid: 8540150000000000023
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -3, y: 0, z: 0}
+        duration: 0

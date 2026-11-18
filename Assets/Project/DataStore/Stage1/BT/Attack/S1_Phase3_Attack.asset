@@ -20,20 +20,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147960821842855
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 89e6f04e41964d32b011acd0793a35db
         graphPosition: {x: 0, y: 0}
         comment: 
-        children:
-        - rid: 8540147960821842856
-        - rid: 8540147961671975624
-    - rid: 8540147960821842856
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: b23a6bdb3a5e4d4bb5338accbc0b0813
-        graphPosition: {x: 0, y: 0}
-        comment: 
+        child:
+          rid: 8540147961671975624
         frames:
           value: 156
           param: 
@@ -55,8 +48,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: ab5e550005eb7e6499fd79056d32559d, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: cc201ab6b9230f443b863c264c857689, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000001
           range: 0
           affectedByWind: 1
         direction:
@@ -65,3 +59,8 @@ MonoBehaviour:
           rid: 8540147960821842860
         muzzleOffset: {x: -0.3, y: 0}
         se: 0
+    - rid: 8540150000000000001
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -2.1, y: 0, z: 0}
+        duration: 0

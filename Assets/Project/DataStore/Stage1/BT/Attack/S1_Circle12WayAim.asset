@@ -20,20 +20,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147960821842889
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 7a0f6f2940704aaf9dbffd2dee5c943d
         graphPosition: {x: 0, y: 0}
         comment: 
-        children:
-        - rid: 8540147960821842890
-        - rid: 8540147961671975625
-    - rid: 8540147960821842890
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: e275f76384b24f46ab3a07783110a230
-        graphPosition: {x: 0, y: 0}
-        comment: 
+        child:
+          rid: 8540147961671975625
         frames:
           value: 90
           param: 

@@ -69,8 +69,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 69afb771c03ccb24692365f07a3c4396, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000038
           range: 0
           affectedByWind: 1
         direction:
@@ -89,3 +90,8 @@ MonoBehaviour:
           radius: 0.5
           startDelayFrames: 0
           rotationOffset: 0
+    - rid: 8540150000000000038
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -2.4, y: 0, z: 0}
+        duration: 0

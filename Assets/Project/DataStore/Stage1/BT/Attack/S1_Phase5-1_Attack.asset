@@ -20,20 +20,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8540147960821842871
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: e6ae25009a084f77a390a52574675bf2
         graphPosition: {x: 0, y: 0}
         comment: 
-        children:
-        - rid: 8540147960821842872
-        - rid: 8540147961671975594
-    - rid: 8540147960821842872
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: d0001e8a582c465c95eaddf824ca0b9e
-        graphPosition: {x: 0, y: 0}
-        comment: 
+        child:
+          rid: 8540147961671975594
         frames:
           value: 60
           param: 
@@ -54,8 +47,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 37b0cbfe8571bf447a1dfd47ebe6cfe5, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000002
           range: 0
           affectedByWind: 1
         direction:
@@ -74,3 +68,8 @@ MonoBehaviour:
           radius: 0.5
           startDelayFrames: 0
           rotationOffset: 0
+    - rid: 8540150000000000002
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -1, y: 0, z: 0}
+        duration: 0

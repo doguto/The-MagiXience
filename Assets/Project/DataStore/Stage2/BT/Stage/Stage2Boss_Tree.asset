@@ -53,14 +53,16 @@ MonoBehaviour:
           rid: 8540147884263211265
         onChildCompleted: 2
     - rid: 8540147884263211264
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 46dd301b8848447d87b4a4be2d215682
         graphPosition: {x: 1066.6666, y: 621.3334}
         comment: 
-        children:
-        - rid: 8540147886565098118
-        - rid: 8540147961671975480
+        child:
+          rid: 8540147961671975480
+        frames:
+          value: 36
+          param: 
     - rid: 8540147884263211265
       type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -369,15 +371,6 @@ MonoBehaviour:
         frames:
           value: 312
           param: 
-    - rid: 8540147886565098118
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: c2c2f63d454148c987ac4773267c2723
-        graphPosition: {x: 727.33325, y: 774.6667}
-        comment: 
-        frames:
-          value: 36
-          param: 
     - rid: 8540147886565098121
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -519,18 +512,20 @@ MonoBehaviour:
         guid: c4ac6a9f9784447e87d8f891e1433112
         graphPosition: {x: -952.6668, y: 946}
         comment: MoveUp
-        preset: {fileID: 11400000, guid: 4b388ce3aaaf3ed43a7b21134d48be89, type: 2}
+        preset: {fileID: 0}
         presetParam: 
-        steps: []
+        steps:
+        - rid: 8540150000000000026
     - rid: 8540147960821842010
       type: {class: Move, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 83ab46936e38474eb9d6d70f1820be42
         graphPosition: {x: -672.6668, y: 946}
         comment: MoveDown
-        preset: {fileID: 11400000, guid: eb174b7681be74742add825e5c219fe4, type: 2}
+        preset: {fileID: 0}
         presetParam: 
-        steps: []
+        steps:
+        - rid: 8540150000000000027
     - rid: 8540147960821842011
       type: {class: Move, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -678,9 +673,12 @@ MonoBehaviour:
         guid: fbd3aeb25c79471f869509dbc2df4b60
         graphPosition: {x: -1792.6669, y: 1117.3333}
         comment: 
-        preset: {fileID: 11400000, guid: 76a161c55514af643820c3c980afecd0, type: 2}
+        preset: {fileID: 0}
         presetParam: 
-        steps: []
+        steps:
+        - rid: 8540150000000000030
+        - rid: 8540150000000000029
+        - rid: 8540150000000000028
     - rid: 8540147960821842020
       type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -925,8 +923,9 @@ MonoBehaviour:
           prefab: {fileID: -4487681364143076941, guid: fe060beb386601a49b461c37a927c69f, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 8463faaf148267c438875e201c3bbb90, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000031
           range: 0
           affectedByWind: 1
         direction:
@@ -1009,6 +1008,186 @@ MonoBehaviour:
         guid: 80131d8cb3644f7b8f9d1bf9812ae80d
         graphPosition: {x: 447.33325, y: 621.3334}
         comment: 
-        preset: {fileID: 11400000, guid: 08c69ec184a4bf04cb96793d379d1846, type: 2}
+        preset: {fileID: 0}
         presetParam: 
-        steps: []
+        steps:
+        - rid: 8540150000000000032
+    - rid: 8540150000000000026
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 5, y: 3, z: 0}
+        isRelative: 0
+        duration: 0.6
+        ease:
+          easeValue: 6
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+    - rid: 8540150000000000027
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 5, y: -3, z: 0}
+        isRelative: 0
+        duration: 0.6
+        ease:
+          easeValue: 6
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+    - rid: 8540150000000000028
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 6, y: -3, z: 0}
+        isRelative: 0
+        duration: 1.2
+        ease:
+          easeValue: 4
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+    - rid: 8540150000000000029
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 6, y: 3, z: 0}
+        isRelative: 0
+        duration: 0.5
+        ease:
+          easeValue: 6
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+    - rid: 8540150000000000030
+      type: {class: WaitMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        duration: 1
+        invincible: 0
+    - rid: 8540150000000000031
+      type: {class: ReflectMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        speed: 3
+        maxReflections: 1
+        reflectTop: 1
+        reflectBottom: 1
+        reflectLeft: 0
+        reflectRight: 1
+    - rid: 8540150000000000032
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 7, y: 0, z: 0}
+        isRelative: 0
+        duration: 0.6
+        ease:
+          easeValue: 6
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}

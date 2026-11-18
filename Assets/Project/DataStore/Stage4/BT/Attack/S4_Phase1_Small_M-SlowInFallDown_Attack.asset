@@ -31,28 +31,21 @@ MonoBehaviour:
           rid: 8540147961671975344
         onChildCompleted: 0
     - rid: 8540147961671975343
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 5e84b1e9bf5e4b94a11e5cc80ba2650e
         graphPosition: {x: 345, y: 450}
         comment: 
-        children:
-        - rid: 8540147961671975345
-        - rid: 8540147961671975346
+        child:
+          rid: 8540147961671975346
+        frames:
+          value: 48
+          param: 
     - rid: 8540147961671975344
       type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 241
-          param: 
-    - rid: 8540147961671975345
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 11209c4c0d774e1794f7fffd70d10a74
-        graphPosition: {x: 230, y: 600}
-        comment: 
-        frames:
-          value: 48
           param: 
     - rid: 8540147961671975346
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -87,8 +80,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: 67ed420ca909000448078ddced7509ff, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 3362cc4e4f4613543b2a44525fe9fece, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000048
           range: 0
           affectedByWind: 1
         direction:
@@ -97,3 +91,8 @@ MonoBehaviour:
           rid: 8540147961671975350
         muzzleOffset: {x: -0.375, y: 0}
         se: 0
+    - rid: 8540150000000000048
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -1.5, y: 0, z: 0}
+        duration: 0

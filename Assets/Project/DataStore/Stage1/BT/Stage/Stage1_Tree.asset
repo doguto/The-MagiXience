@@ -58,7 +58,19 @@ MonoBehaviour:
         comment: 
         children:
         - rid: 8540147960821842037
-        - rid: 8540147960821842038
+        - rid: 8540147960821842806
+        - rid: 8540147960821842807
+        - rid: 8540147960821842075
+        - rid: 8540147960821842076
+        - rid: 8540147960821842077
+        - rid: 8540147960821842078
+        - rid: 8540147960821842079
+        - rid: 8540147960821842080
+        - rid: 8540147960821842808
+        - rid: 8540147960821842809
+        - rid: 8540147960821842091
+        - rid: 8540147960821842092
+        - rid: 8540147960821842093
         - rid: 8540147960821842039
     - rid: 8540147960821842036
       type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -78,20 +90,6 @@ MonoBehaviour:
         graphPosition: {x: -3360, y: 600}
         comment: 
         bgm: 1
-    - rid: 8540147960821842038
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: df6c8c2e301a4a219cae4587c65ec013
-        graphPosition: {x: -760, y: 600}
-        comment: Group 0
-        children:
-        - rid: 8540147960821842806
-        - rid: 8540147960821842807
-        - rid: 8540147960821842046
-        - rid: 8540147960821842047
-        - rid: 8540147960821842808
-        - rid: 8540147960821842809
-        - rid: 8540147960821842050
     - rid: 8540147960821842039
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -139,36 +137,6 @@ MonoBehaviour:
         scenario: {fileID: 11400000, guid: 2f9130952c2461c4fa42598358634941, type: 2}
         skipOnResume: 0
         restorePlayerControl: 0
-    - rid: 8540147960821842046
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 410ae18788b143b7aefa56057fa47cbb
-        graphPosition: {x: -2060, y: 750}
-        comment: 1_Phase2-5
-        children:
-        - rid: 8540147960821842075
-        - rid: 8540147960821842076
-        - rid: 8540147960821842077
-    - rid: 8540147960821842047
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 366ceda77cb14aa0b50000e8d991d978
-        graphPosition: {x: -760, y: 750}
-        comment: 1_Phase3
-        children:
-        - rid: 8540147960821842078
-        - rid: 8540147960821842079
-        - rid: 8540147960821842080
-    - rid: 8540147960821842050
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 16aae6aa07bb470b8b37bc5d5636411d
-        graphPosition: {x: 1060, y: 750}
-        comment: 1_Phase6
-        children:
-        - rid: 8540147960821842091
-        - rid: 8540147960821842092
-        - rid: 8540147960821842093
     - rid: 8540147960821842051
       type: {class: OnCommand, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -514,7 +482,7 @@ MonoBehaviour:
       data:
         guid: 663c8cf047ba4990a431ab4e2422a761
         graphPosition: {x: -2580, y: 900}
-        comment: 
+        comment: 1_Phase2-5
         frames:
           value: 60
           param: 
@@ -545,7 +513,7 @@ MonoBehaviour:
       data:
         guid: aa9ffaecffe04aaca352cfc2ed73d1fe
         graphPosition: {x: -1280, y: 900}
-        comment: 
+        comment: 1_Phase3
         frames:
           value: 60
           param: 
@@ -761,7 +729,7 @@ MonoBehaviour:
       data:
         guid: 10838164c46c49d8b63568d28d99f785
         graphPosition: {x: 540, y: 900}
-        comment: 
+        comment: 1_Phase6
         frames:
           value: 60
           param: 

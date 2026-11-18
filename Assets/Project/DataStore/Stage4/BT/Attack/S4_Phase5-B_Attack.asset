@@ -31,28 +31,21 @@ MonoBehaviour:
           rid: 8540147961671975453
         onChildCompleted: 0
     - rid: 8540147961671975452
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: a99511bbe92349bfbd773ff1e27a1324
         graphPosition: {x: 345, y: 450}
         comment: 
-        children:
-        - rid: 8540147961671975454
-        - rid: 8540147961671975455
+        child:
+          rid: 8540147961671975455
+        frames:
+          value: 120
+          param: 
     - rid: 8540147961671975453
       type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 901
-          param: 
-    - rid: 8540147961671975454
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 0d40d5a62db4474cb568307bf3a5459c
-        graphPosition: {x: 230, y: 600}
-        comment: 
-        frames:
-          value: 120
           param: 
     - rid: 8540147961671975455
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}

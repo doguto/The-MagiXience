@@ -31,28 +31,21 @@ MonoBehaviour:
           rid: 8540147961671975357
         onChildCompleted: 0
     - rid: 8540147961671975356
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 4b0c3e70ab7e4b72a9db78e9c9ec0655
         graphPosition: {x: 345, y: 450}
         comment: 
-        children:
-        - rid: 8540147961671975358
-        - rid: 8540147961671975359
+        child:
+          rid: 8540147961671975359
+        frames:
+          value: 180
+          param: 
     - rid: 8540147961671975357
       type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 6001
-          param: 
-    - rid: 8540147961671975358
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: f045d407a51d478fa9eb558a379a4c62
-        graphPosition: {x: 230, y: 600}
-        comment: 
-        frames:
-          value: 180
           param: 
     - rid: 8540147961671975359
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -85,8 +78,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: 618458775320b7543b6b8b2cd91af409, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: ae9e75f92a54fed40bd2b3bb91fb0c53, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000047
           range: 0
           affectedByWind: 1
         direction:
@@ -105,3 +99,8 @@ MonoBehaviour:
           radius: 0
           startDelayFrames: 0
           rotationOffset: 0
+    - rid: 8540150000000000047
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -0.8, y: 0, z: 0}
+        duration: 0

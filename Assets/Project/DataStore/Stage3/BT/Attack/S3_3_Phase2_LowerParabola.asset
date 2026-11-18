@@ -31,28 +31,21 @@ MonoBehaviour:
           rid: 8540147961671974996
         onChildCompleted: 0
     - rid: 8540147961671974995
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: bb334e4a92e74316b5f4419c7a230ac2
         graphPosition: {x: 0, y: 0}
         comment: 
-        children:
-        - rid: 8540147961671974997
-        - rid: 8540147961671974998
+        child:
+          rid: 8540147961671974998
+        frames:
+          value: 30
+          param: 
     - rid: 8540147961671974996
       type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         frames:
           value: 481
-          param: 
-    - rid: 8540147961671974997
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 9c1627a3fe354e8286804c5cc46c7916
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        frames:
-          value: 30
           param: 
     - rid: 8540147961671974998
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -85,8 +78,9 @@ MonoBehaviour:
           prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
           prefabParam: 
           damage: 10
-          motionPreset: {fileID: 11400000, guid: 9b8f22dbce218dc469b2dc4ceeeb9fff, type: 2}
-          motion: []
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000039
           range: 0
           affectedByWind: 1
         direction:
@@ -95,3 +89,14 @@ MonoBehaviour:
           rid: 8540147961671975002
         muzzleOffset: {x: -0.5, y: 0}
         se: 0
+    - rid: 8540150000000000039
+      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        orientation: 0
+        vertex: {x: -4, y: 4}
+        initialSpeed: 7
+        isRelative: 1
+        oscillateVertex: 0
+        vertexAmplitude: {x: 0, y: 0}
+        vertexAngularSpeed: {x: 0, y: 0}
+        attackTimeOffset: 0

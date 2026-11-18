@@ -1585,24 +1585,294 @@ MonoBehaviour:
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         direction: {x: -1, y: 0}
+    - rid: 8540149000000000004
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540149000000000005
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540149000000000006
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540149000000000007
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540149000000000008
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540149000000000009
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
     - rid: 8540147884264522035
-      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: e1cbc813c072419cb056d2d82b2e30d2
+        guid: e69059352e15425889d358fd879fd41d
         graphPosition: {x: 1244.333, y: 1580.6666}
-        comment: 
-        tree: {fileID: 11400000, guid: c86eebe2ead42ee488f911ce38f501bc, type: 2}
-        treeParam: 
-        overrides: []
-    - rid: 8540147884264522036
-      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+        comment: UshitoraThird4Way
+        children:
+        - rid: 8540149000000000013
+        - rid: 8540149000000000011
+        - rid: 8540149000000000014
+        - rid: 8540149000000000012
+        - rid: 8540149000000000015
+    - rid: 8540149000000000011
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: ab8e3b5ba6614363abe3cfce45be9ad3
-        graphPosition: {x: 1491.6665, y: 1580.6666}
+        guid: f74c56fd355a4a1986f7815c333941be
+        graphPosition: {x: 1014.333, y: 1430.6666}
         comment: 
-        tree: {fileID: 11400000, guid: 7e39000d890e22f4984c35bd5fdde508, type: 2}
-        treeParam: 
-        overrides: []
+        frames:
+          value: 30
+          param: 
+    - rid: 8540149000000000012
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d62f7f233de94c0197a182539a27fd33
+        graphPosition: {x: 1014.333, y: 1430.6666}
+        comment: 
+        frames:
+          value: 30
+          param: 
+    - rid: 8540149000000000013
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 056ffbdf79614c61bd61539cd12351f9
+        graphPosition: {x: 1014.333, y: 1730.6666}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: c32e0c92eb4887a47b48b549b6537d86, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 85b2d1f8660fb834c9029e399fec3e82, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540149000000000004
+        rotation:
+          rid: 8540149000000000005
+        muzzleOffset: {x: -0.25, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 4
+            param: 
+          spreadAngle:
+            value: 45
+            param: 
+          radius: 0.3
+          startDelayFrames: 0
+          rotationOffset: 0
+    - rid: 8540149000000000014
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 77b5d6d3bf9b48c7934a24cddbf1d5d8
+        graphPosition: {x: 1244.333, y: 1880.6666}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: c32e0c92eb4887a47b48b549b6537d86, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 85b2d1f8660fb834c9029e399fec3e82, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540149000000000006
+        rotation:
+          rid: 8540149000000000007
+        muzzleOffset: {x: -0.25, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 4
+            param: 
+          spreadAngle:
+            value: 45
+            param: 
+          radius: 0.3
+          startDelayFrames: 0
+          rotationOffset: 0
+    - rid: 8540149000000000015
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: cfa2c3fe88574aebbc98cafa9278e09a
+        graphPosition: {x: 1474.333, y: 1880.6666}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: c32e0c92eb4887a47b48b549b6537d86, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 85b2d1f8660fb834c9029e399fec3e82, type: 2}
+          motion: []
+          range: 0
+          affectedByWind: 1
+        direction:
+          rid: 8540149000000000008
+        rotation:
+          rid: 8540149000000000009
+        muzzleOffset: {x: -0.25, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 4
+            param: 
+          spreadAngle:
+            value: 45
+            param: 
+          radius: 0.3
+          startDelayFrames: 0
+          rotationOffset: 0
+    - rid: 8540149000000000016
+      type: {class: SpriteBeam, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 4e248a6176b2401ea32ba0597915a178
+        graphPosition: {x: 1146.6665, y: 1730.6666}
+        comment: 
+        line:
+          start: {x: 2, y: 4}
+          end: {x: -9, y: -7}
+        isRelative: 1
+        bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
+        bodyDuration: 1
+    - rid: 8540149000000000017
+      type: {class: SpriteBeam, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a533ccb98d5f470d8a8923b8e33d23c2
+        graphPosition: {x: 1376.6665, y: 1880.6666}
+        comment: 
+        line:
+          start: {x: 2, y: -4}
+          end: {x: -9, y: 7}
+        isRelative: 1
+        bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
+        bodyDuration: 1
+    - rid: 8540149000000000018
+      type: {class: SpriteBeam, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3dfd34be1cf046c4b2d036c68ec3ed8b
+        graphPosition: {x: 1606.6665, y: 1880.6666}
+        comment: 
+        line:
+          start: {x: -2, y: 4}
+          end: {x: -2, y: -10}
+        isRelative: 1
+        bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
+        bodyDuration: 1
+    - rid: 8540149000000000019
+      type: {class: SpriteBeam, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b1c10e85eb7e4dcc93d134e7d7573af6
+        graphPosition: {x: 1836.6665, y: 1880.6666}
+        comment: 
+        line:
+          start: {x: -0.3, y: 0}
+          end: {x: -20, y: 0}
+        isRelative: 1
+        bodyPrefab: {fileID: 8143873751805396341, guid: 958bc3b31ab677545b257400a36778ea, type: 3}
+        bodyDuration: 1
+    - rid: 8540147884264522036
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b5040d4016af4d3eb491b336c1a5e9f7
+        graphPosition: {x: 1491.6665, y: 1580.6666}
+        comment: UshitoraThirdSubBeam
+        children:
+        - rid: 8540149000000000024
+        - rid: 8540149000000000021
+        - rid: 8540149000000000025
+        - rid: 8540149000000000022
+        - rid: 8540149000000000026
+        - rid: 8540149000000000023
+        - rid: 8540149000000000027
+    - rid: 8540149000000000021
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7d8c38d3e13944249b4149b11e73f645
+        graphPosition: {x: 1146.6665, y: 1430.6666}
+        comment: 
+        frames:
+          value: 120
+          param: 
+    - rid: 8540149000000000022
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 17b7ab0d19d14e08921e29a37649d697
+        graphPosition: {x: 1146.6665, y: 1430.6666}
+        comment: 
+        frames:
+          value: 120
+          param: 
+    - rid: 8540149000000000023
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2ce2741cd692469a8fec5552943a2374
+        graphPosition: {x: 1146.6665, y: 1430.6666}
+        comment: 
+        frames:
+          value: 120
+          param: 
+    - rid: 8540149000000000024
+      type: {class: WarningLine, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9070d384cedb43fc8109e4eabb34dae8
+        graphPosition: {x: 1146.6665, y: 1730.6666}
+        comment: 
+        child:
+          rid: 8540149000000000016
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540149000000000025
+      type: {class: WarningLine, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2d5c5decd3a24159a721b53f534547dd
+        graphPosition: {x: 1376.6665, y: 1880.6666}
+        comment: 
+        child:
+          rid: 8540149000000000017
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540149000000000026
+      type: {class: WarningLine, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3df7cf92262d46e6ad7aeb41f82e2cda
+        graphPosition: {x: 1606.6665, y: 1880.6666}
+        comment: 
+        child:
+          rid: 8540149000000000018
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
+    - rid: 8540149000000000027
+      type: {class: WarningLine, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 04a0a98a15b041b4be93b8743e2319d6
+        graphPosition: {x: 1836.6665, y: 1880.6666}
+        comment: 
+        child:
+          rid: 8540149000000000019
+        prefab: {fileID: 5888170941882211794, guid: 696315ec26264a14d831e7d09c134df4, type: 3}
+        frames: 60
+        displayFrames: 0
+        width: 0
+        waitForBeam: 0
     - rid: 8540147884264522037
       type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -1732,14 +2002,46 @@ MonoBehaviour:
         treeParam: 
         overrides: []
     - rid: 8540147884264522069
-      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 90029642bd684fcda4dd92ff0eba72fb
+        guid: e087067435cb48af800dde4c813c66b8
         graphPosition: {x: -655.667, y: 1730.6666}
-        comment: 
-        tree: {fileID: 11400000, guid: c648e783aa510b844a96906bee44572f, type: 2}
-        treeParam: 
-        overrides: []
+        comment: UshitoraSecond
+        prefab: {fileID: 7074045735317373604, guid: 8e30874dffba99441b33faa707fccc61, type: 3}
+        behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        overrides:
+        - name: movement
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 9aae98205c363834ba26e52b7b454e4b, type: 2}
+          bindToParent: 
+        position: {x: 0, y: 0}
+        worldSpace: 0
+        layout:
+          rid: 8540149000000000001
+        rotation:
+          rid: 8540149000000000002
+        direction:
+          rid: 8540149000000000003
+        tracked: 1
+        beamRange: 0
+        beamDuration: 0
+        beamWidth: 0
+    - rid: 8540149000000000001
+      type: {class: SingleLayout, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        offset: {x: -1, y: 0}
+    - rid: 8540149000000000002
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540149000000000003
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        direction: {x: -1, y: 0}
     - rid: 8540147886565097587
       type: {class: Parallel, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -1925,9 +2227,11 @@ MonoBehaviour:
         guid: b9a56a52fe4c43069e45c0e61eb93235
         graphPosition: {x: 4519.6665, y: 548.6666}
         comment: 
-        preset: {fileID: 11400000, guid: fdde899a688218a48adae26f6209ae4d, type: 2}
+        preset: {fileID: 0}
         presetParam: 
-        steps: []
+        steps:
+        - rid: 8540150000000000050
+        - rid: 8540150000000000049
     - rid: 8540147974269042802
       type: {class: Parallel, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -1947,6 +2251,158 @@ MonoBehaviour:
         guid: f445b3ab100044348aac46656a0c3a66
         graphPosition: {x: 3809.6665, y: 858.6666}
         comment: 
-        preset: {fileID: 11400000, guid: 7f75469592c46d54ba29323b0ae69d52, type: 2}
+        preset: {fileID: 0}
         presetParam: 
-        steps: []
+        steps:
+        - rid: 8540150000000000055
+        - rid: 8540150000000000054
+        - rid: 8540150000000000053
+        - rid: 8540150000000000052
+        - rid: 8540150000000000051
+    - rid: 8540150000000000049
+      type: {class: WaitMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        duration: 0
+        invincible: 0
+    - rid: 8540150000000000050
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 3.7, y: 0, z: 0}
+        isRelative: 0
+        duration: 1.5
+        ease:
+          easeValue: 6
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+    - rid: 8540150000000000051
+      type: {class: WaitMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        duration: 0
+        invincible: 0
+    - rid: 8540150000000000052
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 6.5, y: 3.5, z: 0}
+        isRelative: 0
+        duration: 0.5
+        ease:
+          easeValue: 1
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+    - rid: 8540150000000000053
+      type: {class: WaitMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        duration: 14.37557
+        invincible: 0
+    - rid: 8540150000000000054
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 14, y: 3.5, z: 0}
+        isRelative: 0
+        duration: 1
+        ease:
+          easeValue: 1
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
+    - rid: 8540150000000000055
+      type: {class: MoveToMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        targetOffset: {x: 14, y: 0, z: 0}
+        isRelative: 0
+        duration: 1.5
+        ease:
+          easeValue: 6
+          customCurve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 1
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          curvePreset: {fileID: 0}
