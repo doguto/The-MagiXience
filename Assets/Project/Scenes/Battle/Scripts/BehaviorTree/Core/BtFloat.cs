@@ -23,5 +23,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public static implicit operator BtFloat(float v) => new(v);
 
         public override string ToString() => string.IsNullOrEmpty(param) ? value.ToString("0.##") : "$" + param;
+
+        public string ToFrameString() => string.IsNullOrEmpty(param) ? $"{value:0.##}f ({value / BattleContext.FramesPerSecond:0.##}s)" : "$" + param;
     }
 }
