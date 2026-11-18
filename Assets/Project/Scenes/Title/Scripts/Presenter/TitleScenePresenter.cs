@@ -4,6 +4,7 @@ using Project.Scenes.Title.Scripts.Model;
 using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scenes.Title.Scripts.View;
 using Project.Scripts.Extensions;
+using Project.Scripts.Extensions.Message;
 using Project.Scripts.Presenter;
 using Project.Scripts.Repository.ModelRepository;
 using UniRx;
@@ -48,7 +49,13 @@ namespace Project.Scenes.Title.Scripts.Presenter
             {
                 soundManager.PlaySEAsync(SeType.Click).Forget();
                 titleMenuView.SetInteractable(false);
-                globalScenePresenter.OptionModalPresenter.Open();
+                var optionModal = globalScenePresenter.OptionModalPresenter;
+                optionModal.Open();
+
+                // Esc(UI Cancel)でもオプションを閉じられるようにする
+                using var cancelSubscription = MessageBroker.Default.Receive<UICancelMessage>()
+                    .Where(_ => optionModal.IsOpen)
+                    .Subscribe(_ => optionModal.Close());
 
                 await globalScenePresenter.OptionModalPresenter.OnClosed.ToUniTask(true);
 
