@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Project.Scenes.Battle.Scripts.Runtime;
+using Project.Scenes.Battle.Scripts.Runtime.Motion;
 using UnityEngine;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
@@ -23,7 +25,15 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         [NonSerialized] List<(Vector2 offset, Quaternion rotation)> slots;
 
-        public override string Summary => (prefab ? prefab.name : "(未設定)") + $" {layout?.Summary}" + (behavior ? $" / {behavior.name}" : "");
+        public override string Summary =>
+            (prefab ? prefab.name : "(未設定)") + $" {layout?.Summary}" + (behavior ? $" / {behavior.name}" : "") + string.Concat(overrides.Select(OverrideSummary));
+
+        static string OverrideSummary(TreeParameter p) => p.ObjectValue switch
+        {
+            MotionPreset motion => $" / {p.Name}: {MotionStep.Describe(motion.Steps)}",
+            BehaviorTreeAsset tree => $" / {p.Name}: {tree.name}",
+            _ => "",
+        };
 
         protected override void OnSetup(TreeScope scope) => slots = new List<(Vector2, Quaternion)>();
 

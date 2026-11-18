@@ -22,9 +22,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             get
             {
                 if (!string.IsNullOrEmpty(presetParam)) return "$" + presetParam;
-                if (preset != null) return preset.name;
-                if (steps.Count == 1) return steps[0]?.Summary;
-                return steps.Count == 0 ? "(移動なし)" : $"{steps.Count} ステップ";
+                if (preset != null) return $"{preset.name}: {MotionStep.Describe(preset.Steps)}";
+                return steps.Count == 0 ? "(移動なし)" : MotionStep.Describe(steps);
             }
         }
 

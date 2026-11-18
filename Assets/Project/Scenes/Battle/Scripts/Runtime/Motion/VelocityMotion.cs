@@ -13,7 +13,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
         public VelocityMotion() { }
         public VelocityMotion(Vector3 velocity) => this.velocity = velocity;
 
-        public override string Summary => $"速度 {velocity.magnitude:0.##}" + (duration > 0f ? $" / {duration:0.##}s" : "");
+        public override string Summary => $"速度 ({velocity.x:0.##}, {velocity.y:0.##})" + (duration > 0f ? $" / {duration:0.##}s" : "");
 
         public override MotionRunner CreateRunner()
         {

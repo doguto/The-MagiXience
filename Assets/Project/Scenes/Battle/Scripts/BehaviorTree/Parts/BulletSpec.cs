@@ -21,7 +21,12 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public bool affectedByWind = true;
 
         public IReadOnlyList<MotionStep> Motion => motionPreset != null ? motionPreset.Steps : motion;
-        public override string ToString() => !string.IsNullOrEmpty(prefabParam) ? "$" + prefabParam : prefab ? prefab.name : "(弾未設定)";
+        public override string ToString()
+        {
+            var name = !string.IsNullOrEmpty(prefabParam) ? "$" + prefabParam : prefab ? prefab.name : "(弾未設定)";
+            var motion = MotionStep.Describe(Motion);
+            return string.IsNullOrEmpty(motion) ? name : $"{name} ({motion})";
+        }
 
         // 定義は共有されるので、パラメータで差し替えるときは複製を返す
         public BulletSpec Resolve(TreeScope scope)
