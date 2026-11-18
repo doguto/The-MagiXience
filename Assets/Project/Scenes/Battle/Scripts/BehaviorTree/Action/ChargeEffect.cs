@@ -19,7 +19,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Tooltip("度/秒。負で時計回り")] BtFloat rotationSpeed = 480f;
         [SerializeField] SeType se;
 
-        [NonSerialized] BulletSpec spec;
+        [NonSerialized] BulletConfig spec;
         [NonSerialized] int resolvedCount;
         [NonSerialized] float resolvedRadius;
         [NonSerialized] MotionStep[] motion;
@@ -29,7 +29,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override void OnSetup(TreeScope scope)
         {
-            spec = new BulletSpec { prefab = prefab, prefabParam = prefabParam, damage = 0, affectedByWind = false }.Resolve(scope);
+            spec = new BulletConfig { prefab = prefab, prefabParam = prefabParam, damage = 0, affectedByForce = false }.Resolve(scope);
             resolvedCount = Mathf.Max(1, count.Resolve(scope));
             resolvedRadius = Mathf.Max(0f, radius.Resolve(scope));
             var seconds = Mathf.Max(1, gatherFrames.Resolve(scope)) / (float)BattleContext.FramesPerSecond;

@@ -19,7 +19,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 | Decorator | `Scripts/BehaviorTree/Decorator/<型名>.cs` |
 | 条件 | `Scripts/BehaviorTree/Condition/<型名>.cs` |
 | Action | `Scripts/BehaviorTree/Action/<型名>.cs` |
-| 部品 (ShotPattern / DirectionSource / BulletSpec / BossDefinition など) | `Scripts/BehaviorTree/Parts/<型名>.cs` |
+| 部品 (ShotPattern / DirectionSource / BulletConfig / BossDefinition など) | `Scripts/BehaviorTree/Parts/<型名>.cs` |
 | MotionStep | `Scripts/Runtime/Motion/<型名>.cs` |
 
 1 ファイルに 1 型。1 つの型からしか使われない enum などの付属型だけ、その型のファイルに同居させる。
@@ -268,7 +268,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 
 | フィールド | 説明 |
 |---|---|
-| `bullet` (`BulletSpec`) | 弾の設定（後述） |
+| `bullet` (`BulletConfig`) | 弾の設定（後述） |
 | `direction` (`DirectionSource`) | 基準方向。既定は Fixed(180°) |
 | `rotation` (`RotationSource`) | 弾の回転（Prefab 本来の回転に対するオフセット）。既定は Inherit |
 | `muzzleOffset` | 撃つ敵の位置からのずれ（ワールド単位）。ステージ直下では原点からのずれ |
@@ -311,7 +311,7 @@ Parallel(All)
 | `pattern` | | ビームの本数と角度 (`ShotPattern`)。パターンの各方向に 1 本ずつ出す |
 | `rotation` | | 弾の回転。既定は Fixed(0°) |
 | `range` | ワールド単位 | 弾の飛距離と予測線の長さ。0 なら弾/予測線 Prefab の値 |
-| `bullets` | | 1 回の連射で撃つ弾 (`List<BulletSpec>`)。複数なら同じ位置・向きに重ねて撃つ |
+| `bullets` | | 1 回の連射で撃つ弾 (`List<BulletConfig>`)。複数なら同じ位置・向きに重ねて撃つ |
 | `shotCount` | 回 | 連射回数（最小 1、既定 36） |
 | `shotIntervalFrames` | f | 連射の間隔（最小 1、既定 5） |
 | `se` | | 連射 1 回ごとに鳴らす SE |
@@ -368,7 +368,7 @@ Parallel(All)
 | `segments[].direction` / `spread` | この区間に置いた弾を撃つ向きと、隣り合う弾の角度（度） |
 | `segments[].extraFireDelayFrames` | 全体の発射時刻からさらに遅らせるフレーム数（区間ごとに時間差で撃つとき） |
 
-### 発射の部品: BulletSpec
+### 発射の部品: BulletConfig
 
 | フィールド | 説明 |
 |---|---|
@@ -378,7 +378,7 @@ Parallel(All)
 | `motionPreset` | 指定するとインラインの `motion` より優先 |
 | `motion` | 弾の移動 (`List<MotionStep>`)。空なら発射方向へ等速 (`VelocityMotion`) |
 | `range` | 飛距離の上限（発射方向への進捗、ワールド単位）。0 で無制限 |
-| `affectedByWind` | 発射時に風 (`IBulletForce`) が有効なら外力を受ける（既定 ON） |
+| `affectedByForce` | 発射時にステージの外力 (`IBulletForce`。Stage3 の風など) が有効なら外力を受ける（既定 ON） |
 
 ### ChargeEffect（Action/Effect）
 
@@ -386,7 +386,7 @@ Parallel(All)
 
 | フィールド | 説明 |
 |---|---|
-| `prefab` / `prefabParam` | 弾の Prefab。`prefabParam` にツリーの Object パラメータ名を書くとその値を使う（`BulletSpec` と同じ） |
+| `prefab` / `prefabParam` | 弾の Prefab。`prefabParam` にツリーの Object パラメータ名を書くとその値を使う（`BulletConfig` と同じ） |
 | `count` | 並べる弾の数 |
 | `radius` | 出し始めの半径 |
 | `targetRadius` | 寄せた先の半径（0 で中心） |
@@ -621,7 +621,7 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 
 ## 8. MotionStep
 
-敵・ボス・弾の移動の 1 ステップ。`Move` / `BulletSpec.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
+敵・ボス・弾の移動の 1 ステップ。`Move` / `BulletConfig.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
 **時間はすべて秒**。`duration` が「0 で無限」のステップは終わらないため、後ろのステップに進まない。
 
 「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに旧実装の OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.2 参照）。
@@ -650,7 +650,7 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 |---|---|---|
 | `AcceleratedMotion` | 通常: `direction`、`useConfiguredDirection`、`initialSpeed`、`acceleration`(単位/s²、負で減速)、`maxSpeed`、`minSpeed`、`duration`(s, 0=無限) | 発射方向（`useConfiguredDirection` が ON なら `direction`）へ加速。速さを min〜max に制限 |
 | | 放物運動: `useWorldAcceleration`、`worldAcceleration` | 初速 + 固定方向の加速度で放物運動 |
-| | 自機狙い放物線: `aimAtPlayer`、`useBattleWind`、`targetFlightTime`(s)、`vertexDepth`、`vertexScreenMargin`、`rightShotInterval`(発)、`alternateVertical`、`flightTimeVariation`(0〜0.4)、`vertexDepthVariation`(0〜0.8) | 画面内に頂点を作り、`targetFlightTime` 秒で発射時の自機位置へ届く放物線。曲げる軸は `useBattleWind` なら発射時の風の予定上の向き、それ以外は `worldAcceleration` の向き。`alternateVertical` で上下交互、`rightShotInterval` 発ごとに右向きの放物線を試す。揺らぎは全弾共有の発射カウンタで決まる。自機がいなければ動かない |
+| | 自機狙い放物線: `aimAtPlayer`、`useForceAxis`、`targetFlightTime`(s)、`vertexDepth`、`vertexScreenMargin`、`rightShotInterval`(発)、`alternateVertical`、`flightTimeVariation`(0〜0.4)、`vertexDepthVariation`(0〜0.8) | 画面内に頂点を作り、`targetFlightTime` 秒で発射時の自機位置へ届く放物線。曲げる軸は `useForceAxis` なら発射時の外力の予定上の向き (`IBulletForce.LaunchAxis`)、それ以外は `worldAcceleration` の向き。`alternateVertical` で上下交互、`rightShotInterval` 発ごとに右向きの放物線を試す。揺らぎは全弾共有の発射カウンタで決まる。自機がいなければ動かない |
 | `VertexParabolaMotion` | `orientation`(Vertical/Horizontal)、`vertex`、`initialSpeed`、`isRelative`、`oscillateVertex`、`vertexAmplitude`、`vertexAngularSpeed`(rad/s)、`attackTimeOffset`(s) | 発射位置から頂点へ向かい折り返す軸平行の放物線。`oscillateVertex` なら発射時刻 (`AttackTime − attackTimeOffset`) で頂点を揺らす。解けない設定なら弾を即消す。終わらない |
 | `ReflectMotion` | `speed`、`maxReflections`、`reflectTop` / `reflectBottom` / `reflectLeft` / `reflectRight` | 発射方向へ進み、一度画面内に入ってから指定した画面端で反射する。終わらない。OutQuad 再現 |
 | `ZigzagMotion` | `speed`、`angleDegrees`(度)、`segmentLength`、`initialSign`、`maxReflections`(0=無制限)、`firstSegmentLength`(0=segmentLength)、`duration`(s, 0=無限)、`fallbackAxis`、`rotateToVelocity`、`rotationOffsetDegrees` | 発射方向（無ければ `fallbackAxis`）を軸に ±angle で折り返しながら進む |

@@ -10,7 +10,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     // ---------- 弾の設定 ----------
 
     [Serializable]
-    public sealed class BulletSpec
+    public sealed class BulletConfig
     {
         public BulletEntityPresenter prefab;
         [Tooltip("ツリーの Object パラメータ名。指定すると Prefab の代わりにその値を使う")] public string prefabParam;
@@ -18,7 +18,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [Tooltip("指定するとインラインの移動より優先")] public MotionPreset motionPreset;
         [SerializeReference, SubclassSelector] public List<MotionStep> motion = new();
         [Tooltip("飛距離の上限。0 で無制限")] public float range;
-        public bool affectedByWind = true;
+        [Tooltip("ステージの外力 (IBulletForce) を受ける")] public bool affectedByForce = true;
 
         public IReadOnlyList<MotionStep> Motion => motionPreset != null ? motionPreset.Steps : motion;
         public override string ToString()
@@ -29,13 +29,13 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         // 定義は共有されるので、パラメータで差し替えるときは複製を返す
-        public BulletSpec Resolve(TreeScope scope)
+        public BulletConfig Resolve(TreeScope scope)
         {
             if (string.IsNullOrEmpty(prefabParam) || scope == null || !scope.TryGet(prefabParam, out var p)) return this;
             var resolved = p.ObjectValue as BulletEntityPresenter
                 ?? (p.ObjectValue is GameObject go ? go.GetComponent<BulletEntityPresenter>() : null);
             if (resolved == null) return this;
-            var copy = (BulletSpec)MemberwiseClone();
+            var copy = (BulletConfig)MemberwiseClone();
             copy.prefab = resolved;
             return copy;
         }

@@ -16,8 +16,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField, Tooltip("弾のライフタイム（秒）。0以下で無制限")]
         float lifetime = 5f;
-        [SerializeField, Min(0f), Tooltip("風の影響の倍率。0で影響なし、1で標準、1より大きいと標準より強く流される")]
-        float windInfluence = 1f;
+        [SerializeField, Min(0f), Tooltip("ステージの外力の影響の倍率。0で影響なし、1で標準、1より大きいと標準より強く流される")]
+        float forceInfluence = 1f;
 
         void Reset()
         {
@@ -55,7 +55,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         public BulletEntityModel Model => model;
         public bool IsActive => !isInPool && model != null && model.IsAlive;
-        public float WindInfluence => windInfluence;
+        public float ForceInfluence => forceInfluence;
 
         /// <param name="rotation">Prefab本来の回転に対するオフセット</param>
         /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>

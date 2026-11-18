@@ -72,7 +72,7 @@ set(nway, "wayCount", 3);
 set(nway, "spreadAngle", 20f);
 set(fire, "pattern", nway);   // 撃ち方はノードの種類で決まる。pattern はその種類のパターン
 set(fire, "direction", new Project.Scenes.Battle.Scripts.BehaviorTree.AimDirection());
-// set(fire, "bullet", new Project.Scenes.Battle.Scripts.BehaviorTree.BulletSpec { prefab = ..., damage = 10, motionPreset = ... });
+// set(fire, "bullet", new Project.Scenes.Battle.Scripts.BehaviorTree.BulletConfig { prefab = ..., damage = 10, motionPreset = ... });
 
 var repeat = new Project.Scenes.Battle.Scripts.BehaviorTree.Repeat
 {

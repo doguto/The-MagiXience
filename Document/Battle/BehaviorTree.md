@@ -53,7 +53,7 @@ BT の適用範囲は次の 2 層である。
 | `.../BehaviorTree/Decorator/` | Loop / Repeat / Until / Delay / Inverter / ForceSuccess / WarningLine / Section / OnCommand / WithWind / WithPrefab |
 | `.../BehaviorTree/Condition/` | 条件の基底 `Condition` と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies など |
 | `.../BehaviorTree/Action/` | Wait / Log / SubTree / CheckCondition / WaitUntil、発射・ビーム・移動・出現・ステージ演出・ステージ進行の Action ノード |
-| `.../BehaviorTree/Parts/` | ノードではない部品 (ShotPattern / DirectionSource / RotationSource / SpawnLayout / BulletSpec / Emitter / BeamAim など) と `BossDefinition` / `TrailPath` |
+| `.../BehaviorTree/Parts/` | ノードではない部品 (ShotPattern / DirectionSource / RotationSource / SpawnLayout / BulletConfig / Emitter / BeamAim など) と `BossDefinition` / `TrailPath` |
 | `Assets/Project/Scenes/Battle/Scripts/Runtime/` | `BattleWorld` / `BattleServices` / `BattleClock` / `BattleFlow` / `BattleActor` / `ActorSpawner` / `BulletSystem`、`IScenarioService` / `IBossHost` / `StageProgress`、敵のプール（`ActorPool` / `IPoolableActor` / `ActorDespawn` / `PooledActor` / `NoActorPool`）、事前生成用の `StagePrefabCollector` |
 | `.../Runtime/Stage/` | `StageContext` / `IStageService` / `WindService` / 外力の受け口 (`IMoveModifier` / `IBulletForce`) |
 | `.../Runtime/Motion/` | `MotionStep` と各ステップ (`*Motion.cs`)、実行器 (`MotionRunner` / `PullRunner` / `MotionSequence`)、`MotionPreset` / `EaseCurveAsset` / `BattleTargets`（自機の Transform） |
@@ -240,7 +240,7 @@ Spawn ノードで出す敵は `ActorPool`（`Runtime/ActorPool.cs`）で Prefab
 | `Move.presetParam` | `MotionPreset` | 動かずに Success |
 | `SubTree.treeParam` | 実行するツリー | 何もしない（Success） |
 | `SetDeathBehavior.treeParam` | 撃破時のツリー | 撃破時の行動なし |
-| `BulletSpec.prefabParam` | 弾 Prefab | `prefab` を使う |
+| `BulletConfig.prefabParam` | 弾 Prefab | `prefab` を使う |
 
 ### 5.2 TreeParameter と TreeScope
 
@@ -406,8 +406,8 @@ public abstract class StageServiceDefinition
 - `Tick(dt)`: 予定表を秒で進め、区間が終われば次の向きへ。無風から風ありになった瞬間に `startSe` を鳴らす。
 - `End`: 受け口から自分を外し、矢印を破棄する。
 - `Apply(settings)`: 予定表を差し替えて先頭から始める。`WithWind` ノード（子の実行中だけ別の風にし、終了時に直前の風へ戻す）と `BossWindCue` ノードが使う。
-- `enabled` が OFF でも予定表は進む。このとき自機・弾への影響と矢印表示は無いが、`ProjectileDirection` は予定表の向きを返し、自機狙い放物線 (`AcceleratedMotion` の `useBattleWind`) の曲げる向きに使われる。
-- 弾への影響は発射時点で決まる。`BulletSystem.Spawn` 時に風が有効で、かつ `BulletSpec.affectedByWind` が ON の弾だけが外力を受ける（`BulletEntityPresenter.WindInfluence` を倍率として掛ける）。
+- `enabled` が OFF でも予定表は進む。このとき自機・弾への影響と矢印表示は無いが、`ProjectileDirection` は予定表の向きを返し、自機狙い放物線 (`AcceleratedMotion` の `useForceAxis`) の曲げる向きに使われる。
+- 弾への影響は発射時点で決まる。`BulletSystem.Spawn` 時に風が有効で、かつ `BulletConfig.affectedByForce` が ON の弾だけが外力を受ける（`BulletEntityPresenter.ForceInfluence` を倍率として掛ける）。
 
 ### 7.3 新しいサービスを追加する手順
 
@@ -423,7 +423,7 @@ public abstract class StageServiceDefinition
 
 発射系ノード（SingleShot / NWayShot などの弾を撃つノード、BulletBeam、MoveTrailFan、PlaceAlongPath）はすべて `Parts/Emitter.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
 
-- 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletSpec`、撃ち方は `ShotPattern` で指定する（詳細はノードリファレンス）。
+- 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletConfig`、撃ち方は `ShotPattern` で指定する（詳細はノードリファレンス）。
 - 発射位置は「撃つ敵の位置 + muzzleOffset + パターンごとのずれ」。ステージ直下（`Self == null`）なら原点基準。
 - パターンの `SpawnDelayFrames` が付いた弾は `BattleWorld.Schedule` で予約され、予約時点ではなく出現時点の撃ち手の位置から出る。撃ち手が倒れると予約は取り消される（死亡時ツリーから撃った弾は取り消し対象にしない）。
 - 方向は発射ノードを実行したフレームに 1 回だけ決める。
@@ -438,7 +438,7 @@ public abstract class StageServiceDefinition
 - 移動は `MotionSequence` で進める。`Motion` が空なら `VelocityMotion`（発射方向へ等速）を使う。
 - 移動ステップが `GrantsInvincibility` を返す間は弾を無敵にする。
 - 移動が開始できない設定（`Rejected`）なら即プールへ戻す。
-- 外力 (`IBulletForce`) は、作者が設定した移動の速度を元に補正量を積分し、`WindInfluence` を掛けて位置に足す。
+- 外力 (`IBulletForce`) は、作者が設定した移動の速度を元に補正量を積分し、`ForceInfluence` を掛けて位置に足す。
 
 ### 8.2 MotionStep
 

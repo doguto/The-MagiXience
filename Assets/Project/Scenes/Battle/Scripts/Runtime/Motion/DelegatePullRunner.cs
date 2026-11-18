@@ -22,7 +22,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
         public IMotionBody Target => Body;
         public Vector2 LaunchDirection => Direction;
         public float LaunchAttackTime => AttackTime;
-        public Vector2 LaunchWindAxis => WindAxis;
+        public Vector2 LaunchForceAxis => ForceAxis;
         public float Time => Elapsed;
         public void Reject() => Rejected = true;
 

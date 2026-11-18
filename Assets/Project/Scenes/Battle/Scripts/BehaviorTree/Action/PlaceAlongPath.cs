@@ -10,14 +10,14 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class PlaceAlongPath : ActionNode
     {
         [SerializeField] BtObject<TrailPath> path;
-        [SerializeField] BulletSpec bullet = new();
+        [SerializeField] BulletConfig bullet = new();
         [SerializeField, Tooltip("弾を置く間隔 (距離)")] BtFloat spacing = 0.5f;
         [SerializeField, Tooltip("経路の移動を終えてから放つまでのフレーム数")] BtInt fireDelayFrames = 0;
         [SerializeReference, SubclassSelector] RotationSource rotation = new InheritRotation();
         [SerializeField] SeType se;
 
         [NonSerialized] TrailPath resolvedPath;
-        [NonSerialized] BulletSpec resolvedBullet;
+        [NonSerialized] BulletConfig resolvedBullet;
         [NonSerialized] float resolvedSpacing;
         [NonSerialized] int fireDelay;
         [NonSerialized] List<Placement> plan;

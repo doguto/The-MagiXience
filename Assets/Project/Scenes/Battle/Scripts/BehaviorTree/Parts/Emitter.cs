@@ -10,7 +10,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public static class Emitter
     {
         // 1 発を出す。delayFrames > 0 なら予約し、その時点の撃ち手の位置から出す
-        public static void Spawn(BattleContext ctx, BulletSpec bullet, Vector2 muzzleOffset, Func<EmitContext, Vector2> position,
+        public static void Spawn(BattleContext ctx, BulletConfig bullet, Vector2 muzzleOffset, Func<EmitContext, Vector2> position,
             Vector2 direction, Quaternion rotation, int spawnDelayFrames, int startDelayFrames,
             IReadOnlyList<MotionStep> motionOverride = null, float rangeOverride = -1f)
         {
@@ -35,7 +35,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
                     StartDelayFrames = startDelayFrames,
                     Motion = motionOverride ?? bullet.Motion,
                     AttackTime = e.AttackTime,
-                    AffectedByForce = bullet.affectedByWind,
+                    AffectedByForce = bullet.affectedByForce,
                 });
             }, owner);
         }

@@ -844,7 +844,7 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 - `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Delay、Inverter、ForceSuccess、WarningLine、Section、OnCommand、WithWind、WithPrefab。
 - `Condition/`: Constant、FrameElapsed、BgmReached、And / Or / Not、NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples。
 - `Action/`: Wait、Log、SubTree、CheckCondition / WaitUntil、発射（SingleShot / NWayShot など、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（EnterStrongMode、ClearBullets、BossWindCue、PhaseMarker）、進行（Wave、PlayBgm、SpawnBoss、BossBattle）。
-- `Parts/`: ノードではない部品。ShotPattern / DirectionSource / RotationSource / BulletSpec / Emitter、`*Param` 欄から Object パラメータを引く `ParamObjects`、BossDefinition / TrailPath など。
+- `Parts/`: ノードではない部品。ShotPattern / DirectionSource / RotationSource / BulletConfig / Emitter、`*Param` 欄から Object パラメータを引く `ParamObjects`、BossDefinition / TrailPath など。
 
 ### 設計方針
 
@@ -1016,7 +1016,7 @@ Collider 経由で取得した Presenter から `EntityBase` を取得するた�
 - `BulletEntityModel`
 - `BulletEntityView`
 - ObjectPool 参照
-- lifetime / 風の影響の倍率（`WindInfluence`）
+- lifetime / ステージの外力の影響の倍率（`ForceInfluence`）
 
 できること:
 

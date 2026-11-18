@@ -15,7 +15,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Min(0f), Tooltip("秒")] float moveDuration = 1f;
         [SerializeField] MotionEase moveEase = MotionEase.Of(DG.Tweening.Ease.Linear);
         [SerializeField] bool emitBullets = true;
-        [SerializeField] BulletSpec bullet = new();
+        [SerializeField] BulletConfig bullet = new();
         [SerializeReference, SubclassSelector] DirectionSource direction = new FixedDirection();
         [SerializeReference, SubclassSelector] RotationSource rotation = new InheritRotation();
         [SerializeField, Min(1)] int wayCount = 13;
@@ -23,7 +23,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeField, Min(0)] int releaseDelayFrames = 18;
         [SerializeField] SeType se;
 
-        [NonSerialized] BulletSpec resolvedBullet;
+        [NonSerialized] BulletConfig resolvedBullet;
         [NonSerialized] MotionSequence move;
         [NonSerialized] Vector3 from;
         [NonSerialized] Vector3 to;

@@ -28,7 +28,7 @@ StageData.asset
                                         ├─ prefab / spawnPosition / entrance (MotionStep[])
                                         └─ tree ──► Stage{N}/BT/Stage/Stage{N}Boss_Tree.asset
                                                      ├─ SubTree ノード ──► Stage{N}/BT/Attack/*.asset
-                                                     └─ Move / BulletSpec.motionPreset ──► Stage{N}/BT/Motion/*.asset
+                                                     └─ Move / BulletConfig.motionPreset ──► Stage{N}/BT/Motion/*.asset
 
 BgmData.asset / SeData.asset
  └─ BgmData のループ位置 (サンプル) が BgmSamples 条件の thresholdSamples と、
@@ -173,7 +173,7 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 
 - 定義: `Assets/Project/Scenes/Battle/Scripts/Runtime/Motion/MotionPreset.cs`（`Create > Battle > Motion Preset`）
 - `[SerializeReference] List<MotionStep> steps` を持つだけ。時間は秒指定。
-- `Move` の `preset`、共通ツリー `Enemy` の `movement` パラメータ、`BulletSpec.motionPreset`、`LoopMotion` のエントリから参照する。`Bullet_{弾Prefab名}` という名前のものは、旧形式で弾 Prefab 側に設定されていた移動を移行時に切り出したもの。
+- `Move` の `preset`、共通ツリー `Enemy` の `movement` パラメータ、`BulletConfig.motionPreset`、`LoopMotion` のエントリから参照する。`Bullet_{弾Prefab名}` という名前のものは、旧形式で弾 Prefab 側に設定されていた移動を移行時に切り出したもの。
 
 ### EaseCurveAsset
 

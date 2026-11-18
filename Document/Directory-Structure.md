@@ -292,7 +292,7 @@ Battle BehaviorTree:
 - `Decorator/`: Loop / Repeat / Until / Delay / Inverter / ForceSuccess、WarningLine、Section / OnCommand、WithWind / WithPrefab。
 - `Action/`: Wait / Log / SubTree、弾を撃つノード (SingleShot / NWayShot など)、ChargeEffect、BulletBeam / SpriteBeam / MoveTrailFan、Move / MovePath / PlaceAlongPath、Spawn / Despawn / SetDeathBehavior / SetInvincible / PlaySe、Wave / PlayBgm / SpawnBoss / BossBattle、EnterStrongMode / ClearBullets / BossWindCue / PhaseMarker、CheckCondition / WaitUntil。
 - `Condition/`: 条件の基底と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies / NormalHpDepleted / BgmSamples。
-- `Parts/`: ノードではない部品 (ShotPattern 系、DirectionSource / RotationSource 系、SpawnLayout 系、BulletSpec、Emitter、EmitContext、BeamAim / BeamLine / IBeam、TrailPolyline) と、ScriptableObject の `BossDefinition` / `TrailPath`。
+- `Parts/`: ノードではない部品 (ShotPattern 系、DirectionSource / RotationSource 系、SpawnLayout 系、BulletConfig、Emitter、EmitContext、BeamAim / BeamLine / IBeam、TrailPolyline) と、ScriptableObject の `BossDefinition` / `TrailPath`。
 
 Battle Runtime:
 

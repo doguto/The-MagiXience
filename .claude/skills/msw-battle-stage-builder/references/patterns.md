@@ -46,7 +46,7 @@ Stage{N}/BT/Attack/S{N}_xxx (攻撃ツリー)
 - 攻撃ツリーは中身が同じなら 1 つを使い回す。移動だけが違う敵は `movement` だけ変える。
 - 移動は `Move` だけで行う（ツリーの外で流れる移動はない）。攻撃と同時に動かすときは `Parallel{ Move, 攻撃 }`、移動してから一定時間待つときは `Parallel{ Move, Wait N }` と並べる（`Sequence[Move, Wait]` は移動の長さぶん後ろがずれる）。
 - 攻撃の途中で移動を変える、HP で行動を変えるなど、共通ツリーの形に収まらない敵だけ `Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。専用ツリーでも攻撃部分は `Attack/` を `SubTree` で参照し、中身を複製しない。
-- ツリーのパラメータ（`$名前`）を使えるのは、数値では `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` と `ChargeEffect` / `MovePath` / `PlaceAlongPath` の一部、アセット参照では `*Param` 欄（`ChargeEffect.prefabParam` / `Move.presetParam` / `SubTree.treeParam` / `SetDeathBehavior.treeParam` / `BulletSpec.prefabParam`）だけ。弾を撃つノードの向きや本数などはパラメータにできない。
+- ツリーのパラメータ（`$名前`）を使えるのは、数値では `Parallel`（Duration）/ `Loop` / `Repeat` / `Delay` / `Wait` / `FrameElapsed` / `BgmReached` と `ChargeEffect` / `MovePath` / `PlaceAlongPath` の一部、アセット参照では `*Param` 欄（`ChargeEffect.prefabParam` / `Move.presetParam` / `SubTree.treeParam` / `SetDeathBehavior.treeParam` / `BulletConfig.prefabParam`）だけ。弾を撃つノードの向きや本数などはパラメータにできない。
 - `Spawn` の overrides には固定値を書く。親ツリーのパラメータを渡す（bind to parent）は敵ツリーでは効かない。
 - 撃破時のツリーは 1 フレームだけ実行される。`NWayShot` などの発射や `Spawn` など、即時に終わるものだけを書く。
 
@@ -93,7 +93,7 @@ Sequence
 - 雑魚の攻撃は必ず `Attack/` に置き、`Enemy` の `attack` パラメータで参照する。
 - ボスで複数のフェーズから使う攻撃も `Attack/` に切り出し、`SubTree` で参照する。既存の攻撃をコピーして別アセットにしない（元を直せば全体に効くようにする）。
 - 逆に、ボスのツリーで 1 か所でしか使わない攻撃や、数ノードで書ける小さな攻撃は SubTree にしない。ツリーを開いたときに中身が見えている方が読みやすい。SubTree にするのは「複数のツリーから使う」か「名前の付いたひとまとまりの攻撃として調整する」ものだけ。
-- 値だけ変えたいときは、攻撃ツリーにパラメータを作り、`SubTree` の overrides で上書きする。弾だけ変えたいときは `BulletSpec.prefabParam` を使う。
+- 値だけ変えたいときは、攻撃ツリーにパラメータを作り、`SubTree` の overrides で上書きする。弾だけ変えたいときは `BulletConfig.prefabParam` を使う。
 
 ## ビーム
 

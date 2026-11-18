@@ -22,7 +22,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
 
         [Header("Aimed parabola")]
         [SerializeField] bool aimAtPlayer;
-        [SerializeField] bool useBattleWind = true;
+        [SerializeField, Tooltip("ON でステージの外力の向きに曲げる")] bool useForceAxis = true;
         [SerializeField, Min(0.1f)] float targetFlightTime = 4f;
         [SerializeField, Min(0.001f)] float vertexDepth = 1.1f;
         [SerializeField, Min(0f)] float vertexScreenMargin = 0.35f;
@@ -77,7 +77,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
                 aimed = true;
                 start = r.Target.Position;
                 z = r.Target.Position.z;
-                Vector2 axis = useBattleWind ? r.LaunchWindAxis : worldAcceleration.normalized;
+                Vector2 axis = useForceAxis ? r.LaunchForceAxis : worldAcceleration.normalized;
                 var shot = AimedParabola.NextShotIndex();
                 if (alternateVertical) axis = shot % 2 == 0 ? Vector2.up : Vector2.down;
                 var flightTime = Mathf.Max(0.1f, targetFlightTime * (1f + flightTimeVariation * ((shot % 11) / 5f - 1f)));

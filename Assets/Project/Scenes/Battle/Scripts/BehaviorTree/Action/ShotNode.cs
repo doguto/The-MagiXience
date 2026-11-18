@@ -9,13 +9,13 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable]
     public abstract class ShotNode : ActionNode
     {
-        [SerializeField] BulletSpec bullet = new();
+        [SerializeField] BulletConfig bullet = new();
         [SerializeReference, SubclassSelector] DirectionSource direction = new FixedDirection();
         [SerializeReference, SubclassSelector] RotationSource rotation = new InheritRotation();
         [SerializeField, Tooltip("撃つ敵の位置からのずれ")] Vector2 muzzleOffset;
         [SerializeField] SeType se;
 
-        [NonSerialized] BulletSpec resolvedBullet;
+        [NonSerialized] BulletConfig resolvedBullet;
         [NonSerialized] ShotPattern resolvedPattern;
         [NonSerialized] List<Shot> shots;
 

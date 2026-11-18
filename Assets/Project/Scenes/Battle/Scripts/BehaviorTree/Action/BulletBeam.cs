@@ -22,12 +22,12 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeReference, SubclassSelector, Tooltip("ビームの本数と角度")] ShotPattern pattern = new SinglePattern();
         [SerializeReference, SubclassSelector] RotationSource rotation = new FixedRotation();
         [SerializeField, Tooltip("弾の飛距離と予測線の長さ。0 なら弾/予測線 Prefab の値")] float range;
-        [SerializeField, Tooltip("1 回の連射で撃つ弾。複数並べると同じ位置・向きに重ねて撃つ")] List<BulletSpec> bullets = new() { new BulletSpec() };
+        [SerializeField, Tooltip("1 回の連射で撃つ弾。複数並べると同じ位置・向きに重ねて撃つ")] List<BulletConfig> bullets = new() { new BulletConfig() };
         [SerializeField, Min(1)] int shotCount = 36;
         [SerializeField, Min(1)] int shotIntervalFrames = 5;
         [SerializeField] SeType se;
 
-        [NonSerialized] BulletSpec[] resolvedBullets;
+        [NonSerialized] BulletConfig[] resolvedBullets;
         [NonSerialized] ShotPattern resolvedPattern;
         [NonSerialized] BeamAim presetAim;
 
@@ -44,7 +44,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override void OnSetup(TreeScope scope)
         {
-            resolvedBullets = new BulletSpec[bullets.Count];
+            resolvedBullets = new BulletConfig[bullets.Count];
             for (var i = 0; i < bullets.Count; i++) resolvedBullets[i] = bullets[i].Resolve(scope);
             resolvedPattern = (pattern ?? new SinglePattern()).Resolve(scope);
         }

@@ -71,7 +71,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             {
                 Direction = spawn.Direction,
                 AttackTime = spawn.AttackTime,
-                WindAxis = LaunchAxis(),
+                ForceAxis = LaunchAxis(),
             });
             bullets.Add(bullet);
             return presenter;
@@ -126,7 +126,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 {
                     var authoredVelocity = (Vector2)(position - b.PreviousPosition) / dt;
                     foreach (var force in forces) force.Integrate(authoredVelocity, dt, ref b.ForceVelocity, ref b.ForceOffset);
-                    position += (Vector3)(b.ForceOffset * b.Presenter.WindInfluence);
+                    position += (Vector3)(b.ForceOffset * b.Presenter.ForceInfluence);
                 }
                 b.PreviousPosition = b.Position;
                 b.Presenter.transform.SetPositionAndRotation(position, b.Rotation);
