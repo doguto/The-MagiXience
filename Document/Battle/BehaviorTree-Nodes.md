@@ -43,6 +43,10 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 - 子が Running ならそこで止まり Running。子が Success なら Success。
 - 全て Failure なら Failure。一度 Running になった子が後から Failure しても、次の子へ進む。
 
+### If
+
+開始時に `condition` を 1 回だけ判定し、成立なら 1 番目の子、不成立なら 2 番目の子を実行して、その結果を返す。2 番目の子が無ければ不成立のとき何もせず Success。実行中に条件が変わっても選び直さない（毎フレーム判定して中断したいなら Until を使う）。
+
 ### Parallel
 
 全ての子を毎フレーム、左から順に Tick する。各子の開始時刻は子側に Delay を挟んで指定する。時間のかかる子（Repeat / Move / SubTree など）を重ねて動かすときに使い、即時に終わる子だけなら Sequence + Wait で書く。
@@ -166,7 +170,7 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 | `Constant` | `value` | 常に `value` |
 | `FrameElapsed` | `frames` ($ 可, f) | Reset（Until などの開始）からの経過フレーム ≧ frames |
 | `BgmReached` | `seconds` ($ 可, s) | `AudioSource.time` ≧ seconds |
-| `BgmSamples` | `thresholdSamples`（サンプル） | BGM の `timeSamples` が閾値に達した、またはループで先頭へ戻った。開始時点で既に閾値を過ぎていれば、ループで戻るのを待つ。BGM が無ければ常に成立 |
+| `BgmSamples` | `thresholdSamples`（サンプル、BtInt。パラメータで差し替え可） | BGM の `timeSamples` が閾値に達した、またはループで先頭へ戻った。開始時点で既に閾値を過ぎていれば、ループで戻るのを待つ。BGM が無ければ常に成立 |
 | `NoActiveEnemies` | なし | `EnemyTracker` の生存敵数が 0（Spawn の `tracked` が ON の敵だけが数えられる）。Spawner が無ければ成立 |
 | `HpBelow` | `target`（Self / Boss）、`percent`（0〜100） | 現在 HP ≦ ceil(最大 HP × percent / 100)。対象の Model が無ければ成立 |
 | `NormalHpDepleted` | `target`（Self / Boss） | 対象がボスで、通常 HP を削り切った（`BossEntityModel.ShouldUseStrongAttack`）。ボス以外は不成立 |
@@ -675,20 +679,18 @@ Loop ∞
 
 各フェーズを BGM のサンプル位置で区切る。BgmSamples は「閾値到達」または「ループで先頭へ戻った」で成立し、開始時点で既に閾値を過ぎていればループを待つので、最後のフェーズもループと同時に終わる。閾値は `BgmData` のループ位置と同じサンプル単位。
 
-### 発狂 (Strong) = Selector[Sequence[Check NormalHpDepleted, EnterStrongMode, 発狂本体], 通常本体]
+### 発狂 (Strong) = If[NormalHpDepleted]{ Sequence[EnterStrongMode, 発狂本体], 通常本体 }
 
 ```text
-Selector
- ├─ Sequence
- │   ├─ CheckCondition  cond: NormalHpDepleted
- │   ├─ EnterStrongMode
- │   └─ Until [Hold]  cond: BgmSamples(...)
- │       └─ (発狂本体)
- └─ Until [Hold]  cond: BgmSamples(...)
-     └─ (通常本体)
+Until [Hold]  cond: BgmSamples(...)
+ └─ Parallel
+     ├─ Move (フェーズの移動)
+     └─ If  cond: NormalHpDepleted
+         ├─ 1: Sequence[ EnterStrongMode, SubTree 発狂本体 ]
+         └─ 2: SubTree 通常本体
 ```
 
-フェーズ開始時に通常 HP が削り切られていれば発狂側、そうでなければ通常側を実行する。Check が Failure を返すと Selector が次の子（通常本体）へ進む（Stage1 / Stage3 ボス）。
+フェーズ開始時に通常 HP が削り切られていれば 1 番目（発狂）、そうでなければ 2 番目（通常）を実行する。BGM の区切りと移動は発狂・通常で共通なので If の外に置く（Stage1 / Stage3 ボス）。Stage1 は各フェーズの攻撃を `Stage1/BT/Attack/S1_<フェーズ>_Strong` / `_Normal` に分けている。
 
 ### HP 閾値までランダムにフェーズを選ぶ
 
