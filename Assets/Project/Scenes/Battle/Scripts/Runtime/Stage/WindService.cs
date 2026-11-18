@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Project.Scenes.Battle.Scripts.Runtime
 {
     // 風の予定表 (向き × 秒数を順に繰り返す) を進め、開始時に自機・敵弾・矢印表示へ自分を登録する。
-    // Enabled が OFF でも予定表は進み、自機狙い放物線の曲げる向きなどには使われる
+    // Enabled が OFF でも予定表は進む
     public sealed class WindService : IStageService, IMoveModifier, IBulletForce
     {
         readonly BattleWindSettings initial;
@@ -26,9 +26,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         bool HasSchedule => settings != null && settings.intervals != null && settings.intervals.Count > 0;
         public BattleWindSettings Current => settings;
         public bool Enabled => HasSchedule && settings.enabled;
-        public WindDirection ProjectileDirection => HasSchedule ? settings.intervals[index].direction : WindDirection.None;
-        public Vector2 ProjectileVector => ToVector(ProjectileDirection);
-        public WindDirection Direction => Enabled ? ProjectileDirection : WindDirection.None;
+        WindDirection ScheduledDirection => HasSchedule ? settings.intervals[index].direction : WindDirection.None;
+        public WindDirection Direction => Enabled ? ScheduledDirection : WindDirection.None;
         public Vector2 Vector => ToVector(Direction);
         public float PlayerSpeedRatio => Enabled ? Mathf.Clamp01(settings.playerSpeedRatio) : 0f;
         public float BulletAcceleration => Enabled ? Mathf.Max(0f, settings.bulletAcceleration) : 0f;
@@ -88,7 +87,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         Vector2 IMoveModifier.Modify(Vector2 velocity, Vector2 input, float speed) => velocity + Vector * (PlayerSpeedRatio * speed);
 
         bool IBulletForce.Active => Enabled;
-        Vector2 IBulletForce.LaunchAxis => ProjectileVector;
 
         // 本来の軌道に対する風のずれを積分する。抵抗があるため流される速さは 加速度 / 抵抗 で頭打ちになる
         public void Integrate(Vector2 authoredVelocity, float dt, ref Vector2 velocityCorrection, ref Vector2 positionCorrection)

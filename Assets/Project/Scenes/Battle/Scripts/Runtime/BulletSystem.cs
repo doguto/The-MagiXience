@@ -71,7 +71,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             {
                 Direction = spawn.Direction,
                 AttackTime = spawn.AttackTime,
-                ForceAxis = LaunchAxis(),
             });
             bullets.Add(bullet);
             return presenter;
@@ -84,15 +83,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                 if (force.Active) return true;
             }
             return false;
-        }
-
-        Vector2 LaunchAxis()
-        {
-            foreach (var force in forces)
-            {
-                if (force.LaunchAxis != Vector2.zero) return force.LaunchAxis;
-            }
-            return Vector2.zero;
         }
 
         public void Tick(float dt)

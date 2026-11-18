@@ -8,7 +8,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
         protected IMotionBody Body { get; private set; }
         protected Vector2 Direction { get; private set; }
         protected float AttackTime { get; private set; }
-        protected Vector2 ForceAxis { get; private set; }
 
         // 開始できない設定 (頂点が発射位置と同じ放物線など)。弾ならその場で消す
         public bool Rejected { get; protected set; }
@@ -19,7 +18,6 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
             Body = body;
             Direction = launch.Direction;
             AttackTime = launch.AttackTime;
-            ForceAxis = launch.ForceAxis;
             OnBegin();
         }
 
