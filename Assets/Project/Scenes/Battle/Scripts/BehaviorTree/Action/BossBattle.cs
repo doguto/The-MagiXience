@@ -10,6 +10,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         [NonSerialized] bool started;
 
+        public BehaviorTreeAsset Tree => tree;
+
         public override string Summary => tree ? tree.name : "(BossDefinition のツリー)";
 
         protected override void OnEnter(BattleContext ctx)

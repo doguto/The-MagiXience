@@ -157,9 +157,16 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             return true;
         }
 
+        // デバッグ起動で、ボス戦を途中のフェーズ・HP から始める
+        public string DebugBossStartPhase { get; set; }
+        public float DebugBossStartHpPercent { get; set; } = 100f;
+
         public BattleActor StartBattle(BehaviorTreeAsset tree)
         {
             if (boss == null || tree == null) return null;
+
+            world.Services.SkipToPhase = DebugBossStartPhase;
+            if (DebugBossStartHpPercent < 100f) boss.Model.SetHpPercent(DebugBossStartHpPercent);
 
             // 旧実装と同じく、登場の動きは途中で止めず終点まで一気に進める
             entrance?.Complete();

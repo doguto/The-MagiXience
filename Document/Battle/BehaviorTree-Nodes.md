@@ -59,6 +59,33 @@ Cycle(72f, ∞)                 … 72f ごとに 2 つのパターンを交互�
 
 開始時に `condition` を 1 回だけ判定し、成立なら 1 番目の子、不成立なら 2 番目の子を実行して、その結果を返す。2 番目の子が無ければ不成立のとき何もせず Success。実行中に条件が変わっても選び直さない（毎フレーム判定して中断したいなら Until を使う）。
 
+### HpSections
+
+HP の区切りで段階を進める。区切りは HP ゲージの色の区切りにもなる（`BossEntityModel.HpBreaks` 経由。ゲージ側に閾値は書かない）。区切りの値はツリーの上の方でこのノードにだけ書き、下のノードは段階の番号だけを見る。
+
+| フィールド | 説明 |
+|---|---|
+| `target` | Self / Boss |
+| `breaks` | 区切りの HP (%)。大きい順 |
+| `switchAt` | `Immediate`: 区切りを下回ったらすぐ次の段階へ / `NextPhase`: 下回った後、次の Phase の開始で次の段階へ |
+| `pendingDamageScale` | `NextPhase` のとき、区切りを下回ってから次の段階に入るまでの被ダメージ倍率 |
+| `indexParam` | 空でなければ、今の段階（0 始まり）をこのパラメータに書き込む |
+
+- 開始時は今の HP から段階を決める（区切りを既に下回っていればその段階から）。
+- 子が複数なら段階ごとに子を切り替える（区切りを越えたら今の子を中断して次の子へ）。途中の子が先に終わったら区切りまで待ち、最後の子が終われば Success。
+- 子が 1 つなら段階が進んでも同じ子を続ける。段階は `indexParam` と Compare 条件で子に伝える。
+
+```text
+HpSections  70% / 30%                 … Stage4 ボス
+├ 第1形態
+├ 第2形態
+└ 第3形態
+
+HpSections  25%  次の Phase から (待機中の被ダメ ×0.25) → $stage   … Stage1 ボス
+└ Sequence[ Phase «Intro», Loop∞{ Phase «MelodyA», … } ]
+     Phase の中: If($stage ≧ 1)[ 発狂攻撃, 通常攻撃 ]
+```
+
 ### Parallel
 
 全ての子を毎フレーム、左から順に Tick する。各子の開始時刻は子側に Delay を挟んで指定する。時間のかかる子（Repeat / Move / SubTree など）を重ねて動かすときに使い、即時に終わる子だけなら Sequence + Wait で書く。
@@ -174,6 +201,17 @@ Repeat(×15, 12f, → $i)
 - ステージに `WindService` が宣言されていなければ警告して子だけを実行する。
 - 子の結果をそのまま返す。
 
+### Phase
+
+フェーズ 1 つ分。Until と同じ動き（`condition` / `onChildCompleted`）に加えて次を行う。
+
+| フィールド | 説明 |
+|---|---|
+| `phaseId` | フェーズ名。開始時に `BattleServices.OnPhaseStarted` へ流す（`HpSections` の `NextPhase` が使う） |
+
+- 実行中は終了条件の進み具合（`Condition.Progress`）を `BattleServices.PhaseProgress` へ流す。`BossPhaseProgressGauge` はこれを表示するだけで、閾値を持たない。
+- 進み具合が決まるのは `BgmSamples`（開始時の BGM 位置 → 閾値）と `FrameElapsed`。それ以外の条件ではゲージを隠す。
+
 ### WithPrefab
 
 子の実行中だけ Prefab を出しておく（障害物・演出など。旧 Control トラック相当）。
@@ -197,7 +235,7 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 | `BgmSamples` | `thresholdSamples`（サンプル、BtInt。パラメータで差し替え可） | BGM の `timeSamples` が閾値に達した、またはループで先頭へ戻った。開始時点で既に閾値を過ぎていれば、ループで戻るのを待つ。BGM が無ければ常に成立 |
 | `NoActiveEnemies` | なし | `EnemyTracker` の生存敵数が 0（Spawn の `tracked` が ON の敵だけが数えられる）。Spawner が無ければ成立 |
 | `HpBelow` | `target`（Self / Boss）、`percent`（0〜100） | 現在 HP ≦ ceil(最大 HP × percent / 100)。対象の Model が無ければ成立 |
-| `NormalHpDepleted` | `target`（Self / Boss） | 対象がボスで、通常 HP を削り切った（`BossEntityModel.ShouldUseStrongAttack`）。ボス以外は不成立 |
+| `Compare` | `a` ($ 可)、`op`（≧ > ≦ < = ≠）、`b` ($ 可) | `a op b`。パラメータは判定のたびに読み直す（HpSections の段階などを見る） |
 | `And` | `conditions` | 全て成立（空なら成立） |
 | `Or` | `conditions` | どれか成立（空なら不成立） |
 | `Not` | `condition` | 中の条件が不成立（未設定なら成立） |
@@ -511,10 +549,6 @@ Parallel(All)
 
 ## 7. バトル Action: ステージ・ボス
 
-### EnterStrongMode（Action/Boss）
-
-`target`（Self / Boss）のボスを発狂 (Strong) 状態にする（`BossEntityModel.EnterStrongMode`）。ボス以外には何もしない。即 Success。
-
 ### ClearBullets（Action/Stage）
 
 画面の敵弾（`BulletSystem`）と、`BulletClearReceiver` 経由で警告線・ビームなどを消す。`clearEnemies` が ON なら敵も消す。即 Success。
@@ -532,10 +566,6 @@ Parallel(All)
 | `cueScale` | | 合図中のスケール変化率（`IWindCueReceiver` 側が使う） |
 
 実行時に `WindService.Apply` で「直前の向き × cueSeconds → direction × 3600 秒」の予定表を入れ、`Self` が `IWindCueReceiver` を持っていれば `PlayCue(cue)` を呼ぶ。`WindService` が無ければ警告して何もしない。
-
-### PhaseMarker（Action/Stage）
-
-`phaseId` を `BattleServices.OnPhaseStarted` に流す。即 Success。`BossPhaseProgressGauge` がボスのフェーズ区切りの検出に使う（現状 `phaseId` の値は見ていない）。
 
 ## 7.5 ステージ進行
 
@@ -634,15 +664,10 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 | `VelocityMotion` | `velocity`(単位/s)、`duration`(s, 0=無限) | 等速移動。発射方向があればその向きに \|velocity\| の速さ。OutQuad 再現 |
 | `MoveToMotion` | `targetOffset`、`isRelative`、`duration`(s)、`ease`(`MotionEase`) | 指定位置へ補間移動。`isRelative` が ON なら開始位置からの相対 |
 | `MoveToPlayerMotion` | `duration`(s)、`x`、`y`、`ease` | 開始時の自機位置へ補間移動。`x` / `y` で追う軸を選ぶ（両方 OFF なら待つだけ） |
-| `AimStraightMotion` | `speed`(単位/s)、`duration`(s, 0=無限) | 開始時の自機方向へ直進。OutQuad 再現 |
-| `ForwardMotion` | `speed`、`duration`(s, 0=無限) | 開始時の向き（回転 × 右）へ直進。OutQuad 再現 |
-| `HomingMotion` | `speed`、`turnSpeed`(度/s)、`duration`(s, 0=無限) | 自機へ旋回しながら進む。初期方向は回転 × 右。OutQuad 再現 |
 | `StraightWithHomingMotion` | `speed`、`verticalTrackingSpeed`(単位/s)、`duration`(s, 0=無限) | 常に左へ進みつつ Y を自機に寄せる。OutQuad 再現 |
 | `SineMotion` | `baseVelocity`、`amplitude`、`frequency`(Hz)、`duration`(s, 0=無限) | `baseVelocity` で進みつつ、その垂直方向にサイン波で揺れる。差分加算なので他の移動と合成できる。OutQuad 再現 |
 | `AnchoredSineMotion` | `anchor`、`amplitude`(Vector3)、`angularSpeed`(rad/s)、`cueSeconds`(s)、`cueOffset`、`duration`(s, 0=無限) | `anchor` の周りで絶対位置として揺れる（開始時に anchor へ吸着）。最初の `cueSeconds` は `cueOffset` 方向へ半周期の合図動作 |
 | `QuadraticMotion` | `initialVelocity`、`acceleration`、`duration`(s, 0=無限) | 等加速度運動 |
-| `AimRotateMotion` | `duration`(s)、`ease`(DOTween の `Ease`) | 位置は動かさず、自機の方向へ回転する |
-| `AnimationMotion` | `clip`、`layerIndex` | Animator の先頭のクリップを `clip` に差し替えて `Base` ステートを再生し、クリップの長さだけ待つ |
 
 ### 応用
 
@@ -650,12 +675,10 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 |---|---|---|
 | `AcceleratedMotion` | 通常: `direction`、`useConfiguredDirection`、`initialSpeed`、`acceleration`(単位/s²、負で減速)、`maxSpeed`、`minSpeed`、`duration`(s, 0=無限) | 発射方向（`useConfiguredDirection` が ON なら `direction`）へ加速。速さを min〜max に制限 |
 | | 放物運動: `useWorldAcceleration`、`worldAcceleration` | 初速 + 固定方向の加速度で放物運動 |
-| | 自機狙い放物線: `aimAtPlayer`、`useForceAxis`、`targetFlightTime`(s)、`vertexDepth`、`vertexScreenMargin`、`rightShotInterval`(発)、`alternateVertical`、`flightTimeVariation`(0〜0.4)、`vertexDepthVariation`(0〜0.8) | 画面内に頂点を作り、`targetFlightTime` 秒で発射時の自機位置へ届く放物線。曲げる軸は `useForceAxis` なら発射時の外力の予定上の向き (`IBulletForce.LaunchAxis`)、それ以外は `worldAcceleration` の向き。`alternateVertical` で上下交互、`rightShotInterval` 発ごとに右向きの放物線を試す。揺らぎは全弾共有の発射カウンタで決まる。自機がいなければ動かない |
 | `VertexParabolaMotion` | `orientation`(Vertical/Horizontal)、`vertex`、`initialSpeed`、`isRelative`、`oscillateVertex`、`vertexAmplitude`、`vertexAngularSpeed`(rad/s)、`attackTimeOffset`(s) | 発射位置から頂点へ向かい折り返す軸平行の放物線。`oscillateVertex` なら発射時刻 (`AttackTime − attackTimeOffset`) で頂点を揺らす。解けない設定なら弾を即消す。終わらない |
 | `ReflectMotion` | `speed`、`maxReflections`、`reflectTop` / `reflectBottom` / `reflectLeft` / `reflectRight` | 発射方向へ進み、一度画面内に入ってから指定した画面端で反射する。終わらない。OutQuad 再現 |
 | `ZigzagMotion` | `speed`、`angleDegrees`(度)、`segmentLength`、`initialSign`、`maxReflections`(0=無制限)、`firstSegmentLength`(0=segmentLength)、`duration`(s, 0=無限)、`fallbackAxis`、`rotateToVelocity`、`rotationOffsetDegrees` | 発射方向（無ければ `fallbackAxis`）を軸に ±angle で折り返しながら進む |
 | `SpiralMotion` | `startRadius`、`targetRadius`、`duration`(s)、`rotationSpeed`(度/s、負で時計回り) | 開始位置から発射方向の逆へ `startRadius` の点を中心に回りながら半径を変える。ChargeEffect が使う |
-| `DriftMotion` | `anchor`、`pullStrength`、`moveDistance`、`moveBounds`(幅, 高さ)、`moveDuration`(s)、`pauseDuration`(s)、`moveEase`(DOTween の `Ease`)、`duration`(s, 0=無限) | `anchor` の周りを「移動 → 停止」で漂う。行き先は `UnityEngine.Random` で決める |
 | `FadeMoveMotion` | `duration`(s)、`velocity`、`startAlpha`、`endAlpha`、`invincible` | 等速で動きながら SpriteRenderer のアルファを変える。`invincible` は弾のみ有効。OutQuad 再現 |
 | `PathMotion` | `waypoints`、`duration`(s)、`shape`(CatmullRom/Linear)、`ease`、`isRelative` | ウェイポイントを通る経路を、経路長に対して `ease` で進む |
 | `LoopMotion` | `loop`、`loopCount`(0=無限)、`entries[]`（`preset` / `inlineSteps` / `repeatCount`） | エントリを順に（各 `repeatCount` 回）再生し、`loop` なら繰り返す。`loop` OFF なら 1 周で終わる |
@@ -699,50 +722,49 @@ Until cond: FrameElapsed(481)
 
 `Repeat(interval=k)` は k フレームの周期で子を繰り返す。子が時間のかかる Sequence でも、周期より短ければ開始間隔はずれない。1 周期の中で複数の発射タイミングがある場合は `Repeat ∞ / k { Sequence[NWayShot, Wait a, NWayShot, Wait (b−a), NWayShot] }` のように子の中に並べる（残りは Repeat が周期まで待つ）。
 
-### BGM 同期のボスフェーズ = BgmSamples
+### BGM 同期のボスフェーズ = Phase(BgmSamples)
 
 ```text
 Loop ∞
  └─ Sequence
-     ├─ Sequence #MelodyA
-     │   ├─ PhaseMarker
-     │   └─ (MelodyA 本体)  … Until cond: BgmSamples(1263874)
-     ├─ Sequence #MelodyB  … Until cond: BgmSamples(2976121)
-     └─ Sequence #Chorus   … ...
+     ├─ Phase «MelodyA»  〜 BgmSamples(1263874)
+     ├─ Phase «MelodyB»  〜 BgmSamples(2976121)
+     └─ Phase «Chorus»   〜 BgmSamples(3897391)
 ```
 
 各フェーズを BGM のサンプル位置で区切る。BgmSamples は「閾値到達」または「ループで先頭へ戻った」で成立し、開始時点で既に閾値を過ぎていればループを待つので、最後のフェーズもループと同時に終わる。閾値は `BgmData` のループ位置と同じサンプル単位。
 
-### 発狂 (Strong) = If[NormalHpDepleted]{ Sequence[EnterStrongMode, 発狂本体], 通常本体 }
+### 発狂 (Strong) = HpSections(NextPhase) + If($stage ≧ 1)
 
 ```text
-Until [Hold]  cond: BgmSamples(...)
- └─ Parallel
-     ├─ Move (フェーズの移動)
-     └─ If  cond: NormalHpDepleted
-         ├─ 1: Sequence[ EnterStrongMode, 発狂本体… ]
-         └─ 2: 通常本体
+HpSections  25%  次の Phase から → $stage     … 区切りはここだけ (HP ゲージにも出る)
+└─ …
+    └─ Phase [Hold]  〜 BgmSamples(...)
+        └─ Parallel
+            ├─ Move (フェーズの移動)
+            └─ If  cond: $stage ≧ 1
+                ├─ 1: 発狂本体
+                └─ 2: 通常本体
 ```
 
-フェーズ開始時に通常 HP が削り切られていれば 1 番目（発狂）、そうでなければ 2 番目（通常）を実行する。BGM の区切りと移動は発狂・通常で共通なので If の外に置く（Stage1 / Stage3 ボス）。
+区切りを越えた後の次の Phase の開始で `$stage` が 1 になり、そのフェーズから 1 番目（発狂）を実行する。越えてから次の Phase までの被ダメージは `pendingDamageScale` 倍（Stage1 は ×0.25、Stage3 は ×1）。BGM の区切りと移動は発狂・通常で共通なので If の外に置く（Stage1 / Stage3 ボス）。
 
 SubTree は複数箇所から使い回す攻撃・部品（プリセット）にだけ使い、1 箇所でしか使わない処理はツリーに直接書く。入れ子が深くなるとグラフで追いにくくなるため。
 
 ### HP 閾値までランダムにフェーズを選ぶ
 
 ```text
-Sequence
- ├─ Until #Group0  cond: HpBelow(Self, 40%)
- │   └─ Loop ∞
- │       └─ RandomSelect (avoidRepeat)
- │           ├─ Sequence [Until #PhaseA (FrameElapsed), Until #Interlude]
- │           ├─ Sequence [Until #PhaseB (FrameElapsed), Until #Interlude]
- │           └─ ...
- ├─ Until #Interlude (FrameElapsed)  … 定位置へ戻る
- └─ 次のグループ
+HpSections  40%
+ ├─ Loop ∞
+ │   └─ RandomSelect (avoidRepeat)
+ │       ├─ Sequence [Until #PhaseA (FrameElapsed), Until #Interlude]
+ │       └─ ...
+ └─ Sequence
+     ├─ Until #Interlude (FrameElapsed)  … 定位置へ戻る
+     └─ 次のグループ
 ```
 
-HP が閾値を下回った瞬間に Until が中のフェーズを中断して Success を返し、次へ進む（Stage2 ボス）。HP の判定はこの 1 か所だけに置き、各フェーズの Until 条件に同じ `HpBelow` を重ねない。`Inverter` / `ForceSuccess` で Loop を失敗させて抜ける書き方はしない。
+HP が区切りを下回った瞬間に HpSections が 1 番目の子を中断して 2 番目へ進む（Stage2 ボス）。HP の区切りはこの 1 か所だけに置き、各フェーズの条件に同じ `HpBelow` を重ねない。`Inverter` / `ForceSuccess` で Loop を失敗させて抜ける書き方はしない。
 
 ### 雑魚 = 共通ツリー Enemy + overrides
 

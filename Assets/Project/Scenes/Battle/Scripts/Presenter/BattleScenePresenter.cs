@@ -300,6 +300,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         void StartStage(int section, bool resume)
         {
             awaitingFirstSection = true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var runtime = RuntimeModelRepository.Get();
+            flow.DebugBossStartPhase = runtime.DebugBossStartPhase;
+            flow.DebugBossStartHpPercent = runtime.DebugBossStartHpPercent;
+#endif
             flow.StartStage(stage, section, resume);
         }
 

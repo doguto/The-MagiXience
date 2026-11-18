@@ -1,151 +1,50 @@
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-using Project.Scenes.Battle.Scripts.Model;
-using Project.Scripts.Model;
 using Project.Scripts.Presenter;
 using Project.Scenes.Battle.Scripts.Runtime;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
-    // 1面ボス専用の予告ゲージ。BGM位置を直接見て、現在フェーズの終了までの進捗を Image.fillAmount に反映する。
-    //
-    // 拡張メモ：将来 BGM以外の終了条件（時間制限・HPしきい値など）も扱いたい場合は、
-    //   1) BattlePhaseModelBase に virtual float? RemainingProgress を生やして各派生で実装し、
-    //   2) ここでは activePhase.RemainingProgress を見るだけにする
-    // のように一般化できる。今は1面ボス専用のため、フェーズごとの thresholdSamples を Inspector で直書きする。
+    // 実行中の Phase ノードの終了までの残りを Image.fillAmount に表示する。進み具合が決まらないフェーズでは隠す
     public class BossPhaseProgressGauge : MonoPresenter
     {
         [SerializeField] Image fillImage;
 
-        [Tooltip("各フェーズの終了予定 BGM サンプル位置（絶対値）を、フェーズが開始される順に並べる。"
-                 + "区間 [前のthreshold, このthreshold) でゲージが1→0に進む。最初のフェーズは [0, threshold[0])。")]
-        [SerializeField] int[] phaseThresholdSamples;
-
-        [Tooltip("配列の末尾まで使い切った後、ここで指定したインデックスに戻ってループする。"
-                 + "例: [intro, a, b, c] で loopBackIndex=1 → intro→a→b→c→a→b→c→… となる。"
-                 + "ループしない場合は配列長以上の値を設定。")]
-        [SerializeField] int loopBackIndex = 1;
-
-        // ボスのツリーはシナリオ明けに付与されるため、見つかった時点でフェーズ通知を購読する
-        BattleActor actor;
+        // ボスのツリーはシナリオ明けに付与されるため、見つかった時点でサービスを購読する
         BattleServices subscribedServices;
 
-        int phaseIndex = -1;
-        int phaseStartThreshold;
-        int phaseEndThreshold;
-        bool isFirstPhase = true;
-        bool isActive;
-        float lastLogTime;
-
         readonly CompositeDisposable disposables = new();
-        readonly SerialDisposable phaseSubscription = new();
+        readonly SerialDisposable progressSubscription = new();
 
         protected override void Start()
         {
             base.Start();
 
-            SetVisible(false);
+            SetProgress(null);
             BattleActor.OnAttached.Subscribe(OnActorAttached).AddTo(disposables);
-            phaseSubscription.AddTo(disposables);
+            progressSubscription.AddTo(disposables);
 
             // 生成と同じフレームでツリーが付与された場合は OnAttached を取り逃がすため、既に付いていればここで拾う
             var existing = GetComponentInParent<BattleActor>();
-            if (existing != null && existing.World != null)
-            {
-                OnActorAttached(existing);
-                // 既にツリーが動いていれば最初の PhaseMarker も通知済みなので、ここで補う
-                if (existing.World.Frame > existing.StartFrame) OnPhaseStarted();
-            }
+            if (existing != null && existing.World != null) OnActorAttached(existing);
         }
 
         void OnActorAttached(BattleActor attached)
         {
             if (attached == null || !transform.IsChildOf(attached.transform)) return;
-            actor = attached;
-            var services = actor.World?.Services;
+            var services = attached.World?.Services;
             if (services == null || services == subscribedServices) return;
 
             subscribedServices = services;
-            phaseSubscription.Disposable = services.OnPhaseStarted.Subscribe(_ => OnPhaseStarted());
+            progressSubscription.Disposable = services.PhaseProgress.Subscribe(SetProgress);
         }
 
-        void OnPhaseStarted()
-        {
-            if (phaseThresholdSamples == null || phaseThresholdSamples.Length == 0)
-            {
-                Debug.LogWarning("[BossPhaseProgressGauge] OnPhaseStarted: thresholds is empty, hiding gauge.", this);
-                SetVisible(false);
-                return;
-            }
-
-            var audioSource = soundManager?.BgmAudioSource;
-            if (isFirstPhase)
-            {
-                phaseIndex = InferInitialPhaseIndex(audioSource != null ? audioSource.timeSamples : 0);
-                isFirstPhase = false;
-            }
-            else
-            {
-                phaseIndex++;
-            }
-            
-            int currentIndex = ResolvePhaseIndex(phaseIndex);
-            phaseEndThreshold = phaseThresholdSamples[currentIndex];
-
-            int prevRawIndex = phaseIndex - 1;
-            phaseStartThreshold = prevRawIndex < 0 ? 0 : phaseThresholdSamples[ResolvePhaseIndex(prevRawIndex)];
-            
-            isActive = true;
-            SetVisible(true);
-        }
-
-        // 初回購読時、現在のBGMサンプル位置から「いま何番目のフェーズか」を推定する。
-        // 配列の thresholds を昇順とみなし、currentSamples 以上の最初のthresholdが今のフェーズ。
-        int InferInitialPhaseIndex(int currentSamples)
-        {
-            for (int i = 0; i < phaseThresholdSamples.Length; i++)
-            {
-                if (currentSamples < phaseThresholdSamples[i])
-                {
-                    return i;
-                }
-            }
-            return phaseThresholdSamples.Length - 1;
-        }
-
-        void Update()
-        {
-            if (!isActive || !fillImage) return;
-
-            var audioSource = soundManager?.BgmAudioSource;
-            if (audioSource == null || audioSource.clip == null) return;
-
-            int currentSamples = audioSource.timeSamples;
-
-            int sectionLength = phaseEndThreshold - phaseStartThreshold;
-            int elapsed = currentSamples - phaseStartThreshold;
-
-            if (sectionLength <= 0) return;
-
-            float ratio = Mathf.Clamp01(1-(float)elapsed / sectionLength);
-            fillImage.fillAmount = ratio;
-        }
-
-        int ResolvePhaseIndex(int rawIndex)
-        {
-            int length = phaseThresholdSamples.Length;
-            if (rawIndex < length) return rawIndex;
-
-            // ループ
-            phaseIndex = loopBackIndex;
-            return loopBackIndex;
-        }
-
-        void SetVisible(bool visible)
+        void SetProgress(float? progress)
         {
             if (fillImage == null) return;
-            fillImage.gameObject.SetActive(visible);
+            fillImage.gameObject.SetActive(progress.HasValue);
+            if (progress.HasValue) fillImage.fillAmount = 1f - progress.Value;
         }
 
         void OnDestroy()

@@ -773,7 +773,7 @@ Battle 全体の中心 Presenter。
 
 - `StartBattle` は通常の Unity `Start` ではなく、SceneNavigation 完了後に呼ばれる。
 - Retry 時には `BattleFlow.Stop()`（全ツリー・予約・弾・ステージサービスの破棄）、Scenario ロード待ち、購読、Boss、弾、敵を解除してから開始し直す。
-- ボスの発狂（Strong）は、ボスツリー内の `NormalHpDepleted` 条件と `EnterStrongMode` ノードで切り替える。
+- ボスの発狂（Strong）は、ボスツリーの `HpSections`（区切りと切り替えの時期、待機中の被ダメージ倍率）と `If($stage ≧ 1)` で切り替える。
 
 ### BattleFlow / BattleWorld / BattleClock
 
@@ -840,10 +840,10 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 
 1 ファイル 1 型で、ノードは基底クラスごとのフォルダに置く。
 
-- `Composite/`: Sequence、Selector、Parallel（All / Any / Duration。Duration は指定フレームで打ち切る）、Random（重み・連続回避）、進行の Stage / PlayScenario。
-- `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Delay、Inverter、ForceSuccess、WarningLine、Section、OnCommand、WithWind、WithPrefab。
-- `Condition/`: Constant、FrameElapsed、BgmReached、And / Or / Not、NoActiveEnemies / HpBelow / NormalHpDepleted / BgmSamples。
-- `Action/`: Wait、Log、SubTree、CheckCondition / WaitUntil、発射（SingleShot / NWayShot など、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（EnterStrongMode、ClearBullets、BossWindCue、PhaseMarker）、進行（Wave、PlayBgm、SpawnBoss、BossBattle）。
+- `Composite/`: Sequence、Selector、Parallel（All / Any / Duration。Duration は指定フレームで打ち切る）、Random（重み・連続回避）、If、Cycle、HpSections（HP の区切りで段階を進める）、進行の Stage / PlayScenario。
+- `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Phase（Until + フェーズ開始の通知と進み具合）、Delay、Inverter、ForceSuccess、WarningLine、Section、OnCommand、WithWind、WithPrefab。
+- `Condition/`: Constant、FrameElapsed、BgmReached、And / Or / Not、NoActiveEnemies / HpBelow / Compare / BgmSamples。
+- `Action/`: Wait、Log、SubTree、CheckCondition / WaitUntil、発射（SingleShot / NWayShot など、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（ClearBullets、BossWindCue）、進行（Wave、PlayBgm、SpawnBoss、BossBattle）。
 - `Parts/`: ノードではない部品。ShotPattern / DirectionSource / RotationSource / BulletConfig / Emitter、`*Param` 欄から Object パラメータを引く `ParamObjects`、BossDefinition / TrailPath など。
 
 ### 設計方針
@@ -906,12 +906,10 @@ Battle Entity の純粋 Model 基底。
 
 扱うもの:
 
-- 通常 HP と強化 HP。
-- 強化攻撃に入る HP 比率。
-- オーバーフローダメージ倍率。
-- 強化攻撃を使うべきかどうか。
+- HP ゲージの区切り（`HpBreaks`）。ボスツリーの `HpSections` が設定する。
+- 被ダメージ倍率（`DamageMultiplier`）。`HpSections` の `pendingDamageScale` が使う。
 
-ボスツリーの `NormalHpDepleted` 条件が `ShouldUseStrongAttack`（通常 HP が 0 以下）を参照し、`EnterStrongMode` ノードが `EnterStrongMode()` を呼んで発狂状態に入れる。`HpBelow` 条件は `CurrentHp` と `MaxHp` を参照する。
+HP は 1 本で、通常・発狂の切り替えはボスツリー側（`HpSections`）で決める。`HpBelow` 条件は `CurrentHp` と `MaxHp` を参照する。
 
 ### `BulletEntityModel.cs`
 
@@ -1050,7 +1048,7 @@ EntityPresenter として EntityModel を提供しつつ、接触時の押し出
 ### `BossPhaseProgressGauge.cs`
 
 ボスフェーズの進行状況を表示する Presenter。
-`BattleActor.OnAttached` で自分を含むボスにツリーが付与されたことを検知し、`BattleServices.OnPhaseStarted`（BT の `PhaseMarker` ノードが通知）を購読する。フェーズの位置は BGM のサンプル位置と閾値テーブルから求める。
+`BattleActor.OnAttached` で自分を含むボスにツリーが付与されたことを検知し、`BattleServices.PhaseProgress`（BT の `Phase` ノードが終了条件から流す進み具合）を表示する。閾値は持たない。
 
 ### Death Directors
 
@@ -1089,7 +1087,7 @@ Battle Entity View の共通基底。
 ### `BossEntityView.cs`
 
 ボス表示 View。
-位置更新、通常 HP/強化 HP ゲージ、被弾フラッシュを扱う。
+位置更新、HP ゲージ（区切りは `BossEntityModel.HpBreaks`、色は `sectionColors`）、被弾フラッシュを扱う。
 
 ### `BulletEntityView.cs`
 

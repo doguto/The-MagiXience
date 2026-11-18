@@ -14,5 +14,11 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         // 評価の起点となるタイミング (Until の開始時など) で呼ばれる
         public virtual void Reset(BattleContext ctx) { }
         public abstract bool Evaluate(BattleContext ctx);
+
+        // Reset から成立までの進み具合 (0〜1)。決まらない条件は null
+        public virtual float? Progress(BattleContext ctx) => null;
+
+        // デバッグでフェーズを飛ばすとき、成立した時点まで外部の状態を進める (BGM の位置など)
+        public virtual void FastForward(BattleContext ctx) { }
     }
 }

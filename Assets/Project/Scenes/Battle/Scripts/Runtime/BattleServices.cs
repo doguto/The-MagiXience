@@ -23,9 +23,17 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public PlayerEntityPresenter Player { get; set; }
         public BackgroundPresenter Background { get; set; }
 
-        // PhaseMarker ノードが通知するフェーズの区切り (進行ゲージなどが購読する)
+        // Phase ノードが通知するフェーズの区切りと進み具合 (HpSections や進行ゲージが購読する)
         readonly Subject<string> phaseStarted = new();
         public IObservable<string> OnPhaseStarted => phaseStarted;
         public void NotifyPhase(string phaseId) => phaseStarted.OnNext(phaseId);
+
+        // デバッグ起動で指定したフェーズ。空でなければ、このフェーズに着くまでの Phase を飛ばす
+        public string SkipToPhase { get; set; }
+
+        // 実行中のフェーズの進み具合 (0〜1)。終了条件から決まらなければ null
+        readonly ReactiveProperty<float?> phaseProgress = new();
+        public IReadOnlyReactiveProperty<float?> PhaseProgress => phaseProgress;
+        public void SetPhaseProgress(float? progress) => phaseProgress.Value = progress;
     }
 }

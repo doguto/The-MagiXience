@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Stage2Boss_Tree
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147884263211257
+    rid: 8540155000000000002
   detachedNodes: []
   parameters: []
   references:
@@ -26,7 +26,6 @@ MonoBehaviour:
         graphPosition: {x: -120.00001, y: 125.33333}
         comment: 
         children:
-        - rid: 8540147886565097472
         - rid: 8540147886565097473
         - rid: 8540147884263211261
         - rid: 8540147884263211272
@@ -95,11 +94,6 @@ MonoBehaviour:
         count:
           value: 0
           param: 
-    - rid: 8540147884263211301
-      type: {class: HpBelow, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        target: 0
-        percent: 40
     - rid: 8540147884263211333
       type: {class: BulletBeam, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -300,17 +294,6 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
-    - rid: 8540147886565097472
-      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 01fc30b9347747b59dba633aae6098ea
-        graphPosition: {x: -2072.6667, y: 278.66666}
-        comment: Group 0
-        child:
-          rid: 8540147884263211260
-        condition:
-          rid: 8540147884263211301
-        onChildCompleted: 0
     - rid: 8540147886565097473
       type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -1199,3 +1182,18 @@ MonoBehaviour:
             m_PostInfinity: 2
             m_RotationOrder: 4
           curvePreset: {fileID: 0}
+    - rid: 8540155000000000002
+      type: {class: HpSections, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 647a32dce26d433eb50156950c50fbb4
+        graphPosition: {x: -2072.6667, y: 278.66666}
+        comment: 
+        children:
+        - rid: 8540147884263211260
+        - rid: 8540147884263211257
+        target: 0
+        breaks:
+        - 40
+        switchAt: 0
+        pendingDamageScale: 1
+        indexParam: 

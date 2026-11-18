@@ -16,5 +16,6 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected override void OnSetup(TreeScope scope) => target = frames.Resolve(scope);
         public override void Reset(BattleContext ctx) => startFrame = ctx.Frame;
         public override bool Evaluate(BattleContext ctx) => ctx.Frame - startFrame >= target;
+        public override float? Progress(BattleContext ctx) => target <= 0 ? 1f : Mathf.Clamp01((ctx.Frame - startFrame) / (float)target);
     }
 }

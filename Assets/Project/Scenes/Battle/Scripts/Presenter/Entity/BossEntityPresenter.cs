@@ -16,8 +16,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Entity Settings")]
         [SerializeField] int maxHp = 200;
         [SerializeField] int contactDamage = 20;
-        [SerializeField, Range(0f, 1f)] float strongHpRatio = 0.5f;
-        [SerializeField, Range(0f, 1f)] float overflowDamageMultiplier = 0f;
         [Tooltip("シナリオ→ボス戦突入直後、ボスのColliderを無効化して接触ダメージを防ぐ秒数")]
         [SerializeField, Min(0f)] float entryColliderDisableSeconds = 1f;
 
@@ -48,7 +46,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void Awake()
         {
             aliveCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-            model = new BossEntityModel(maxHp, contactDamage, strongHpRatio, overflowDamageMultiplier);
+            model = new BossEntityModel(maxHp, contactDamage);
 
             model.OnDeath
                 .Subscribe(_ => HandleDeath())
@@ -66,6 +64,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.CurrentHp
                 .Subscribe(hp => view.SetHpRatio(hp / denom))
+                .AddTo(disposables);
+            model.HpBreaks
+                .Subscribe(view.SetHpBreaks)
                 .AddTo(disposables);
         }
 

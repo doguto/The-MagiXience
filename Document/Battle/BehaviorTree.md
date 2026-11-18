@@ -33,7 +33,7 @@ BattleScenePresenter (IScenarioService を実装)
          │   ├─ ActorSpawner   … 敵・ビーム・障害物 Prefab の生成 (プール対象の敵は ActorPool から出す)
          │   ├─ BossHost (= BattleFlow) / Scenario (= BattleScenePresenter) / Progress (StageProgress)
          │   ├─ BulletClearReceiver / Boss / PlaySe / PlayBgm / BgmSource / Player / Background
-         │   └─ OnPhaseStarted (PhaseMarker ノードが通知)
+         │   └─ OnPhaseStarted / PhaseProgress (Phase ノードが通知)
          └─ StageContext  … BattleStageAsset.services から生成した IStageService 群
 ```
 
@@ -351,6 +351,7 @@ BGM と会話はサービス経由で Presenter が直接受ける。
 - Retry / タイトル戻り / ステージ完了では `flow.Stop()` が呼ばれ、ステージツリーの Abort（実行中の会話も閉じる）、ボスの破棄、弾の消去、`BattleClock.End()` → `BattleWorld.Clear()`（tickables・予約の破棄、`SetStage(null)` によるサービスの End）を行う。次の開始時に新しい `BattleWorld` が作られる。`ActorPool` と弾の共有プールは作り直さず使い回す。
 - リトライは `CheckpointSection` の Section から `resume = true` で再開する。その Section の `skipOnResume` が ON の Scenario は会話を出さず、コマンドだけを順に即実行する（ボス前の会話を飛ばしてもボスは出る）。
 - `Tools/Battle Debug Launcher` と `DebugRuntimeModelInitializer` は `stageNumber` と `startSection`（Stage 直下の並び順）を指定する。途中の Section から始めた場合も resume 扱いで会話を飛ばす。
+- ボス戦の Section を選ぶと、`bossStartPhase`（ボスのツリーの Phase 名）と `bossStartHpPercent` も指定できる。指定した Phase に着くまでの Phase は即終了し、終了条件の `FastForward` で BGM をその Phase の開始位置まで進める（`BattleServices.SkipToPhase`）。HP は `BossBattle` の開始時に設定するので、`HpSections` は開始時の HP から段階を決める。Phase を使っていないボス（今は Stage2 / Stage4）は HP だけ選べる。
 
 ## 7. ステージサービス
 
@@ -385,7 +386,7 @@ public abstract class StageServiceDefinition
 | 受け口 | 実装側 | 内容 |
 |---|---|---|
 | `IMoveModifier.Modify(velocity, input, speed)` | `PlayerEntityPresenter.AddMoveModifier / RemoveMoveModifier` | 自機の移動速度に補正を加える |
-| `IBulletForce` (`Active` / `LaunchAxis` / `Integrate`) | `BulletSystem.AddForce / RemoveForce` | 敵弾の本来の軌道に外力によるずれを足す |
+| `IBulletForce` (`Active` / `Integrate`) | `BulletSystem.AddForce / RemoveForce` | 敵弾の本来の軌道に外力によるずれを足す |
 
 ### 7.2 例: WindService
 
@@ -406,7 +407,7 @@ public abstract class StageServiceDefinition
 - `Tick(dt)`: 予定表を秒で進め、区間が終われば次の向きへ。無風から風ありになった瞬間に `startSe` を鳴らす。
 - `End`: 受け口から自分を外し、矢印を破棄する。
 - `Apply(settings)`: 予定表を差し替えて先頭から始める。`WithWind` ノード（子の実行中だけ別の風にし、終了時に直前の風へ戻す）と `BossWindCue` ノードが使う。
-- `enabled` が OFF でも予定表は進む。このとき自機・弾への影響と矢印表示は無いが、`ProjectileDirection` は予定表の向きを返し、自機狙い放物線 (`AcceleratedMotion` の `useForceAxis`) の曲げる向きに使われる。
+- `enabled` が OFF でも予定表は進む。このとき自機・弾への影響と矢印表示は無い。
 - 弾への影響は発射時点で決まる。`BulletSystem.Spawn` 時に風が有効で、かつ `BulletConfig.affectedByForce` が ON の弾だけが外力を受ける（`BulletEntityPresenter.ForceInfluence` を倍率として掛ける）。
 
 ### 7.3 新しいサービスを追加する手順
@@ -494,19 +495,18 @@ public abstract class StageServiceDefinition
 | ノードの形 | ノード 1 種類 = 1 クラス（設定・状態・処理を 1 つに持つ）。アセット上のノードは雛形で、実行するツリーごとに複製する。OSS の BT と同じ形で、「設定のクラス」と「実行時のクラス」を 2 つ組で書かない |
 | 保存形式 | ScriptableObject + `[SerializeReference]`。実行中の状態は `[NonSerialized]` にしてアセットに残さない |
 | 旧挙動の再現 | 旧実装の「Ease 未指定時は OutQuad」の癖は `StepClock` / `MotionEasing` で再現し、移行前後で弾道を変えない |
-| ボスと雑魚の統一 | ボスと通常敵は同じ `BattleActor` + 同じノード群で攻撃・移動を解釈する。ボス固有なのは HP 系条件の対象 (`HpTarget.Boss`) と EnterStrongMode 程度 |
+| ボスと雑魚の統一 | ボスと通常敵は同じ `BattleActor` + 同じノード群で攻撃・移動を解釈する。ボス固有なのは HP 系条件の対象 (`HpTarget.Boss`) と、HpSections が設定する HP ゲージの区切り・被ダメージ倍率程度 |
 | ステージ固有機能 | `BattleStageAsset.services` に宣言するステージサービスとしてカプセル化する。サービスが自機・弾へ働きかけ、自機・弾は汎用の受け口だけを持つ |
 | 進行もツリーに書く | 道中・会話・ボス戦の順序と、会話中のコマンド（ボスの出現・BGM）はステージツリーに書く。Presenter はツリーからの通知に演出で応えるだけで、進行を判断しない |
 | 1 ステージ = 1 アセット | 道中とボス戦を別アセットに分けず、Section で区切る。リトライ地点は Section 単位 |
 
 ## 11. 既知の制約・注意点
 
-- **乱数は再現性がない**: `BattleWorld` の乱数シードは `Environment.TickCount`。さらに `DriftMotion` は `UnityEngine.Random`、自機狙い放物線は static な発射カウンタ (`AimedParabola.NextShotIndex`) を使うため、同じ入力でも同じ展開にはならない。
+- **乱数は再現性がない**: `BattleWorld` の乱数シードは `Environment.TickCount` のため、同じ入力でも同じ展開にはならない。
 - **パラメータ化できるフィールドが限られる**: `Bt*` 型のフィールドは時間・回数系などの一部だけ、アセット参照は `*Param` 欄のある 4 つだけ（5.1 参照）。
 - **プール品の状態**: 使い回す敵の Prefab に、`Start` などで一度だけ状態を作るコンポーネントがあると 2 体目以降で動きが変わる。`IPoolableActor` で戻せないものは `NoActorPool` を付ける。
 - **死亡時ツリーは 1 フレームだけ**: `SetDeathBehavior` のツリーは 1 回 Tick して停止する。Wait や Delay を含めても後半は実行されない。
 - **ツリー開始は翌フレーム**: 出現させた敵のツリー、`StartStage` で登録したステージツリーは次の `Step` から動く。
 - **秒とフレームの混在**: BT ノードの時間はフレーム、`MotionStep` と一部のバトルノードのフィールド（Spawn.beamDuration、SpriteBeam.bodyDuration、MoveTrailFan.moveDuration、ScreenEdgeDirection など）は秒。各フィールドの単位はノードリファレンスを参照。
-- **PhaseMarker の phaseId は現状使われていない**: `BossPhaseProgressGauge` は通知の回数だけを見て、BGM のサンプル位置から現在フェーズを推定する。
 - **型の置き場所**: `WindDirection` / `WindInterval` / `BattleWindSettings` は `Model/` に 1 型 1 ファイルで、`BossWindCueSettings` は `Model/BossWindCueSettings.cs`、自機の Transform を持つ `BattleTargets` は `Runtime/Motion/BattleTargets.cs` にある。
 - `BossEntityPresenter` は HP・被弾・撃破演出・登場直後の当たり判定オフだけを持つ。`Stage3WindBossController` は BossWindCue ノードの腕上げ演出の受け手（`IWindCueReceiver`）として残っている。

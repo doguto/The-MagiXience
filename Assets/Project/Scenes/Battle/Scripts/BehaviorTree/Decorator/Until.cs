@@ -11,7 +11,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     }
 
     [Serializable, NodeInfo("条件が成立した瞬間に子を中断して完了する。毎フレーム子より先に判定")]
-    public sealed class Until : DecoratorNode
+    public class Until : DecoratorNode
     {
         [SerializeReference, SubclassSelector] Condition condition;
         [SerializeField] UntilChildCompletion onChildCompleted = UntilChildCompletion.Finish;

@@ -164,7 +164,7 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 役割ごとの典型的な形:
 
 - `Stage/Stage{N}_Tree`: `Stage[ Section "Way"[ PlayBgm, Wave..., Wait ], Section "Boss"[ PlayScenario{OnCommand SpawnBoss / PlayBossBgm}, BossBattle, Wait, PlayScenario ] ]`（[BehaviorTree.md](./BehaviorTree.md) 6.1）
-- `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / RandomSelect / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP 閾値（`HpBelow`）、発狂（`NormalHpDepleted` + `EnterStrongMode`）など
+- `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / RandomSelect / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP の区切り（`HpSections`。区切りは HP ゲージにも出る）、発狂（`HpSections` の `NextPhase` + `If($stage ≧ 1)`）など
 - `Commons/BT/Enemy`: `Parallel(All)[ Move($movement), Sequence[ SetDeathBehavior($death), SubTree($attack) ] ]`。パラメータ `movement`（MotionPreset）/ `attack` / `death`（BehaviorTreeAsset）を Spawn の `overrides` で渡す
 - `Attack/*`: 雑魚の攻撃（`Until(FrameElapsed){ Repeat{NWayShot} }` など）やボスの 1 フェーズ分の攻撃（`Sequence` + `Wait` / `Repeat` / `NWayShot` などの弾を撃つノード / `BulletBeam` など）
 - `Enemy/*`: 共通ツリーで表せない敵の専用ツリー（攻撃の途中で移動を変えるなど）

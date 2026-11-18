@@ -1,4 +1,4 @@
-﻿using Project.Scripts.Extensions;
+using Project.Scripts.Extensions;
 
 namespace Project.Scripts.Model
 {
@@ -24,10 +24,16 @@ namespace Project.Scripts.Model
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        public void SetForDebug(int stageNumber, int startSection)
+        // ボス戦をこのフェーズ・HP (%) から始める。空 / 100 なら指定なし
+        public string DebugBossStartPhase { get; private set; }
+        public float DebugBossStartHpPercent { get; private set; } = 100f;
+
+        public void SetForDebug(int stageNumber, int startSection, string bossStartPhase, float bossStartHpPercent)
         {
             CurrentStageType = BattleStageTypeExtensions.FromInt(stageNumber);
             CheckpointSection = startSection;
+            DebugBossStartPhase = bossStartPhase;
+            DebugBossStartHpPercent = bossStartHpPercent;
         }
 #endif
     }

@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +8,7 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
     {
         // memo: 色帯は「満タンの固定絵」として bandsContainer 上に並べ、その全体を
         //       hpBarMask (RectMask2D) で右から削る。色帯自体は動かさず、マスク幅だけを
-        //       残量割合に応じて変える。境界は colorStops で自由に定義できる。
+        //       残量割合に応じて変える。区切りはツリーの HpSections から受け取る。
         [Header("Hp Bar")]
         [Tooltip("残量割合に応じて幅を変えるマスク。この子に色帯が並ぶ")]
         [SerializeField] RectMask2D hpBarMask;
@@ -16,56 +16,50 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         [SerializeField] RectTransform bandsContainer;
         [Tooltip("色帯に使うスプライト（UiFlatSquare など単色ベタ）")]
         [SerializeField] Sprite bandSprite;
-        [Tooltip("色帯の定義。upperRatio を降順（大きい順）で並べる")]
-        [SerializeField] HpBarColorStop[] colorStops =
+        [Tooltip("区間の色。満タン側の区間が先頭、最後の区間が末尾。区間数に合わせて間を拾う")]
+        [SerializeField] Color[] sectionColors =
         {
-            new() { upperRatio = 1.0f, color = new Color(0.85f, 0.10f, 0.10f) }, // 赤
-            new() { upperRatio = 0.6f, color = new Color(0.90f, 0.50f, 0.10f) }, // 橙
-            new() { upperRatio = 0.3f, color = new Color(0.81f, 0.85f, 0.10f) }, // 黄
+            new(0.81f, 0.85f, 0.10f), // 黄
+            new(0.90f, 0.50f, 0.10f), // 橙
+            new(0.85f, 0.10f, 0.10f), // 赤
         };
 
+        readonly List<GameObject> bands = new();
         RectTransform maskRect;
         float fullWidth;
-        bool built;
 
         protected override void OnAwakeView()
         {
             base.OnAwakeView();
-            BuildBands();
+            if (hpBarMask != null) maskRect = hpBarMask.rectTransform;
+            SetHpBreaks(System.Array.Empty<float>());
         }
 
         /// <summary>
-        /// colorStops から色帯 Image を生成し、bandsContainer 上に左詰めで並べる。
-        /// 各帯は anchor の割合指定で配置するので、コンテナ幅が変わっても比率を保つ。
+        /// 区切り (0〜1、大きい順) から色帯を作り直す。区間 i は [区切り i, 区切り i-1] の範囲。
         /// </summary>
-        void BuildBands()
+        public void SetHpBreaks(IReadOnlyList<float> breaks)
         {
-            if (built) return;
-            if (hpBarMask == null || bandsContainer == null) return;
+            if (bandsContainer == null || sectionColors == null || sectionColors.Length == 0) return;
 
-            maskRect = hpBarMask.rectTransform;
-            fullWidth = maskRect.rect.width;
+            foreach (var band in bands) Destroy(band);
+            bands.Clear();
 
-            // 降順ソート（Inspector 入力が前後しても安全に動くように）
-            var stops = (HpBarColorStop[])colorStops.Clone();
-            Array.Sort(stops, (a, b) => b.upperRatio.CompareTo(a.upperRatio));
-
-            float lowerRatio = 0f;
-            for (int i = stops.Length - 1; i >= 0; i--)
+            var count = breaks.Count + 1;
+            var upper = 1f;
+            for (var i = 0; i < count; i++)
             {
-                var stop = stops[i];
-                float upper = Mathf.Clamp01(stop.upperRatio);
-                if (upper <= lowerRatio)
-                {
-                    // 幅ゼロ以下の帯はスキップ
-                    continue;
-                }
-
-                CreateBand(lowerRatio, upper, stop.color, i);
-                lowerRatio = upper;
+                var lower = i < breaks.Count ? Mathf.Clamp01(breaks[i]) : 0f;
+                if (upper > lower) CreateBand(lower, upper, SectionColor(i, count), i);
+                upper = lower;
             }
+        }
 
-            built = true;
+        Color SectionColor(int index, int count)
+        {
+            if (count <= 1) return sectionColors[0];
+            var at = Mathf.RoundToInt(index * (sectionColors.Length - 1) / (float)(count - 1));
+            return sectionColors[Mathf.Clamp(at, 0, sectionColors.Length - 1)];
         }
 
         void CreateBand(float leftRatio, float rightRatio, Color color, int index)
@@ -84,6 +78,7 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
             image.sprite = bandSprite;
             image.color = color;
             image.raycastTarget = false;
+            bands.Add(go);
         }
 
         /// <summary>

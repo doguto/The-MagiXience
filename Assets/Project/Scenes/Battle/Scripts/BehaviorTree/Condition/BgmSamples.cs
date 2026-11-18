@@ -13,6 +13,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [NonSerialized] int threshold;
         [NonSerialized] bool waitingForWrap;
         [NonSerialized] int last;
+        [NonSerialized] int start;
 
         public override string Summary => $"BGM {thresholdSamples} サンプル";
 
@@ -22,6 +23,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         {
             var source = ctx.Services.BgmSource;
             last = source != null ? source.timeSamples : 0;
+            start = last;
             waitingForWrap = last >= threshold;
         }
 
@@ -34,6 +36,23 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             last = now;
             if (wrapped) return true;
             return !waitingForWrap && now >= threshold;
+        }
+
+        public override void FastForward(BattleContext ctx)
+        {
+            var source = ctx.Services.BgmSource;
+            if (source == null || source.clip == null) return;
+            source.timeSamples = Mathf.Clamp(threshold, 0, source.clip.samples - 1);
+        }
+
+        public override float? Progress(BattleContext ctx)
+        {
+            var source = ctx.Services.BgmSource;
+            if (source == null || source.clip == null) return null;
+            // 開始時に位置を過ぎていたら、ループで先頭に戻るまでを 1 区間とみなす
+            var end = waitingForWrap ? source.clip.samples : threshold;
+            if (end <= start) return 1f;
+            return Mathf.Clamp01((source.timeSamples - start) / (float)(end - start));
         }
     }
 }

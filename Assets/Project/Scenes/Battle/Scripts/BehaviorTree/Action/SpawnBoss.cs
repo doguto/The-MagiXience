@@ -10,6 +10,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeField] BossDefinition boss;
 
+        public BossDefinition Boss => boss;
+
         public override string Summary => boss ? boss.name : "(ボス未設定)";
 
         protected override NodeStatus OnTick(BattleContext ctx)
