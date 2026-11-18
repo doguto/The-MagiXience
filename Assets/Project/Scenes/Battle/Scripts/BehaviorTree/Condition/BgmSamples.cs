@@ -8,18 +8,21 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable]
     public sealed class BgmSamples : Condition
     {
-        [SerializeField, Min(0)] int thresholdSamples;
+        [SerializeField] BtInt thresholdSamples;
 
+        [NonSerialized] int threshold;
         [NonSerialized] bool waitingForWrap;
         [NonSerialized] int last;
 
         public override string Summary => $"BGM {thresholdSamples} サンプル";
 
+        protected override void OnSetup(TreeScope scope) => threshold = Mathf.Max(0, thresholdSamples.Resolve(scope));
+
         public override void Reset(BattleContext ctx)
         {
             var source = ctx.Services.BgmSource;
             last = source != null ? source.timeSamples : 0;
-            waitingForWrap = last >= thresholdSamples;
+            waitingForWrap = last >= threshold;
         }
 
         public override bool Evaluate(BattleContext ctx)
@@ -30,7 +33,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var wrapped = now < last;
             last = now;
             if (wrapped) return true;
-            return !waitingForWrap && now >= thresholdSamples;
+            return !waitingForWrap && now >= threshold;
         }
     }
 }
