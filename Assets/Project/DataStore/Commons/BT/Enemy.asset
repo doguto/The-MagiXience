@@ -9,21 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ad8c3eac9f5d47448b44b0827100d56, type: 3}
   m_Name: Enemy
   m_EditorClassIdentifier: 
   root:
     rid: 8540147974269042804
   detachedNodes: []
   parameters:
-  - name: movement
-    kind: 4
-    floatValue: 0
-    intValue: 0
-    boolValue: 0
-    vector2Value: {x: 0, y: 0}
-    objectValue: {fileID: 0}
-    bindToParent: 
   - name: attack
     kind: 4
     floatValue: 0
@@ -53,13 +45,14 @@ MonoBehaviour:
         - rid: 8540147960821842816
         - rid: 8540147960821842818
     - rid: 8540147960821842816
-      type: {class: SetDeathBehavior, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      type: {class: SetDespawnBehavior, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6d70c7b354464b1982cac15ad4b58818
         graphPosition: {x: 0, y: 0}
         comment: 
         tree: {fileID: 0}
         treeParam: death
+        reasons: 1
     - rid: 8540147960821842818
       type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -76,18 +69,15 @@ MonoBehaviour:
         graphPosition: {x: 0, y: 0}
         comment: 
         children:
-        - rid: 8540147974269042805
+        - rid: 8540148020670627913
         - rid: 8540147960821842815
         policy: 0
         duration:
           value: 0
           param: 
-    - rid: 8540147974269042805
-      type: {class: Move, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540148020670627913
+      type: {class: MoveSelf, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 0d5c91ed2705493ab4e7d111193c6afe
         graphPosition: {x: -160, y: 160}
         comment: 
-        preset: {fileID: 0}
-        presetParam: movement
-        steps: []

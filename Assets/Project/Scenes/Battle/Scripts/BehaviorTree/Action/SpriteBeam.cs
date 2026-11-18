@@ -52,7 +52,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         {
             var aim = presetAim as Aim ?? (Aim)CreateAim(ctx);
             presetAim = null;
-            ctx.Services.Spawner?.Spawn(new ActorSpawn
+            ctx.Services.Spawner?.Spawn(new EnemySpawn
             {
                 Prefab = bodyPrefab,
                 Position = aim.Segment.start,

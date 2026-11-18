@@ -13,7 +13,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected override NodeStatus OnTick(BattleContext ctx)
         {
             ctx.Services.Bullets.Clear();
-            ctx.Services.Clearer?.ClearAllBullets();
+            ctx.Services.Clearer?.ClearAllBeams();
             if (clearEnemies) ctx.Services.Clearer?.ClearAllEnemies();
             return NodeStatus.Success;
         }

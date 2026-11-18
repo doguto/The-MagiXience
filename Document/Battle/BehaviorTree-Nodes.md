@@ -236,11 +236,12 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 | `NoActiveEnemies` | なし | `EnemyTracker` の生存敵数が 0（Spawn の `tracked` が ON の敵だけが数えられる）。Spawner が無ければ成立 |
 | `HpBelow` | `target`（Self / Boss）、`percent`（0〜100） | 現在 HP ≦ ceil(最大 HP × percent / 100)。対象の Model が無ければ成立 |
 | `Compare` | `a` ($ 可)、`op`（≧ > ≦ < = ≠）、`b` ($ 可) | `a op b`。パラメータは判定のたびに読み直す（HpSections の段階などを見る） |
+| `Signaled` | `key` | このフレームに自分（`Self`）へ合図 `key` が届いた（SendSignal、6 章）。届いたフレームに判定されなかった合図は受け取れない。`Self` が無ければ不成立 |
 | `And` | `conditions` | 全て成立（空なら成立） |
 | `Or` | `conditions` | どれか成立（空なら不成立） |
 | `Not` | `condition` | 中の条件が不成立（未設定なら成立） |
 
-- `HpTarget.Self` はツリーを持つアクター自身、`Boss` は `Services.Boss`（BossBattle ノードでツリーを付けたボスの BattleActor）。ステージツリーからボスの HP を見るときは `Boss` を使う。
+- `HpTarget.Self` はツリーを持つ敵自身、`Boss` は `Services.Boss`（BossBattle ノードでツリーを付けたボスの `EnemyAgent`）。ステージツリーからボスの HP を見るときは `Boss` を使う。
 - 実データの FrameElapsed は 601 や 1801 のように +1 された値が多い。旧形式から変換したとき、旧データのループ終端時刻ちょうどの発射を含めるために付けたもの。
 
 ## 4. 基本 Action
@@ -281,7 +282,7 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 
 | フィールド | 説明 |
 |---|---|
-| `tree` | 実行するツリー。未設定なら警告して即 Success |
+| `tree` | 実行するツリー。未設定なら警告して即 Success。`CommonTreeAsset` か、開いているツリーと同じ種類のツリーだけを指定できる（Common のツリーからは Common だけ） |
 | `treeParam` | ツリーの Object パラメータ名。指定するとその値のツリーを `tree` の代わりに実行する。値が空なら何もせず即 Success（共通の雑魚ツリー `Enemy` の `attack` で使う） |
 | `overrides` | 子ツリーのパラメータの上書き（`TreeParameter`）。`bindToParent` に親ツリーのパラメータ名を入れると、その値を引き継ぐ |
 
@@ -416,7 +417,13 @@ Parallel(All)
 | `motionPreset` | 指定するとインラインの `motion` より優先 |
 | `motion` | 弾の移動 (`List<MotionStep>`)。空なら発射方向へ等速 (`VelocityMotion`) |
 | `range` | 飛距離の上限（発射方向への進捗、ワールド単位）。0 で無制限 |
+| `lifetime` | 消えるまでのフレーム数（`StartDelayFrames` の間も数える）。0 で無制限。弾 Prefab は寿命を持たない |
 | `affectedByForce` | 発射時にステージの外力 (`IBulletForce`。Stage3 の風など) が有効なら外力を受ける（既定 ON） |
+| `behavior` | 弾を動かすツリー（`BulletTreeAsset`）。未指定なら MoveSelf だけの組み込みツリーで、`motionPreset` / `motion` の移動を実行する。指定したツリーで移動させるには MoveSelf を置く |
+| `overrides` | `behavior` のパラメータ上書き（固定値のみ） |
+| `group` | 合図の宛先 `Group` で使う名前。空ならグループに入らない |
+
+撃った弾の `AttackTime` は撃った時点の撃ち手の `AttackTime`（弾のツリーから撃った子弾は親弾の値を引き継ぐ）、`Owner` は撃ち手になる。
 
 ### ChargeEffect（Action/Effect）
 
@@ -430,6 +437,7 @@ Parallel(All)
 | `targetRadius` | 寄せた先の半径（0 で中心） |
 | `gatherFrames` (f) | 寄せるのにかけるフレーム数 |
 | `rotationSpeed` (度/s) | 回る速さ。負で時計回り |
+| `lifetime` (f) | 溜めの弾が消えるまでのフレーム数。0 で無制限（パラメータ不可） |
 | `se` | 出したときの SE |
 
 `count` / `radius` / `targetRadius` / `gatherFrames` / `rotationSpeed` はツリーのパラメータにできる。例: `Stage2/BT/Attack/S2_Charge`（パラメータ prefab / count / frames / radius）。
@@ -471,13 +479,21 @@ Parallel(All)
 | `OffsetRotation` | `offsetDegrees` | 撃つ敵の回転 + オフセット |
 | `AimRotation` | なし | 左向きを基準に自機の方向へ向ける |
 
-## 6. バトル Action: アクター
+## 6. バトル Action: 敵・弾 (Self)
 
-`Self` を対象にするノードは、ステージ直下（`Self == null`）では何もしない（Move のみ Failure）。
+`Self` を対象にするノードは、ステージ直下（`Self == null`）では何もしない（Move のみ Failure）。`Self` は敵（`EnemyAgent`）か弾（`BulletAgent`）で、`EnemyActionNode` を継承するノード（SetInvincible / BossWindCue）は敵のツリー（`EnemyTreeAsset`）にだけ置ける。
+
+### MoveSelf（Action/Move）
+
+出現させた側から渡された移動（`Self.Motion`）を、`Self.Direction` / `Self.AttackTime` で実行する。フィールドは無い。移動が終わると Success（無限の移動は終わらない）。移動が空なら即 Success。
+
+- 敵の移動は Spawn の `motionPreset` / `motion`、弾の移動は `BulletConfig` の `motionPreset` / `motion` から渡る。共通の雑魚ツリー `Enemy` と、ツリー未指定の弾の組み込みツリーはこのノードで動く。
+- 移動が開始できない設定（`Rejected`。頂点が発射位置と同じ放物線など）なら `Self.Despawn()` で消して Failure。
+- 中断・完了時に移動を止める。
 
 ### Move（Action/Move）
 
-この敵を `MotionStep` の列で動かす。移動が終わると Success（無限の移動は終わらない）。`Self` が無ければ Failure。
+この敵（または弾）を `MotionStep` の列で動かす。移動が終わると Success（無限の移動は終わらない）。`Self` が無ければ Failure。
 
 | フィールド | 説明 |
 |---|---|
@@ -485,7 +501,7 @@ Parallel(All)
 | `presetParam` | ツリーの Object パラメータ名。指定するとその値の `MotionPreset` を使う。値が空なら動かずに Success |
 | `steps` | インラインの `List<MotionStep>` |
 
-敵の移動は必ずこのノードで行う（ツリーの外で流れる移動はない）。中断・完了時に移動を止める。
+敵の移動は必ずこのノードか MoveSelf で行う（ツリーの外で流れる移動はない）。中断・完了時に移動を止める。
 - 攻撃と同時に動かすときは `Parallel{ Move, 攻撃 }` と並べる（Move を先頭に置くと、そのフレームの発射は移動後の位置になる）。
 - 移動の後に一定時間待つときは `Parallel{ Move, Wait N }` にする。`Sequence[Move, Wait]` だと移動の長さぶん後ろがずれる。
 - 複数のフェーズにまたがって続ける移動は、そのフェーズをまとめた外側に `Parallel{ Move, Sequence[フェーズ…] }` と置く（例: Stage3 ボスの横揺れ）。
@@ -498,19 +514,48 @@ Parallel(All)
 |---|---|
 | `path` | `TrailPath`（パラメータ可） |
 
-### SetDeathBehavior（Action/Actor）
+### SetDespawnBehavior（Action）
 
-この敵が倒されたときに 1 回だけ実行するツリー (`tree`) を設定する。即 Success。
-`treeParam`（ツリーの Object パラメータ名）を指定するとその値のツリーを使い、値が空なら撃破時の行動なしになる。
-死亡時ツリーは 1 フレームだけ Tick して停止するため、即時ノード（NWayShot などの発射）だけが意味を持つ。
+`Self`（敵・弾）が消えるときに 1 回だけ実行するツリーを設定する。どの種類のツリーにも置ける。即 Success。
 
-### SetInvincible（Action/Actor）
+| フィールド | 説明 |
+|---|---|
+| `tree` | 消えるときに実行するツリー |
+| `treeParam` | ツリーの Object パラメータ名。指定するとその値のツリーを使い、値が空なら消えるときの行動なし |
+| `reasons` | このどれかの理由（`DespawnReason`、複数選択）で消えたときだけ実行する。既定は `Defeated` |
 
-`invincible`（既定 ON）でこの敵の無敵を切り替える。即 Success。
+| 理由 | 敵 | 弾 |
+|---|---|---|
+| `Defeated` | HP が 0 になった | 何かに当たって消えた |
+| `Expired` | 寿命が尽きた | 寿命・飛距離が尽きた |
+| `OutOfScreen` | 一度画面に入ってから外へ出た | 画面外へ出た |
+| `Despawned` | Despawn ノード | Despawn ノード |
+| `Cleared` | — | 一括消去・リトライ・バトル終了 |
 
-### Despawn（Action/Actor）
+- `Cleared` は普通は含めない（一括消去で子弾が出ないように）。
+- 消えるときのツリーは 1 フレームだけ Tick して返すため、即時ノード（NWayShot などの発射、Spawn）だけが意味を持つ。`Self` は消えていく敵・弾で、そこから撃つ。
+- 敵の撃破時の行動は、撃破の次の Step で実行される（[BehaviorTree.md](./BehaviorTree.md) 4.6）。
 
-この敵を消す（撃破扱いにしない）。この敵が予約していた発射も取り消す。消す処理は `ActorDespawn.Despawn` で、プールから出した敵はプールへ戻す。即 Success。
+### SetInvincible（Action/Enemy）
+
+`invincible`（既定 ON）でこの敵の無敵を切り替える。即 Success。`EnemyActionNode` なので敵のツリーにだけ置ける。
+
+### Despawn（Action）
+
+`Self`（敵・弾）を消す（撃破扱いにしない。理由は `Despawned`）。`Self.Despawn()` を呼んで印を付けるだけで、実際に消えるのは敵ならそのフレームの `CompleteEnemyDespawns`、弾なら `BulletSystem` の処理の中。消えた敵・弾が予約していた発射も取り消す。敵はプールから出したものならプールへ戻す。即 Success。
+
+### SendSignal（Action）
+
+合図を送る。次のフレームの頭に宛先の敵・弾へ届き、`Signaled` 条件で受け取れる。会話のコマンド（OnCommand）とは別の仕組み。即 Success。
+
+| フィールド | 説明 |
+|---|---|
+| `key` | 合図の名前 |
+| `target` | `Spawned`（既定。自分が出した敵・弾と、それらがさらに出したもの）/ `Group`（同じグループ名の敵・弾）/ `All`（自分以外のすべての敵・弾） |
+| `group` | `target = Group` のときの宛先グループ名（`Spawn.group` / `BulletConfig.group` で付けた名前） |
+
+- ステージツリー（`Self == null`）から `Spawned` で送ると、すべての敵・弾に届く。
+- 受け取る側は `Until(Signaled)` / `If(Signaled)` などで判定する。届いたフレームに判定しないと取りこぼす。
 
 ### PlaySe（Action）
 
@@ -523,8 +568,11 @@ Parallel(All)
 | フィールド | 単位 | 説明 |
 |---|---|---|
 | `prefab` | | 出す Prefab |
-| `behavior` | | この Prefab を動かすツリー（`BattleActor` を付ける）。雑魚は通常 `Commons/BT/Enemy`。未指定ならツリーを付けず、その場から動かない |
+| `behavior` | | この Prefab を動かすツリー（`EnemyTreeAsset`。`EnemyAgent` を付ける）。雑魚は通常 `Commons/BT/Enemy`。未指定ならツリーを付けず、その場から動かない（`EnemyEntityPresenter` を持つ Prefab には、消えるかの判定のため `EnemyAgent` だけ付ける） |
+| `motionPreset` | | 出した敵に渡す移動（`EnemyAgent.Motion`）。ツリーの MoveSelf が実行する。指定するとインラインの `motion` より優先 |
+| `motion` | | インラインの移動 (`List<MotionStep>`) |
 | `overrides` | | `behavior` のパラメータ上書き（固定値のみ。`bindToParent` は効かない） |
+| `group` | | 合図の宛先 `Group` で使う名前。空ならグループに入らない |
 | `position` | ワールド単位 | 撃つ敵がいなければワールド座標、いればその位置からの相対 |
 | `worldSpace` | | ON なら撃つ敵がいてもワールド座標で出す |
 | `layout` | | 並べ方 (`SpawnLayout`、下表)。既定は Single |
@@ -535,7 +583,7 @@ Parallel(All)
 | `beamDuration` | s | ビーム/警告線の表示時間。0 以下は Prefab の値 |
 | `beamWidth` | ワールド単位 | ビーム/警告線の幅。0 以下は Prefab の値 |
 
-`beam*` は Prefab が `IBeamVisualReceiver` を持つ場合だけ使われる。出現した敵のツリーは翌フレームから動く。プール対象の敵 Prefab は `ActorPool` から出す（[BehaviorTree.md](./BehaviorTree.md) 4.5）。
+`beam*` は Prefab が `IBeamVisualReceiver` を持つ場合だけ使われる。出現した敵のツリーは翌フレームから動く。プール対象の敵 Prefab は `EnemyPool` から出す（[BehaviorTree.md](./BehaviorTree.md) 4.5）。
 
 ### SpawnLayout
 
@@ -551,11 +599,11 @@ Parallel(All)
 
 ### ClearBullets（Action/Stage）
 
-画面の敵弾（`BulletSystem`）と、`BulletClearReceiver` 経由で警告線・ビームなどを消す。`clearEnemies` が ON なら敵も消す。即 Success。
+画面の弾を `BulletSystem.Clear()`（理由 `Cleared`）で消し、`BulletClearReceiver.ClearAllBeams` で警告線・ビームを消す。`clearEnemies` が ON なら敵も消す（`ClearAllEnemies`。消えるときのツリーは実行しない）。即 Success。
 
 ### BossWindCue（Action/Boss）
 
-合図の演出のあと風向きを切り替える。即 Success（切り替え自体は風の予定表で遅らせる）。
+合図の演出のあと風向きを切り替える。即 Success（切り替え自体は風の予定表で遅らせる）。`EnemyActionNode` なので敵のツリーにだけ置ける。
 
 | フィールド (`cue`: `BossWindCueSettings`) | 単位 | 説明 |
 |---|---|---|
@@ -647,14 +695,14 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 | `prefab` | `BossEntityPresenter` を持つ Prefab |
 | `spawnPosition` | 生成位置 |
 | `entrance` | 登場の移動 (`List<MotionStep>`、秒) |
-| `tree` | ボス自身が実行するツリー |
+| `tree` | ボス自身が実行するツリー（`EnemyTreeAsset`） |
 
 ## 8. MotionStep
 
-敵・ボス・弾の移動の 1 ステップ。`Move` / `BulletConfig.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
+敵・ボス・弾の移動の 1 ステップ。`Move` / `Spawn.motion` / `BulletConfig.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
 **時間はすべて秒**。`duration` が「0 で無限」のステップは終わらないため、後ろのステップに進まない。
 
-「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに旧実装の OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.2 参照）。
+「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに旧実装の OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.3 参照）。
 
 ### 基本
 
@@ -769,12 +817,12 @@ HP が区切りを下回った瞬間に HpSections が 1 番目の子を中断�
 ### 雑魚 = 共通ツリー Enemy + overrides
 
 ```text
-Commons/BT/Enemy
+Commons/BT/Enemy (EnemyTreeAsset)
  └─ Parallel [All]
-     ├─ Move              $movement   … Stage{N}/BT/Motion/*
+     ├─ MoveSelf                        … Spawn の motionPreset / motion (Stage{N}/BT/Motion/*)
      └─ Sequence
-         ├─ SetDeathBehavior  $death  … 撃破時のツリー (空なら無し)
-         └─ SubTree           $attack … Stage{N}/BT/Attack/S{N}_*
+         ├─ SetDespawnBehavior  $death  … 撃破時のツリー (空なら無し。reasons = Defeated)
+         └─ SubTree             $attack … Stage{N}/BT/Attack/S{N}_* (CommonTreeAsset)
 
 Stage{N}/BT/Attack/S{N}_*
  └─ Until cond: FrameElapsed(N)
@@ -782,7 +830,25 @@ Stage{N}/BT/Attack/S{N}_*
          └─ NWayShot
 ```
 
-Spawn（Wave の entries を含む）で `behavior = Enemy` とし、`overrides` で `movement` / `attack` / `death` を渡す。移動と攻撃は Parallel で同時に進み、両方が終わるまで敵は残る。攻撃ツリーは攻撃だけを書く。攻撃の途中で移動を変える、HP で行動を変える（`Sequence[Until(HpBelow){通常}, 後半]`）など、この形に収まらない敵だけ `Stage{N}/BT/Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。
+Spawn（Wave の entries を含む）で `behavior = Enemy` とし、移動を `motionPreset`（または `motion`）に、`overrides` で `attack` / `death` を渡す。移動と攻撃は Parallel で同時に進む。ツリーが終わっても敵は消えず、撃破・寿命・画面外で消えるまで残る。攻撃ツリーは攻撃だけを書く。攻撃の途中で移動を変える、HP で行動を変える（`Sequence[Until(HpBelow){通常}, 後半]`）など、この形に収まらない敵だけ `Stage{N}/BT/Enemy/` に専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。
+
+### 弾のツリーと合図
+
+```text
+撃つ側 (敵の攻撃ツリー)
+ └─ Sequence
+     ├─ NWayShot  bullet.behavior = 弾のツリー
+     ├─ Wait 60
+     └─ SendSignal "split" → Spawned
+
+弾のツリー (BulletTreeAsset)
+ └─ Sequence
+     ├─ Until [Finish]  cond: Signaled("split")
+     │   └─ MoveSelf
+     └─ (合図の後の処理。分裂して撃つ、Despawn など)
+```
+
+（組み方の例。実データにある定型ではない）弾の動きを変えたいときは `BulletConfig.behavior` に `BulletTreeAsset` を指定し、移動させる部分に MoveSelf を置く。合図は送った次のフレームに届き、そのフレームに評価された `Signaled` だけが成立する。弾が消えるときに子弾を撃つなら、弾のツリーで `SetDespawnBehavior`（`reasons` に `Expired` など）を使う。
 
 ### 道中 = Section "Way" [ PlayBgm, Wave..., Wait ]
 

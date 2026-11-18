@@ -12,9 +12,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [SerializeReference, SubclassSelector, Tooltip("このステージでだけ使う機能 (風など)。宣言しないものは存在しない扱いになる")]
         List<StageServiceDefinition> services = new();
 
-        [SerializeField, Tooltip("ステージ全体の進行。完了するとステージクリア")] BehaviorTreeAsset tree;
+        [SerializeField, Tooltip("ステージ全体の進行。完了するとステージクリア")] StageTreeAsset tree;
 
         public IReadOnlyList<StageServiceDefinition> Services => services;
-        public BehaviorTreeAsset Tree => tree;
+        public StageTreeAsset Tree => tree;
     }
 }

@@ -7,7 +7,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     {
         BossDefinition Current { get; }
         bool Spawn(BossDefinition definition);
-        BattleActor StartBattle(BehaviorTreeAsset tree);
+        EnemyAgent StartBattle(EnemyTreeAsset tree);
         // 撃破演出まで終わったら true
         bool IsDefeated { get; }
     }

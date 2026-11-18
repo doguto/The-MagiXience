@@ -92,7 +92,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             searchProvider = ScriptableObject.CreateInstance<NodeSearchWindowProvider>();
             searchProvider.hideFlags = HideFlags.HideAndDontSave;
-            searchProvider.Initialize(CreateNodeAtScreenPosition);
+            searchProvider.Initialize(CreateNodeAtScreenPosition, () => asset);
             nodeCreationRequest = ctx =>
             {
                 pendingPort = null;
@@ -123,9 +123,15 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             return nodeType != null || subTree != null;
         }
 
+        // ツリーの種類ごとに、置けるノードと SubTree で使えるツリーが決まっている
+        bool Allows(BtNode node) => Allows(node.GetType(), (node as SubTree)?.Tree);
+
+        bool Allows(Type nodeType, BehaviorTreeAsset subTree) =>
+            subTree != null ? subTree != asset && asset.CanUse(subTree) : asset.Accepts(nodeType);
+
         void OnDragUpdated(DragUpdatedEvent evt)
         {
-            if (asset == null || !TryGetDraggedItem(out _, out var subTree) || subTree == asset)
+            if (asset == null || !TryGetDraggedItem(out var nodeType, out var subTree) || !Allows(nodeType, subTree))
             {
                 SetDropTarget(null);
                 return;
@@ -140,7 +146,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             var parent = dropTarget;
             SetDropTarget(null);
-            if (asset == null || !TryGetDraggedItem(out var nodeType, out var subTree) || subTree == asset) return;
+            if (asset == null || !TryGetDraggedItem(out var nodeType, out var subTree) || !Allows(nodeType, subTree)) return;
 
             DragAndDrop.AcceptDrag();
             var localPos = contentViewContainer.WorldToLocal(evt.mousePosition);
@@ -689,7 +695,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         void CreateNodeAtScreenPosition(Type type, Vector2 screenPosition)
         {
-            if (asset == null) return;
+            if (asset == null || !asset.Accepts(type)) return;
             var windowPos = screenPosition - window.position.position;
             var localPos = contentViewContainer.WorldToLocal(windowPos);
             var def = (BtNode)Activator.CreateInstance(type);
@@ -788,7 +794,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             Undo.RecordObject(asset, "Paste Behavior Tree Nodes");
             foreach (var entry in holder.nodes)
             {
-                if (entry.node == null) continue;
+                if (entry.node == null || !Allows(entry.node)) continue;
                 // 子は別エントリとして貼り付けるため、ここでは単体ノードとして扱う
                 entry.node.SetChildren(Array.Empty<BtNode>());
                 entry.node.RegenerateGuid();

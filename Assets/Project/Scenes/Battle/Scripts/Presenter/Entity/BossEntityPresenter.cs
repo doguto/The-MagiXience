@@ -9,7 +9,7 @@ using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
-    // ボスの HP・被弾・撃破演出を受け持つ。攻撃と移動は BattleActor が実行する BehaviorTree が行う
+    // ボスの HP・被弾・撃破演出を受け持つ。攻撃と移動は EnemyAgent が実行する BehaviorTree が行う
     [RequireComponent(typeof(BossEntityView))]
     public class BossEntityPresenter : MonoPresenter, IEntityPresenter
     {

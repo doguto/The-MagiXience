@@ -111,7 +111,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             asset = target;
             assetField?.SetValueWithoutNotify(asset);
-            if (titleLabel != null) titleLabel.text = asset ? AssetDatabase.GetAssetPath(asset) : "(no asset)";
+            if (titleLabel != null) titleLabel.text = asset ? $"{AssetDatabase.GetAssetPath(asset)}  [{asset.GetType().Name.Replace("TreeAsset", "")}]" : "(no asset)";
             graphView?.Load(asset);
             parameterPanel?.SetAsset(asset);
             palette?.Rebuild();

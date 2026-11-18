@@ -20,7 +20,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public BattleContext Context { get; }
         // パラメータを撃つ時点の値で読むためのもの
         public TreeScope Scope { get; }
-        public BattleActor Self { get; }
+        public IAgent Self { get; }
         public Vector2 Origin { get; }
         public Quaternion SelfRotation { get; }
         public float AttackTime { get; }

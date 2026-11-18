@@ -27,6 +27,12 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             previous = -1;
         }
 
+        protected override void OnRecycle()
+        {
+            current = -1;
+            previous = -1;
+        }
+
         protected override void OnEnter(BattleContext ctx)
         {
             current = Pick(ctx.Random);

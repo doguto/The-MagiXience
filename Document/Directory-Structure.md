@@ -263,13 +263,13 @@ Battle/
 ├── Prefabs/                           # Player/敵/ステージ用バトルプレハブ。
 └── Scripts/
     ├── BehaviorTree/                  # BT のコアとノード定義。
-    │   ├── Core/                      # Node (ノードの基底) / BehaviorTreeAsset / BattleStageAsset / パラメータと複製 / Runner。
+    │   ├── Core/                      # Node (ノードの基底) / BehaviorTreeAsset と種類 (Stage / Enemy / Bullet / Common) / BattleStageAsset / パラメータと複製 / Runner。
     │   ├── Composite/                 # Sequence / Selector / Parallel / Random。
     │   ├── Decorator/                 # Loop / Repeat / Until / Delay / Inverter / ForceSuccess。
     │   ├── Condition/                 # 条件定義と CheckCondition / WaitUntil。
     │   ├── Action/                    # Wait / Log / SubTree。
     │   └── Battle/                    # 発射・ビーム・移動・出現・ステージ演出のバトル固有ノード。
-    ├── Runtime/                       # BT の実行基盤 (BattleFlow / BattleWorld / BattleClock / BattleActor / ActorSpawner / ActorPool / BulletSystem)。
+    ├── Runtime/                       # BT の実行基盤 (BattleFlow / BattleWorld / BattleClock / IAgent / EnemyAgent / BulletAgent / EnemySpawner / EnemyPool / BulletSystem / TreePool / 消える理由 / 合図)。
     │   ├── Stage/                     # ステージサービス (StageContext / WindService) と外力の受け口。
     │   └── Motion/                    # 敵・ボス・弾共通の移動定義 MotionStep と実行器。
     ├── Model/                         # Battle の純粋データ・Entity Model・風の設定型。
@@ -283,27 +283,34 @@ Battle/
 Battle BehaviorTree:
 
 - `Core/BattleStageAsset.cs`: 1 ステージ (道中・会話・ボス戦) 全体の定義 (ステージサービス、ステージツリー)。
-- `Core/BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject (root、未接続ノード、パラメータ)。
-- `Core/Node.cs` / `Core/CompositeNode.cs` / `Core/DecoratorNode.cs` / `Core/ActionNode.cs`: ノードの基底。設定・実行中の状態・処理を 1 クラスに持ち、Enter/Tick/Abort/Exit の順を保証する。
+- `Core/BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject の抽象基底 (root、未接続ノード、パラメータ、置けるノードと SubTree の判定)。
+- `Core/StageTreeAsset.cs` / `Core/EnemyTreeAsset.cs` / `Core/BulletTreeAsset.cs` / `Core/CommonTreeAsset.cs`: ツリーの種類。`Create > Battle > Behavior Tree > Stage / Enemy / Bullet / Common` で作る。
+- `Core/Node.cs` / `Core/CompositeNode.cs` / `Core/DecoratorNode.cs` / `Core/ActionNode.cs` / `Core/EnemyActionNode.cs`: ノードの基底。設定・実行中の状態・処理を 1 クラスに持ち、Enter/Tick/Abort/Exit の順を保証する。`EnemyActionNode` は敵のツリーにだけ置けるノードの基底。
 - `Core/TreeScope.cs` / `Core/TreeParameter.cs` / `Core/Bt*.cs` / `Core/NodeCloner.cs`: パラメータ解決 (`BtInt` などの `$param`)・SubTree の循環検出と、実行用にノードを複製する `NodeCloner`。
 - `Core/BattleContext.cs` / `Core/BehaviorTreeRunner.cs`: ツリー 1 本の実行文脈と駆動。
 - 1 ファイル 1 型。ノードは基底クラスごとのフォルダ (`Composite/` / `Decorator/` / `Action/` / `Condition/`) に置き、ファイル名は型名と同じ。
 - `Composite/`: Sequence / Selector / Parallel / RandomSelect / If / Cycle / HpSections、ステージ進行の Stage / PlayScenario。
 - `Decorator/`: Loop / Repeat / Until / Phase / Delay / Inverter / ForceSuccess、WarningLine、Section / OnCommand、WithWind / WithPrefab。
-- `Action/`: Wait / Log / SubTree、弾を撃つノード (SingleShot / NWayShot など)、ChargeEffect、BulletBeam / SpriteBeam / MoveTrailFan、Move / MovePath / PlaceAlongPath、Spawn / Despawn / SetDeathBehavior / SetInvincible / PlaySe、Wave / PlayBgm / SpawnBoss / BossBattle、ClearBullets / BossWindCue、CheckCondition / WaitUntil。
-- `Condition/`: 条件の基底と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies / Compare / BgmSamples。
+- `Action/`: Wait / Log / SubTree、弾を撃つノード (SingleShot / NWayShot など)、ChargeEffect、BulletBeam / SpriteBeam / MoveTrailFan、MoveSelf / Move / MovePath / PlaceAlongPath、Spawn / Despawn / SetDespawnBehavior / SetInvincible / SendSignal / PlaySe、Wave / PlayBgm / SpawnBoss / BossBattle、ClearBullets / BossWindCue、CheckCondition / WaitUntil。
+- `Condition/`: 条件の基底と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies / Compare / BgmSamples / Signaled。
 - `Parts/`: ノードではない部品 (ShotPattern 系、DirectionSource / RotationSource 系、SpawnLayout 系、BulletConfig、Emitter、EmitContext、BeamAim / BeamLine / IBeam、TrailPolyline) と、ScriptableObject の `BossDefinition` / `TrailPath`。
 
 Battle Runtime:
 
 - `BattleFlow.cs`: バトル 1 回分の BT 実行 (ステージサービス、弾・敵の事前生成、ステージツリー・ボスツリーの開始、停止) を管理する。
-- `BattleWorld.cs`: フレーム番号・乱数・予約実行・サービスを持ち、1 フレームを進める。
+- `BattleWorld.cs`: フレーム番号・乱数・予約実行・合図の配送・ツリーの使い回し・サービスを持ち、1 フレームを進める。
 - `BattleClock.cs`: 固定 60fps で BattleWorld を進める MonoBehaviour。
-- `BattleActor.cs`: 敵/ボスに付けてツリーと移動を毎フレーム進める。
-- `ActorSpawner.cs`: 敵・ビーム・障害物 Prefab を生成 (プール対象は ActorPool から取得) し、必要ならツリーを付ける。
-- `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs` / `IPoolableActor.cs` / `ActorDespawn.cs`: 敵を Prefab ごとに使い回すプールと、敵を消す共通の入口 `ActorDespawn`。
+- `IAgent.cs`: ツリーの Self になるもの (敵・弾) の共通インターフェース。
+- `EnemyAgent.cs`: 敵/ボスに付けてツリーを毎フレーム進め、撃破・寿命・画面外で消えるかを判定する。
+- `BulletAgent.cs`: 弾 1 発分の Self。BulletSystem が出し入れする。
+- `TreePool.cs`: 複製したツリーを (アセット, 上書きパラメータ) ごとに使い回す。
+- `DespawnReason.cs` / `DespawnBehavior.cs`: 敵・弾が消えた理由と、消えるときに 1 回だけ実行するツリー。
+- `Signal.cs` / `SignalInbox.cs`: ツリー間の合図とその受け箱。
+- `EnemySpawn.cs` / `BulletSpawn.cs`: EnemySpawner / BulletSystem に渡す出現内容。
+- `EnemySpawner.cs`: 敵・ビーム・障害物 Prefab を生成 (プール対象は EnemyPool から取得) し、ツリー指定時と敵 Prefab には EnemyAgent を付ける。
+- `EnemyPool.cs` / `PooledEnemy.cs` / `NoEnemyPool.cs` / `IPoolableEnemy.cs` / `EnemyDespawn.cs`: 敵を Prefab ごとに使い回すプールと、敵を消す共通の入口 `EnemyDespawn`。
 - `StagePrefabCollector.cs`: BattleStageAsset から参照をたどり、事前生成する弾・出現物の Prefab を集める。
-- `BulletSystem.cs`: 敵弾・自機弾を MotionStep に従って固定フレームで動かす。
+- `BulletSystem.cs`: 敵弾・自機弾のツリーを固定フレームで実行し、位置の反映と消えるかの判定 (当たり・寿命・飛距離・画面外)、プールへの返却を行う。
 - `Stage/`: ステージサービスの仕組み (`StageContext` / `IStageService` / `StageServiceDefinition`)、風 (`WindService` / `WindServiceDefinition`)、自機・弾への外力の受け口 (`IMoveModifier` / `IBulletForce`)。
 - `Motion/`: MotionStep の基底と各ステップ (`*Motion.cs`)、実行器 (`MotionRunner` / `PullRunner` / `DelegatePullRunner` / `TweenRunner` / `MotionSequence`)、MotionPreset / EaseCurveAsset / BattleTargets (自機の Transform)。
 
@@ -336,9 +343,9 @@ Battle Presenter:
 Battle Entity Presenter:
 
 - `PlayerEntityPresenter.cs`: プレイヤー移動、攻撃、チャージ、被弾、死亡演出を制御する。
-- `EnemyEntityPresenter.cs`: 通常敵の HP・被弾点滅・効かない攻撃の SE・寿命・画面外・接触を扱う (移動と攻撃は BattleActor のツリー)。ActorPool での出し入れに対応する。
+- `EnemyEntityPresenter.cs`: 通常敵の HP・被弾点滅・効かない攻撃の SE・寿命と画面外マージンの設定値・接触を扱う (移動と攻撃は EnemyAgent のツリー、消える判定は EnemyAgent)。EnemyPool での出し入れに対応する。
 - `BossEntityPresenter.cs`: ボスの HP・被弾・撃破演出・登場直後の当たり判定オフを扱う。
-- `BulletEntityPresenter.cs`: 弾の見た目・寿命・衝突・画面外・プール返却を扱う (位置は BulletSystem が与える)。
+- `BulletEntityPresenter.cs`: 弾の見た目・衝突・外力の倍率・画面外マージンを扱う (位置・寿命・消える判定・プール返却は BulletSystem)。
 - `BulletPool.cs`: 弾 Prefab ごとの共有 ObjectPool (`GetOrCreateSharedPool` / `Prewarm`) と、撃ち手の弾 Prefab の保持。
 - `PhysicsBallPresenter.cs`: 物理挙動を持つ Battle エンティティを制御する。
 - `AudioSpectrumPresenter.cs`: 音声スペクトラム表現を制御する。

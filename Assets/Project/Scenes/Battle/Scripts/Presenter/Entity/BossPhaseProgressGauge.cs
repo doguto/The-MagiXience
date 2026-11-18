@@ -22,15 +22,15 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             base.Start();
 
             SetProgress(null);
-            BattleActor.OnAttached.Subscribe(OnActorAttached).AddTo(disposables);
+            EnemyAgent.OnAttached.Subscribe(OnEnemyAttached).AddTo(disposables);
             progressSubscription.AddTo(disposables);
 
             // 生成と同じフレームでツリーが付与された場合は OnAttached を取り逃がすため、既に付いていればここで拾う
-            var existing = GetComponentInParent<BattleActor>();
-            if (existing != null && existing.World != null) OnActorAttached(existing);
+            var existing = GetComponentInParent<EnemyAgent>();
+            if (existing != null && existing.World != null) OnEnemyAttached(existing);
         }
 
-        void OnActorAttached(BattleActor attached)
+        void OnEnemyAttached(EnemyAgent attached)
         {
             if (attached == null || !transform.IsChildOf(attached.transform)) return;
             var services = attached.World?.Services;

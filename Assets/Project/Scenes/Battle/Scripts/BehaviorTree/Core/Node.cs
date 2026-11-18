@@ -79,6 +79,16 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             OnExit(ctx);
         }
 
+        // TreePool に戻すとき (別の敵・弾で使い回す前) に呼ぶ
+        internal void Recycle()
+        {
+            OnRecycle();
+            foreach (var child in Children) child?.Recycle();
+        }
+
+        // 実行をまたいで持ち続ける状態 (前回の抽選結果など) だけを戻す。実行中の状態は OnEnter で初期化する
+        protected virtual void OnRecycle() { }
+
         protected virtual void OnEnter(BattleContext ctx) { }
         protected abstract NodeStatus OnTick(BattleContext ctx);
         protected virtual void OnAbort(BattleContext ctx) { }

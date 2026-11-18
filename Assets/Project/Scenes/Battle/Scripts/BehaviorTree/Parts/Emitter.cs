@@ -32,8 +32,13 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
                     Direction = direction,
                     Rotation = rotation,
                     Range = rangeOverride >= 0f ? rangeOverride : bullet.range,
+                    LifetimeFrames = bullet.lifetime,
                     StartDelayFrames = startDelayFrames,
                     Motion = motionOverride ?? bullet.Motion,
+                    Tree = bullet.behavior,
+                    Overrides = bullet.overrides,
+                    Owner = self,
+                    Group = bullet.group,
                     AttackTime = e.AttackTime,
                     AffectedByForce = bullet.affectedByForce,
                 });

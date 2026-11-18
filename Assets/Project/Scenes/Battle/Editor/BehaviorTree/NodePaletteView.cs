@@ -50,10 +50,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             scroll.Clear();
             var filter = searchField.value?.Trim() ?? "";
+            var self = currentAsset?.Invoke();
 
             foreach (var group in NodeCatalog.All.GroupBy(e => e.Category))
             {
-                var items = group.Where(e => Matches(filter, e.Name, e.Description)).ToList();
+                var items = group.Where(e => (self == null || self.Accepts(e.Type)) && Matches(filter, e.Name, e.Description)).ToList();
                 if (items.Count == 0) continue;
 
                 var foldout = CreateFoldout(group.Key);
@@ -65,8 +66,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                 scroll.Add(foldout);
             }
 
-            var self = currentAsset?.Invoke();
-            var trees = NodeCatalog.SubTreeAssets().Where(t => t != self && Matches(filter, t.name, "")).ToList();
+            var trees = NodeCatalog.SubTreeAssets().Where(t => t != self && (self == null || self.CanUse(t)) && Matches(filter, t.name, "")).ToList();
             if (trees.Count > 0)
             {
                 var foldout = CreateFoldout("SubTrees");

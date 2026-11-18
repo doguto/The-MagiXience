@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
   m_Name: S2_NWayRepeat
   m_EditorClassIdentifier: 
   root:
@@ -56,7 +56,7 @@ MonoBehaviour:
       data:
         guid: 3964689a009344058aa4ca7839229974
         graphPosition: {x: 460, y: 450}
-        comment: N-Way を count 回、interval フレームおきに自機狙いで撃つ
+        comment: "N-Way \u3092 count \u56DE\u3001interval \u30D5\u30EC\u30FC\u30E0\u304A\u304D\u306B\u81EA\u6A5F\u72D9\u3044\u3067\u6483\u3064"
         child:
           rid: 1001
         count:
@@ -65,6 +65,7 @@ MonoBehaviour:
         interval:
           value: 6
           param: interval
+        indexParam: 
     - rid: 1001
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -79,7 +80,10 @@ MonoBehaviour:
           motion:
           - rid: 8540150000000000022
           range: 0
+          lifetime: 480
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 1002
         rotation:

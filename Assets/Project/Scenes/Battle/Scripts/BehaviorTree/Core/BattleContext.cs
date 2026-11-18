@@ -3,12 +3,12 @@ using Project.Scenes.Battle.Scripts.Runtime;
 
 namespace Project.Scenes.Battle.Scripts.BehaviorTree
 {
-    // ツリー 1 本ぶんの実行文脈。World は全ツリーで共有し、Self はそのツリーを持つ敵/ボス (ステージ進行なら null)。
+    // ツリー 1 本ぶんの実行文脈。World は全ツリーで共有し、Self はそのツリーで動く敵や弾 (ステージ進行なら null)。
     public sealed class BattleContext
     {
         public const int FramesPerSecond = BattleWorld.FramesPerSecond;
 
-        public BattleContext(BattleWorld world, BattleActor self = null)
+        public BattleContext(BattleWorld world, IAgent self = null)
         {
             World = world ?? throw new ArgumentNullException(nameof(world));
             Self = self;
@@ -19,7 +19,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public BattleWorld World { get; }
-        public BattleActor Self { get; }
+        public IAgent Self { get; }
         public int Frame => World.Frame;
         public Random Random => World.Random;
         public float BgmTime => World.BgmTime;

@@ -28,7 +28,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         readonly Subject<BossEntityPresenter> bossBattleStarted = new();
         BattleWorld world;
         BehaviorTreeRunner stageRunner;
-        ActorPool actorPool;
+        EnemyPool enemyPool;
         MotionTickable entrance;
         BossEntityPresenter boss;
         BossDefinition bossDefinition;
@@ -78,15 +78,15 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
         // 1 種類あたりに先に作っておく数。同時に出る数の目安で、足りなければプールが増やす
         const int BulletPrewarmCount = 30;
-        const int ActorPrewarmCount = 4;
+        const int EnemyPrewarmCount = 4;
 
         void Prewarm(BattleStageAsset stage)
         {
             var collected = StagePrefabCollector.Collect(stage);
             foreach (var bullet in collected.Bullets) Presenter.Entity.BulletPool.Prewarm(bullet, BulletPrewarmCount);
-            foreach (var actor in collected.Actors)
+            foreach (var prefab in collected.Spawnables)
             {
-                if (ActorPool.IsPoolable(actor)) actorPool.Prewarm(actor, ActorPrewarmCount);
+                if (EnemyPool.IsPoolable(prefab)) enemyPool.Prewarm(prefab, EnemyPrewarmCount);
             }
         }
 
@@ -112,6 +112,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             clock.End();
             world = null;
             Player?.BindBulletSystem(null);
+            clearer?.BindBulletSystem(null);
         }
 
         // ---------- IBossHost ----------
@@ -161,7 +162,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public string DebugBossStartPhase { get; set; }
         public float DebugBossStartHpPercent { get; set; } = 100f;
 
-        public BattleActor StartBattle(BehaviorTreeAsset tree)
+        public EnemyAgent StartBattle(EnemyTreeAsset tree)
         {
             if (boss == null || tree == null) return null;
 
@@ -172,10 +173,10 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             entrance?.Complete();
             entrance = null;
 
-            var actor = BattleActor.Attach(boss.gameObject, world, tree);
-            world.Services.Boss = actor;
+            var agent = EnemyAgent.Attach(boss.gameObject, world, tree);
+            world.Services.Boss = agent;
             bossBattleStarted.OnNext(boss);
-            return actor;
+            return agent;
         }
 
         void EnsureWorld()
@@ -184,9 +185,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
             world = new BattleWorld(Environment.TickCount, () => bgmSource?.Invoke() is { } s ? s.time : 0f);
             // プールはリトライをまたいで使い回す。Battle シーンと一緒に破棄される
-            if (actorPool == null) actorPool = ActorPool.Create();
+            if (enemyPool == null) enemyPool = EnemyPool.Create();
             var services = world.Services;
-            services.Spawner = new ActorSpawner(world, tracker, actorPool);
+            services.Spawner = new EnemySpawner(world, tracker, enemyPool);
             services.Clearer = clearer;
             services.PlaySe = playSe;
             services.PlayBgm = type => PlayBgm?.Invoke(type);
@@ -196,6 +197,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             services.Player = Player;
             services.Background = Background;
             Player?.BindBulletSystem(services.Bullets);
+            clearer?.BindBulletSystem(services.Bullets);
             services.Progress.OnSectionStarted.Subscribe(sectionStarted.OnNext).AddTo(worldSubscriptions);
             clock.Begin(world);
         }

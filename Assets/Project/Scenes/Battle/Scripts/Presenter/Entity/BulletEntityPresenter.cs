@@ -1,21 +1,18 @@
 using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
-using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
-    // 弾の見た目・当たり判定・寿命・画面外判定を受け持つ。位置は BulletSystem が毎フレーム与える
+    // 弾の見た目と当たり判定を受け持つ。位置・消えるかの判定・片付けは BulletSystem が行う
     [RequireComponent(typeof(BulletEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
     public class BulletEntityPresenter : MonoBehaviour, IEntityPresenter
     {
         [SerializeField] BulletEntityView view;
         [SerializeField] SpriteRenderer spriteRenderer;
-        [SerializeField, Tooltip("弾のライフタイム（秒）。0以下で無制限")]
-        float lifetime = 5f;
         [SerializeField, Min(0f), Tooltip("ステージの外力の影響の倍率。0で影響なし、1で標準、1より大きいと標準より強く流される")]
         float forceInfluence = 1f;
 
@@ -29,6 +26,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             // プール再利用時に上書きされる前の、Prefab本来の回転を保持しておく
             baseRotation = transform.rotation;
+            colliders = GetComponents<Collider2D>();
 
             // Rigidbody2Dを持たないColliderは静的コライダー扱いとなり、Transformで動かすたびに
             // ブロードフェーズへの再登録が発生して重い。移動する弾はKinematicとして扱わせる。
@@ -43,10 +41,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         BulletEntityModel model;
         IObjectPool<BulletEntityPresenter> pool;
-        Vector3 travelOrigin;
-        Vector2 travelAxis;
-        float travelRange;
-        float lifetimeElapsed;
+        Collider2D[] colliders;
         float screenMargin;
         bool isInPool;
         bool hasRuntimeKinematicBody;
@@ -54,22 +49,20 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         readonly CompositeDisposable disposables = new();
 
         public BulletEntityModel Model => model;
-        public bool IsActive => !isInPool && model != null && model.IsAlive;
+        // 何かに当たって消費された。片付けは次のフレームに BulletSystem が行う
+        public bool IsConsumed => model != null && !model.IsAlive;
         public float ForceInfluence => forceInfluence;
+        // 画面外とみなすまでの余白。回転しても外接円に収まるよう extents の長さを使う
+        public float ScreenMargin => screenMargin;
 
         /// <param name="rotation">Prefab本来の回転に対するオフセット</param>
-        /// <param name="range">飛距離の上限(ワールド単位)。0以下で無制限</param>
         /// <returns>Prefab本来の回転を合成した、実際の回転</returns>
-        public Quaternion InitializeDriven(int damage, Vector3 position, Vector2 direction, IObjectPool<BulletEntityPresenter> objectPool, Quaternion rotation, float range, bool isPlayerChargeBullet = false)
+        public Quaternion InitializeDriven(int damage, Vector3 position, IObjectPool<BulletEntityPresenter> objectPool, Quaternion rotation, bool isPlayerChargeBullet = false)
         {
             pool = objectPool;
             var offsetRotation = rotation == default ? Quaternion.identity : rotation;
             var resolvedRotation = offsetRotation * baseRotation;
             transform.SetPositionAndRotation(position, resolvedRotation);
-
-            travelOrigin = position;
-            travelAxis = direction.normalized;
-            travelRange = travelAxis == Vector2.zero ? 0f : range;
 
             if (model == null)
             {
@@ -83,11 +76,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             isInPool = false;
             view.ResetView();
+            SetCollidersEnabled(true);
 
-            // 画面外判定の余白は毎フレームbounds計算するとコストが高いため生成時に求める。
-            // 回転しても外接円に収まるようextentsの長さを使う。
+            // 毎フレーム bounds を計算するとコストが高いため生成時に求める
             screenMargin = spriteRenderer.bounds.extents.magnitude + 0.1f;
-            lifetimeElapsed = 0f;
             return resolvedRotation;
         }
 
@@ -96,52 +88,24 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             model.CurrentHp
                 .Where(hp => hp <= 0)
-                .Subscribe(_ => ReturnToPool())
+                .Subscribe(_ => HideConsumed())
                 .AddTo(disposables);
         }
 
-        void LateUpdate()
+        // 片付けまでの間に他のものへ当たったり見えたりしないようにする
+        void HideConsumed()
         {
-            if (isInPool || model == null || !model.IsAlive) return;
-
-            if (lifetime > 0f)
-            {
-                lifetimeElapsed += Time.deltaTime;
-                if (lifetimeElapsed >= lifetime)
-                {
-                    ReturnToPool();
-                    return;
-                }
-            }
-
-            if (IsOutOfScreen() || HasReachedRangeLimit())
-            {
-                ReturnToPool();
-            }
+            SetCollidersEnabled(false);
+            view.SetVisible(false);
         }
 
-        bool HasReachedRangeLimit()
+        void SetCollidersEnabled(bool value)
         {
-            if (travelRange <= 0f) return false;
-
-            // ジグザグ移動は軸の左右に蛇行するため、起点からの直線距離だと終点より手前で消えてしまう。
-            // ビーム軸へ射影した「軸方向の進捗」で判定することで、終点をきっちり揃える。
-            var traveled = Vector2.Dot((Vector2)(transform.position - travelOrigin), travelAxis);
-            return traveled >= travelRange;
-        }
-
-        bool IsOutOfScreen()
-        {
-            var position = transform.position;
-            var margin = screenMargin;
-
-            return position.x < ScreenBoundsCache.MinX - margin || position.x > ScreenBoundsCache.MaxX + margin ||
-                   position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
+            foreach (var c in colliders) c.enabled = value;
         }
 
         public void ReturnToPool()
         {
-            // 寿命・画面外・被弾が同フレームに重なった場合の二重返却を防ぐ
             if (isInPool) return;
             isInPool = true;
 

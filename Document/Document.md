@@ -9,7 +9,7 @@ Magic-science-world は、魔法と科学が融合した世界を舞台にした
 画面構成はタイトル、ステージ選択、バトル、シナリオ、デモクリア、常駐グローバル管理シーンで構成される。
 
 バトルは `Battle` シーンに統合されており、道中とボスを別シーンに分けず、`RuntimeModel` の `CurrentSituation` によって `Way` と `Boss` を切り替える。
-バトル進行は ScriptableObject の `BattleStageAsset` と、それが参照する BehaviorTree（`BehaviorTreeAsset`）を中心にデータ駆動で構築される。BehaviorTree は固定 60fps のフレームで実行され、道中の敵出現と敵・ボスの行動を記述する。
+バトル進行は ScriptableObject の `BattleStageAsset` と、それが参照する BehaviorTree（`BehaviorTreeAsset`）を中心にデータ駆動で構築される。BehaviorTree は固定 60fps のフレームで実行され、道中の敵出現と敵・ボス・弾の行動を記述する。
 
 ## Technology Stack
 
@@ -41,7 +41,7 @@ ScriptableObject データ、セーブデータ、実行時状態、Entity の H
 - `RuntimeModel`: 現在ステージと `Way/Boss` 状態を持つ。
 - `StageModel`: ステージの開放/クリア状態、バトルシーケンス参照を持つ。
 - `UserModel`: セーブデータ、音量、チュートリアル初回状態を管理する。
-- `BattleStageAsset` / `BehaviorTreeAsset`: バトル進行（道中・ボス戦・敵の行動）のデータ。実行は `Scenes/Battle/Scripts/Runtime` の `BattleFlow` / `BattleWorld` が行う。
+- `BattleStageAsset` / `BehaviorTreeAsset`（Stage / Enemy / Bullet / Common の 4 種類）: バトル進行（道中・ボス戦・敵と弾の行動）のデータ。実行は `Scenes/Battle/Scripts/Runtime` の `BattleFlow` / `BattleWorld` が行う。
 - `EntityBase` 派生: プレイヤー、敵、ボス、弾の HP/死亡/衝突を扱う。
 
 ### View
@@ -717,8 +717,8 @@ StageData
   -> BattleStageAsset (1 ステージ = 道中・会話・ボス戦)
        services[]  -> StageContext (ステージサービス: 風など)
        tree        -> BehaviorTreeRunner (ステージツリー。Section "Way" / "Boss")
-                       Spawn     -> BattleActor (雑魚に付与。通常は共通ツリー Commons/BT/Enemy)
-                       SpawnBoss -> BossDefinition.tree -> BattleActor (ボスに付与し、ボス自身がツリーを実行)
+                       Spawn     -> EnemyAgent (雑魚に付与。通常は共通ツリー Commons/BT/Enemy)
+                       SpawnBoss -> BossDefinition.tree -> EnemyAgent (ボスに付与し、ボス自身がツリーを実行)
   -> BattleFlow / BattleWorld (固定 60fps のフレームで全ツリーと弾を進める)
 ```
 
@@ -780,13 +780,18 @@ Battle 全体の中心 Presenter。
 `Assets/Project/Scenes/Battle/Scripts/Runtime/` 配下。BT 実行の土台である。
 
 - `BattleFlow.cs`: バトル 1 回分の BT 実行を管理する。`StartStage`（ステージサービスの開始、弾・敵の事前生成、ステージツリーの開始）と `Stop` を提供し、`IBossHost`（ボスの生成 `Spawn` と戦闘開始 `StartBattle`）を実装する。自機に `BulletSystem` を渡す（`BindBulletSystem`）。
-- `BattleWorld.cs`: 全ツリーで共有するフレーム番号・乱数・予約実行 (`Schedule`)・`BattleServices`・`StageContext` を持ち、`Step()` で 1 フレーム進める。
+- `BattleWorld.cs`: 全ツリーで共有するフレーム番号・乱数・予約実行 (`Schedule`)・合図の配送 (`SendSignal`)・ツリーの使い回し (`Trees`)・`BattleServices`・`StageContext` を持ち、`Step()` で 1 フレーム進める（合図の配送 → 予約 → 敵・ステージのツリー → 弾 → 敵が消える処理 → 追加の弾 → ステージサービスの順）。
 - `BattleClock.cs`: `Update` で `Time.deltaTime` を蓄積し、固定 60fps で `BattleWorld.Step()` を呼ぶ（1 描画フレーム最大 4 ステップ、ポーズ中は停止）。
-- `BattleActor.cs`: 敵/ボスの GameObject に付けるコンポーネント。自分のツリーを毎フレーム進める（移動もツリーの Move ノードで行う）。
-- `ActorSpawner.cs`: Spawn ノードから敵・ビーム・障害物 Prefab を生成し、ツリー指定時は `BattleActor` を付ける。プール対象の敵は `ActorPool` から出す。
-- `ActorPool.cs` / `PooledActor.cs` / `NoActorPool.cs`: 敵を Prefab ごとに使い回すプール。敵を消すときの共通の入口 `ActorDespawn.Despawn`（プール品はプールへ戻し、それ以外は Destroy）と、出し入れ時の状態を戻す `IPoolableActor` はそれぞれ別ファイル。`NoActorPool` を付けた Prefab はプールしない。
+- `IAgent.cs`: ツリーの `Self` になるもの（敵・弾）の共通インターフェース。移動・発射時刻・出した側・合図の受け箱・`Despawn` / `SetDespawnBehavior` を持つ。
+- `EnemyAgent.cs`: 敵/ボスの GameObject に付けるコンポーネント（`IAgent`）。自分のツリーを毎フレーム進め（移動もツリーの MoveSelf / Move ノードで行う）、撃破・寿命・画面外で消えるかを判定する。
+- `BulletAgent.cs`: 弾 1 発分の `IAgent`。`BulletSystem` が出し入れする。
+- `TreePool.cs`: 複製したツリーを (アセット, 上書きパラメータ) ごとに使い回す。弾のツリーと消えるときのツリーに使う。
+- `DespawnReason.cs` / `DespawnBehavior.cs`: 敵・弾が消えた理由と、消えるときに 1 回だけ実行するツリー。
+- `Signal.cs` / `SignalInbox.cs`: ツリー間の合図（宛先 Spawned / Group / All）と、そのフレームに届いた合図の受け箱。
+- `EnemySpawner.cs`: Spawn ノードから敵・ビーム・障害物 Prefab を生成し、ツリー指定時と `EnemyEntityPresenter` を持つ Prefab には `EnemyAgent` を付ける（移動・出した側・グループも渡す）。プール対象の敵は `EnemyPool` から出す。
+- `EnemyPool.cs` / `PooledEnemy.cs` / `NoEnemyPool.cs`: 敵を Prefab ごとに使い回すプール。敵を消すときの共通の入口 `EnemyDespawn.Despawn`（プール品はプールへ戻し、それ以外は Destroy）と、出し入れ時の状態を戻す `IPoolableEnemy` はそれぞれ別ファイル。`NoEnemyPool` を付けた Prefab はプールしない。
 - `StagePrefabCollector.cs`: `BattleStageAsset` からシリアライズされた参照をたどり、事前生成する弾 Prefab と出現物 Prefab を集める（Prefab の中身はたどらない）。
-- `BulletSystem.cs`: 敵弾・自機弾を固定フレームで動かす。弾の移動は BT の外で、`MotionStep` に従う。外力（風）の受け口 `IBulletForce` を持つ。
+- `BulletSystem.cs`: 敵弾・自機弾を固定フレームで動かす。弾ごとにツリー（`BulletConfig.behavior`。未指定なら MoveSelf だけのツリー）を Tick し、外力を足して位置を反映し、当たり・寿命・飛距離・画面外で消えるかを判定して、消えるときのツリーを実行してからプールへ戻す。`Clear()` は全弾を一括消去（`Cleared`）する。外力（風）の受け口 `IBulletForce` を持つ。
 - `Stage/`: ステージ固有機能（ステージサービス）の仕組みと、その実装例である風、自機・弾への汎用の受け口（`IMoveModifier` / `IBulletForce`）。
 - `Motion/`: 敵・ボス・弾で共通の移動定義（`MotionStep` / `MotionPreset` / `EaseCurveAsset`）と実行器。自機の Transform は `BattleTargets.Player`（`BattleTargets.cs`）が持つ。
 
@@ -803,7 +808,7 @@ Battle 画面内の壁や境界に関する Presenter。
 
 ### `BulletClearReceiver.cs`
 
-画面上の弾や敵をまとめて消す処理を持つ。敵は `ActorDespawn.Despawn` で消す。
+画面上の弾や敵をまとめて消す処理を持つ。弾は `BattleFlow` から `BindBulletSystem` で受け取った `BulletSystem.Clear()`（理由 `Cleared`）で、警告線・ビームは `ClearAllBeams` で、敵は `EnemyDespawn.Despawn` で消す。
 BT の `ClearBullets` ノードと、Retry 時の `BattleScenePresenter` から呼ばれる。
 
 ### `EnemyTracker.cs`
@@ -829,11 +834,13 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 ### Core
 
 - `BattleStageAsset.cs`: 1 ステージ（道中・会話・ボス戦）全体の定義。`services`（ステージサービス）と `tree`（ステージツリー）を持つ。
-- `BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject。`root`、`detachedNodes`、`parameters` を持つ。
+- `BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject の抽象基底。`root`、`detachedNodes`、`parameters` を持ち、種類ごとに置けるノード（`Accepts`）と SubTree で使えるツリー（`CanUse`）を決める。
+- `StageTreeAsset.cs` / `EnemyTreeAsset.cs` / `BulletTreeAsset.cs` / `CommonTreeAsset.cs`: ツリーの種類（`Create > Battle > Behavior Tree > Stage / Enemy / Bullet / Common`）。Common はどの種類からも SubTree で使え、Common からは Common だけを使える。
+- `EnemyActionNode.cs`: `Self` が敵であることを必要とするノードの基底（SetInvincible / BossWindCue）。敵のツリーにだけ置ける。
 - `Node.cs`: ノードの基底（`Node` / `CompositeNode` / `DecoratorNode` / `ActionNode`）。ノード 1 種類 = 1 クラスで、設定・実行中の状態（`[NonSerialized]`）・処理を持つ。アセット上のノードは雛形で、実行するツリーごとに複製する。
-- `Node.cs`: 実行時ノードの基底。`OnEnter` / `OnTick` / `OnAbort` / `OnExit` の呼び出し順を保証する。
+- `Node.cs`: 実行時ノードの基底。`OnEnter` / `OnTick` / `OnAbort` / `OnExit` の呼び出し順を保証する。`TreePool` へ戻すときに `OnRecycle` で実行をまたぐ状態を戻す。
 - `TreeScope.cs` / `TreeParameter.cs`: 実行用の複製（`NodeCloner`）、ツリーパラメータの解決（`BtInt` / `BtFloat` などの `$param` 参照、SubTree からの上書き）と SubTree の循環検出。
-- `BattleContext.cs`: ツリー 1 本の実行文脈（`World` と、ツリーを持つアクター `Self`）。
+- `BattleContext.cs`: ツリー 1 本の実行文脈（`World` と、ツリーを持つ敵・弾 `Self`（`IAgent`。ステージツリーでは `null`））。
 - `BehaviorTreeRunner.cs`: ツリー 1 本を毎フレーム Tick し、完了を通知する。
 
 ### Nodes
@@ -842,17 +849,19 @@ Player、Enemy、Bullet、画面端を使う移動・発射方向が画面内制
 
 - `Composite/`: Sequence、Selector、Parallel（All / Any / Duration。Duration は指定フレームで打ち切る）、Random（重み・連続回避）、If、Cycle、HpSections（HP の区切りで段階を進める）、進行の Stage / PlayScenario。
 - `Decorator/`: Loop、Repeat（一定間隔で重ねて開始）、Until（条件成立で子を中断。Finish / Restart / Hold）、Phase（Until + フェーズ開始の通知と進み具合）、Delay、Inverter、ForceSuccess、WarningLine、Section、OnCommand、WithWind、WithPrefab。
-- `Condition/`: Constant、FrameElapsed、BgmReached、And / Or / Not、NoActiveEnemies / HpBelow / Compare / BgmSamples。
-- `Action/`: Wait、Log、SubTree、CheckCondition / WaitUntil、発射（SingleShot / NWayShot など、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、アクター（Move、MovePath、SetDeathBehavior、SetInvincible、Despawn、PlaySe、Spawn）、ステージ（ClearBullets、BossWindCue）、進行（Wave、PlayBgm、SpawnBoss、BossBattle）。
+- `Condition/`: Constant、FrameElapsed、BgmReached、And / Or / Not、NoActiveEnemies / HpBelow / Compare / BgmSamples、Signaled（合図が届いた）。
+- `Action/`: Wait、Log、SubTree、CheckCondition / WaitUntil、発射（SingleShot / NWayShot など、BulletBeam、SpriteBeam、MoveTrailFan、PlaceAlongPath）、敵・弾（MoveSelf、Move、MovePath、SetDespawnBehavior、SetInvincible、Despawn、SendSignal、PlaySe、Spawn）、ステージ（ClearBullets、BossWindCue）、進行（Wave、PlayBgm、SpawnBoss、BossBattle）。
 - `Parts/`: ノードではない部品。ShotPattern / DirectionSource / RotationSource / BulletConfig / Emitter、`*Param` 欄から Object パラメータを引く `ParamObjects`、BossDefinition / TrailPath など。
 
 ### 設計方針
 
-- BT はステージ層（道中・会話・ボス戦の進行）とアクター層（敵・ボスの行動）に適用する。弾は BT の外の `BulletSystem` が動かす。
+- BT はステージ層（道中・会話・ボス戦の進行）、敵層（敵・ボスの行動）、弾層（弾 1 発ごとの行動）に適用する。弾のツリーは `BulletSystem` が実行し、複製は `TreePool` で使い回す。
+- 敵・弾が消えるかは `EnemyAgent` / `BulletSystem` が判定し、Presenter は自分で消えない。消えた理由（`DespawnReason`）ごとに `SetDespawnBehavior` のツリーを実行する。
+- ツリー間の連絡は合図（`SendSignal` / `Signaled`）で行い、次のフレームの頭に一斉に届ける。
 - 時間はフレーム基準（60fps 固定）。`MotionStep` の時間だけは旧データとの互換で秒指定。
 - 割り込みは Until で表す。Blackboard は持たず、値の共通化はツリーパラメータで行う。
-- 攻撃パターンや敵の行動は `BehaviorTreeAsset` として切り出し、SubTree / Spawn で参照して再利用する。雑魚は共通ツリー `Commons/BT/Enemy` に移動・攻撃・撃破時の行動をパラメータで渡す。
-- ボスと通常敵は同じ `BattleActor` と同じノード群で解釈する。
+- 攻撃パターンや敵の行動は `BehaviorTreeAsset` として切り出し、SubTree / Spawn で参照して再利用する。雑魚は共通ツリー `Commons/BT/Enemy` に攻撃・撃破時の行動をパラメータで、移動を Spawn の `motionPreset` / `motion` で渡す。
+- ボスと通常敵は同じ `EnemyAgent` と同じノード群で解釈する。
 - ステージ固有機能は `BattleStageAsset.services` に宣言するステージサービスとしてカプセル化し、自機・弾は汎用の受け口だけを持つ。
 - 旧実装の「Ease 未指定時は OutQuad」の挙動は `StepClock` で再現している。
 
@@ -942,7 +951,7 @@ Collider 経由で取得した Presenter から `EntityBase` を取得するた�
 
 - `PlayerEntityModel`
 - `PlayerEntityView`
-- 通常弾/チャージ弾の BulletPool（弾 Prefab の保持用）と弾の速さ（`normalShotSpeed` / `chargedShotSpeed`）
+- 通常弾/チャージ弾の BulletPool（弾 Prefab の保持用）と弾の速さ（`normalShotSpeed` / `chargedShotSpeed`）・寿命（`normalShotLifetimeFrames` / `chargedShotLifetimeFrames`、フレーム）
 - `BattleFlow` から受け取る `BulletSystem`
 - 移動速度、チャージ閾値、スニーク倍率、無敵時間
 - 攻撃クールダウン
@@ -977,12 +986,12 @@ Collider 経由で取得した Presenter から `EntityBase` を取得するた�
 
 - 出現位置で Model を初期化する。
 - 被弾フラッシュを表示し、効かない攻撃を受けたら SE を鳴らす。
-- 撃破・寿命切れ・画面外退出で `ActorDespawn.Despawn` を呼ぶ（プール品はプールへ戻り、それ以外は Destroy）。
+- 撃破時は Collider を無効にするだけで、自分では消えない。撃破・寿命切れ・画面外退出の判定と `EnemyDespawn.Despawn` の呼び出しは `EnemyAgent` が行う（`lifetime` と画面外マージンは `LifetimeSeconds` / `ScreenMargin` として渡す）。
 - 場から消えたときに `OnRemoved` を 1 回通知する（`EnemyTracker` が使う）。
-- `IPoolableActor` として、プールから出たときに再初期化し、戻すときに購読・寿命・点滅・Model を片付ける。
+- `IPoolableEnemy` として、プールから出たときに再初期化し、戻すときに購読・点滅・Model を片付ける。
 - Collider 衝突時に EntityModel 同士の衝突処理を呼ぶ。
 
-移動と攻撃は持たない。Spawn ノードの `behavior`（雑魚は通常 `Commons/BT/Enemy`）で付いた `BattleActor` のツリーが行う。
+移動と攻撃は持たない。Spawn ノードの `behavior`（雑魚は通常 `Commons/BT/Enemy`）で付いた `EnemyAgent` のツリーが行う。
 
 ### `BossEntityPresenter.cs`
 
@@ -1003,7 +1012,7 @@ Collider 経由で取得した Presenter から `EntityBase` を取得するた�
 - 死亡演出完了を BattleScenePresenter へ通知する。
 - シナリオ明けに一定時間 Collider を切る（`DisableColliderOnEntry`）。
 
-ボスの登場移動は `BattleFlow.Spawn`（`BossDefinition.entrance`）、攻撃と移動はボスに付与した `BattleActor` のツリーが行う。
+ボスの登場移動は `BattleFlow.Spawn`（`BossDefinition.entrance`）、攻撃と移動はボスに付与した `EnemyAgent` のツリーが行う。
 
 ### `BulletEntityPresenter.cs`
 
@@ -1014,15 +1023,15 @@ Collider 経由で取得した Presenter から `EntityBase` を取得するた�
 - `BulletEntityModel`
 - `BulletEntityView`
 - ObjectPool 参照
-- lifetime / ステージの外力の影響の倍率（`ForceInfluence`）
+- ステージの外力の影響の倍率（`ForceInfluence`）/ 画面外マージン（`ScreenMargin`）
 
 できること:
 
-- `BulletSystem` から `InitializeDriven` でダメージ、位置、方向、回転、飛距離を初期化される。
-- HP 0、寿命切れ、画面外退出、飛距離到達で Pool に戻る。
+- `BulletSystem` から `InitializeDriven` でダメージ、位置、回転、チャージ弾かどうかを初期化される。
+- 当たって HP が 0 になると Collider を無効にして非表示にするだけ（`IsConsumed`）。寿命・飛距離・画面外の判定とプールへの返却は `BulletSystem` が行う。
 - Collider 衝突時に EntityModel 同士の衝突処理を呼ぶ。
 
-自前の移動は持たない。敵弾・自機弾とも、位置は常に `BulletSystem` が毎フレーム与える。
+自前の移動も寿命も持たない（寿命は `BulletConfig.lifetime`、フレーム）。敵弾・自機弾とも、位置は常に `BulletSystem` が毎フレーム与える。
 
 ### `BulletPool.cs`
 
@@ -1048,7 +1057,7 @@ EntityPresenter として EntityModel を提供しつつ、接触時の押し出
 ### `BossPhaseProgressGauge.cs`
 
 ボスフェーズの進行状況を表示する Presenter。
-`BattleActor.OnAttached` で自分を含むボスにツリーが付与されたことを検知し、`BattleServices.PhaseProgress`（BT の `Phase` ノードが終了条件から流す進み具合）を表示する。閾値は持たない。
+`EnemyAgent.OnAttached` で自分を含むボスにツリーが付与されたことを検知し、`BattleServices.PhaseProgress`（BT の `Phase` ノードが終了条件から流す進み具合）を表示する。閾値は持たない。
 
 ### Death Directors
 
@@ -1319,9 +1328,9 @@ Editor 実行では `Assets/Project/DataStore/UserData.json` を使う。
 - 既存ドキュメントにある `BattleWay` / `BattleBoss` シーン分割は現状の実装とは異なる。現在は `Battle` シーンに統合されている。
 - `RuntimeModel.CurrentSituation` が Way/Boss の進行を表す中心状態である。
 - `ScenarioScenePresenter` は BattleScenePresenter を直接呼ばない。演出関数以外の行は `ScenarioCommandMessage` として通知し、ステージツリーの PlayScenario ノードが同名の OnCommand で処理する（Boss 生成や Boss BGM 再生）。
-- Battle の進行は BehaviorTree で行う。アセット上のノードは雛形で、ツリーを実行するたびに複製して動かすため、同じ `BehaviorTreeAsset` を複数の敵が同時に使っても状態は共有されない。
+- Battle の進行は BehaviorTree で行う。アセット上のノードは雛形で、ツリーを実行するたびに複製して動かすため、同じ `BehaviorTreeAsset` を複数の敵・弾が同時に使っても状態は共有されない。弾のツリーは `TreePool` で複製を使い回すため、ノードは実行中の状態を `OnEnter` で必ず初期化する。
 - BT の時間はフレーム基準（固定 60fps）、`MotionStep` の時間は秒指定である。混在しているので単位に注意する（[Battle/BehaviorTree-Nodes.md](./Battle/BehaviorTree-Nodes.md)）。
-- Spawn ノードで出す雑魚は `ActorPool` で使い回す。敵を消すときは `Destroy` ではなく `ActorDespawn.Despawn` を通し、使い回すと状態が残るコンポーネントを持つ Prefab には `NoActorPool` を付ける（[Battle/BehaviorTree.md](./Battle/BehaviorTree.md) 4.5）。
+- Spawn ノードで出す雑魚は `EnemyPool` で使い回す。敵を消すときは `Destroy` ではなく `EnemyDespawn.Despawn` を通し、使い回すと状態が残るコンポーネントを持つ Prefab には `NoEnemyPool` を付ける（[Battle/BehaviorTree.md](./Battle/BehaviorTree.md) 4.5）。
 - `UserData.Validate` は現在 `clearedStageNumber` を 0-1 に丸めるため、Stage2 以降を正式開放する場合は修正が必要になる可能性が高い。
 - `InputManager` は通常の C# クラスなので、Unity の `OnDestroy` ライフサイクルに自動的には乗らない。長期的には明示 Dispose の検討余地がある。
 - `MonoPresenter.Start` は Global が存在する前提が強い。Global 常駐前提の Scene では問題になりにくいが、単体シーン起動では Null になり得る。
@@ -1332,11 +1341,11 @@ Editor 実行では `Assets/Project/DataStore/UserData.json` を使う。
 
 - 新しいステージを追加する: `StageData.asset`（`stageAddress` に `BattleStageAsset` のパス）、`DataStore/StageN/BT`、Addressables 登録（アドレス = アセットパス）、`BattleStageType`, 必要なら `SceneType`, UserData の進行制限。
 - 新しい道中/ボスフェーズを作る: ステージツリー・ボスのツリー（`BT/Stage/`）を BT エディタで編集する。フェーズの区切りは Until と条件で表す。
-- 新しい弾幕を作る: `NWayShot` などの弾を撃つノードや `BulletBeam` を組んだ `BehaviorTreeAsset`（`BT/Attack/`）を作り SubTree で参照する。足りない撃ち方は `ShotPattern` / `DirectionSource` / `RotationSource` を追加する。
+- 新しい弾幕を作る: `NWayShot` などの弾を撃つノードや `BulletBeam` を組んだ `CommonTreeAsset`（`Create > Battle > Behavior Tree > Common`、`BT/Attack/`）を作り SubTree で参照する。足りない撃ち方は `ShotPattern` / `DirectionSource` / `RotationSource` を追加する。弾自身に途中で動きを変えさせるなら `BulletTreeAsset` を作って `BulletConfig.behavior` に指定する（合図 `SendSignal` / `Signaled` で外から切り替えられる）。
 - 新しい敵移動を作る: `MotionPreset`（`BT/Motion/`）を作るか、`MotionStep` 実装を `Runtime/Motion/` に追加する。
-- 新しい敵 Prefab を作る: `EnemyEntityPresenter`, `EnemyEntityView` を設定する。行動は Spawn ノードの `behavior` に共通ツリー `Commons/BT/Enemy` を指定し、`overrides` で `movement`（`BT/Motion/`）/ `attack`（`BT/Attack/`）/ `death` を渡す。この形に収まらない敵だけ `BT/Enemy/` に専用ツリーを作る。
+- 新しい敵 Prefab を作る: `EnemyEntityPresenter`, `EnemyEntityView` を設定する。行動は Spawn ノードの `behavior` に共通ツリー `Commons/BT/Enemy` を指定し、移動を `motionPreset`（`BT/Motion/`）に、`overrides` で `attack`（`BT/Attack/`）/ `death` を渡す。この形に収まらない敵だけ `BT/Enemy/` に専用ツリー（`EnemyTreeAsset`）を作る。
 - 新しいボス挙動を作る: Boss Prefab（`BossEntityPresenter`）と、`BossDefinition` の `prefab` / `spawnPosition` / `entrance` / `tree` を設定する。
-- 新しいノードを作る: `Scripts/BehaviorTree/` 配下に `CompositeNode` / `DecoratorNode` / `ActionNode` の派生クラスを 1 つ追加する（設定は保存するフィールド、状態は `[NonSerialized]`）。`NodeInfoAttribute` を付けるとパレットに説明が出る。
+- 新しいノードを作る: `Scripts/BehaviorTree/` 配下に `CompositeNode` / `DecoratorNode` / `ActionNode` の派生クラスを 1 つ追加する（設定は保存するフィールド、状態は `[NonSerialized]` で `OnEnter` で初期化）。`Self` が敵でなければならないノードは `EnemyActionNode` を継承する。`NodeInfoAttribute` を付けるとパレットに説明が出る。
 - ステージ固有の機能を作る: `IStageService` と `StageServiceDefinition` を `Runtime/Stage/` に追加し、使うステージの `BattleStageAsset.services` に宣言する（[Battle/BehaviorTree.md](./Battle/BehaviorTree.md) の「ステージサービス」）。
 - 新しいシナリオコマンドを作る: `ScenarioScenePresenter.ExecuteSteps` に function 分岐を追加し、必要なら `ScenarioView` / Battle Presenter へ処理を追加する。
 - 新しい UI モーダルを作る: `Commons/UI/Scripts/View`, `Commons/UI/Scripts/Presenter`, `GlobalScenePresenter` への参照追加。

@@ -1,29 +1,26 @@
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
+using Project.Scenes.Battle.Scripts.Runtime;
 using Project.Scenes.Battle.Scripts.View;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
-    /// <summary>
-    /// シーン上の全BulletEntityPresenterをプールに返却し、全EnemyEntityPresenterを破壊する。
-    /// ビームの予告線・本体は敵として数えないためEnemyEntityPresenterを持たないので、弾と一緒に個別に破壊する
-    /// </summary>
+    // 弾・警告線・ビーム、または敵を一括で消す。
+    // ビームの予告線・本体は敵として数えないため EnemyEntityPresenter を持たず、ここで個別に破壊する
     public class BulletClearReceiver : MonoBehaviour
     {
+        BulletSystem bullets;
+
+        // 弾は消えた理由を「一括消去」にするため BulletSystem を通して消す。BattleFlow がバトル開始時に渡す
+        public void BindBulletSystem(BulletSystem system) => bullets = system;
+
         public void ClearAllBullets()
         {
-            var bullets = FindObjectsByType<BulletEntityPresenter>(FindObjectsSortMode.None);
-            foreach (var bullet in bullets)
-            {
-                bullet.ReturnToPool();
-            }
-
-            Debug.Log($"[BulletClearReceiver] Cleared {bullets.Length} bullets.", this);
-
+            bullets?.Clear();
             ClearAllBeams();
         }
 
-        void ClearAllBeams()
+        public void ClearAllBeams()
         {
             var warningLines = FindObjectsByType<WarningLineView>(FindObjectsSortMode.None);
             foreach (var warningLine in warningLines)
@@ -45,7 +42,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var enemies = FindObjectsByType<EnemyEntityPresenter>(FindObjectsSortMode.None);
             foreach (var enemy in enemies)
             {
-                Runtime.ActorDespawn.Despawn(enemy.gameObject);
+                Runtime.EnemyDespawn.Despawn(enemy.gameObject);
             }
 
             Debug.Log($"[BulletClearReceiver] Cleared {enemies.Length} enemies.", this);

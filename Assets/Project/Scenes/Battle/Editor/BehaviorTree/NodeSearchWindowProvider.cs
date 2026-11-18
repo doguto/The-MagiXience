@@ -12,8 +12,13 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
     public class NodeSearchWindowProvider : ScriptableObject, ISearchWindowProvider
     {
         Action<Type, Vector2> onSelected;
+        Func<BehaviorTreeAsset> currentAsset;
 
-        public void Initialize(Action<Type, Vector2> callback) => onSelected = callback;
+        public void Initialize(Action<Type, Vector2> callback, Func<BehaviorTreeAsset> assetProvider)
+        {
+            onSelected = callback;
+            currentAsset = assetProvider;
+        }
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
@@ -21,6 +26,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             var types = TypeCache.GetTypesDerivedFrom<BtNode>()
                                  .Where(t => t.IsPublic && !t.IsAbstract && !t.IsGenericType)
+                                 .Where(t => currentAsset?.Invoke() is not { } asset || asset.Accepts(t))
                                  .ToList();
 
             foreach (var group in types.GroupBy(Category).OrderBy(g => CategoryOrder(g.Key)))

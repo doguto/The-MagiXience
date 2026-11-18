@@ -36,6 +36,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [Header("Parabola")]
         [SerializeField, Min(0.05f)] float shotInterval = 0.25f;
         [SerializeField, Min(0.1f)] float parabolaSpeed = 8f;
+        [SerializeField, Min(0), Tooltip("放物線弾が消えるまでのフレーム数。0 で無制限")] int parabolaLifetimeFrames = 720;
         [SerializeField] float normalVertexX = -6f;
         [SerializeField, Min(0.1f)] float vertexDepth = 4f;
         [SerializeField] float sweepNearX = -3f;
@@ -47,7 +48,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField, Min(0.1f)] float vertexScreenMargin = 0.7f;
 
         EnemyEntityPresenter enemy;
-        BattleActor actor;
+        EnemyAgent agent;
         Vector3 spawnPosition;
         float elapsed;
         float halfHeight;
@@ -189,8 +190,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             // 左右を切り替える瞬間、頂点X=0の退化した放物線は発射しない。
             if (Mathf.Abs(vertexX) < 0.01f || Mathf.Abs(vertexY) < 0.01f) return;
             // 双子の行動はこのコンポーネントが実時間で進めるが、弾は BattleWorld の BulletSystem に渡す
-            if (actor == null) actor = GetComponent<BattleActor>();
-            var bullets = actor != null && actor.World != null ? actor.World.Services.Bullets : null;
+            if (agent == null) agent = GetComponent<EnemyAgent>();
+            var bullets = agent != null && agent.World != null ? agent.World.Services.Bullets : null;
             if (bullets == null) return;
             bullets.Spawn(new BulletSpawn
             {
@@ -199,7 +200,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 Position = parabolaBulletPool.transform.position,
                 Rotation = Quaternion.identity,
                 Motion = new MotionStep[] { new VertexParabolaMotion(new Vector2(vertexX, vertexY), parabolaSpeed, true) },
+                LifetimeFrames = parabolaLifetimeFrames,
                 AffectedByForce = true,
+                Owner = agent,
             });
         }
     }

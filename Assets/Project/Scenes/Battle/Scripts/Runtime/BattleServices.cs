@@ -9,10 +9,12 @@ namespace Project.Scenes.Battle.Scripts.Runtime
     // ノードから使うバトル内のサービス。BattleScenePresenter が設定する。
     public sealed class BattleServices
     {
-        public BulletSystem Bullets { get; } = new();
-        public ActorSpawner Spawner { get; set; }
+        public BattleServices(BattleWorld world) => Bullets = new BulletSystem(world);
+
+        public BulletSystem Bullets { get; }
+        public EnemySpawner Spawner { get; set; }
         public BulletClearReceiver Clearer { get; set; }
-        public BattleActor Boss { get; set; }
+        public EnemyAgent Boss { get; set; }
         public IBossHost BossHost { get; set; }
         public IScenarioService Scenario { get; set; }
         public StageProgress Progress { get; } = new();

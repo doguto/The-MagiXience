@@ -9,10 +9,10 @@ Assets/Project/DataStore/Stage{N}/
 ├─ BT/
 │   ├─ Stage{N}_BT.asset       # BattleStageAsset (StageData.stageAddress の参照先。1 ステージに 1 つ)
 │   ├─ Stage{N}_Boss.asset     # BossDefinition (SpawnBoss / BossBattle ノードから参照)
-│   ├─ Stage/                  # ステージツリー Stage{N}_Tree とボスのツリー Stage{N}Boss_Tree
-│   ├─ Attack/                 # 攻撃ツリー S{N}_* (雑魚の attack パラメータ、ボスの SubTree から参照)
-│   ├─ Motion/                 # MotionPreset (敵・ボス・弾の移動。雑魚の movement パラメータ)
-│   ├─ Enemy/                  # 共通ツリーに収まらない特殊な敵の専用ツリー (必要なときだけ)
+│   ├─ Stage/                  # ステージツリー Stage{N}_Tree (Stage) とボスのツリー Stage{N}Boss_Tree (Enemy)
+│   ├─ Attack/                 # 攻撃ツリー S{N}_* (Common。雑魚の attack パラメータ、ボスの SubTree から参照)
+│   ├─ Motion/                 # MotionPreset (敵・ボス・弾の移動。雑魚は Spawn の motionPreset)
+│   ├─ Enemy/                  # 共通ツリーに収まらない特殊な敵の専用ツリー (Enemy)、撃破時のツリー (Common)。必要なときだけ
 │   ├─ Trail/                  # TrailPath (必要なときだけ)
 │   └─ Ease/                   # EaseCurveAsset (必要なときだけ。現状どのステージにも無い)
 └─ Scenario/

@@ -34,6 +34,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         [SerializeField] BulletPool chargeBulletPool;
         [SerializeField, Tooltip("通常弾の速さ。旧来の移動と同じく、実際はこの約2倍の速さで飛ぶ (OutQuad の時間写像)")] float normalShotSpeed = 5f;
         [SerializeField, Tooltip("チャージ弾の速さ。0 でその場に出る")] float chargedShotSpeed = 0f;
+        [SerializeField, Min(0), Tooltip("通常弾が消えるまでのフレーム数。0 で無制限")] int normalShotLifetimeFrames = 48;
+        [SerializeField, Min(0), Tooltip("チャージ弾が消えるまでのフレーム数。0 で無制限")] int chargedShotLifetimeFrames = 18;
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] Vector3 chargeShotOffset = new(0, 0, 0);
         [SerializeField] int chargedShotDamage = 30;
@@ -402,7 +404,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireNormalShot()
         {
-            Shoot(normalBulletPool, normalShotDamage, transform.position, normalShotSpeed, false);
+            Shoot(normalBulletPool, normalShotDamage, transform.position, normalShotSpeed, normalShotLifetimeFrames, false);
             lastShootTime = Time.time;
             view.EnterAttack();
             soundManager?.PlaySE(SeType.Attack);
@@ -410,7 +412,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireChargedShot()
         {
-            Shoot(chargeBulletPool, chargedShotDamage, transform.position + chargeShotOffset, chargedShotSpeed, true);
+            Shoot(chargeBulletPool, chargedShotDamage, transform.position + chargeShotOffset, chargedShotSpeed, chargedShotLifetimeFrames, true);
             view.EnterAttack();
             soundManager?.PlaySE(SeType.ChargeRelease);
         }
@@ -418,7 +420,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         // 弾はバトル中だけ存在する BulletSystem が動かす。BattleFlow がバトル開始時に渡す
         public void BindBulletSystem(BulletSystem bullets) => bulletSystem = bullets;
 
-        void Shoot(BulletPool source, int damage, Vector3 position, float speed, bool isChargeShot)
+        void Shoot(BulletPool source, int damage, Vector3 position, float speed, int lifetimeFrames, bool isChargeShot)
         {
             if (bulletSystem == null || source == null) return;
             bulletSystem.Spawn(new BulletSpawn
@@ -428,6 +430,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 Position = position,
                 Rotation = Quaternion.identity,
                 Motion = new MotionStep[] { new VelocityMotion(new Vector3(speed, 0f, 0f)) },
+                LifetimeFrames = lifetimeFrames,
                 AffectedByForce = false,
                 IsPlayerChargeBullet = isChargeShot,
             });

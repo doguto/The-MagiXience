@@ -39,5 +39,6 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override NodeStatus OnTick(BattleContext ctx) => root?.Tick(ctx) ?? NodeStatus.Success;
         protected override void OnAbort(BattleContext ctx) => root?.Abort(ctx);
+        protected override void OnRecycle() => root?.Recycle();
     }
 }

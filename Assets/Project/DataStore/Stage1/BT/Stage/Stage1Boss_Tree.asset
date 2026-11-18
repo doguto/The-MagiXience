@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ad8c3eac9f5d47448b44b0827100d56, type: 3}
   m_Name: Stage1Boss_Tree
   m_EditorClassIdentifier: 
   root:
@@ -126,7 +126,10 @@ MonoBehaviour:
           motion:
           - rid: 8540150000000000016
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540147884261900758
         rotation:
@@ -390,15 +393,9 @@ MonoBehaviour:
         comment: 
         prefab: {fileID: 2191354779743736906, guid: 33482601f496c5d4488d3c72cfe3cc21, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        motionPreset: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
+        motion: []
         overrides:
-        - name: movement
-          kind: 4
-          floatValue: 0
-          intValue: 0
-          boolValue: 0
-          vector2Value: {x: 0, y: 0}
-          objectValue: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
-          bindToParent: 
         - name: attack
           kind: 4
           floatValue: 0
@@ -439,15 +436,9 @@ MonoBehaviour:
         comment: 
         prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        motionPreset: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
+        motion: []
         overrides:
-        - name: movement
-          kind: 4
-          floatValue: 0
-          intValue: 0
-          boolValue: 0
-          vector2Value: {x: 0, y: 0}
-          objectValue: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
-          bindToParent: 
         - name: attack
           kind: 4
           floatValue: 0
@@ -521,15 +512,9 @@ MonoBehaviour:
         comment: 
         prefab: {fileID: 7967959992965454673, guid: e502d7894a9e50648bb423d863eb560c, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
+        motionPreset: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
+        motion: []
         overrides:
-        - name: movement
-          kind: 4
-          floatValue: 0
-          intValue: 0
-          boolValue: 0
-          vector2Value: {x: 0, y: 0}
-          objectValue: {fileID: 11400000, guid: 533680e0f7225d54da49fc9546631f12, type: 2}
-          bindToParent: 
         - name: attack
           kind: 4
           floatValue: 0
@@ -633,7 +618,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000028
         rotation:
@@ -696,7 +684,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 00672ee08b2171043b7545424d75d8d0, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000033
         rotation:
@@ -785,7 +776,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 4dfafa0c23ec53143b5e50d4692b9fef, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000058
         rotation:
@@ -848,7 +842,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 00672ee08b2171043b7545424d75d8d0, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000063
         rotation:
@@ -974,7 +971,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000080
         rotation:
@@ -1013,7 +1013,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000084
         rotation:
@@ -1052,7 +1055,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000092
         rotation:
@@ -1091,7 +1097,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000096
         rotation:
@@ -1151,6 +1160,8 @@ MonoBehaviour:
         comment: 
         prefab: {fileID: 496091470483533460, guid: 099d18aed3025f0469211fce96764a06, type: 3}
         behavior: {fileID: 0}
+        motionPreset: {fileID: 0}
+        motion: []
         overrides: []
         position: {x: 4.6, y: 0}
         worldSpace: 1
@@ -1228,7 +1239,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000112
         rotation:
@@ -1267,7 +1281,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 39cd96a6296c152499470d45228c9348, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540149000000000116
         rotation:
@@ -1312,6 +1329,8 @@ MonoBehaviour:
         comment: 
         prefab: {fileID: 496091470483533460, guid: 099d18aed3025f0469211fce96764a06, type: 3}
         behavior: {fileID: 0}
+        motionPreset: {fileID: 0}
+        motion: []
         overrides: []
         position: {x: 4.6, y: 0}
         worldSpace: 1

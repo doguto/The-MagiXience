@@ -16,7 +16,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public sealed class Result
         {
             public readonly HashSet<BulletEntityPresenter> Bullets = new();
-            public readonly HashSet<GameObject> Actors = new();
+            public readonly HashSet<GameObject> Spawnables = new();
         }
 
         const BindingFlags Fields = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
@@ -43,10 +43,10 @@ namespace Project.Scenes.Battle.Scripts.Runtime
                         return;
                     case GameObject go:
                         if (go.TryGetComponent<BulletEntityPresenter>(out var asBullet)) result.Bullets.Add(asBullet);
-                        else result.Actors.Add(go);
+                        else result.Spawnables.Add(go);
                         return;
                     case Component component:
-                        result.Actors.Add(component.gameObject);
+                        result.Spawnables.Add(component.gameObject);
                         return;
                     case ScriptableObject:
                         VisitFields(unityObject, result, visited, depth);

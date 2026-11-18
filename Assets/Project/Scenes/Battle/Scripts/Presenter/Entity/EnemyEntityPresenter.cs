@@ -1,6 +1,4 @@
 using System;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model;
@@ -12,10 +10,10 @@ using Project.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 {
-    // 敵の HP・被弾・寿命・画面外判定を受け持つ。移動と攻撃は BattleActor が実行する BehaviorTree が行う
+    // 敵の HP・被弾・見た目を受け持つ。移動・攻撃・消えるかの判定は EnemyAgent が行う
     [RequireComponent(typeof(EnemyEntityView))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class EnemyEntityPresenter : MonoPresenter, IEntityPresenter, IPoolableActor
+    public class EnemyEntityPresenter : MonoPresenter, IEntityPresenter, IPoolableEnemy
     {
         [Header("Entity Settings")] [SerializeField]
         int maxHp = 50;
@@ -41,14 +39,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         EnemyEntityModel model;
-        CancellationTokenSource lifetimeCts;
         readonly CompositeDisposable disposables = new();
         IDisposable damageFlashSubscription;
-        bool isEnteredScreen;
         readonly Subject<Unit> removed = new();
         bool removedNotified;
 
         public EnemyEntityModel Model => model;
+        public float LifetimeSeconds => lifetime;
+        // 画面外とみなすまでの余白
+        public float ScreenMargin
+        {
+            get
+            {
+                var extents = spriteRenderer.bounds.extents;
+                return Mathf.Max(extents.x, extents.y) + 0.1f;
+            }
+        }
         public IObservable<Unit> OnDeath => model?.OnDeath;
         // 場から消えたとき (撃破・画面外・寿命・プールへの返却・破棄) に 1 回だけ通知する
         public IObservable<Unit> OnRemoved => removed;
@@ -62,7 +68,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         {
             transform.position = spawnPosition;
             model = new EnemyEntityModel(maxHp, contactDamage, onlyChargeDamageable);
-            isEnteredScreen = false;
+            SetCollidersEnabled(true);
             removedNotified = false;
 
             model.OnDeath
@@ -77,8 +83,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             SubscribeToDamageFlash();
 
             view.UpdatePosition(transform.position);
-
-            StartLifetimeCountdown();
         }
 
         void SubscribeToDamageFlash()
@@ -122,47 +126,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
                 });
         }
 
-        void StartLifetimeCountdown()
+        // 片付けは EnemyAgent が次のフレームに行う。それまでに他のものへ当たらないようにする
+        void HandleDeath() => SetCollidersEnabled(false);
+
+        void SetCollidersEnabled(bool value)
         {
-            if (lifetime <= 0f) return;
-
-            lifetimeCts = new CancellationTokenSource();
-            WaitLifetimeAsync(lifetimeCts.Token).Forget();
-        }
-
-        async UniTaskVoid WaitLifetimeAsync(CancellationToken ct)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(lifetime), cancellationToken: ct);
-            ActorDespawn.Despawn(gameObject);
-        }
-
-        void Update()
-        {
-            if (model == null || !model.IsAlive) return;
-
-            if (IsOutOfScreen())
-            {
-                ActorDespawn.Despawn(gameObject);
-            }
-        }
-
-        bool IsOutOfScreen()
-        {
-            var position = transform.position;
-            var extents = spriteRenderer.bounds.extents;
-            var margin = Mathf.Max(extents.x, extents.y) + 0.1f;
-
-            var outOfScreen = position.x < ScreenBoundsCache.MinX - margin || position.x > ScreenBoundsCache.MaxX + margin ||
-                              position.y < ScreenBoundsCache.MinY - margin || position.y > ScreenBoundsCache.MaxY + margin;
-
-            if (!outOfScreen) isEnteredScreen = true;
-
-            return isEnteredScreen && outOfScreen;
-        }
-
-        void HandleDeath()
-        {
-            ActorDespawn.Despawn(gameObject);
+            foreach (var c in GetComponents<Collider2D>()) c.enabled = value;
         }
 
         void NotifyRemoved()
@@ -186,9 +155,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         // 1 体分の生存中に作ったもの (購読・寿命・点滅・Model) を片付ける
         void CleanupLife()
         {
-            lifetimeCts?.Cancel();
-            lifetimeCts?.Dispose();
-            lifetimeCts = null;
             damageFlashSubscription?.Dispose();
             damageFlashSubscription = null;
             view.ResetDamageFlash();
@@ -209,9 +175,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         void OnDestroy()
         {
             NotifyRemoved();
-            lifetimeCts?.Cancel();
-            lifetimeCts?.Dispose();
-            lifetimeCts = null;
             damageFlashSubscription?.Dispose();
             damageFlashSubscription = null;
             disposables.Dispose();

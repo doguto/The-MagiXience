@@ -11,8 +11,11 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class Spawn : ActionNode
     {
         [SerializeField] GameObject prefab;
-        [SerializeField, Tooltip("この Prefab を動かすツリー。未指定ならツリーを付けない (自前で動く Prefab 用)")] BehaviorTreeAsset behavior;
+        [SerializeField, Tooltip("この Prefab を動かすツリー。未指定ならツリーを付けない (自前で動く Prefab 用)")] EnemyTreeAsset behavior;
+        [SerializeField, Tooltip("出した敵に渡す移動。指定するとインラインの移動より優先 (ツリーの MoveSelf が実行する)")] MotionPreset motionPreset;
+        [SerializeReference, SubclassSelector] List<MotionStep> motion = new();
         [SerializeField] List<TreeParameter> overrides = new();
+        [SerializeField, Tooltip("合図の宛先「グループ」で使う名前。空ならグループに入らない")] string group;
         [SerializeField, Tooltip("撃つ敵がいなければワールド座標、いればその位置からの相対")] Vector2 position;
         [SerializeField, Tooltip("撃つ敵がいてもワールド座標で出す")] bool worldSpace;
         [SerializeReference, SubclassSelector] SpawnLayout layout = new SingleLayout();
@@ -25,15 +28,13 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         [NonSerialized] List<(Vector2 offset, Quaternion rotation)> slots;
 
-        public override string Summary =>
-            (prefab ? prefab.name : "(未設定)") + $" {layout?.Summary}" + (behavior ? $" / {behavior.name}" : "") + string.Concat(overrides.Select(OverrideSummary));
+        IReadOnlyList<MotionStep> Motion => motionPreset != null ? motionPreset.Steps : motion;
 
-        static string OverrideSummary(TreeParameter p) => p.ObjectValue switch
-        {
-            MotionPreset motion => $" / {p.Name}: {MotionStep.Describe(motion.Steps)}",
-            BehaviorTreeAsset tree => $" / {p.Name}: {tree.name}",
-            _ => "",
-        };
+        public override string Summary =>
+            (prefab ? prefab.name : "(未設定)") + $" {layout?.Summary}" + (behavior ? $" / {behavior.name}" : "")
+            + (Motion.Count > 0 ? $" / 移動: {MotionStep.Describe(Motion)}" : "") + string.Concat(overrides.Select(OverrideSummary));
+
+        static string OverrideSummary(TreeParameter p) => p.ObjectValue is BehaviorTreeAsset tree ? $" / {p.Name}: {tree.name}" : "";
 
         protected override void OnSetup(TreeScope scope) => slots = new List<(Vector2, Quaternion)>();
 
@@ -52,13 +53,16 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             foreach (var (offset, rot) in slots)
             {
                 var p = e.Origin + offset;
-                spawner.Spawn(new ActorSpawn
+                spawner.Spawn(new EnemySpawn
                 {
                     Prefab = prefab,
                     Position = new Vector3(p.x, p.y, z),
                     Rotation = rot * baseRot,
                     Behavior = behavior,
                     Overrides = overrides,
+                    Motion = Motion,
+                    Owner = ctx.Self,
+                    Group = group,
                     Tracked = tracked,
                     BeamRange = beamRange,
                     BeamDuration = beamDuration,

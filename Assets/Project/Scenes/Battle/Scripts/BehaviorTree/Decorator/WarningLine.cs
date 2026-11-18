@@ -38,7 +38,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var z = ctx.Self != null ? ctx.Self.Body.Position.z : 0f;
             foreach (var line in aim.Lines)
             {
-                ctx.Services.Spawner?.Spawn(new ActorSpawn
+                ctx.Services.Spawner?.Spawn(new EnemySpawn
                 {
                     Prefab = prefab,
                     Position = new Vector3(line.Start.x, line.Start.y, z),

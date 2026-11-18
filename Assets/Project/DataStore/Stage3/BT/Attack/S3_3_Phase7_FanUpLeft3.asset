@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
   m_Name: S3_3_Phase7_FanUpLeft3
   m_EditorClassIdentifier: 
   root:
@@ -61,6 +61,7 @@ MonoBehaviour:
         interval:
           value: 96
           param: 
+        indexParam: 
     - rid: 8540147961671974956
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -84,7 +85,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: f5177624aa153f4479bf6c053d4fba31, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540147961671974956
         rotation:

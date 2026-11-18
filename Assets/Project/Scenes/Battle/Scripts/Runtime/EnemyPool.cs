@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Project.Scenes.Battle.Scripts.Runtime
 {
     // Spawn ノードで出す敵を Prefab ごとに使い回す。Battle シーンに 1 つ置き、シーンと一緒に破棄される
-    public sealed class ActorPool : MonoBehaviour
+    public sealed class EnemyPool : MonoBehaviour
     {
         // 独自の状態を Start などで一度だけ作るため、使い回すと動きが変わるもの
         static readonly Type[] Unsupported =
@@ -24,10 +24,10 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         readonly List<GameObject> pendingRelease = new();
         Transform storage;
 
-        public static ActorPool Create()
+        public static EnemyPool Create()
         {
-            var go = new GameObject("ActorPool");
-            var pool = go.AddComponent<ActorPool>();
+            var go = new GameObject("EnemyPool");
+            var pool = go.AddComponent<EnemyPool>();
             var storage = new GameObject("Storage");
             // 非アクティブの親の下で生成すると、出すまで Awake が走らない (事前生成で旧来の初期化を動かさない)
             storage.SetActive(false);
@@ -41,7 +41,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             if (prefab == null) return false;
             if (poolableCache.TryGetValue(prefab, out var cached)) return cached;
 
-            var result = prefab.TryGetComponent<EnemyEntityPresenter>(out _) && prefab.GetComponentInChildren<NoActorPool>(true) == null;
+            var result = prefab.TryGetComponent<EnemyEntityPresenter>(out _) && prefab.GetComponentInChildren<NoEnemyPool>(true) == null;
             foreach (var type in Unsupported)
             {
                 if (result && prefab.GetComponentInChildren(type, true) != null) result = false;
@@ -79,9 +79,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         }
 
         // Destroy と同じくフレームの最後に戻す。撃破の通知の途中で戻すと、後続の購読者 (撃破時の行動) が壊れるため
-        public void Release(GameObject actor)
+        public void Release(GameObject enemy)
         {
-            if (actor != null && !pendingRelease.Contains(actor)) pendingRelease.Add(actor);
+            if (enemy != null && !pendingRelease.Contains(enemy)) pendingRelease.Add(enemy);
         }
 
         void LateUpdate()
@@ -90,11 +90,11 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             foreach (var go in pendingRelease)
             {
                 if (go == null) continue;
-                foreach (var poolable in go.GetComponentsInChildren<IPoolableActor>(true)) poolable.OnReturnedToPool();
+                foreach (var poolable in go.GetComponentsInChildren<IPoolableEnemy>(true)) poolable.OnReturnedToPool();
                 go.SetActive(false);
                 go.transform.SetParent(storage, false);
 
-                var pooled = go.GetComponent<PooledActor>();
+                var pooled = go.GetComponent<PooledEnemy>();
                 if (!idle.TryGetValue(pooled.Prefab, out var stack)) idle[pooled.Prefab] = stack = new Stack<GameObject>();
                 stack.Push(go);
             }
@@ -103,7 +103,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
         GameObject Activate(GameObject go, Vector3 position, Quaternion rotation)
         {
-            var pooled = go.GetComponent<PooledActor>();
+            var pooled = go.GetComponent<PooledEnemy>();
             var reused = pooled.HasBeenActive;
             // 親を外すと、プールの置かれたシーン (Battle) のルートに戻る
             go.transform.SetParent(null, false);
@@ -112,14 +112,14 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             pooled.HasBeenActive = true;
             if (reused)
             {
-                foreach (var poolable in go.GetComponentsInChildren<IPoolableActor>(true)) poolable.OnTakenFromPool();
+                foreach (var poolable in go.GetComponentsInChildren<IPoolableEnemy>(true)) poolable.OnTakenFromPool();
             }
             return go;
         }
 
-        PooledActor Tag(GameObject go, GameObject prefab)
+        PooledEnemy Tag(GameObject go, GameObject prefab)
         {
-            var pooled = go.AddComponent<PooledActor>();
+            var pooled = go.AddComponent<PooledEnemy>();
             pooled.Prefab = prefab;
             pooled.Pool = this;
             return pooled;

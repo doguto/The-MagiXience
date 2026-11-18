@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
   m_Name: S4_BossBeamSub_Attack
   m_EditorClassIdentifier: 
   root:
@@ -74,6 +74,7 @@ MonoBehaviour:
         count:
           value: 0
           param: 
+        indexParam: 
     - rid: 8540147961671975185
       type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -87,7 +88,7 @@ MonoBehaviour:
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: d346d01a9d44473bb84b025eaeecee20
-        graphPosition: {x: 2070.0, y: 900.0}
+        graphPosition: {x: 2070, y: 900}
         comment: 
         frames:
           value: 12
@@ -105,7 +106,7 @@ MonoBehaviour:
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 4aaab0d987a547e7b52c604e6f7b44aa
-        graphPosition: {x: 2020.0, y: 1200.0}
+        graphPosition: {x: 2020, y: 1200}
         comment: 
         bullet:
           prefab: {fileID: 366756060701291069, guid: c32e0c92eb4887a47b48b549b6537d86, type: 3}
@@ -114,7 +115,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 85b2d1f8660fb834c9029e399fec3e82, type: 2}
           motion: []
           range: 0
+          lifetime: 600
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540147961671975217
         rotation:
@@ -135,7 +139,7 @@ MonoBehaviour:
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 5db9cca32af842109a16d4c9067e4535
-        graphPosition: {x: 1770.0, y: 900.0}
+        graphPosition: {x: 1770, y: 900}
         comment: 
         child:
           rid: 8540154000000000001
@@ -150,7 +154,7 @@ MonoBehaviour:
       type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6a286ee7f5d146fcb158967427656ddb
-        graphPosition: {x: 1770.0, y: 1050.0}
+        graphPosition: {x: 1770, y: 1050}
         comment: 
         children:
         - rid: 8540154000000000002
@@ -160,7 +164,7 @@ MonoBehaviour:
       type: {class: Calc, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 3c1eadc8c0a64e63866418601c05af82
-        graphPosition: {x: 1520.0, y: 1200.0}
+        graphPosition: {x: 1520, y: 1200}
         comment: 
         resultParam: angle
         a:
@@ -174,7 +178,7 @@ MonoBehaviour:
       type: {class: Calc, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: ede06e5258a14e7486f23880665eb46d
-        graphPosition: {x: 1770.0, y: 1200.0}
+        graphPosition: {x: 1770, y: 1200}
         comment: 
         resultParam: angle
         a:

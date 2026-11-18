@@ -7,13 +7,13 @@ using UnityEngine;
 namespace Project.Scenes.Battle.Scripts.Runtime
 {
     // 敵・ビーム・障害物などの Prefab を出現させる。
-    public sealed class ActorSpawner
+    public sealed class EnemySpawner
     {
         readonly BattleWorld world;
         readonly EnemyTracker tracker;
-        readonly ActorPool pool;
+        readonly EnemyPool pool;
 
-        public ActorSpawner(BattleWorld world, EnemyTracker tracker, ActorPool pool = null)
+        public EnemySpawner(BattleWorld world, EnemyTracker tracker, EnemyPool pool = null)
         {
             this.world = world;
             this.tracker = tracker;
@@ -22,16 +22,16 @@ namespace Project.Scenes.Battle.Scripts.Runtime
 
         public int ActiveEnemyCount => tracker != null ? tracker.ActiveEnemyCount : 0;
 
-        public GameObject Spawn(in ActorSpawn spawn)
+        public GameObject Spawn(in EnemySpawn spawn)
         {
             if (spawn.Prefab == null)
             {
-                Debug.LogWarning("[ActorSpawner] Prefab is not assigned.");
+                Debug.LogWarning("[EnemySpawner] Prefab is not assigned.");
                 return null;
             }
 
             var rotation = spawn.Rotation == default ? Quaternion.identity : spawn.Rotation;
-            var instance = pool != null && ActorPool.IsPoolable(spawn.Prefab)
+            var instance = pool != null && EnemyPool.IsPoolable(spawn.Prefab)
                 ? pool.Get(spawn.Prefab, spawn.Position, rotation)
                 : Object.Instantiate(spawn.Prefab, spawn.Position, rotation);
 
@@ -41,7 +41,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             }
 
             var enemy = instance.GetComponent<EnemyEntityPresenter>();
-            if (spawn.Behavior != null) BattleActor.Attach(instance, world, spawn.Behavior, spawn.Overrides);
+            // 敵はツリーが無くても EnemyAgent が消えるかを判定するので必ず付ける
+            if (spawn.Behavior != null || enemy != null) EnemyAgent.Attach(instance, world, spawn.Behavior, spawn.Overrides, spawn.Motion, spawn.Owner, spawn.Group);
 
             if (enemy != null && spawn.Tracked && tracker != null)
             {

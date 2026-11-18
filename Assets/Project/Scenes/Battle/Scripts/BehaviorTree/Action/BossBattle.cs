@@ -6,11 +6,11 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable, NodeInfo("出ているボスにツリーを付けて戦闘を始め、撃破演出が終わるまで待つ", "Action/Boss")]
     public sealed class BossBattle : ActionNode
     {
-        [SerializeField, Tooltip("未指定なら BossDefinition のツリー")] BehaviorTreeAsset tree;
+        [SerializeField, Tooltip("未指定なら BossDefinition のツリー")] EnemyTreeAsset tree;
 
         [NonSerialized] bool started;
 
-        public BehaviorTreeAsset Tree => tree;
+        public EnemyTreeAsset Tree => tree;
 
         public override string Summary => tree ? tree.name : "(BossDefinition のツリー)";
 

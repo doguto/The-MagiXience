@@ -26,11 +26,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
 
         public void Tick(float dt)
         {
-            if (IsFinished) return;
-            if (current == null && !MoveNext()) return;
-
-            if (!current.Tick(dt)) return;
-            MoveNext();
+            if (!IsFinished && (current != null || MoveNext()) && current.Tick(dt)) MoveNext();
+            if (body is IInvincibleBody invincible) invincible.Invincible = GrantsInvincibility;
         }
 
         public void Stop()
@@ -38,6 +35,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime.Motion
             current?.Stop();
             current = null;
             IsFinished = true;
+            if (body is IInvincibleBody invincible) invincible.Invincible = false;
         }
 
         bool MoveNext()

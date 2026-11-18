@@ -5,7 +5,7 @@
 `DataStore` は ScriptableObject を使ったマスターデータ・ステージ進行データの置き場である。データは大きく分けて以下の3系統から成る。
 
 - **マスターデータ系**（`BgmData` / `SeData` / `CharacterData` / `StageData`）: 単純な `List<T>` を持つだけの ScriptableObject。
-- **バトル進行系**（`Commons/BT/` と `Stage{N}/BT/` 配下の `BattleStageAsset` / `BossDefinition` / `BehaviorTreeAsset` / `MotionPreset` / `EaseCurveAsset`）: BehaviorTree 形式のステージ・ボス・敵・攻撃データ。ノードは `SerializeReference + SubclassSelector` によるポリモーフィックな構成で保存される。
+- **バトル進行系**（`Commons/BT/` と `Stage{N}/BT/` 配下の `BattleStageAsset` / `BossDefinition` / ツリー（`StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`）/ `MotionPreset` / `EaseCurveAsset`）: BehaviorTree 形式のステージ・ボス・敵・攻撃データ。ノードは `SerializeReference + SubclassSelector` によるポリモーフィックな構成で保存される。
 - **シナリオ系**（`Stage{N}/Scenario/` 配下の `ScenarioData`）: 会話・演出イベントを `function` / `args` という汎用コマンド列で表現する簡易スクリプト形式。
 
 これに加えて、開発用の `Test` フォルダが存在する。
@@ -22,7 +22,8 @@ StageData.asset
                                    ├─ Wave / Spawn ノード
                                    │    ├─ prefab    ──► 敵 Prefab
                                    │    ├─ behavior  ──► Commons/BT/Enemy.asset (共通の雑魚ツリー。特殊な敵は Stage{N}/BT/Enemy/*.asset)
-                                   │    └─ overrides ──► movement: Stage{N}/BT/Motion/*.asset, attack: Stage{N}/BT/Attack/*.asset, death: 撃破時のツリー
+                                   │    ├─ motionPreset ──► Stage{N}/BT/Motion/*.asset (敵に渡す移動。MoveSelf が実行)
+                                   │    └─ overrides ──► attack: Stage{N}/BT/Attack/*.asset, death: 撃破時のツリー
                                    ├─ PlayScenario ノード ──► Stage{N}/Scenario/Stage{N}WayScenario.asset / Stage{N}BossScenario.asset
                                    └─ SpawnBoss / BossBattle ノード ──► Stage{N}/BT/Stage{N}_Boss.asset (BossDefinition)
                                         ├─ prefab / spawnPosition / entrance (MotionStep[])
@@ -108,21 +109,21 @@ BehaviorTree 方式のバトルデータ。仕組みは [BehaviorTree.md](./Beha
 
 ```text
 Assets/Project/DataStore/Commons/BT/
-└── Enemy.asset             # 全ステージ共通の雑魚ツリー (BehaviorTree.md 5.4)
+└── Enemy.asset             # 全ステージ共通の雑魚ツリー (EnemyTreeAsset。BehaviorTree.md 5.4)
 
 Assets/Project/DataStore/Stage{N}/BT/
 ├── Stage{N}_BT.asset       # BattleStageAsset (StageData.stageAddress の参照先)
 ├── Stage{N}_Boss.asset     # BossDefinition (SpawnBoss / BossBattle ノードの参照先)
-├── Stage/                  # ステージツリー Stage{N}_Tree とボスのツリー Stage{N}Boss_Tree
-├── Attack/                 # 攻撃パターンのツリー S{N}_*。雑魚の attack パラメータやボスの SubTree から参照
-├── Motion/                 # MotionPreset (移動ステップ列)。敵・ボスの移動、弾の移動に使う
+├── Stage/                  # ステージツリー Stage{N}_Tree (StageTreeAsset) とボスのツリー Stage{N}Boss_Tree (EnemyTreeAsset)
+├── Attack/                 # 攻撃パターンのツリー S{N}_* (CommonTreeAsset)。雑魚の attack パラメータやボスの SubTree から参照
+├── Motion/                 # MotionPreset (移動ステップ列)。Spawn.motionPreset (敵の移動)、Move、弾の移動に使う
 ├── Enemy/                  # 共通ツリーに収まらない特殊な敵の専用ツリー (現状は Stage2 の 2 つだけ)
 └── Trail/                  # TrailPath (MovePath / PlaceAlongPath の経路)。Stage2 のみ
 ```
 
 - `Attack/` は中身が同じ攻撃を 1 つにまとめてある。雑魚とボスの両方から参照される。
-- `Motion/*_Move` は、雑魚のツリーにインラインで書かれていた移動を共通ツリー化のときに切り出したもの。
-- `Enemy/` に残っているのは、攻撃中に移動を変える `Stage2/BT/Enemy/S2_2_WayAzuma` と、撃破時の行動ツリー `S2_2_WayEnemy1_death_Death` だけ。Stage1・3・4 の `Enemy/` は空。
+- `Motion/*_Move` は、雑魚のツリーにインラインで書かれていた移動を共通ツリー化のときに切り出したもの。以前は共通ツリーの `movement` パラメータで渡していたが、今は Spawn の `motionPreset` に移してある。
+- `Enemy/` に残っているのは、攻撃中に移動を変える `Stage2/BT/Enemy/S2_2_WayAzuma`（EnemyTreeAsset）と、撃破時の行動ツリー `S2_2_WayEnemy1_death_Death`（CommonTreeAsset）だけ。Stage1・3・4 の `Enemy/` は空。
 - `EaseCurveAsset` 用の `Ease/` は現状どのステージにも無い。必要になったら `Stage{N}/BT/Ease/` に置く。
 - ファイル名の `S{N}_` 接頭辞や `_2_Azuma` のような接尾辞は、旧形式から変換したときに旧アセット名から付けたもの。
 
@@ -134,7 +135,7 @@ Assets/Project/DataStore/Stage{N}/BT/
 | フィールド | 型 | 説明 |
 |---|---|---|
 | `services` | `List<StageServiceDefinition>` | このステージでだけ有効な機能。Stage3 だけが `WindServiceDefinition`（初期の風と矢印 Prefab）を宣言している |
-| `tree` | `BehaviorTreeAsset` | ステージツリー（`Stage/Stage{N}_Tree`）。Success で完了するとステージクリア |
+| `tree` | `StageTreeAsset` | ステージツリー（`Stage/Stage{N}_Tree`）。Success で完了するとステージクリア |
 
 Addressables には「アドレス = アセットパス」で Default Local Group に登録する。`StageData.stageAddress` にそのパスを書く。ツリー・BossDefinition・会話など、ここから参照されるアセットは依存として一緒に読み込まれるので個別の登録は要らない。
 
@@ -147,11 +148,20 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 | `prefab` | `GameObject` | ボス Prefab（`BossEntityPresenter` 必須） |
 | `spawnPosition` | `Vector3` | 生成位置 |
 | `entrance` | `List<MotionStep>` | 登場の移動（秒指定）。戦闘開始時に終わっていなければ終点まで進める |
-| `tree` | `BehaviorTreeAsset` | ボス自身が実行するツリー（`Stage/Stage{N}Boss_Tree`）。BossBattle ノードで別のツリーを指定しなければこれを使う |
+| `tree` | `EnemyTreeAsset` | ボス自身が実行するツリー（`Stage/Stage{N}Boss_Tree`）。BossBattle ノードで別のツリーを指定しなければこれを使う |
 
 ### BehaviorTreeAsset（`Commons/BT/Enemy` と `Stage/` `Attack/` `Enemy/`）
 
-- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/BehaviorTreeAsset.cs`
+- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/BehaviorTreeAsset.cs`（抽象クラス）と、種類ごとの派生 `StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`（同じフォルダ）
+
+| 種類 | 作り方 | このフォルダでの使い道 |
+|---|---|---|
+| `StageTreeAsset` | `Create > Battle > Behavior Tree > Stage` | `Stage/Stage{N}_Tree` |
+| `EnemyTreeAsset` | `Create > Battle > Behavior Tree > Enemy` | `Commons/BT/Enemy`、`Stage/Stage{N}Boss_Tree`、`Enemy/` の専用ツリー |
+| `BulletTreeAsset` | `Create > Battle > Behavior Tree > Bullet` | `BulletConfig.behavior` に指定する弾のツリー（現状のデータには無い） |
+| `CommonTreeAsset` | `Create > Battle > Behavior Tree > Common` | `Attack/` の攻撃と撃破時の行動ツリーなど、SubTree / SetDespawnBehavior で使うもの |
+
+種類によって置けるノードと SubTree で参照できるツリーが決まる（[BehaviorTree.md](./BehaviorTree.md) 3.2）。`Attack/` のツリーは敵からも弾からも使えるよう Common で作る。
 
 | フィールド | 説明 |
 |---|---|
@@ -165,7 +175,7 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 
 - `Stage/Stage{N}_Tree`: `Stage[ Section "Way"[ PlayBgm, Wave..., Wait ], Section "Boss"[ PlayScenario{OnCommand SpawnBoss / PlayBossBgm}, BossBattle, Wait, PlayScenario ] ]`（[BehaviorTree.md](./BehaviorTree.md) 6.1）
 - `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / RandomSelect / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP の区切り（`HpSections`。区切りは HP ゲージにも出る）、発狂（`HpSections` の `NextPhase` + `If($stage ≧ 1)`）など
-- `Commons/BT/Enemy`: `Parallel(All)[ Move($movement), Sequence[ SetDeathBehavior($death), SubTree($attack) ] ]`。パラメータ `movement`（MotionPreset）/ `attack` / `death`（BehaviorTreeAsset）を Spawn の `overrides` で渡す
+- `Commons/BT/Enemy`: `Parallel(All)[ MoveSelf, Sequence[ SetDespawnBehavior($death), SubTree($attack) ] ]`。パラメータ `attack` / `death`（BehaviorTreeAsset）を Spawn の `overrides` で、移動を Spawn の `motionPreset` / `motion` で渡す
 - `Attack/*`: 雑魚の攻撃（`Until(FrameElapsed){ Repeat{NWayShot} }` など）やボスの 1 フェーズ分の攻撃（`Sequence` + `Wait` / `Repeat` / `NWayShot` などの弾を撃つノード / `BulletBeam` など）
 - `Enemy/*`: 共通ツリーで表せない敵の専用ツリー（攻撃の途中で移動を変えるなど）
 
@@ -173,7 +183,7 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 
 - 定義: `Assets/Project/Scenes/Battle/Scripts/Runtime/Motion/MotionPreset.cs`（`Create > Battle > Motion Preset`）
 - `[SerializeReference] List<MotionStep> steps` を持つだけ。時間は秒指定。
-- `Move` の `preset`、共通ツリー `Enemy` の `movement` パラメータ、`BulletConfig.motionPreset`、`LoopMotion` のエントリから参照する。`Bullet_{弾Prefab名}` という名前のものは、旧形式で弾 Prefab 側に設定されていた移動を移行時に切り出したもの。
+- `Move` の `preset`、`Spawn.motionPreset`（共通ツリー `Enemy` の雑魚の移動）、`BulletConfig.motionPreset`、`LoopMotion` のエントリから参照する。`Bullet_{弾Prefab名}` という名前のものは、旧形式で弾 Prefab 側に設定されていた移動を移行時に切り出したもの。
 
 ### EaseCurveAsset
 

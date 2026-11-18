@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a99327086f23ed41abe7f2e8793f566, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ad8c3eac9f5d47448b44b0827100d56, type: 3}
   m_Name: S2_2_WayAzuma
   m_EditorClassIdentifier: 
   root:
@@ -102,14 +102,20 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: d60ab8ad084c3f6498e3efd174e18f68, type: 2}
           motion: []
           range: 0
+          lifetime: 480
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         - prefab: {fileID: -4487681364143076941, guid: 0adeecb1d4988fe4f88247da027fccc8, type: 3}
           prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 7cef9c86d81867345976be64d8a0b66a, type: 2}
           motion: []
           range: 0
+          lifetime: 480
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         shotCount: 24
         shotIntervalFrames: 5
         se: 0
@@ -131,6 +137,7 @@ MonoBehaviour:
         count:
           value: 0
           param: 
+        indexParam: 
     - rid: 8540147884261901053
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -396,7 +403,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 3a26df4201788774093a5c44da940981, type: 2}
           motion: []
           range: 0
+          lifetime: 300
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540147884261901067
         rotation:
@@ -426,7 +436,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 3a26df4201788774093a5c44da940981, type: 2}
           motion: []
           range: 0
+          lifetime: 300
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540147884261901081
         rotation:
@@ -456,7 +469,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 3a26df4201788774093a5c44da940981, type: 2}
           motion: []
           range: 0
+          lifetime: 300
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540147884261901078
         rotation:
@@ -486,7 +502,10 @@ MonoBehaviour:
           motionPreset: {fileID: 11400000, guid: 3a26df4201788774093a5c44da940981, type: 2}
           motion: []
           range: 0
+          lifetime: 300
           affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
         direction:
           rid: 8540147884261901075
         rotation:
@@ -621,3 +640,4 @@ MonoBehaviour:
         interval:
           value: 6
           param: 
+        indexParam: 

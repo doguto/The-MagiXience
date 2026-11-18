@@ -19,7 +19,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         {
             public int Frame;
             public int Order;
-            public BattleActor Owner;
+            public IAgent Owner;
             public bool HasOwner;
             public Action Action;
         }
@@ -30,7 +30,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         {
             Random = new Random(seed);
             this.bgmTimeProvider = bgmTimeProvider;
-            Services = new BattleServices();
+            Services = new BattleServices(this);
         }
 
         // 現在のステージ (道中/ボス戦) で宣言されたサービス。ステージ外では null
@@ -47,6 +47,27 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public Random Random { get; }
         public float BgmTime => bgmTimeProvider?.Invoke() ?? 0f;
         public BattleServices Services { get; }
+        // 弾や消えるときのツリーなど、頻繁に使うツリーの複製を使い回す
+        public TreePool Trees { get; } = new();
+
+        readonly List<EnemyAgent> despawning = new();
+        readonly List<Signal> outgoing = new();
+        readonly List<Signal> delivering = new();
+        int serialCounter;
+
+        internal int NextSerial() => ++serialCounter;
+
+        // 送り手によらず次のフレームの頭に届ける。ツリーを処理する順番で結果が変わらないようにするため
+        public void SendSignal(IAgent sender, string key, SignalTarget target, string group)
+        {
+            if (!string.IsNullOrEmpty(key)) outgoing.Add(new Signal(sender, key, target, group));
+        }
+
+        // 消える敵を登録する。消えるときのツリーと片付けは、このフレームの弾の処理の後にまとめて行う
+        internal void RequestDespawn(EnemyAgent agent)
+        {
+            if (!despawning.Contains(agent)) despawning.Add(agent);
+        }
 
         // 追加はそのフレームの終わりに反映する (Tick 中に敵が生まれても列挙が壊れないように)
         public void Register(IBattleTickable tickable)
@@ -57,7 +78,7 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         }
 
         // frame 後に action を実行する。owner を渡すと、その敵が倒れた/消えた時点で取り消す
-        public void Schedule(int delayFrames, Action action, BattleActor owner = null)
+        public void Schedule(int delayFrames, Action action, IAgent owner = null)
         {
             if (action == null) return;
             if (delayFrames <= 0 && (owner == null || owner.IsAlive))
@@ -68,13 +89,14 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             scheduled.Add(new Scheduled { Frame = Frame + delayFrames, Order = scheduleOrder++, Owner = owner, HasOwner = owner != null, Action = action });
         }
 
-        public void CancelScheduled(BattleActor owner)
+        public void CancelScheduled(IAgent owner)
         {
             scheduled.RemoveAll(s => s.HasOwner && s.Owner == owner);
         }
 
         public void Step()
         {
+            DeliverSignals();
             RunScheduled();
             FlushPending();
             for (var i = 0; i < tickables.Count; i++)
@@ -85,6 +107,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             tickables.RemoveAll(t => t.IsFinished);
 
             Services.Bullets.Tick(DeltaTime);
+            CompleteEnemyDespawns();
+            Services.Bullets.Flush(DeltaTime);
             Stage?.Tick(DeltaTime);
             AdvanceFrame();
         }
@@ -94,6 +118,9 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             tickables.Clear();
             pending.Clear();
             scheduled.Clear();
+            despawning.Clear();
+            outgoing.Clear();
+            Trees.Clear();
             SetStage(null);
         }
 
@@ -110,9 +137,37 @@ namespace Project.Scenes.Battle.Scripts.Runtime
             due.Sort((a, b) => a.Frame != b.Frame ? a.Frame.CompareTo(b.Frame) : a.Order.CompareTo(b.Order));
             foreach (var s in due)
             {
-                if (s.HasOwner && (s.Owner == null || !s.Owner.IsAlive)) continue;
+                if (s.HasOwner && !s.Owner.IsAlive) continue;
                 s.Action();
             }
+        }
+
+        void DeliverSignals()
+        {
+            if (outgoing.Count == 0) return;
+            delivering.AddRange(outgoing);
+            outgoing.Clear();
+            foreach (var signal in delivering)
+            {
+                Deliver(signal, tickables);
+                Deliver(signal, pending);
+                Services.Bullets.Deliver(signal, Frame);
+            }
+            delivering.Clear();
+        }
+
+        void Deliver(in Signal signal, List<IBattleTickable> list)
+        {
+            foreach (var t in list)
+            {
+                if (t is EnemyAgent enemy && enemy.IsAlive && signal.Reaches(enemy)) enemy.Signals.Add(signal.Key, Frame);
+            }
+        }
+
+        void CompleteEnemyDespawns()
+        {
+            for (var i = 0; i < despawning.Count; i++) despawning[i].CompleteDespawn();
+            despawning.Clear();
         }
 
         internal void AdvanceFrame() => Frame++;
