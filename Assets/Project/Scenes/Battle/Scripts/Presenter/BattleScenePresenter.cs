@@ -179,7 +179,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
             else
             {
-                pauseModal.Open();
+                pauseModal.Open(CalculateRetryHpIncreaseRate());
             }
         }
 
@@ -197,7 +197,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (gameOverModalForRetry != null)
             {
                 gameOverModalForRetry.OnRetryRequested
-                                     .Subscribe(_ => Retry(isContinue: true))
+                                     .Subscribe(_ => Retry())
                                      .AddTo(disposables);
                 gameOverModalForRetry.OnTitleRequested
                                      .Subscribe(_ => ReturnToTitle())
@@ -207,9 +207,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             var pauseModalForRetry = globalScenePresenter?.PauseModalPresenter;
             if (pauseModalForRetry != null)
             {
-                // ポーズからのリトライはコンティニュー扱いにしない（体力増加なし）
+                // ポーズからのリトライもコンティニュー扱い（体力増加あり）
                 pauseModalForRetry.OnRetryRequested
-                                  .Subscribe(_ => Retry(isContinue: false))
+                                  .Subscribe(_ => Retry())
                                   .AddTo(disposables);
                 pauseModalForRetry.OnTitleRequested
                                   .Subscribe(_ => ReturnToTitle())
@@ -217,9 +217,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        // isContinue: ゲームオーバーからのリトライ(コンティニュー)ならtrue。
-        //             trueの場合のみコンティニュー回数を進め、最大HPを増加させる。
-        void Retry(bool isContinue)
+        // リトライ(コンティニュー)。ゲームオーバー・ポーズのどちらからでもコンティニュー回数を進め、最大HPを増加させる。
+        // オプション「リトライ時にステージの最初からやり直す」がONの場合は完全に初期状態へ戻す。
+        void Retry()
         {
             StopBattle();
 
@@ -230,8 +230,17 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             playerPresenter?.Retry();
-            // コンティニュー時のみ回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
-            if (isContinue) continueCount++;
+            var fromStageStart = IsRetryFromStageStart();
+            if (fromStageStart)
+            {
+                // オプションON: 完全に初期状態へ戻す。コンティニュー回数・被弾履歴をリセットし、
+                // 体力は初期値のまま。クリアランク判定も通常通り行われる。
+                continueCount = 0;
+                playerPresenter?.ClearDamageHistory();
+                RuntimeModelRepository.Get().CheckpointSection = 0;
+            }
+            // 回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
+            else continueCount++;
             ApplyPlayerMaxHp();
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
@@ -338,6 +347,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 return;
             }
             Debug.LogError($"[BattleScenePresenter] ステージのツリーが {status} で終了しました", this);
+        }
+
+        // オプション「リトライ時にステージの最初からやり直す」が有効か
+        static bool IsRetryFromStageStart()
+        {
+            return UserModelRepository.Instance.Get().IsRetryFromStageStartEnabled;
         }
 
         // 現在のコンティニュー回数に応じた最大HPをPlayerに適用する。

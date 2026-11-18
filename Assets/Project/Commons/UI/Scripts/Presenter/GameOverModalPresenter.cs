@@ -44,6 +44,8 @@ namespace Project.Commons.UI.Scripts.Presenter
                 pauseEvent = globalScenePresenter.OptionModalPresenter.OnClosed.Subscribe(_ =>
                 {
                     gameObject.SetActive(true);
+                    // オプション画面で設定が変わっている可能性があるため反映し直す
+                    ApplyRetryOption();
                     gameOverModalView.InitStart();
                     pauseEvent?.Dispose();
                     pauseEvent = null;
@@ -68,7 +70,13 @@ namespace Project.Commons.UI.Scripts.Presenter
 
             gameObject.SetActive(true);
             gameOverModalView.SetRetryHpIncreaseRate(retryHpIncreaseRate);
+            ApplyRetryOption();
             gameOverModalView.InitStart();
+        }
+
+        void ApplyRetryOption()
+        {
+            gameOverModalView.SetRetryFromStageStart(UserModelRepository.Instance.Get().IsRetryFromStageStartEnabled);
         }
 
         void Retry()

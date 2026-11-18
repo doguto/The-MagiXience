@@ -46,6 +46,9 @@ namespace Project.Scripts.Model
 
         public void Open()
         {
+            // 未解放扱いにしているステージは、前のステージをクリアしても開放しない
+            if (UserModel.IsStageConcealed(StageData.stageNumber)) return;
+
             IsOpened = true;
         }
 

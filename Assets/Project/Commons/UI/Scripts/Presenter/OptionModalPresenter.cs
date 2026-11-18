@@ -49,6 +49,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             }).AddTo(this);
 
             optionModalView.OnMashSkipChanged.Subscribe(userModel.SetMashSkipEnabled).AddTo(this);
+            optionModalView.OnRetryFromStageStartChanged.Subscribe(userModel.SetRetryFromStageStartEnabled).AddTo(this);
 
             optionModalView.OnSeVolumeSelected.Subscribe(_ =>
             {
@@ -74,6 +75,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             optionModalView.SetBgmValueWithoutNotify(userModel.BgmVolume);
             optionModalView.SetSeValueWithoutNotify(userModel.SeVolume);
             optionModalView.SetMashSkipWithoutNotify(userModel.IsMashSkipEnabled);
+            optionModalView.SetRetryFromStageStartWithoutNotify(userModel.IsRetryFromStageStartEnabled);
         }
 
         public void Close()

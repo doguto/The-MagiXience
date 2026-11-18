@@ -105,7 +105,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.Reset();
             view.ResetDamageFlash();
-            view.ResetDamageOverlay();
             view.ResetChargeFlash();
             view.EnterRun();
             view.UpdatePosition(initialPosition);
@@ -138,10 +137,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model.CurrentHp
                  .Subscribe(hp => view.SetHpRatio((float)hp / model.MaxHp))
-                 .AddTo(disposables);
-
-            model.OnDamaged
-                 .Subscribe(_ => view.PlayDamageOverlay())
                  .AddTo(disposables);
 
             model.IsInvincible
@@ -326,6 +321,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         public bool HasTakenDamage => model.HasTakenDamage;
+        public void ClearDamageHistory() => model.ClearDamageHistory();
 
         // 最大HPを設定し、HPを満タンにする。コンティニュー回数に応じた体力調整に使用する。
         public void SetMaxHp(int newMaxHp)

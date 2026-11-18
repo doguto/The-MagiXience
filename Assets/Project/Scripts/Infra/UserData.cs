@@ -22,6 +22,8 @@ namespace Project.Scripts.Infra
         public int[] stageClearRanks;
         // シナリオで連打したとき確認なしでスキップするか
         public bool isMashSkipEnabled;
+        // リトライ時にステージの最初から完全にやり直すか（ONの場合はコンティニュー扱いにならない）
+        public bool isRetryFromStageStartEnabled;
 
         public UserData()
         {
@@ -33,6 +35,7 @@ namespace Project.Scripts.Infra
             textSpeed = DefaultTextSpeed;
             stageClearRanks = new int[0];
             isMashSkipEnabled = false;
+            isRetryFromStageStartEnabled = false;
         }
 
         // 読み込んだ値を正常な範囲へ補正する。不正なJSON(欠損・型不一致)はJsonUtilityにより

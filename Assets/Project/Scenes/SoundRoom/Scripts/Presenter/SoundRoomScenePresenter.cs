@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Scenes.SoundRoom.Scripts.View;
+using Project.Scenes.Title.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Model;
@@ -57,8 +58,13 @@ namespace Project.Scenes.SoundRoom.Scripts.Presenter
                 var indexText = bgmModels[i].IsSoundRoomSecret ? string.Empty : $"No.{++trackNumber:00}";
                 soundRoomView.SetTrack(i, indexText, GetTitle(i), bgmModels[i].SoundRoomBackgroundStageNumber);
             }
-            soundRoomView.Init(bgmModels.Count);
-            ShowTrackInfo(0);
+            // 背景はタイトルと同じ画像を使う
+            soundRoomView.SetBackGround(TitleModelRepository.Instance.Get().GetBackGroundSprites().backGround);
+
+            var isUnlockedList = bgmModels.Select(IsUnlocked).ToList();
+            var initialFocusIndex = Mathf.Max(0, isUnlockedList.IndexOf(true));
+            soundRoomView.Init(isUnlockedList, initialFocusIndex);
+            ShowTrackInfo(initialFocusIndex);
 
             soundRoomView.OnTrackFocused.Subscribe(ShowTrackInfo).AddTo(this);
             soundRoomView.OnTrackPressed.Subscribe(PlayTrack).AddTo(this);
@@ -74,7 +80,13 @@ namespace Project.Scenes.SoundRoom.Scripts.Presenter
 
         bool IsUnlocked(BgmModel model)
         {
-            return userModel.ClearedStageNumber >= model.SoundRoomUnlockClearedStage;
+            return userModel.ClearedStageNumber >= model.SoundRoomUnlockClearedStage && !IsConcealed(model);
+        }
+
+        // 未解放扱いにしているステージの曲は、解放条件を満たしていても未発見扱いにする
+        bool IsConcealed(BgmModel model)
+        {
+            return userModel.IsStageConcealed(model.SoundRoomBackgroundStageNumber);
         }
 
         bool IsUnlocked(int index) => IsUnlocked(bgmModels[index]);

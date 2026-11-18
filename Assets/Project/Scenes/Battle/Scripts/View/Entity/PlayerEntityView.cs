@@ -1,4 +1,3 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,21 +7,13 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
     {
         [Header("Damage Flash")]
         [SerializeField] SpriteRenderer bodySpriteRenderer;
-        [SerializeField] Color flashColor = Color.black;
+        [SerializeField] Color flashColor = Color.red;
 
         
         // memo: 白光りさせたかったが、SpriteRendererはデフォルトが白だから意味ないので黄色っぽくしている
         // 綺麗にやるなら別途スプライトを用意する必要あり？
         [Header("Charge Flash")]
         [SerializeField] Color chargeFlashColor = Color.white;
-
-        // 被ダメージ時に画面全体へ一瞬かける赤いオーバーレイ。画面全体を覆うUI Image（Raycast Target OFF）を割り当てる
-        [Header("Damage Overlay")]
-        [SerializeField] Image damageOverlayImage;
-        [Tooltip("オーバーレイの色。アルファ値が表示開始時の濃さになる")]
-        [SerializeField] Color damageOverlayColor = new(1f, 0f, 0f, 0.35f);
-        [Tooltip("表示開始から完全に消えるまでの秒数")]
-        [SerializeField] float damageOverlayFadeDuration = 0.4f;
 
         // memo: HpBarを大量に場に出すことになったら、Canvasを使わない設計にしたい
         // Claudeの提案；SpriteRenderer + Material Property （カスタムシェーダー）、9-Sliced Sprite + Size 直接操作、Quad Mesh自作 (最軽量だがやや手間)
@@ -65,7 +56,6 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         }
 
         Color originalBodyColor;
-        Tween damageOverlayTween;
         AnimationState currentState = AnimationState.Run;
         bool runFrozen;
         float frameTimer;
@@ -97,7 +87,6 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
             {
                 originalBodyColor = bodySpriteRenderer.color;
             }
-            ResetDamageOverlay();
             EnterStay();
         }
 
@@ -317,29 +306,6 @@ namespace Project.Scenes.Battle.Scripts.View.Entity
         {
             if (bodySpriteRenderer == null) return;
             bodySpriteRenderer.color = originalBodyColor;
-        }
-
-        public void PlayDamageOverlay()
-        {
-            if (damageOverlayImage == null) return;
-
-            damageOverlayTween?.Kill();
-            damageOverlayImage.color = damageOverlayColor;
-            damageOverlayTween = damageOverlayImage
-                .DOFade(0f, damageOverlayFadeDuration)
-                .SetEase(Ease.OutQuad)
-                .SetLink(gameObject);
-        }
-
-        public void ResetDamageOverlay()
-        {
-            damageOverlayTween?.Kill();
-            damageOverlayTween = null;
-            if (damageOverlayImage == null) return;
-
-            var color = damageOverlayColor;
-            color.a = 0f;
-            damageOverlayImage.color = color;
         }
 
         public void SetChargeFlashActive(bool active)
