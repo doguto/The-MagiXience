@@ -686,11 +686,13 @@ Until [Hold]  cond: BgmSamples(...)
  └─ Parallel
      ├─ Move (フェーズの移動)
      └─ If  cond: NormalHpDepleted
-         ├─ 1: Sequence[ EnterStrongMode, SubTree 発狂本体 ]
-         └─ 2: SubTree 通常本体
+         ├─ 1: Sequence[ EnterStrongMode, 発狂本体… ]
+         └─ 2: 通常本体
 ```
 
-フェーズ開始時に通常 HP が削り切られていれば 1 番目（発狂）、そうでなければ 2 番目（通常）を実行する。BGM の区切りと移動は発狂・通常で共通なので If の外に置く（Stage1 / Stage3 ボス）。Stage1 は各フェーズの攻撃を `Stage1/BT/Attack/S1_<フェーズ>_Strong` / `_Normal` に分けている。
+フェーズ開始時に通常 HP が削り切られていれば 1 番目（発狂）、そうでなければ 2 番目（通常）を実行する。BGM の区切りと移動は発狂・通常で共通なので If の外に置く（Stage1 / Stage3 ボス）。
+
+SubTree は複数箇所から使い回す攻撃・部品（プリセット）にだけ使い、1 箇所でしか使わない処理はツリーに直接書く。入れ子が深くなるとグラフで追いにくくなるため。
 
 ### HP 閾値までランダムにフェーズを選ぶ
 
