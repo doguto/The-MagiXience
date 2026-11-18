@@ -1,6 +1,5 @@
 using System;
 using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
@@ -23,9 +22,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             activeCount++;
             enemySpawned.OnNext(Unit.Default);
 
-            // 敵1体ごとに購読が積み上がらないよう、破棄通知を受けたら自身をdisposablesから外す
+            // プールで使い回す敵は破棄されないので、「場から消えた」通知で数える。
+            // 敵1体ごとに購読が積み上がらないよう、通知を受けたら自身をdisposablesから外す
             IDisposable subscription = null;
-            subscription = enemy.gameObject.OnDestroyAsObservable()
+            subscription = enemy.OnRemoved
                 .Take(1)
                 .Subscribe(_ =>
                 {

@@ -41,12 +41,15 @@ namespace Project.Editor
             string stageName = match.Groups[1].Value;
             string wayOrBoss = match.Groups[2].Value == "前" ? "Way" : "Boss";
 
-            string directory = $"Assets/Project/DataStore/Stage{stageName}/{wayOrBoss}";
-            if (!AssetDatabase.IsValidFolder(directory))
+            // ステージツリーの Scenario ノードがこのアセットを直接参照するので、同じパスへ上書きして参照を保つ
+            string stageDirectory = $"Assets/Project/DataStore/Stage{stageName}";
+            string directory = $"{stageDirectory}/Scenario";
+            if (!AssetDatabase.IsValidFolder(stageDirectory))
             {
-                Debug.LogError($"出力先フォルダが存在しません: {directory}");
+                Debug.LogError($"出力先フォルダが存在しません: {stageDirectory}");
                 return;
             }
+            if (!AssetDatabase.IsValidFolder(directory)) AssetDatabase.CreateFolder(stageDirectory, "Scenario");
 
             ImportScenario(path, $"{directory}/Stage{stageName}{wayOrBoss}Scenario.asset");
         }

@@ -74,7 +74,7 @@ namespace Project.Scenes.Title.Scripts.Presenter
 
             var runtimeModel = RuntimeModelRepository.Get();
             runtimeModel.CurrentStageType = BattleStageType.Stage1;
-            runtimeModel.CurrentSituation = BattleSituation.Way;
+            runtimeModel.CheckpointSection = 0;
 
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, gameObject.scene.name);
         }

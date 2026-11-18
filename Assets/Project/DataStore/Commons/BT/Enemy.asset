@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ad8c3eac9f5d47448b44b0827100d56, type: 3}
+  m_Name: Enemy
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147974269042804
+  detachedNodes: []
+  parameters:
+  - name: attack
+    kind: 4
+    floatValue: 0
+    intValue: 0
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  - name: death
+    kind: 4
+    floatValue: 0
+    intValue: 0
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147960821842815
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: c5aaff1e44054830a34c07a45f07ad8a
+        graphPosition: {x: 160, y: 160}
+        comment: 
+        children:
+        - rid: 8540147960821842816
+        - rid: 8540147960821842818
+    - rid: 8540147960821842816
+      type: {class: SetDespawnBehavior, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 6d70c7b354464b1982cac15ad4b58818
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        tree: {fileID: 0}
+        treeParam: death
+        reasons: 1
+    - rid: 8540147960821842818
+      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: f06d4ede45ad4d478742d965259f1561
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        tree: {fileID: 0}
+        treeParam: attack
+        overrides: []
+    - rid: 8540147974269042804
+      type: {class: Parallel, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 8d00b4802bf1429a9cd66e6393758d01
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        children:
+        - rid: 8540148020670627913
+        - rid: 8540147960821842815
+        policy: 0
+        duration:
+          value: 0
+          param: 
+    - rid: 8540148020670627913
+      type: {class: MoveSelf, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 0d5c91ed2705493ab4e7d111193c6afe
+        graphPosition: {x: -160, y: 160}
+        comment: 

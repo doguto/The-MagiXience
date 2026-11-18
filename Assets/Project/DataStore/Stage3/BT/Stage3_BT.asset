@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad8d74a6da2b57c4288abee5efee3baf, type: 3}
+  m_Name: Stage3_BT
+  m_EditorClassIdentifier: 
+  services:
+  - rid: 8540147960821842563
+  tree: {fileID: 11400000, guid: 37d24793ee9a00345bbc5aef09f5ec23, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147960821842563
+      type: {class: WindServiceDefinition, ns: Project.Scenes.Battle.Scripts.Runtime, asm: Presenter}
+      data:
+        initial:
+          enabled: 0
+          startSe: 0
+          playerSpeedRatio: 0.2
+          intervals: []
+          bulletAcceleration: 3
+          bulletDrag: 0.6
+        arrowsPrefab: {fileID: 4716998419276244145, guid: aa540362359578e4f9ed75f3b221a0d2, type: 3}

@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 687098778609101120}
   - component: {fileID: 3404090275090801080}
   m_Layer: 10
-  m_Name: ChorusBall
+  m_Name: 1_ChorusBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -173,18 +173,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfd5daf7fba3164387b3052b7eeb571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSteps:
-  - rid: 454448126278500352
   view: {fileID: -4247039310025859046}
   spriteRenderer: {fileID: 1794115724145055288}
-  lifetime: 100
-  references:
-    version: 2
-    RefIds:
-    - rid: 454448126278500352
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        velocity: {x: -1, y: 0, z: 0}
+  forceInfluence: 1
 --- !u!50 &687098778609101120
 Rigidbody2D:
   serializedVersion: 5

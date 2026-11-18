@@ -161,23 +161,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfd5daf7fba3164387b3052b7eeb571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSteps:
-  - rid: 3310600359757742436
-  - rid: 3310600359757742429
   view: {fileID: 4330750818476369800}
   spriteRenderer: {fileID: 5248511050965479480}
-  lifetime: 8
-  references:
-    version: 2
-    RefIds:
-    - rid: 3310600359757742429
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        velocity: {x: -1, y: 0, z: 0}
-    - rid: 3310600359757742436
-      type: {class: InvincibleFadeMoveMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        duration: 0.2
-        velocity: {x: -0.3, y: 0, z: 0}
-        startAlpha: 0
-        endAlpha: 1
+  forceInfluence: 1

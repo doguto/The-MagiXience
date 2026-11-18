@@ -37,8 +37,6 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         public void Initialize(BattleBackgroundModel backgroundModel)
         {
-            if (RuntimeModelRepository.Get().CurrentSituation == BattleSituation.Way) currentSpeed = scrollSpeed;
-
             backgroundModel.CurrentBackground
                            .Subscribe(sprite => view?.SetSprite(sprite))
                            .AddTo(disposables);

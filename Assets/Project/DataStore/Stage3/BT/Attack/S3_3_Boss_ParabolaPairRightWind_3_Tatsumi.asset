@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
+  m_Name: S3_3_Boss_ParabolaPairRightWind_3_Tatsumi
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147886565097814
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147884263997660
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        angle:
+          value: 180
+          param: 
+    - rid: 8540147884263997661
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147884263997663
+      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        angle:
+          value: 180
+          param: 
+    - rid: 8540147884263997664
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147886565097814
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 3cf04f6c08c74a2881b1e39a69c9a324
+        graphPosition: {x: 115, y: 150}
+        comment: 
+        children:
+        - rid: 8540147961671975533
+        - rid: 8540147961671975534
+    - rid: 8540147961671975533
+      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 560923431bd74830a01757a24f636c74
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000033
+          range: 0
+          lifetime: 720
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+        direction:
+          rid: 8540147884263997660
+        rotation:
+          rid: 8540147884263997661
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+    - rid: 8540147961671975534
+      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 4916de0aa1ae499aaac3437681e52532
+        graphPosition: {x: 230, y: 300}
+        comment: 
+        bullet:
+          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000034
+          range: 0
+          lifetime: 720
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+        direction:
+          rid: 8540147884263997663
+        rotation:
+          rid: 8540147884263997664
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+    - rid: 8540150000000000033
+      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        orientation: 0
+        vertex: {x: -5, y: -3.6}
+        initialSpeed: 8
+        isRelative: 1
+        oscillateVertex: 1
+        vertexAmplitude: {x: 1.5, y: 1.2}
+        vertexAngularSpeed: {x: 0.75, y: 0.677}
+        attackTimeOffset: -3.74
+    - rid: 8540150000000000034
+      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        orientation: 0
+        vertex: {x: -5, y: 3.6}
+        initialSpeed: 8
+        isRelative: 1
+        oscillateVertex: 1
+        vertexAmplitude: {x: 1.5, y: -1.2}
+        vertexAngularSpeed: {x: 0.75, y: 0.677}
+        attackTimeOffset: -3.74

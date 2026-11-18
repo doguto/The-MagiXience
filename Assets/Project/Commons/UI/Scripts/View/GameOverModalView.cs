@@ -3,7 +3,6 @@ using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 namespace Project.Commons.UI.Scripts.View
 {
@@ -12,7 +11,6 @@ namespace Project.Commons.UI.Scripts.View
         [SerializeField] SimpleButton retryButton;
         [SerializeField] SimpleButton optionButton;
         [SerializeField] SimpleButton exitButton;
-        [FormerlySerializedAs("retryTipText")]
         [SerializeField] TMP_Text tipText;
 
         public const string RetryTipFormat = "Rewrite: 次回リトライ時、主人公の体力を {0}% 増加した状態に書き換える。";

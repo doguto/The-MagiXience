@@ -1,0 +1,593 @@
+/* Unity 標準エディタ (Shader Graph / Inspector) に合わせた配色・密度 */
+
+/* ---------- Graph ---------- */
+
+.bt-graph {
+    background-color: #202020;
+}
+
+.bt-graph GridBackground {
+    --grid-background-color: #202020;
+    --line-color: rgba(255, 255, 255, 0.035);
+    --thick-line-color: rgba(255, 255, 255, 0.07);
+    --spacing: 20;
+}
+
+.bt-graph .edge {
+    --edge-width: 2;
+    --edge-color: #7a7a7a;
+    --selected-edge-color: #3a99ff;
+}
+
+.bt-graph .edge:hover {
+    --edge-color: #a8a8a8;
+}
+
+/* ---------- Node ---------- */
+
+.bt-node {
+    min-width: 240px;
+    max-width: 360px;
+    overflow: visible;
+}
+
+.bt-node #node-border {
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: #1a1a1a;
+    background-color: #2f2f2f;
+    overflow: visible;
+}
+
+.bt-node #selection-border {
+    border-radius: 4px;
+}
+
+.bt-node:hover #selection-border {
+    border-color: rgba(255, 255, 255, 0.25);
+    border-width: 1px;
+}
+
+.bt-node:checked #selection-border,
+.bt-node:selected #selection-border {
+    border-color: #3a99ff;
+    border-width: 2px;
+}
+
+.bt-node #title,
+.bt-node #top {
+    display: none;
+}
+
+.bt-node #contents,
+.bt-node #collapsible-area {
+    background-color: transparent;
+    overflow: visible;
+}
+
+.bt-node.bt-running #node-border {
+    border-color: #e8a23a;
+    border-width: 2px;
+}
+
+.bt-node.bt-drop-target #node-border {
+    border-color: #3a99ff;
+    border-width: 2px;
+}
+
+/* ---------- Ports ---------- */
+/* ポートはノード内の上端/下端に置く。はみ出させると当たり判定から外れる */
+
+.bt-port-row {
+    flex-direction: row;
+    justify-content: center;
+    height: 16px;
+}
+
+.bt-port-row--in {
+    background-color: #3b3b3b;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.bt-port-row .port {
+    height: 16px;
+    width: 56px;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.bt-port-row .port #type {
+    display: none;
+}
+
+.bt-port-row .port #connector {
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    border-width: 1px;
+    border-color: #9a9a9a;
+    background-color: #2a2a2a;
+}
+
+.bt-port-row .port:hover #connector {
+    border-color: #ffffff;
+}
+
+/* ---------- Header ---------- */
+
+.bt-header {
+    flex-direction: row;
+    align-items: center;
+    height: 30px;
+    padding: 0 10px 2px 10px;
+    background-color: #3b3b3b;
+}
+
+.bt-marker {
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.bt-title {
+    flex-grow: 1;
+    color: #e0e0e0;
+    font-size: 15px;
+    -unity-font-style: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bt-order {
+    color: #8c8c8c;
+    font-size: 13px;
+    margin-left: 6px;
+}
+
+/* ---------- Body ---------- */
+
+.bt-body {
+    padding: 6px 8px 6px 8px;
+    font-size: 13px;
+}
+
+.bt-body .unity-base-field {
+    margin: 2px 0;
+    min-height: 22px;
+}
+
+.bt-body .unity-base-field__label {
+    min-width: 90px;
+    width: 90px;
+    color: #9d9d9d;
+}
+
+.bt-summary {
+    color: #b0b0b0;
+    font-size: 13px;
+    margin: 3px 2px 0 2px;
+    white-space: normal;
+}
+
+/* ---------- Category markers ---------- */
+
+.bt-node--composite .bt-marker,
+.bt-palette__item.bt-node--composite .bt-marker { background-color: #5b8dd9; }
+
+.bt-node--decorator .bt-marker,
+.bt-palette__item.bt-node--decorator .bt-marker { background-color: #d9a35b; }
+
+.bt-node--action .bt-marker,
+.bt-palette__item.bt-node--action .bt-marker { background-color: #6bbf7a; }
+
+.bt-node--condition .bt-marker,
+.bt-palette__item.bt-node--condition .bt-marker { background-color: #a98ad9; }
+
+.bt-node--subtree .bt-marker,
+.bt-palette__item.bt-node--subtree .bt-marker { background-color: #c46bbf; }
+
+.bt-node .bt-header { border-bottom-width: 2px; }
+.bt-node--composite .bt-header { border-bottom-color: #5b8dd9; }
+.bt-node--decorator .bt-header { border-bottom-color: #d9a35b; }
+.bt-node--action .bt-header { border-bottom-color: #6bbf7a; }
+.bt-node--condition .bt-header { border-bottom-color: #a98ad9; }
+.bt-node--subtree .bt-header { border-bottom-color: #c46bbf; }
+
+/* ---------- Root ---------- */
+
+.bt-node--root {
+    min-width: 80px;
+}
+
+.bt-node--root .bt-header {
+    justify-content: center;
+    height: 30px;
+    padding: 0 12px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.bt-node--root .bt-title {
+    flex-grow: 0;
+    -unity-text-align: middle-center;
+}
+
+/* ---------- Value field (BtXxx) ---------- */
+
+.bt-value {
+    flex-direction: row;
+    align-items: center;
+    margin: 2px 0;
+    min-height: 22px;
+}
+
+.bt-value__label {
+    min-width: 90px;
+    width: 90px;
+    color: #9d9d9d;
+    padding-left: 1px;
+}
+
+.bt-value__field {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.bt-value__field .unity-base-field {
+    margin: 0;
+}
+
+.bt-value__field .unity-base-field__label {
+    display: none;
+}
+
+.bt-value__bound {
+    flex-grow: 1;
+    height: 22px;
+    padding: 0 5px;
+    -unity-text-align: middle-left;
+    background-color: #242424;
+    border-width: 1px;
+    border-color: #1c1c1c;
+    border-radius: 3px;
+    color: #c9a6ff;
+}
+
+.bt-value__bound--missing {
+    color: #ff8a80;
+    border-color: #7a3030;
+}
+
+.bt-value__menu {
+    width: 20px;
+    height: 22px;
+    margin: 0 0 0 2px;
+    padding: 0;
+    font-size: 11px;
+    color: #9d9d9d;
+}
+
+.bt-value--drop {
+    background-color: rgba(58, 153, 255, 0.15);
+}
+
+.bt-overrides__header {
+    margin: 6px 0 2px 1px;
+    color: #9d9d9d;
+    -unity-font-style: bold;
+}
+
+.bt-overrides__note {
+    margin: 2px 0 2px 1px;
+    color: #7a7a7a;
+}
+
+.bt-override--default .bt-value__field {
+    opacity: 0.5;
+}
+
+/* ---------- Palette (左ペイン) ---------- */
+
+.bt-palette {
+    min-width: 160px;
+    background-color: #383838;
+    border-right-width: 1px;
+    border-right-color: #232323;
+}
+
+.bt-palette__search {
+    margin: 6px;
+    width: auto;
+}
+
+.bt-palette__scroll {
+    flex-grow: 1;
+}
+
+.bt-palette__group {
+    margin: 0;
+}
+
+.bt-palette__group > Toggle {
+    margin: 0;
+    height: 20px;
+    padding-left: 4px;
+}
+
+.bt-palette__group > Toggle Label {
+    -unity-font-style: bold;
+    color: #d6d6d6;
+}
+
+.bt-palette__group > #unity-content {
+    margin-left: 0;
+}
+
+.bt-palette__item {
+    flex-direction: row;
+    align-items: center;
+    height: 20px;
+    padding-left: 22px;
+}
+
+.bt-palette__item:hover {
+    background-color: #454545;
+}
+
+.bt-palette__item:active {
+    background-color: #2c5d87;
+}
+
+.bt-palette__item .bt-marker {
+    margin-right: 8px;
+}
+
+.bt-palette__item-label {
+    color: #c4c4c4;
+    font-size: 12px;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bt-palette__item:active .bt-palette__item-label {
+    color: #ffffff;
+}
+
+.bt-palette__description {
+    padding: 8px 10px;
+    min-height: 48px;
+    border-top-width: 1px;
+    border-top-color: #2a2a2a;
+    color: #9d9d9d;
+    font-size: 11px;
+    white-space: normal;
+}
+
+/* ---------- Parameters (右ペイン / Blackboard) ---------- */
+
+.bt-params {
+    min-width: 200px;
+    background-color: #2f2f2f;
+    border-left-width: 1px;
+    border-left-color: #232323;
+}
+
+.bt-params__header {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px 6px 10px;
+}
+
+.bt-params__title {
+    color: #e6e6e6;
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.bt-params__subtitle {
+    color: #8c8c8c;
+    font-size: 11px;
+}
+
+.bt-params__add {
+    width: 22px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+.bt-params__columns {
+    flex-direction: row;
+    height: 18px;
+    align-items: center;
+    padding: 0 10px;
+    border-top-width: 1px;
+    border-top-color: #232323;
+    border-bottom-width: 1px;
+    border-bottom-color: #262626;
+    background-color: #353535;
+}
+
+.bt-params__columns Label {
+    color: #8c8c8c;
+    font-size: 11px;
+}
+
+.bt-params__columns #name { flex-grow: 1; }
+.bt-params__columns #type { width: 48px; }
+.bt-params__columns #value { width: 72px; }
+
+.bt-params__scroll {
+    flex-grow: 1;
+}
+
+.bt-params__row {
+    flex-direction: row;
+    align-items: center;
+    height: 22px;
+    padding: 0 6px 0 6px;
+    border-bottom-width: 1px;
+    border-bottom-color: #262626;
+}
+
+.bt-params__row:hover {
+    background-color: #363636;
+}
+
+.bt-params__row--selected,
+.bt-params__row--selected:hover {
+    background-color: #2c5d87;
+}
+
+.bt-params__name {
+    flex-grow: 1;
+    margin: 0;
+}
+
+.bt-params__name #unity-text-input {
+    background-color: transparent;
+    border-color: transparent;
+    color: #d6d6d6;
+}
+
+.bt-params__name:focus #unity-text-input {
+    background-color: #242424;
+    border-color: #3a99ff;
+}
+
+.bt-params__row--selected .bt-params__name #unity-text-input {
+    color: #ffffff;
+}
+
+.bt-params__kind {
+    width: 48px;
+    color: #8c8c8c;
+    cursor: move-arrow;
+}
+
+.bt-params__row--selected .bt-params__kind {
+    color: #cfe2f5;
+}
+
+.bt-params__value {
+    width: 72px;
+}
+
+.bt-params__value .unity-base-field {
+    margin: 0;
+}
+
+.bt-params__value .unity-base-field__label {
+    display: none;
+}
+
+.bt-params__empty {
+    padding: 8px 10px;
+    color: #7a7a7a;
+}
+
+.bt-params__footer {
+    flex-direction: row;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 6px 0 10px;
+    border-top-width: 1px;
+    border-top-color: #232323;
+}
+
+.bt-params__footer-text {
+    flex-grow: 1;
+    color: #8c8c8c;
+    font-size: 11px;
+}
+
+.bt-params__select {
+    height: 18px;
+    margin: 0;
+}
+
+/* ---------- 右ペインのタブ (Node / Parameters) ---------- */
+
+.bt-side-tabs {
+    flex-grow: 1;
+    min-width: 240px;
+    background-color: #2f2f2f;
+    border-left-width: 1px;
+    border-left-color: #232323;
+}
+
+.bt-side-tabs .unity-tab-view__content-container,
+.bt-side-tabs .unity-tab__content-container {
+    flex-grow: 1;
+}
+
+.bt-side-tabs .bt-params {
+    flex-grow: 1;
+    border-left-width: 0;
+}
+
+.bt-inspector,
+.bt-inspector__scroll {
+    flex-grow: 1;
+}
+
+.bt-inspector__header {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px 4px 10px;
+}
+
+.bt-inspector__title {
+    color: #e6e6e6;
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.bt-inspector__category {
+    color: #8c8c8c;
+    font-size: 11px;
+}
+
+.bt-inspector__description {
+    color: #c8c8c8;
+    white-space: normal;
+    padding: 2px 10px 6px 10px;
+}
+
+.bt-inspector__state {
+    color: #8c8c8c;
+    padding: 0 10px 4px 10px;
+}
+
+.bt-inspector__state--active {
+    color: #6fcf6f;
+}
+
+.bt-inspector__summary {
+    color: #b0b0b0;
+    white-space: normal;
+    padding: 0 10px 6px 10px;
+}
+
+.bt-inspector__fields {
+    padding: 6px 10px 10px 10px;
+    border-top-width: 1px;
+    border-top-color: #232323;
+}
+
+.bt-inspector__fields .unity-base-field__label {
+    min-width: 110px;
+    width: 110px;
+    color: #9d9d9d;
+}
+
+.bt-inspector__empty {
+    color: #8c8c8c;
+    white-space: normal;
+    padding: 12px 10px;
+}

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UniRx;
-using Project.Scenes.Battle.Scripts.Presenter;
 using Project.Scenes.Global.Scripts.Presenter;
 using Project.Scenes.Scenario.Scripts.Model;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
@@ -328,38 +327,6 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     continue;
                 }
 
-                if (step.function == "SpawnBoss")
-                {
-                    var battleScenePresenter = FindFirstObjectByType<BattleScenePresenter>();
-                    if (battleScenePresenter != null)
-                    {
-                        battleScenePresenter.SpawnBoss();
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[ScenarioScenePresenter] BattleScenePresenter not found, cannot spawn boss.");
-                    }
-
-                    scenarioModel.Next();
-                    continue;
-                }
-
-                if (step.function == "PlayBossBgm")
-                {
-                    var battleScenePresenter = FindFirstObjectByType<BattleScenePresenter>();
-                    if (battleScenePresenter != null)
-                    {
-                        battleScenePresenter.PlayBossBgm();
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[ScenarioScenePresenter] BattleScenePresenter not found, cannot play boss BGM.");
-                    }
-
-                    scenarioModel.Next();
-                    continue;
-                }
-
                 if (step.function == "HideCast")
                 {
                     var characterName = step.args.Length > 0 ? step.args[0] : "";
@@ -403,6 +370,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                     continue;
                 }
 
+                if (!ScenarioData.IsPresentation(step.function))
+                {
+                    MessageBroker.Default.Publish(new ScenarioCommandMessage(step.function, step.args));
+                }
+
                 scenarioModel.Next();
             }
 
@@ -411,11 +383,7 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
                 if (isCompleted) return;
                 isCompleted = true;
 
-                Debug.Log("[ScenarioScenePresenter] Scenario End. Advance to Next Sequence");
-
-                // シナリオ完了時にSituationを変更
-                var runtimeModel = RuntimeModelRepository.Instance.Get();
-                runtimeModel.AdvanceToNextSequence();
+                Debug.Log("[ScenarioScenePresenter] Scenario End.");
 
                 scenarioCompleted.OnNext(Unit.Default);
                 // シナリオシーンをアンロード

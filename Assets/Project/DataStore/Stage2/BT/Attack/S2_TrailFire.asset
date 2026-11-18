@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
+  m_Name: S2_TrailFire
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147960821841999
+  detachedNodes: []
+  parameters:
+  - name: path
+    kind: 4
+    floatValue: 0
+    intValue: 0
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 11400000, guid: e59bcf9ea176191498b396348b9f6d6e, type: 2}
+    bindToParent: 
+  - name: bullet
+    kind: 4
+    floatValue: 0
+    intValue: 0
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: -4487681364143076941, guid: d1b918877e4c9a84191c8ecacbd1c714, type: 3}
+    bindToParent: 
+  - name: spacing
+    kind: 0
+    floatValue: 0.4
+    intValue: 0
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  - name: fireDelay
+    kind: 1
+    floatValue: 0
+    intValue: 0
+    boolValue: 0
+    vector2Value: {x: 0, y: 0}
+    objectValue: {fileID: 0}
+    bindToParent: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147960821841999
+      type: {class: Parallel, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 56c4855d55c04916aefd94eb5f2c6232
+        graphPosition: {x: -110, y: 150}
+        comment: 
+        children:
+        - rid: 8540147960821842000
+        - rid: 8540147960821842001
+        policy: 0
+        duration:
+          value: 0
+          param: 
+    - rid: 8540147960821842000
+      type: {class: MovePath, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 7b7a39990bcc483c992590c5f8201917
+        graphPosition: {x: -240, y: 300}
+        comment: 
+        path:
+          value: {fileID: 0}
+          param: path
+    - rid: 8540147960821842001
+      type: {class: PlaceAlongPath, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d62263d179a74a06bf8cc7d7ba746f23
+        graphPosition: {x: 20, y: 300}
+        comment: 
+        path:
+          value: {fileID: 0}
+          param: path
+        bullet:
+          prefab: {fileID: -4487681364143076941, guid: d1b918877e4c9a84191c8ecacbd1c714, type: 3}
+          prefabParam: bullet
+          damage: 10
+          motionPreset: {fileID: 0}
+          motion:
+          - rid: 8540150000000000023
+          range: 0
+          lifetime: 480
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+        spacing:
+          value: 0.4
+          param: spacing
+        fireDelayFrames:
+          value: 0
+          param: fireDelay
+        rotation:
+          rid: 8540147960821842002
+        se: 0
+    - rid: 8540147960821842002
+      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540150000000000023
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -3, y: 0, z: 0}
+        duration: 0

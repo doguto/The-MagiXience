@@ -1,7 +1,5 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-using System;
 using Project.Scripts.Extensions.Message;
-using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
 using UniRx;
 using UnityEngine;
@@ -11,8 +9,9 @@ namespace Project.Commons.Debugger.Scripts.Presenter
     public class DebugRuntimeModelInitializer : MonoBehaviour
     {
         [SerializeField] [Min(1)] int stageNumber = 1;
-        [SerializeField] BattleSituation situation = BattleSituation.Way;
-        [SerializeField] [Min(0)] int startPhaseIndex;
+        [SerializeField, Min(0), Tooltip("開始する Section の番号 (ステージツリーの Stage 直下の並び順)")] int startSection;
+        [SerializeField, Tooltip("ボス戦をこの Phase から始める。空なら最初から")] string bossStartPhase;
+        [SerializeField, Range(1f, 100f), Tooltip("ボス戦開始時のボスの HP (%)")] float bossStartHpPercent = 100f;
 
         void Awake()
         {
@@ -23,8 +22,8 @@ namespace Project.Commons.Debugger.Scripts.Presenter
                 return;
             }
 
-            runtimeModel.SetForDebug(stageNumber, situation, startPhaseIndex);
-            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, Situation={situation}, StartPhaseIndex={startPhaseIndex} に設定しました");
+            runtimeModel.SetForDebug(stageNumber, startSection, bossStartPhase, bossStartHpPercent);
+            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, StartSection={startSection}, BossPhase={bossStartPhase}, BossHp={bossStartHpPercent}% に設定しました");
         }
 
         void Start()

@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
@@ -7,9 +6,13 @@ using UnityEngine.SceneManagement;
 using Project.Scenes.Battle.Scripts.Model;
 using Project.Scripts.Model;
 using Project.Scripts.Repository.ModelRepository;
-using Project.Scenes.Battle.Scripts.Repository.ModelRepository;
+using Project.Scenes.Battle.Scripts.BehaviorTree;
+using Project.Scenes.Battle.Scripts.Runtime;
+using UnityEngine.AddressableAssets;
 using Project.Scenes.Battle.Scripts.Presenter.Entity;
 using Project.Scenes.Battle.Scripts.View;
+using Project.Scenes.Scenario.Scripts.Model;
+using Project.Scenes.Scenario.Scripts.Presenter;
 using Project.Scenes.Scenario.Scripts.Repository.ModelRepository;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
@@ -18,9 +21,9 @@ using Project.Scenes.Global.Scripts.Presenter;
 
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
-    public class BattleScenePresenter : MonoPresenter
+    // ステージのツリーを動かし、ツリーから届く出来事 (Section の開始・ボスの出現・会話・BGM) にシーン側の演出で応える
+    public class BattleScenePresenter : MonoPresenter, IScenarioService
     {
-        [SerializeField] BattlePhaseStateMachine phaseStateMachine;
         [SerializeField] EnemyTracker enemyTracker;
         [SerializeField] BackgroundPresenter backgroundPresenter;
         [SerializeField] BulletClearReceiver bulletClearReceiver;
@@ -30,40 +33,47 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         [Tooltip("コンティニュー回数に応じたPlayerの最大HP。index=コンティニュー回数（0=初回）。回数がテーブル長を超えた場合は末尾の値を使用する。")]
         [SerializeField] int[] continueHpTable = { 100 };
 
-        BattleSequenceModelRepository sequenceModelRepository;
+        BattleClock battleClock;
+        BattleFlow flow;
         readonly Subject<Unit> battleCompleted = new();
         readonly CompositeDisposable disposables = new();
 
         StageModel stageModel;
-        BattleSequenceModel waySequence;
-        BattleSequenceModel bossSequence;
+        BattleStageAsset stage;
         readonly BattleBackgroundModel backgroundModel = new();
-        Action pendingScenarioCallback;
         PlayerEntityPresenter playerPresenter;
-        BossEntityPresenter bossPresenter;
-        CompositeDisposable bossDisposables = new();
-        bool isSceneLoadedHandlerRegistered = false;
 
         IDisposable sceneNavigationSubscription;
 
         public IObservable<Unit> OnBattleCompleted => battleCompleted;
 
-        bool isBattleStarted;
-        bool hasResumedPlayerAnimationOnBoss;
         bool hasShownTutorial;
+        // StartStage 直後の最初の Section で背景の初期状態を決める
+        bool awaitingFirstSection;
 
         // コンティニュー回数。バトルシーン内でのみ保持し、シーン遷移でリセットされる。
         int continueCount;
-        CancellationTokenSource sequenceTransitionCts;
-        IDisposable scenarioCompletedSubscription;
         IDisposable tutorialClosedSubscription;
+
+        // 再生中の会話。会話シーンの読み込み・コマンドの受け取り・終了の購読をまとめて破棄できるようにする
+        ScenarioCommandQueue currentScenario;
+        readonly CompositeDisposable scenarioSubscriptions = new();
+        bool isSceneLoadedHandlerRegistered;
+        bool restorePlayerControlAfterScenario;
 
         void Awake()
         {
-            sequenceModelRepository = new BattleSequenceModelRepository(enemyTracker);
-            sequenceModelRepository.SetBossModelProvider(() => bossPresenter != null ? bossPresenter.Model : null);
-            sequenceModelRepository.SetBgmAudioSourceProvider(() => soundManager != null ? soundManager.BgmAudioSource : null);
-            phaseStateMachine ??= GetComponent<BattlePhaseStateMachine>();
+            battleClock = GetComponent<BattleClock>() ?? gameObject.AddComponent<BattleClock>();
+            flow = new BattleFlow(battleClock, enemyTracker, bulletClearReceiver,
+                () => soundManager != null ? soundManager.BgmAudioSource : null,
+                se => soundManager?.PlaySE(se));
+            flow.Background = backgroundPresenter;
+            flow.Scenario = this;
+            flow.PlayBgm = PlayBgm;
+            flow.OnSectionStarted.Subscribe(x => OnSectionStarted(x.Index, x.Situation)).AddTo(disposables);
+            flow.OnBossSpawned.Subscribe(_ => OnBossSpawned()).AddTo(disposables);
+            flow.OnBossBattleStarted.Subscribe(OnBossBattleStarted).AddTo(disposables);
+            flow.OnStageFinished.Subscribe(OnStageFinished).AddTo(disposables);
             ScreenBoundsCache.Initialize(GlobalScenePresenter.OrthographicSize, GlobalScenePresenter.TargetAspect);
 
             sceneNavigationSubscription = MessageBroker.Default.Receive<SceneNavigationMessage>().Subscribe(message =>
@@ -81,19 +91,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             base.Start();
 
-            if (!phaseStateMachine)
-            {
-                Debug.LogError("BattlePhaseStateMachine is not assigned.", this);
-                return;
-            }
-
-            phaseStateMachine.OnSequenceCompleted
-                             .Subscribe(HandleSequenceCompleted)
-                             .AddTo(disposables);
-
             SubscribeToPauseInput();
 
-            // 1面道中の初回開始時はチュートリアルモーダルを表示し、閉じてからシーケンスを開始する
+            // 1面の頭から始めるときはチュートリアルモーダルを表示し、閉じてから開始する
             if (ShouldShowTutorial())
             {
                 ShowTutorialThenStart();
@@ -110,8 +110,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             var runtimeModel = RuntimeModelRepository.Get();
             var isStage1 = runtimeModel.CurrentStageType.AsInt() == 1;
-            var isWay = runtimeModel.CurrentSituation == BattleSituation.Way;
-            if (!isStage1 || !isWay) return false;
+            if (!isStage1 || runtimeModel.CheckpointSection != 0) return false;
 
             return globalScenePresenter?.TutorialModalPresenter != null;
         }
@@ -222,47 +221,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         // オプション「リトライ時にステージの最初からやり直す」がONの場合は完全に初期状態へ戻す。
         void Retry()
         {
-            phaseStateMachine.Stop();
-            playerPresenter?.CancelCharge();
-
-            // シナリオ遷移待ち中のDelayや、シーンロード待ちハンドラ・購読をすべて解除
-            sequenceTransitionCts?.Cancel();
-            sequenceTransitionCts?.Dispose();
-            sequenceTransitionCts = null;
-
-            if (isSceneLoadedHandlerRegistered)
-            {
-                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
-                isSceneLoadedHandlerRegistered = false;
-            }
-
-            scenarioCompletedSubscription?.Dispose();
-            scenarioCompletedSubscription = null;
-
-            bossDisposables.Dispose();
-            bossDisposables = new CompositeDisposable();
-            phaseStateMachine.SetTimelineResolver(null);
-
-            if (bossPresenter != null)
-            {
-                Destroy(bossPresenter.gameObject);
-                bossPresenter = null;
-            }
+            StopBattle();
 
             if (bulletClearReceiver != null)
             {
                 bulletClearReceiver.ClearAllBullets();
                 bulletClearReceiver.ClearAllEnemies();
             }
-
-            var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
-            if (scenarioScene.IsValid() && scenarioScene.isLoaded)
-            {
-                SceneManager.UnloadSceneAsync(scenarioScene);
-            }
-            ScenarioModelRepository.Instance.Refresh();
-
-            pendingScenarioCallback = null;
 
             playerPresenter?.Retry();
             var fromStageStart = IsRetryFromStageStart();
@@ -272,62 +237,34 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 // 体力は初期値のまま。クリアランク判定も通常通り行われる。
                 continueCount = 0;
                 playerPresenter?.ClearDamageHistory();
-                RuntimeModelRepository.Get().SetSituation(BattleSituation.Way);
+                RuntimeModelRepository.Get().CheckpointSection = 0;
             }
             // 回数を進め、テーブルに応じた最大HPを適用する（Retryによる全回復の後に上書き）
             else continueCount++;
             ApplyPlayerMaxHp();
             playerPresenter?.SetColliderActive(true);
             playerPresenter?.SubscribeToAttackInput();
+            playerPresenter?.UnfreezeRunAnimation();
 
-
-            hasResumedPlayerAnimationOnBoss = false;
-
-            var startSituation = RuntimeModelRepository.Get().CurrentSituation;
-            if (startSituation == BattleSituation.Boss && bossSequence != null)
-            {
-                backgroundPresenter?.ResetScroll(false);
-                SpawnBoss();
-                PlayBgmForSituation(BattleSituation.Boss);
-                phaseStateMachine.PlaySequence(bossSequence);
-            }
-            else if (waySequence != null)
-            {
-                backgroundPresenter?.ResetScroll(true);
-                PlayBgmForSituation(BattleSituation.Way);
-                phaseStateMachine.PlaySequence(waySequence);
-            }
+            StartStage(RuntimeModelRepository.Get().CheckpointSection, resume: true);
         }
 
         async void ReturnToTitle()
         {
-            phaseStateMachine.Stop();
-            playerPresenter?.CancelCharge();
-
-            sequenceTransitionCts?.Cancel();
-            sequenceTransitionCts?.Dispose();
-            sequenceTransitionCts = null;
-
-            if (isSceneLoadedHandlerRegistered)
-            {
-                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
-                isSceneLoadedHandlerRegistered = false;
-            }
-
-            scenarioCompletedSubscription?.Dispose();
-            scenarioCompletedSubscription = null;
-
-            var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
-            if (scenarioScene.IsValid() && scenarioScene.isLoaded)
-            {
-                await SceneManager.UnloadSceneAsync(scenarioScene).ToUniTask();
-            }
-            ScenarioModelRepository.Instance.Refresh();
+            StopBattle();
 
             var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
             await SceneManager.LoadSceneAsync(SceneRouterModel.Title, LoadSceneMode.Additive).ToUniTask();
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(SceneRouterModel.Title));
             SceneManager.UnloadSceneAsync(battleSceneName).ToUniTask().Forget();
+        }
+
+        // ツリー・ボス・会話を止める。会話は Scenario ノードの Abort 経由でも閉じるが、念のためここでも後始末する
+        void StopBattle()
+        {
+            flow.Stop();
+            playerPresenter?.CancelCharge();
+            CloseScenario();
         }
 
         public void InitializeAndStart()
@@ -341,6 +278,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             // PlayerEntityPresenterを取得（チュートリアル経由の場合は取得済み）
             if (playerPresenter == null) playerPresenter = FindFirstObjectByType<PlayerEntityPresenter>();
+            flow.Player = playerPresenter;
             if (playerPresenter == null)
             {
                 Debug.LogWarning("[BattleScenePresenter] PlayerEntityPresenter not found in scene.", this);
@@ -356,30 +294,59 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             ApplyPlayerMaxHp();
             playerPresenter?.SubscribeToAttackInput();
 
-            waySequence = LoadSequence(stageModel.WaySequenceAddress);
-            bossSequence = LoadSequence(stageModel.BossSequenceAddress);
+            stage = LoadStage(stageModel.StageAddress);
+            if (stage == null)
+            {
+                Debug.LogError("No battle stage is configured for this stage.", this);
+                return;
+            }
 
-            var startSituation = RuntimeModelRepository.Instance.Get().CurrentSituation;
+            // 途中の Section から始める (デバッグ起動など) ときは、その Section の会話を飛ばす
+            var startSection = RuntimeModelRepository.Get().CheckpointSection;
+            StartStage(startSection, resume: startSection > 0);
+        }
 
+        void StartStage(int section, bool resume)
+        {
+            awaitingFirstSection = true;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            ApplyDebugStartPhase(startSituation);
+            var runtime = RuntimeModelRepository.Get();
+            flow.DebugBossStartPhase = runtime.DebugBossStartPhase;
+            flow.DebugBossStartHpPercent = runtime.DebugBossStartHpPercent;
 #endif
+            flow.StartStage(stage, section, resume);
+        }
 
-            if (startSituation == BattleSituation.Boss && bossSequence != null)
+        void OnSectionStarted(int index, BattleSituation situation)
+        {
+            RuntimeModelRepository.Get().CheckpointSection = index;
+
+            if (!awaitingFirstSection) return;
+            awaitingFirstSection = false;
+            backgroundPresenter?.ResetScroll(situation == BattleSituation.Way);
+        }
+
+        void OnBossSpawned()
+        {
+            playerPresenter?.FreezeRunAnimation();
+            backgroundPresenter?.StartDeceleration();
+        }
+
+        void OnBossBattleStarted(BossEntityPresenter boss)
+        {
+            // シナリオ明けにプレイヤーとボスが重なっていても即被弾しないよう、少しの間ボスの当たり判定を切る
+            boss.DisableColliderOnEntry();
+            playerPresenter?.UnfreezeRunAnimation();
+        }
+
+        void OnStageFinished(NodeStatus status)
+        {
+            if (status == NodeStatus.Success)
             {
-                SpawnBoss();
-                PlayBgmForSituation(BattleSituation.Boss);
-                phaseStateMachine.PlaySequence(bossSequence);
+                CompleteStage();
+                return;
             }
-            else if (waySequence != null)
-            {
-                PlayBgmForSituation(BattleSituation.Way);
-                phaseStateMachine.PlaySequence(waySequence);
-            }
-            else
-            {
-                Debug.LogError("No battle sequences are configured for this stage.", this);
-            }
+            Debug.LogError($"[BattleScenePresenter] ステージのツリーが {status} で終了しました", this);
         }
 
         // オプション「リトライ時にステージの最初からやり直す」が有効か
@@ -411,35 +378,12 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             return Mathf.RoundToInt((nextHp - baseHp) * 100f / baseHp);
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // デバッグ起動で指定された開始フェーズを、起動対象のシーケンスにのみ適用する。
-        // Way から Boss へ遷移した場合、Boss 側は常に先頭から再生される。
-        void ApplyDebugStartPhase(BattleSituation startSituation)
+        void PlayBgm(BgmType bgmType)
         {
-            var startPhaseIndex = RuntimeModelRepository.Instance.Get().DebugStartPhaseIndex;
-            if (startPhaseIndex <= 0) return;
+            if (soundManager == null || stageModel == null) return;
 
-            var targetSequence = startSituation == BattleSituation.Boss ? bossSequence : waySequence;
-            if (targetSequence == null) return;
-
-            targetSequence.SetStartPhaseByFlatIndex(startPhaseIndex);
-            Debug.Log($"[BattleScenePresenter] Debug start phase index {startPhaseIndex} applied to {startSituation} sequence.", this);
-        }
-#endif
-
-        public void PlayBossBgm()
-        {
-            PlayBgmForSituation(BattleSituation.Boss);
-        }
-
-        void PlayBgmForSituation(BattleSituation situation)
-        {
-            if (soundManager == null) return;
-
-            var stageNumber = stageModel.StageNumber;
             // SceneType.Stage1=3, Stage2=4, ... なので stageNumber+2 で変換
-            var sceneType = (SceneType)(stageNumber + 2);
-            var bgmType = situation == BattleSituation.Boss ? BgmType.BattleBoss : BgmType.BattleWay;
+            var sceneType = (SceneType)(stageModel.StageNumber + 2);
             soundManager.PlayBGMAsync(sceneType, bgmType).Forget();
 
             // 東方風に、BGMの切り替わり時に曲名を表示する
@@ -468,63 +412,30 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
         }
 
-        BattleSequenceModel LoadSequence(string address)
+        static BattleStageAsset LoadStage(string address)
         {
-            if (string.IsNullOrEmpty(address))
-            {
-                return null;
-            }
+            if (string.IsNullOrEmpty(address)) return null;
 
             try
             {
-                return sequenceModelRepository.Load(address);
+                return Addressables.LoadAssetAsync<BattleStageAsset>(address).WaitForCompletion();
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to load phase sequence from {address}: {e.Message}", this);
+                Debug.LogError($"[BattleScenePresenter] Failed to load battle stage. address={address} error={e.Message}");
                 return null;
             }
         }
 
-        async void HandleSequenceCompleted(BattleSituation situation)
+        // ---------- IScenarioService ----------
+
+        public IScenarioHandle Play(ScenarioData data, bool skip, bool restorePlayerControl)
         {
-            sequenceTransitionCts?.Cancel();
-            sequenceTransitionCts?.Dispose();
-            sequenceTransitionCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-            var token = sequenceTransitionCts.Token;
+            if (skip || data == null) return ScenarioCommandQueue.Skipped(data);
 
-            try
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-
-            if (token.IsCancellationRequested) return;
-
-            if (situation == BattleSituation.Way)
-            {
-                // 制作中のステージは道中（中ボスを含む）だけでも再生できる。
-                // 本ボス未設定ならボス前シナリオへ進めず、ステージクリア扱いにもせずここで終了する。
-                if (bossSequence == null)
-                {
-                    Debug.Log("[BattleScenePresenter] 道中完了。本ボスのシーケンスは未設定のため、ボス戦への移行を停止します。", this);
-                    return;
-                }
-                TransitionToScenario(StartBossSequence);
-            }
-            else
-            {
-                TransitionToScenario(CompleteStage);
-            }
-        }
-
-        void TransitionToScenario(Action onCompleteOrSkip)
-        {
-            // ScenarioIdは不要、ScenarioModelRepositoryがRuntimeModelから自動決定
-            Debug.Log($"[BattleScenePresenter] TransitionToScenario called", this);
+            CloseScenario();
+            currentScenario = new ScenarioCommandQueue(CloseScenario);
+            restorePlayerControlAfterScenario = restorePlayerControl;
 
             // シナリオ中は攻撃を禁止 + プレイヤーの当たり判定を無効化（被弾でゲームオーバー誤発火を防ぐ）
             playerPresenter?.UnsubscribeFromAttackInput();
@@ -532,152 +443,79 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             // チャージ中のままシナリオへ突入した場合に備えてチャージ状態をリセット
             playerPresenter?.CancelCharge();
 
-            // シナリオ完了後のコールバックを保存
-            pendingScenarioCallback = onCompleteOrSkip;
+            var queue = currentScenario;
+            MessageBroker.Default.Receive<ScenarioCommandMessage>()
+                         .Subscribe(m => queue.Enqueue(new ScenarioStep { function = m.Function, args = m.Args }))
+                         .AddTo(scenarioSubscriptions);
 
-            // シーンロード完了を待ってからイベントを購読
+            ScenarioModelRepository.Instance.SetData(data);
             if (!isSceneLoadedHandlerRegistered)
             {
                 SceneManager.sceneLoaded += OnScenarioSceneLoaded;
                 isSceneLoadedHandlerRegistered = true;
             }
-
             SceneManager.LoadScene(SceneRouterModel.Scenario, LoadSceneMode.Additive);
+            return queue;
         }
 
         void OnScenarioSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (scene.name != SceneRouterModel.Scenario) return;
+            UnregisterSceneLoaded();
 
-            Debug.Log($"[BattleScenePresenter] Scenario scene loaded", this);
-
-            // ハンドラを解除
-            if (isSceneLoadedHandlerRegistered)
-            {
-                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
-                isSceneLoadedHandlerRegistered = false;
-            }
-
-            // ScenarioScenePresenterを見つけてイベントを購読
-            var scenarioPresenter = FindFirstObjectByType<Project.Scenes.Scenario.Scripts.Presenter.ScenarioScenePresenter>();
-            if (scenarioPresenter != null)
-            {
-                // Retryで途中解除できるよう、購読を保持しておく
-                scenarioCompletedSubscription?.Dispose();
-                scenarioCompletedSubscription = scenarioPresenter.OnScenarioCompleted
-                                 .Take(1) // 1回だけ実行
-                                 .Subscribe(_ => OnScenarioCompleted());
-            }
-            else
+            var scenarioPresenter = FindFirstObjectByType<ScenarioScenePresenter>();
+            if (scenarioPresenter == null)
             {
                 Debug.LogWarning("ScenarioScenePresenter not found in the loaded scene.", this);
+                currentScenario?.Complete();
+                return;
             }
+
+            var queue = currentScenario;
+            scenarioPresenter.OnScenarioCompleted
+                             .Take(1)
+                             .Subscribe(_ => OnScenarioCompleted(queue))
+                             .AddTo(scenarioSubscriptions);
         }
 
-        void OnScenarioCompleted()
+        void OnScenarioCompleted(ScenarioCommandQueue queue)
         {
-            Debug.Log("[BattleScenePresenter] Scenario completed, invoking callback.", this);
+            if (queue != currentScenario) return;
 
-            // シナリオ完了後は攻撃と当たり判定を再開
             playerPresenter?.SetColliderActive(true);
-            // temp: デモ版ではボス戦終了後に攻撃できない
-            if (RuntimeModelRepository.Instance.Get().CurrentSituation == BattleSituation.Boss)
-            {
-                playerPresenter?.SubscribeToAttackInput();
-            }
+            if (restorePlayerControlAfterScenario) playerPresenter?.SubscribeToAttackInput();
 
-            pendingScenarioCallback?.Invoke();
-            pendingScenarioCallback = null;
+            scenarioSubscriptions.Clear();
+            currentScenario = null;
+            queue.Complete();
         }
 
-        public void SpawnBoss()
+        // 会話を途中で閉じる (リトライ・タイトルへ戻る・ツリーの中断)
+        void CloseScenario()
         {
-            if (bossPresenter != null)
+            UnregisterSceneLoaded();
+            scenarioSubscriptions.Clear();
+
+            var queue = currentScenario;
+            currentScenario = null;
+            queue?.Complete();
+
+            var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
+            if (scenarioScene.IsValid() && scenarioScene.isLoaded)
             {
-                Debug.LogWarning("[BattleScenePresenter] Boss already spawned.", this);
-                return;
+                SceneManager.UnloadSceneAsync(scenarioScene);
             }
-
-            if (bossSequence == null || bossSequence.BossPrefab == null)
-            {
-                Debug.LogWarning("[BattleScenePresenter] BossPrefab is not configured in boss sequence.", this);
-                return;
-            }
-
-            var instance = Instantiate(bossSequence.BossPrefab, bossSequence.BossSpawnPosition, Quaternion.identity);
-            bossPresenter = instance.GetComponent<BossEntityPresenter>();
-
-            if (bossPresenter == null)
-            {
-                Debug.LogError("[BattleScenePresenter] Spawned boss prefab has no BossEntityPresenter.", this);
-                return;
-            }
-
-            playerPresenter?.FreezeRunAnimation();
-            hasResumedPlayerAnimationOnBoss = false;
-
-            phaseStateMachine.SetTimelineResolver(phase =>
-            {
-                if (ShouldUseStrongAttack(phase))
-                {
-                    return phase.ResolveTimelineStrong();
-                }
-                return phase.ResolveTimeline();
-            });
-            phaseStateMachine.OnPhaseStarted
-                             .Subscribe(phase =>
-                             {
-                                 if (!hasResumedPlayerAnimationOnBoss)
-                                 {
-                                     hasResumedPlayerAnimationOnBoss = true;
-                                     playerPresenter?.UnfreezeRunAnimation();
-                                 }
-
-                                 bool useStrong = ShouldUseStrongAttack(phase);
-                                 if (useStrong)
-                                 {
-                                     bossPresenter.Model.EnterStrongMode();
-                                 }
-                                 var builder = useStrong ? phase.BuilderStrong : phase.Builder;
-                                 bossPresenter.OnPhaseStarted(phase, builder);
-                             })
-                             .AddTo(bossDisposables);
-
-            bossPresenter.OnDeath
-                         .Take(1)
-                         .Subscribe(_ => phaseStateMachine.Stop())
-                         .AddTo(bossDisposables);
-
-            bossPresenter.OnDeathSequenceCompleted
-                         .Take(1)
-                         .Subscribe(_ => HandleSequenceCompleted(BattleSituation.Boss))
-                         .AddTo(bossDisposables);
-
-            bossPresenter.PlayEntranceMovement(bossSequence.BossEntranceMovement);
-
-            backgroundPresenter?.StartDeceleration();
-
-            Debug.Log($"[BattleScenePresenter] Boss spawned at {bossSequence.BossSpawnPosition}", this);
+            ScenarioModelRepository.Instance.Refresh();
         }
 
-        bool ShouldUseStrongAttack(BattlePhaseModelBase phase)
+        void UnregisterSceneLoaded()
         {
-            if (phase.BuilderStrong == null || bossPresenter?.Model == null) return false;
-            return bossPresenter.Model.ShouldUseStrongAttack;
+            if (!isSceneLoadedHandlerRegistered) return;
+            SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
+            isSceneLoadedHandlerRegistered = false;
         }
 
-        void StartBossSequence()
-        {
-            if (bossSequence == null)
-            {
-                Debug.LogError("Boss sequence is not configured.", this);
-                return;
-            }
-
-            // シナリオ明けにプレイヤーとボスが重なっていても即被弾しないよう、少しの間ボスの当たり判定を切る
-            bossPresenter?.DisableColliderOnEntry();
-            phaseStateMachine.PlaySequence(bossSequence);
-        }
+        // ---------- クリア ----------
 
         // クリアしたステージの次のステージを開放する。
         void OpenNextStage(StageModel clearedStage)
@@ -708,7 +546,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             OpenNextStage(stageModel);
 
             // 次のステージをロードせず、To be continued画面を経由してステージ選択画面へ遷移する
-            phaseStateMachine.Stop();
+            flow.Stop();
 
             // BGMの切り替え・StageListへの遷移・Battleシーンの破棄はDemoClearScenePresenterが行う
             await SceneManager.LoadSceneAsync(SceneRouterModel.DemoClear, LoadSceneMode.Additive).ToUniTask();
@@ -717,18 +555,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void OnDestroy()
         {
-            // 登録されているハンドラを確実に解除
-            if (isSceneLoadedHandlerRegistered)
-            {
-                SceneManager.sceneLoaded -= OnScenarioSceneLoaded;
-                isSceneLoadedHandlerRegistered = false;
-            }
-
-            scenarioCompletedSubscription?.Dispose();
-            scenarioCompletedSubscription = null;
-            sequenceTransitionCts?.Cancel();
-            sequenceTransitionCts?.Dispose();
-            sequenceTransitionCts = null;
+            UnregisterSceneLoaded();
+            scenarioSubscriptions.Dispose();
 
             // チュートリアルモーダルを閉じる前にシーンが破棄された場合に備えて後始末する
             tutorialClosedSubscription?.Dispose();
@@ -740,10 +568,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             }
 
             disposables.Dispose();
-            bossDisposables.Dispose();
             battleCompleted.Dispose();
             backgroundModel.Dispose();
-            phaseStateMachine?.Stop();
+            flow?.Stop();
         }
     }
 }

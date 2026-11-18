@@ -1,0 +1,75 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Project.Scenes.Battle.Scripts.Runtime;
+using Project.Scenes.Battle.Scripts.Runtime.Motion;
+using UnityEngine;
+
+namespace Project.Scenes.Battle.Scripts.BehaviorTree
+{
+    [Serializable, NodeInfo("敵・障害物・ビームなどの Prefab を出現させる", "Action/Spawn")]
+    public sealed class Spawn : ActionNode
+    {
+        [SerializeField] GameObject prefab;
+        [SerializeField, Tooltip("この Prefab を動かすツリー。未指定ならツリーを付けない (自前で動く Prefab 用)")] EnemyTreeAsset behavior;
+        [SerializeField, Tooltip("出した敵に渡す移動。指定するとインラインの移動より優先 (ツリーの MoveSelf が実行する)")] MotionPreset motionPreset;
+        [SerializeReference, SubclassSelector] List<MotionStep> motion = new();
+        [SerializeField] List<TreeParameter> overrides = new();
+        [SerializeField, Tooltip("合図の宛先「グループ」で使う名前。空ならグループに入らない")] string group;
+        [SerializeField, Tooltip("撃つ敵がいなければワールド座標、いればその位置からの相対")] Vector2 position;
+        [SerializeField, Tooltip("撃つ敵がいてもワールド座標で出す")] bool worldSpace;
+        [SerializeReference, SubclassSelector] SpawnLayout layout = new SingleLayout();
+        [SerializeReference, SubclassSelector] RotationSource rotation;
+        [SerializeReference, SubclassSelector] DirectionSource direction;
+        [SerializeField, Tooltip("「敵の全滅」の判定対象にする")] bool tracked = true;
+        [SerializeField, Tooltip("ビーム/警告線の長さ。0 以下は Prefab の値")] float beamRange;
+        [SerializeField, Tooltip("ビーム/警告線の表示時間 (秒)。0 以下は Prefab の値")] float beamDuration;
+        [SerializeField] float beamWidth;
+
+        [NonSerialized] List<(Vector2 offset, Quaternion rotation)> slots;
+
+        IReadOnlyList<MotionStep> Motion => motionPreset != null ? motionPreset.Steps : motion;
+
+        public override string Summary =>
+            (prefab ? prefab.name : "(未設定)") + $" {layout?.Summary}" + (behavior ? $" / {behavior.name}" : "")
+            + (Motion.Count > 0 ? $" / 移動: {MotionStep.Describe(Motion)}" : "") + string.Concat(overrides.Select(OverrideSummary));
+
+        static string OverrideSummary(TreeParameter p) => p.ObjectValue is BehaviorTreeAsset tree ? $" / {p.Name}: {tree.name}" : "";
+
+        protected override void OnSetup(TreeScope scope) => slots = new List<(Vector2, Quaternion)>();
+
+        protected override NodeStatus OnTick(BattleContext ctx)
+        {
+            var spawner = ctx.Services.Spawner;
+            if (spawner == null) return NodeStatus.Success;
+
+            var e = worldSpace ? new EmitContext(new BattleContext(ctx.World), position, Scope) : new EmitContext(ctx, position, Scope);
+            var dir = direction?.GetDirection(e) ?? Vector2.left;
+            var baseRot = rotation?.GetRotation(e) ?? Quaternion.identity;
+            var z = ctx.Self != null ? ctx.Self.Body.Position.z : 0f;
+
+            slots.Clear();
+            (layout ?? new SingleLayout()).Build(dir, slots);
+            foreach (var (offset, rot) in slots)
+            {
+                var p = e.Origin + offset;
+                spawner.Spawn(new EnemySpawn
+                {
+                    Prefab = prefab,
+                    Position = new Vector3(p.x, p.y, z),
+                    Rotation = rot * baseRot,
+                    Behavior = behavior,
+                    Overrides = overrides,
+                    Motion = Motion,
+                    Owner = ctx.Self,
+                    Group = group,
+                    Tracked = tracked,
+                    BeamRange = beamRange,
+                    BeamDuration = beamDuration,
+                    BeamWidth = beamWidth,
+                });
+            }
+            return NodeStatus.Success;
+        }
+    }
+}

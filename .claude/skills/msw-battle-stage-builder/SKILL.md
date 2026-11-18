@@ -1,63 +1,82 @@
 ---
 name: msw-battle-stage-builder
-description: Magic-science-world（Unity製2Dシューティング）のBattle Sceneに新しいステージ（道中・ボス戦）を実装するためのスキル。DataStore配下へのAttack/Movement/Easeプリセット・TimelineBuilder・BattleSequenceAsset作成、StageDataとAddressableへの登録、BGM・シナリオ接続までを一貫してガイドする。ユーザーが「新ステージ」「ステージ3を実装」「道中を追加」「ボス戦を作りたい」「弾幕を追加」「敵の攻撃パターンを作りたい」「中ボスを作る」「発狂(Strong)フェーズを追加」のように言った場合、たとえ「ステージ」という単語を使っていなくても必ずこのスキルを参照すること。このプロジェクトでは.asset/.prefab/.unity/.metaの直接編集が禁止されているため、少しでもBattle Scene関連のアセット作業だと判断したら真っ先にこのスキルを読むこと。
+description: Magic-science-world（Unity製2Dシューティング）のBattle Sceneで、ステージ（道中・会話・ボス戦）や敵・ボスの攻撃/移動を BehaviorTree で実装・修正するためのスキル。BattleStageAsset・BossDefinition・BehaviorTree（Stage / Enemy / Bullet / Common）・MotionPreset の作成、ステージ固有サービス（風など）の宣言、StageData/Addressables への登録、BGM・会話の接続、再生確認までをガイドする。ユーザーが「新ステージ」「ステージ3を実装」「道中を追加」「ボス戦を作りたい」「弾幕を追加」「敵の攻撃パターンを作りたい」「中ボスを作る」「発狂(Strong)フェーズを追加」「BT/ツリーを組みたい」「ビームを撃たせたい」のように言った場合、たとえ「ステージ」という単語を使っていなくても必ずこのスキルを参照すること。Battle Scene 関連のアセット作業だと判断したら真っ先にこのスキルを読むこと。
 ---
 
-# Battle Stage Builder
+# Battle Stage Builder（BehaviorTree 版）
 
-Magic-science-worldのBattle Sceneに新規ステージ（道中/ボス戦）を実装するための手順書。
+Battle Scene のステージ進行・敵/ボス/弾の行動は BehaviorTree（以下 BT）で記述する。
+旧形式（`AttackPreset` / `AttackTimeline` / `MovementPreset` と `Stage{N}/Attack|Movement|Ease|Bullet` のデータ）はコード・データともに削除済み。敵の移動と攻撃はすべて BT で書く。
 
-## 大原則（最優先で厳守）
+設計の詳細とノード一覧はリポジトリのドキュメントを正とする。
 
-**`.asset` / `.prefab` / `.unity` / `.meta` を直接編集・直接生成してはならない。**
+- 仕組み: `Document/Battle/BehaviorTree.md`
+- ノード・パラメータの一覧: `Document/Battle/BehaviorTree-Nodes.md`
+- データ配置: `Document/Battle/DataStore.md`
 
-リポジトリの `WARP.md` に明記されている通り、これらの拡張子はレビューが困難なため、Edit/Writeツールでの直接書き込みは一切禁止。ScriptableObjectアセットの新規作成・フィールド値の設定・Prefabの編集・シーンへの配置は、すべて **Unity Editor MCP経由**で行うこと（`unity-mcp-skill` を併読し、Unity Editorを実際に操作してアセットを作る）。
+## 大原則
 
-編集してよいのは `.cs` ファイルのみ。新規の移動パターン(`IMovementStep`実装)や新規ExitCondition種別など、既存のプリセット/コンポーネントの組み合わせでは表現できない挙動が必要な場合に限り、C#の追加・修正を行う。
+1. **Unity 形式のファイル（`.asset` / `.prefab` / `.unity` / `.meta`）をテキストとして直接書き換えない。** 作成・変更は Unity Editor 上で行う（ユーザーへの手順案内、または Unity MCP の `execute_code` で Editor API を使う）。詳細は [authoring.md](references/authoring.md)。
+2. **新しい C# ファイルを作る前に必ずユーザーの許可を取る**（`AGENTS.md`）。既存ノードの組み合わせで書けるならコードを足さない。
+3. ユーザーが「〜したい」と操作方法を聞いている場合は、実装せずに BT エディタでの手順を案内する。
+4. **機械的に展開しない。** 同じ攻撃を Delay で並べる、向きだけ違うアセットを量産する、といった書き方はしない。繰り返しは `Repeat`、本数と角度は `ShotPattern`、共通の攻撃は `SubTree` で表す。[patterns.md](references/patterns.md) の「やってはいけない書き方」を必ず確認する。
+5. **ステージ固有の機能は自機や Presenter に直接実装しない。** `StageServiceDefinition` / `IStageService` としてカプセル化し、使うステージの `BattleStageAsset.Services` にだけ宣言する。サービス側から自機・弾へ働きかけ、自機は汎用の受け口（`IMoveModifier` など）だけを持つ。
+6. ユーザーが Inspector で調整した値を、想定値で上書きしない。
 
-## このスキルの対象
-
-- 新規ステージの道中（Way）シーケンス実装
-- 新規ステージのボス（Boss）シーケンス実装
-- 既存ステージへのフェーズ追加・弾幕（攻撃パターン）追加
-- ボスの発狂（Strong）フェーズ追加
-
-## 仕組みの全体像
-
-1体のステージは **道中シーケンス** と **ボスシーケンス** の2本の `BattleSequenceAsset` で構成される（`Assets/Project/Scenes/Battle/Scripts/Model/BattleSequenceAsset.cs`）。
+## 仕組みの要点
 
 ```
-BattleSequenceAsset (ScriptableObject, CreateAssetMenu: "Battle/Phase Sequence")
-├─ situation: BattleSituation (Way/Boss)  ※アセット名に"Way"/"Boss"を含めるとOnValidateで自動設定される
-├─ sequenceGroups: List<SequenceGroup>
-│   └─ SequenceGroup { loop, loopCount(0=無限), phases: List<BattlePhaseDefinition> }
-│       └─ BattlePhaseDefinition { phaseId, timelineBuilder, timelineBuilderStrong, exitConditionConfig }
-├─ bossPrefab / bossSpawnPosition   ※ボス用シーケンスのみ使用
-└─ bossEntranceMovement: List<IMovementStep>  ※ボス入場演出
+StageData.asset (stageNumber ごとに stageAddress)
+  └─ BattleStageAsset (Stage{N}_BT)          … 1 ステージ = 1 アセット
+       ├─ Services: [WindService など]       … このステージでだけ有効な機能
+       └─ Tree: Stage{N}_Tree                … ステージツリー。Success で完了するとステージクリア
+            Stage
+              ├─ Section "Way"  [Way]  : Sequence[ PlayBgm(BattleWay), Wave..., Wait 120 ]
+              └─ Section "Boss" [Boss] : Sequence[ PlayScenario(ボス前の会話, skipOnResume=ON)
+                                                     ├─ OnCommand "SpawnBoss"   → SpawnBoss(Stage{N}_Boss)
+                                                     └─ OnCommand "PlayBossBgm" → PlayBgm(BattleBoss)
+                                                  , BossBattle, Wait 120
+                                                  , PlayScenario(撃破後の会話, skipOnResume=OFF, restorePlayerControl=OFF) ]
+
+BossDefinition (Stage{N}_Boss)  … Prefab / 出現位置 / 登場移動 / ボスのツリー (Stage{N}Boss_Tree)
+
+Commons/BT/Enemy  … 全ステージ共通の雑魚ツリー (EnemyTreeAsset。パラメータは attack / death)
+  Parallel(All)[ MoveSelf, Sequence[ SetDespawnBehavior($death), SubTree($attack) ] ]
+  … 移動は Spawn の motionPreset / motion で渡り、MoveSelf が実行する
+
+BehaviorTreeAsset (抽象。実体は種類ごとに作る)
+  ├─ StageTreeAsset  … Create > Battle > Behavior Tree > Stage   (BattleStageAsset.tree)
+  ├─ EnemyTreeAsset  … Create > Battle > Behavior Tree > Enemy   (Spawn.behavior / BossDefinition.tree / BossBattle.tree)
+  ├─ BulletTreeAsset … Create > Battle > Behavior Tree > Bullet  (BulletConfig.behavior)
+  └─ CommonTreeAsset … Create > Battle > Behavior Tree > Common  (Attack/ の攻撃、撃破時のツリーなど SubTree で使い回すもの)
+  中身: Root: Node / Parameters: $名前 で参照できる値 (SubTree・Spawn から上書き可)
 ```
 
-- 各 `BattlePhaseDefinition` は **1フェーズ** を表し、`BattleTimelineBuilderAsset`（敵スポーン・Signal・Audio等のトラック定義）から実行時に `TimelineAsset` を生成する。
-- フェーズの終了条件は `IExitConditionConfig`（SerializeReference、`AllEnemiesDefeated` / `TimeLimit` / `BgmPosition` / `BossHpThreshold` / `Composite`）で決まる。
-- ボスの弾幕・移動は `AttackPreset` / `MovementPreset` という別アセットに切り出され、`BattleTimelineBuilderAsset` の `bossAttackPreset` / `bossMovementPreset` から参照される。
-- 発狂（Strong）フェーズは `timelineBuilderStrong` に別のTimelineBuilderを設定するだけでよく、発動判定自体は `BossEntityPresenter.strongHpRatio`（Boss Prefab側の設定）で行われる。`BattlePhaseDefinition`側に閾値フィールドは**存在しない**（過去のスキーマの名残がアセットYAML上に残っていることがあるが、現行コードでは使われていない）。
-
-各要素の詳細は用途に応じて以下のreferenceを読むこと。
+- **時間**: BT のノードは **フレーム（60fps 固定）**。移動（`MotionStep`）の時間は **秒**。
+- **進行**: 道中・会話・ボス戦の順序はすべてステージツリーに書く。Section はリトライ地点。会話中のコマンド（`SpawnBoss` など）は PlayScenario ノードの子の OnCommand で処理する。
+- **ツリーの種類**: 種類ごとに置けるノードと SubTree で参照できるツリーが決まる。SubTree は Common か同じ種類だけ（Common からは Common だけ）。`SetInvincible` / `BossWindCue` は Enemy のツリーにだけ置ける。**攻撃ツリー（`Attack/`）は必ず Common で作る。**
+- **敵**: `Wave` の entries（または `Spawn` ノード）で Prefab と Behavior を指定して出す。雑魚の Behavior は共通ツリー `Commons/BT/Enemy` にし、移動は Spawn の `motionPreset`（`Motion/` の MotionPreset）または `motion` に、Overrides で `attack`（`Attack/` の攻撃ツリー）/ `death`（撃破時のツリー、任意）を渡す。攻撃中に移動を変えるなど、この形に収まらない特殊な敵だけ `Enemy/` に専用ツリーを作る。雑魚 Prefab は `EnemyPool` で使い回される（使い回せない Prefab には `NoEnemyPool` を付ける）。
+- **弾**: `BulletSystem` が弾 1 発ごとにツリーを実行する（自機の弾も同じ）。普通は BT から `NWayShot` などの弾を撃つノード（撃ち方ごとに別ノード）や `BulletBeam` で撃つだけで、弾は `BulletConfig` の移動を組み込みのツリー（MoveSelf だけ）で実行する。途中で動きを変える弾だけ `BulletTreeAsset` を作って `BulletConfig.behavior` に指定する。弾の寿命は `BulletConfig.lifetime`（フレーム、0 で無制限）。
+- **消えるとき**: 敵・弾が消えたときの行動は `SetDespawnBehavior`（理由 `reasons` の既定は撃破 `Defeated`。一括消去 `Cleared` は普通は含めない）。消えるときのツリーは 1 フレームだけ実行されるので、発射や Spawn など即時に終わるものだけを書く。
+- **合図**: ツリー間の連絡は `SendSignal`（宛先 Spawned / Group / All）と `Signaled` 条件（`Until` / `If` で受ける）。次のフレームの頭に届き、そのフレームに判定しないと取りこぼす。会話のコマンド（OnCommand）とは別物。
+- **割り込み・フェーズ**: `Until(条件)` で表す。BGM 同期は `BgmSamples`、HP の区切りは `HpSections`、発狂は `HpSections`（`NextPhase`）+ `If($stage ≧ 1)`。
+- **再利用**: 攻撃は `Attack/` の別ツリーにして参照する（コピーしない）。雑魚は `Enemy` の `attack` パラメータ、ボスは `SubTree` で参照する。どちらからも参照できるよう、攻撃ツリーは `CommonTreeAsset` にする。
 
 ## ワークフロー
 
-1. **要件確認**: ステージ番号、道中/ボス/両方どちらを作るか、敵構成・弾幕パターン、BGM、既存ステージとの関係（`Assets/Project/DataStore/StageData.asset` にエントリ済みか）をユーザーに確認する。
-2. **参照実装を読む**: `Assets/Project/DataStore/Stage1/` と `Stage2/` の該当アセット、および対応するC#を実際に読み、命名規則・粒度を掴む。特にStage1は道中(Phase1〜9)とボス(Intro/MelodyA/MelodyB/Chorus+Strong版)の両方が揃っており最も参考になる。
-3. **下から上へUnity MCP経由で作成する**:
-   1. `AttackPreset` / `MovementPreset` / `EaseCurvePreset`（必要なもののみ） → [presets-and-timelines.md](references/presets-and-timelines.md)
-   2. `BattleTimelineBuilderAsset`（フェーズごとに1つ） → [presets-and-timelines.md](references/presets-and-timelines.md)
-   3. `BattleSequenceAsset`（道中/ボスそれぞれ1つ、`SequenceGroup`→`BattlePhaseDefinition`で上記TimelineBuilderとExitConditionを組み合わせる）→ 道中なら [way-sequence.md](references/way-sequence.md)、ボスなら [boss-sequence.md](references/boss-sequence.md)
-   4. ボスの場合はBoss Prefab（`BossEntityPresenter`必須）も用意 → [boss-sequence.md](references/boss-sequence.md)
-4. **ステージ登録**: `StageData.asset` の該当エントリに `waySequenceAddress` / `bossSequenceAddress` を設定し、シナリオ・BGMの命名規則に沿ってシーン遷移が繋がることを確認する → [stage-registration.md](references/stage-registration.md)
-5. **検証**: Unity MCPでコンパイルエラー・コンソールエラーがないか確認し、可能であれば実際にBattle Sceneを再生して道中→ボス→シナリオ遷移が正しく動くか確認する。
+1. **要件確認**: ステージ番号、道中 / ボス、敵構成・弾幕、BGM の区切り、会話（ボス前・撃破後）、既存アセットとの関係（`StageData.asset` のエントリ）を確認する。
+2. **参照実装を読む**: `Assets/Project/DataStore/Stage{1-4}/BT/` の近いツリーを BT エディタ（`Window/Battle/Behavior Tree Editor`、またはアセットをダブルクリック）で開き、構成と粒度を掴む。YAML を読む場合は読み取りのみ。
+3. **下から作る**（[authoring.md](references/authoring.md)）:
+   1. `MotionPreset` / `EaseCurve`（必要なものだけ）
+   2. 攻撃ツリー（`Attack/`、`CommonTreeAsset`）。特殊な敵がいるときだけ専用ツリー（`Enemy/`、`EnemyTreeAsset`）
+   3. ボスのツリー（`Stage/Stage{N}Boss_Tree`、`EnemyTreeAsset`）と `BossDefinition`（`Stage{N}_Boss`）
+   4. ステージツリー（`Stage/Stage{N}_Tree`、`StageTreeAsset`）。Stage → Section を組み、会話は PlayScenario ノードで参照して OnCommand を付ける
+   5. `BattleStageAsset`（`Stage{N}_BT`）。必要ならサービスを宣言する
+4. **登録**: `StageData.stageAddress` と Addressables を設定し、BGM の登録を確認する → [stage-registration.md](references/stage-registration.md)
+5. **検証**: コンパイルエラーとコンソールを確認し、`Tools/Battle Debug Launcher` でステージと開始 Section を選んで再生する。検証のコツは [authoring.md](references/authoring.md) の「動作確認」を参照。
 
-## reference一覧（必要なものだけ読む）
+## reference 一覧
 
-- [stage-registration.md](references/stage-registration.md): DataStoreレイアウト全体、StageData登録、Addressableアドレスの規則、BGM対応、シナリオ接続の仕組み
-- [way-sequence.md](references/way-sequence.md): 道中フェーズの設計・敵スポーントラックの組み方・ExitCondition選択指針
-- [boss-sequence.md](references/boss-sequence.md): Boss Prefab構成・入場移動・楽節連動フェーズ・Strong版・HP/BGM系ExitCondition
-- [presets-and-timelines.md](references/presets-and-timelines.md): AttackPreset/MovementPreset/EaseCurvePresetとBattleTimelineBuilderAssetのトラック種別詳細
+- [authoring.md](references/authoring.md): アセットの作り方（エディタ操作の案内、MCP `execute_code` での組み立て）、命名、動作確認の方法
+- [patterns.md](references/patterns.md): 道中・ボス・敵・攻撃のよく使う組み方と、やってはいけない書き方
+- [stage-registration.md](references/stage-registration.md): DataStore の配置、StageData / Addressables、BGM、会話の接続

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniRx;
@@ -6,7 +7,8 @@ using UnityEngine;
 using Project.Scenes.Battle.Scripts.Model.Entity;
 using Project.Scenes.Battle.Scripts.View.Entity;
 using Project.Scenes.Battle.Scripts.Model;
-using Project.Scenes.Battle.Scripts.Model.Movement;
+using Project.Scenes.Battle.Scripts.Runtime;
+using Project.Scenes.Battle.Scripts.Runtime.Motion;
 using Project.Scripts.Extensions;
 using Project.Scripts.Extensions.Message;
 using Project.Scripts.Model;
@@ -30,6 +32,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         BulletPool normalBulletPool;
 
         [SerializeField] BulletPool chargeBulletPool;
+        [SerializeField, Tooltip("通常弾の速さ。旧来の移動と同じく、実際はこの約2倍の速さで飛ぶ (OutQuad の時間写像)")] float normalShotSpeed = 5f;
+        [SerializeField, Tooltip("チャージ弾の速さ。0 でその場に出る")] float chargedShotSpeed = 0f;
+        [SerializeField, Min(0), Tooltip("通常弾が消えるまでのフレーム数。0 で無制限")] int normalShotLifetimeFrames = 48;
+        [SerializeField, Min(0), Tooltip("チャージ弾が消えるまでのフレーム数。0 で無制限")] int chargedShotLifetimeFrames = 18;
         [SerializeField] int normalShotDamage = 10;
         [SerializeField] Vector3 chargeShotOffset = new(0, 0, 0);
         [SerializeField] int chargedShotDamage = 30;
@@ -54,6 +60,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         }
 
         PlayerEntityModel model;
+        BulletSystem bulletSystem;
         float lastShootTime;
         Vector2 currentMoveInput;
         Vector2 pendingPush;
@@ -80,7 +87,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
             model = new PlayerEntityModel(maxHp, chargeThreshold, sneakSpeedMultiplier, invincibilityDuration);
             initialPosition = transform.position;
-            PlayerPositionReference.Transform = transform;
+            BattleTargets.Player = transform;
         }
 
         public void Retry()
@@ -359,11 +366,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             view.UpdateAnimation();
         }
 
+        readonly List<Project.Scenes.Battle.Scripts.Runtime.IMoveModifier> moveModifiers = new();
+
+        public void AddMoveModifier(Project.Scenes.Battle.Scripts.Runtime.IMoveModifier modifier)
+        {
+            if (modifier != null && !moveModifiers.Contains(modifier)) moveModifiers.Add(modifier);
+        }
+
+        public void RemoveMoveModifier(Project.Scenes.Battle.Scripts.Runtime.IMoveModifier modifier) => moveModifiers.Remove(modifier);
+
         Vector3 HandleMovement()
         {
             var currentSpeed = model.IsSneaking.Value ? moveSpeed * model.SneakSpeedMultiplier : moveSpeed;
             var input = currentMoveInput.sqrMagnitude < 0.01f ? Vector2.zero : currentMoveInput;
-            Vector3 movement = BattleWind.PlayerVelocity(input, currentSpeed) * Time.deltaTime;
+            Vector2 velocity = input * currentSpeed;
+            foreach (var modifier in moveModifiers) velocity = modifier.Modify(velocity, input, currentSpeed);
+            Vector3 movement = velocity * Time.deltaTime;
             return movement;
         }
 
@@ -382,7 +400,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireNormalShot()
         {
-            normalBulletPool.SpawnBullet(normalShotDamage, transform.position);
+            Shoot(normalBulletPool, normalShotDamage, transform.position, normalShotSpeed, normalShotLifetimeFrames, false);
             lastShootTime = Time.time;
             view.EnterAttack();
             soundManager?.PlaySE(SeType.Attack);
@@ -390,9 +408,28 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void FireChargedShot()
         {
-            chargeBulletPool.SpawnBullet(chargedShotDamage, transform.position + chargeShotOffset, isPlayerBullet: true);
+            Shoot(chargeBulletPool, chargedShotDamage, transform.position + chargeShotOffset, chargedShotSpeed, chargedShotLifetimeFrames, true);
             view.EnterAttack();
             soundManager?.PlaySE(SeType.ChargeRelease);
+        }
+
+        // 弾はバトル中だけ存在する BulletSystem が動かす。BattleFlow がバトル開始時に渡す
+        public void BindBulletSystem(BulletSystem bullets) => bulletSystem = bullets;
+
+        void Shoot(BulletPool source, int damage, Vector3 position, float speed, int lifetimeFrames, bool isChargeShot)
+        {
+            if (bulletSystem == null || source == null) return;
+            bulletSystem.Spawn(new BulletSpawn
+            {
+                Prefab = source.BulletPrefab,
+                Damage = damage,
+                Position = position,
+                Rotation = Quaternion.identity,
+                Motion = new MotionStep[] { new VelocityMotion(new Vector3(speed, 0f, 0f)) },
+                LifetimeFrames = lifetimeFrames,
+                AffectedByForce = false,
+                IsPlayerChargeBullet = isChargeShot,
+            });
         }
 
         void HandleDeath()
@@ -434,9 +471,9 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
 
         void OnDestroy()
         {
-            if (PlayerPositionReference.Transform == transform)
+            if (BattleTargets.Player == transform)
             {
-                PlayerPositionReference.Transform = null;
+                BattleTargets.Player = null;
             }
 
             deathCts?.Cancel();
