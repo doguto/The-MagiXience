@@ -45,7 +45,7 @@ BT で使えるノード・条件・部品の一覧と、各フィールドの�
 
 ### Cycle
 
-子を `interval` フレームの周期で 1 つずつ順に実行し、最後の子の次は 1 番目に戻る（Repeat の子を複数にしたもの）。`count` 回実行したら完了（0 = 無限）。開始のたびに 1 番目の子から始める。`interval` の扱いは Repeat と同じ（小数可）。
+子を `interval` フレームの周期で 1 つずつ順に実行し、最後の子の次は 1 番目に戻る（Repeat の子を複数にしたもの）。`count` 回実行したら完了（0 = 無限）。開始のたびに 1 番目の子から始める。`interval` と `indexParam` の扱いは Repeat と同じ（小数可）。
 
 ```text
 Cycle(72f, ∞)                 … 72f ごとに 2 つのパターンを交互に
@@ -94,6 +94,7 @@ Cycle(72f, ∞)                 … 72f ごとに 2 つのパターンを交互�
 | フィールド | 単位 | 説明 |
 |---|---|---|
 | `count` ($ 可) | 回 | 0 = 無限 |
+| `indexParam` | | 空でなければ、今が何回目か（0 始まり）をこのパラメータに書き込む |
 
 - 子が Failure したら Failure。`count` 回 Success したら Success。
 - **同フレーム再開規則**: 前フレーム以前に始まった周が完了した場合は、同じフレームのうちに次の周を開始する（周期がずれないように）。同じフレーム内で始まって完了した周（中身が全て即時ノードの場合など）の次は、翌フレームに回す（無限ループ防止）。
@@ -106,12 +107,23 @@ Cycle(72f, ∞)                 … 72f ごとに 2 つのパターンを交互�
 |---|---|---|
 | `count` ($ 可) | 回 | 回数。0 = 無限 |
 | `interval` ($ 可) | f | 周期（ある回の開始から次の回の開始まで）。既定 60、最小 1。小数も可で、k 回目から k+1 回目までを `round((k+1)×interval) − round(k×interval)` フレームにする（22.5 なら 22, 23, 23, 22, …） |
+| `indexParam` | | 空でなければ、今が何回目か（0 始まり）をこのパラメータに書き込む。計算は Calc で行う |
 
 - 1 回目は開始フレーム f、子が周期内に終われば k 回目は f + (k−1)×interval に開始する。
 - 子が周期より長くかかったときは、その回が終わったフレームに次の回を始める（以降の開始はそこから数え直す）。
 - 最後の回が終わったフレームで Success。最後の回の後は待たない。`count = 0` なら終わらない（親の Until などで打ち切る）。
 - 子が Failure したら Failure。
 - `Loop{ Sequence[子, Wait] }` との違いは 2 点: 周期が子の長さに左右されないことと、最後の回の後に待ちが入らないこと。
+
+回数から角度を作ってなぎ払う例（Stage4 ボスの BossBeamSub）:
+
+```text
+Repeat(×15, 12f, → $i)
+└ Sequence
+   ├ Calc  $angle = $i × 0.8
+   ├ Calc  $angle = $angle + 180
+   └ NWayShot(向き: 固定 $angle)      … 180°, 180.8°, …, 191.2°
+```
 
 ### Until
 
@@ -203,6 +215,16 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 
 開始フレーム f から数えて f+frames のフレームで Success。
 
+### Calc
+
+`resultParam = a 演算 b` を 1 回計算してパラメータに書き込み、即 Success。演算は 1 ノードに 1 つで、式が長いときは Calc を並べる。
+
+| フィールド | 説明 |
+|---|---|
+| `resultParam` | 書き込み先のパラメータ名 |
+| `a` ($ 可) / `b` ($ 可) | 値。実行のたびにパラメータを読み直す |
+| `op` | Add (+) / Subtract (−) / Multiply (×) / Divide (÷、b が 0 なら 0) |
+
 ### CheckCondition
 
 条件を 1 回評価し、成立なら Success、不成立なら Failure。条件未設定なら Success。カテゴリは Condition。
@@ -247,7 +269,7 @@ Build 時に展開されるため、実行時の戻り値は子ツリーのル�
 | フィールド | 説明 |
 |---|---|
 | `bullet` (`BulletSpec`) | 弾の設定（後述） |
-| `direction` (`DirectionSource`) | 基準方向。既定は Fixed(左) |
+| `direction` (`DirectionSource`) | 基準方向。既定は Fixed(180°) |
 | `rotation` (`RotationSource`) | 弾の回転（Prefab 本来の回転に対するオフセット）。既定は Inherit |
 | `muzzleOffset` | 撃つ敵の位置からのずれ（ワールド単位）。ステージ直下では原点からのずれ |
 | `se` | 発射時に 1 回鳴らす SE。`None` なら鳴らさない |
@@ -389,7 +411,7 @@ Parallel(All)
 
 | 種類 | フィールド | 方向 |
 |---|---|---|
-| `FixedDirection` | `direction` | 固定方向（正規化。0 なら左） |
+| `FixedDirection` | `angle` ($ 可、度) | 固定方向。0 = 右、90 = 上、180 = 左（既定）。撃つたびにパラメータを読み直すので、Calc の結果でなぎ払える |
 | `AimDirection` | `maxUpAngle` / `maxDownAngle`（度、0〜180） | 自機狙い。左向きを 0° として上下の振れ幅を制限する。両方 180 なら制限なし。自機がいなければ左 |
 | `ForwardDirection` | なし | 撃つ敵の向き（回転 × 左）。ステージ直下では左 |
 | `ScreenEdgeDirection` | `fromLeft`、`followWind`、`edgeInset`、`verticalMargin`、`lateralOffset`、`angularSpeed`、`attackTimeOffset` | 画面端から撃つ（下記） |

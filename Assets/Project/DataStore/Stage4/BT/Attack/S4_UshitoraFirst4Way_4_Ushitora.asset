@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: S4_UshitoraFirst4Way_4_Ushitora
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147886565097687
+    rid: 8540152000000000000
   detachedNodes: []
   parameters: []
   references:
@@ -28,54 +28,6 @@ MonoBehaviour:
       type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         degrees: 0
-    - rid: 8540147884263998379
-      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        maxUpAngle: 180
-        maxDownAngle: 180
-    - rid: 8540147884263998380
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0
-    - rid: 8540147884263998382
-      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        maxUpAngle: 180
-        maxDownAngle: 180
-    - rid: 8540147884263998383
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0
-    - rid: 8540147886565097687
-      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 0903538493d14d069618d1394337a21a
-        graphPosition: {x: 230, y: 150}
-        comment: 
-        children:
-        - rid: 8540147961671975559
-        - rid: 8540147886565097688
-        - rid: 8540147961671975560
-        - rid: 8540147886565097689
-        - rid: 8540147961671975561
-    - rid: 8540147886565097688
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 4491223a402b432a83c17e568acd228d
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        frames:
-          value: 30
-          param: 
-    - rid: 8540147886565097689
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 70964ff5497e4f24be4e7190f6ccea92
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        frames:
-          value: 30
-          param: 
     - rid: 8540147961671975559
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -106,63 +58,17 @@ MonoBehaviour:
           radius: 0.3
           startDelayFrames: 0
           rotationOffset: 0
-    - rid: 8540147961671975560
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540152000000000000
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 608e33b08fd9454f80d6687b1123f6fe
-        graphPosition: {x: 230, y: 450}
+        guid: 65291eb15085444f880fa5d747436403
+        graphPosition: {x: 0, y: 300}
         comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: c32e0c92eb4887a47b48b549b6537d86, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 85b2d1f8660fb834c9029e399fec3e82, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        direction:
-          rid: 8540147884263998379
-        rotation:
-          rid: 8540147884263998380
-        muzzleOffset: {x: -0.25, y: 0}
-        se: 0
-        pattern:
-          wayCount:
-            value: 4
-            param: 
-          spreadAngle:
-            value: 45
-            param: 
-          radius: 0.3
-          startDelayFrames: 0
-          rotationOffset: 0
-    - rid: 8540147961671975561
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 78507b7f23894b5c9163ff411d5f0b92
-        graphPosition: {x: 460, y: 450}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: c32e0c92eb4887a47b48b549b6537d86, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 85b2d1f8660fb834c9029e399fec3e82, type: 2}
-          motion: []
-          range: 0
-          affectedByWind: 1
-        direction:
-          rid: 8540147884263998382
-        rotation:
-          rid: 8540147884263998383
-        muzzleOffset: {x: -0.25, y: 0}
-        se: 0
-        pattern:
-          wayCount:
-            value: 4
-            param: 
-          spreadAngle:
-            value: 45
-            param: 
-          radius: 0.3
-          startDelayFrames: 0
-          rotationOffset: 0
+        child:
+          rid: 8540147961671975559
+        count:
+          value: 3
+          param: 
+        interval:
+          value: 30
+          param: 

@@ -11,6 +11,10 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         readonly TreeScope parent;
         readonly BehaviorTreeAsset asset;
         readonly Dictionary<string, TreeParameter> values = new();
+        // 実行中に書き込まれた値 (Repeat の回数や Calc の結果)。宣言値より優先する
+        readonly Dictionary<string, float> variables = new();
+        // 親から引き継いだパラメータは、親の実行中の値も読み書きする
+        readonly Dictionary<string, string> boundToParent = new();
 
         TreeScope(TreeScope parent, BehaviorTreeAsset asset)
         {
@@ -47,6 +51,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
                         continue;
                     }
                     scope.values[o.Name] = o.ResolveAgainst(parent);
+                    if (parent != null && !string.IsNullOrEmpty(o.BindToParent)) scope.boundToParent[o.Name] = o.BindToParent;
                 }
             }
 
@@ -54,6 +59,19 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public bool TryGet(string name, out TreeParameter parameter) => values.TryGetValue(name, out parameter);
+
+        public bool TryGetVariable(string name, out float value)
+        {
+            if (variables.TryGetValue(name, out value)) return true;
+            return boundToParent.TryGetValue(name, out var parentName) && parent.TryGetVariable(parentName, out value);
+        }
+
+        public void Set(string name, float value)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            if (boundToParent.TryGetValue(name, out var parentName)) parent.Set(parentName, value);
+            else variables[name] = value;
+        }
 
         static string DescribePath(TreeScope scope)
         {

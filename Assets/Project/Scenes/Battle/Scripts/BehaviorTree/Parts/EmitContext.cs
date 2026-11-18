@@ -7,8 +7,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     // 発射時点の情報。撃つ敵がいなければ (ステージ直下の発射) Self は null
     public readonly struct EmitContext
     {
-        public EmitContext(BattleContext ctx, Vector2 muzzleOffset)
+        public EmitContext(BattleContext ctx, Vector2 muzzleOffset, TreeScope scope = null)
         {
+            Scope = scope;
             Context = ctx;
             Self = ctx.Self;
             Origin = (Self != null ? (Vector2)Self.Body.Position : Vector2.zero) + muzzleOffset;
@@ -17,6 +18,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         public BattleContext Context { get; }
+        // パラメータを撃つ時点の値で読むためのもの
+        public TreeScope Scope { get; }
         public BattleActor Self { get; }
         public Vector2 Origin { get; }
         public Quaternion SelfRotation { get; }

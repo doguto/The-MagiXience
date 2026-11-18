@@ -49,7 +49,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             move = new MotionSequence(new MotionStep[] { step }, ctx.Self.Body, default);
             moveFrames = Mathf.Max(1, Mathf.RoundToInt(moveDuration * BattleWorld.FramesPerSecond));
 
-            var e = new EmitContext(ctx, Vector2.zero);
+            var e = new EmitContext(ctx, Vector2.zero, Scope);
             baseDirection = (direction ?? new FixedDirection()).GetDirection(e);
             rot = rotation?.GetRotation(e) ?? Quaternion.identity;
             if (emitBullets) Emitter.PlaySe(ctx, se);

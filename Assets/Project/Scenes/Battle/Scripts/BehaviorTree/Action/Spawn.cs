@@ -42,7 +42,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             var spawner = ctx.Services.Spawner;
             if (spawner == null) return NodeStatus.Success;
 
-            var e = worldSpace ? new EmitContext(new BattleContext(ctx.World), position) : new EmitContext(ctx, position);
+            var e = worldSpace ? new EmitContext(new BattleContext(ctx.World), position, Scope) : new EmitContext(ctx, position, Scope);
             var dir = direction?.GetDirection(e) ?? Vector2.left;
             var baseRot = rotation?.GetRotation(e) ?? Quaternion.identity;
             var z = ctx.Self != null ? ctx.Self.Body.Position.z : 0f;

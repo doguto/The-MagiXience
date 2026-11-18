@@ -132,7 +132,7 @@ BT の適用範囲は次の 2 層である。
 - `Frame` / `Random` / `BgmTime` / `Services` / `Stage` は `World` の値の委譲
 - `SecondsToFrames(seconds)`: 秒をフレームへ四捨五入で変換
 
-BT には Blackboard が無い。ノード間で値を受け渡す仕組みは持たず、値の共通化はツリーパラメータで行う。
+BT には Blackboard が無い。値の共通化はツリーパラメータで行う。実行中に値を受け渡すのは、Repeat / Cycle / Loop の `indexParam` と Calc の `resultParam` がツリーパラメータへ書き込む場合だけ（5.2）。
 
 ## 4. 実行時の流れ
 
@@ -253,7 +253,13 @@ Spawn ノードで出す敵は `ActorPool`（`Runtime/ActorPool.cs`）で Prefab
 3. 呼び出し側の `overrides` で同名のものを上書きする。宣言されていない名前の上書きは警告して無視する。
 4. 上書き側の `bindToParent` が空でなければ、親スコープの同名パラメータをそのまま引き継ぐ。
 
-パラメータは **`Setup` 時に 1 回だけ解決される**（各ノードの `OnSetup`）。実行中に値が変わることはない。
+パラメータは基本的に **`Setup` 時に 1 回だけ解決される**（各ノードの `OnSetup`）。
+
+例外として、`TreeScope.Set(name, value)` で実行中に値を書き込める。書き込むのは Repeat / Cycle / Loop の `indexParam`（今が何回目か、0 始まり）と Calc の `resultParam` だけ。
+
+- 書き込んだ値は宣言値より優先される。`bindToParent` で引き継いだパラメータへの書き込みは親スコープへ届く。
+- 書き込んだ値が効くのは、撃つたびに読み直す欄だけ: Calc の `a` / `b`、`FixedDirection` の `angle`。他の欄は `Setup` 時の値のまま。
+- 書き込み先の名前もツリーパラメータとして宣言しておく（エディタで `$` 欄から選べるようにするため）。
 
 ### 5.3 SubTree
 

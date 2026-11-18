@@ -24,6 +24,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public bool BoolValue => boolValue;
         public Vector2 Vector2Value => vector2Value;
         public UnityEngine.Object ObjectValue => objectValue;
+        public string BindToParent => bindToParent;
 
         public TreeParameter() { }
 

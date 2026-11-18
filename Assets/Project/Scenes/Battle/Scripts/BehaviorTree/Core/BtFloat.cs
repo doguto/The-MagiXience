@@ -16,7 +16,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         public float Resolve(TreeScope scope)
         {
-            if (string.IsNullOrEmpty(param) || scope == null || !scope.TryGet(param, out var p)) return value;
+            if (string.IsNullOrEmpty(param) || scope == null) return value;
+            if (scope.TryGetVariable(param, out var v)) return v;
+            if (!scope.TryGet(param, out var p)) return value;
             return p.Kind == TreeParameterKind.Int ? p.IntValue : p.FloatValue;
         }
 

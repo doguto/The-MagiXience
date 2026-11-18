@@ -134,7 +134,9 @@ MonoBehaviour:
     - rid: 8540147884261901053
       type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        direction: {x: -1, y: 0}
+        angle:
+          value: 180
+          param: 
     - rid: 8540147884261901054
       type: {class: SinglePattern, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data: 
@@ -329,11 +331,7 @@ MonoBehaviour:
         - rid: 8540147961671975627
         - rid: 8540147886565097693
         - rid: 8540147974269042766
-        - rid: 8540147961671975628
-        - rid: 8540147886565097695
-        - rid: 8540147961671975629
-        - rid: 8540147886565097696
-        - rid: 8540147961671975630
+        - rid: 8540152000000000004
         - rid: 8540147886565097697
         - rid: 8540147974269042767
     - rid: 8540147886565097693
@@ -353,24 +351,6 @@ MonoBehaviour:
         comment: 
         frames:
           value: 60
-          param: 
-    - rid: 8540147886565097695
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 3d6928ef38e34905acb72d640b8fc910
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        frames:
-          value: 6
-          param: 
-    - rid: 8540147886565097696
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: dacc25e41eed47aaa2edf6dd22c58f46
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        frames:
-          value: 6
           param: 
     - rid: 8540147886565097697
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
@@ -625,3 +605,19 @@ MonoBehaviour:
         presetParam: 
         steps:
         - rid: 8540147884261901084
+    - rid: 8540152000000000004
+      type: {class: Cycle, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 728c0dcddd5946538a1c86cf81771482
+        graphPosition: {x: 920, y: 1200}
+        comment: 
+        children:
+        - rid: 8540147961671975628
+        - rid: 8540147961671975629
+        - rid: 8540147961671975630
+        count:
+          value: 3
+          param: 
+        interval:
+          value: 6
+          param: 

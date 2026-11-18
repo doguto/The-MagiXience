@@ -32,7 +32,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override NodeStatus OnTick(BattleContext ctx)
         {
-            var e = new EmitContext(ctx, muzzleOffset);
+            var e = new EmitContext(ctx, muzzleOffset, Scope);
             var dirSource = direction ?? new FixedDirection();
             var baseDirection = dirSource.GetDirection(e);
             var worldOrigin = dirSource.GetOrigin(e);

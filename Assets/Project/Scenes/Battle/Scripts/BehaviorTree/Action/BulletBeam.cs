@@ -52,7 +52,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public BeamAim CreateAim(BattleContext ctx)
         {
             var muzzle = origin == BeamOrigin.Self ? position : Vector2.zero;
-            var e = new EmitContext(ctx, muzzle);
+            var e = new EmitContext(ctx, muzzle, Scope);
             var shots = new List<Shot>();
             (resolvedPattern ?? pattern ?? new SinglePattern()).Build((direction ?? new FixedDirection()).GetDirection(e), shots);
             var aim = new Aim

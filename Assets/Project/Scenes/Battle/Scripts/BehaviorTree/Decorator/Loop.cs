@@ -9,24 +9,21 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     public sealed class Loop : DecoratorNode
     {
         [SerializeField, Tooltip("0 = 無限")] BtInt count;
+        [SerializeField, Tooltip("空でなければ、今が何回目か (0 始まり) をこのパラメータに書き込む")] string indexParam;
 
         [NonSerialized] int target;
         [NonSerialized] int completed;
         [NonSerialized] int iterationStartFrame;
 
-        public BtInt Count
-        {
-            get => count;
-            set => count = value;
-        }
-
-        public override string Summary => count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞ 無限" : "× " + count;
+        public override string Summary =>
+            (count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞ 無限" : "× " + count) + (string.IsNullOrEmpty(indexParam) ? "" : " → $" + indexParam);
 
         protected override void OnSetup(TreeScope scope) => target = Mathf.Max(0, count.Resolve(scope));
 
         protected override void OnEnter(BattleContext ctx)
         {
             completed = 0;
+            Scope?.Set(indexParam, 0);
             iterationStartFrame = ctx.Frame;
         }
 
@@ -42,6 +39,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
                 completed++;
                 if (target > 0 && completed >= target) return NodeStatus.Success;
+                Scope?.Set(indexParam, completed);
 
                 var startedThisFrame = iterationStartFrame == ctx.Frame;
                 iterationStartFrame = -1;

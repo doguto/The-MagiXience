@@ -52,7 +52,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             line = null;
             if (resolvedPath == null) return;
 
-            var e = new EmitContext(ctx, Vector2.zero);
+            var e = new EmitContext(ctx, Vector2.zero, Scope);
             line = new TrailPolyline(e.Origin, resolvedPath);
             rot = rotation?.GetRotation(e) ?? Quaternion.identity;
             BuildPlan();

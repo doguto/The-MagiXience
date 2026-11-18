@@ -54,30 +54,8 @@ MonoBehaviour:
         graphPosition: {x: 460, y: 600}
         comment: 
         children:
-        - rid: 8540147961671975503
-        - rid: 8540147960821842924
-        - rid: 8540147961671975504
-        - rid: 8540147960821842926
-        - rid: 8540147961671975505
+        - rid: 8540152000000000003
         - rid: 8540147960821842928
-    - rid: 8540147960821842924
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: a212682eef2a418e879b6ad91015407d
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        frames:
-          value: 6
-          param: 
-    - rid: 8540147960821842926
-      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 87b5bf8f65bf4739ad26d6b6be81b514
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        frames:
-          value: 6
-          param: 
     - rid: 8540147960821842928
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -204,3 +182,19 @@ MonoBehaviour:
           radius: 0
           startDelayFrames: 0
           rotationOffset: 0
+    - rid: 8540152000000000003
+      type: {class: Cycle, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 72b87a93c16541dda8198e0f7cb5e282
+        graphPosition: {x: 690, y: 750}
+        comment: 
+        children:
+        - rid: 8540147961671975503
+        - rid: 8540147961671975504
+        - rid: 8540147961671975505
+        count:
+          value: 3
+          param: 
+        interval:
+          value: 6
+          param: 

@@ -9,6 +9,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeField, Tooltip("回数。0 = 無限")] BtInt count;
         [SerializeField, Tooltip("周期: ある回の開始から次の回の開始までのフレーム数。子がこれより長ければ終わり次第すぐ次を始める")] BtFloat interval = new(60);
+        [SerializeField, Tooltip("空でなければ、今が何回目か (0 始まり) をこのパラメータに書き込む")] string indexParam;
 
         [NonSerialized] int target;
         [NonSerialized] float period;
@@ -17,7 +18,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         [NonSerialized] bool waiting;
 
         public override string Summary =>
-            (count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞" : "× " + count) + " / 周期 " + interval.ToFrameString();
+            (count.value == 0 && string.IsNullOrEmpty(count.param) ? "∞" : "× " + count) + " / 周期 " + interval.ToFrameString() + (string.IsNullOrEmpty(indexParam) ? "" : " → $" + indexParam);
 
         protected override void OnSetup(TreeScope scope)
         {
@@ -28,6 +29,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected override void OnEnter(BattleContext ctx)
         {
             completed = 0;
+            Scope?.Set(indexParam, 0);
             elapsed = 0;
             waiting = false;
         }
@@ -57,6 +59,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
                 completed++;
                 if (target > 0 && completed >= target) return NodeStatus.Success;
+                Scope?.Set(indexParam, completed);
 
                 if (elapsed < FrameSchedule.Step(period, completed - 1))
                 {
