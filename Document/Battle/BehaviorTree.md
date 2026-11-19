@@ -536,7 +536,7 @@ public abstract class StageServiceDefinition
 - `MotionPreset`（`Create > Battle > Motion Preset`）はステップ列の共有用アセット。`EaseCurveAsset`（`Create > Battle > Ease Curve`）はカスタム Ease カーブの共有用アセット。
 - 対象は `IMotionBody`。敵/ボスは Transform そのもの (`TransformBody`)、弾は外力補正前の「本来の軌道」。
 
-旧実装との互換のため、`StepClock`（`PullRunner.cs`）は旧 `PullMovementHelper` の挙動を再現する。旧実装では Ease 未指定の移動に DOTween 既定の OutQuad が掛かっていたため、`legacyOutQuad` が ON のステップ（Velocity、AimStraight、Forward、Homing、StraightWithHoming、Sine、Reflect、FadeMove）では実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使う。duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。この癖は意図的に残している。同様に `MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
+旧実装との互換のため、`StepClock`（`PullRunner.cs`）は旧 `PullMovementHelper` の挙動を再現する。旧実装では Ease 未指定の移動に DOTween 既定の OutQuad が掛かっていたため、`legacyOutQuad` が ON のステップ（Velocity、StraightWithHoming、Sine、Reflect、FadeMove）では実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使う。duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。この癖は意図的に残している。同様に `MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
 
 ## 9. エディタ
 

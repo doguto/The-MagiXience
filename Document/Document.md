@@ -580,7 +580,7 @@ Title シーン以外で不要になった Model を Refresh できる。
 - `TitleModelRepository` から `TitleModel` を取得する。
 - `TitleMenuView` に背景 Sprite を渡す。
 - Start 押下で StageList へ遷移する。
-- Option 押下で共通 OptionModal を開く。
+- Option 押下で共通 OptionModal を開く。開いている間は `UICancelMessage`（Esc）でも閉じる。
 - Exit 押下で Editor 再生停止または Application.Quit を行う。
 - Title BGM を再生する。
 
@@ -1282,6 +1282,7 @@ Input System を直接各 Presenter が読むのではなく、`InputManager` �
 
 代表的な購読:
 
+- `TitleScenePresenter`: `UICancelMessage` で OptionModal を閉じる。
 - `StageListScenePresenter`: `UICancelMessage` で Title に戻る。
 - `ScenarioScenePresenter`: `UISubmitMessage` で次メッセージへ進む。
 - `BattleScenePresenter`: `PlayerPauseMessage` で Pause を切り替える。
