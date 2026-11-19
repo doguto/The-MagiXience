@@ -8,10 +8,11 @@ description: Magic-science-world（Unity製2Dシューティング）のBattle S
 Battle Scene のステージ進行・敵/ボス/弾の行動は BehaviorTree（以下 BT）で記述する。
 敵の移動と攻撃はすべて BT で書く。
 
-設計の詳細とノード一覧はリポジトリのドキュメントを正とする。
+設計の詳細はリポジトリのドキュメント、各ノードの設定項目はソースを正とする。
 
 - 仕組み: `Document/Battle/BehaviorTree.md`
-- ノード・パラメータの一覧: `Document/Battle/BehaviorTree-Nodes.md`
+- 汎用ノード（Sequence / Repeat / Until / SubTree / 条件など）: `Document/Battle/BehaviorTree-Nodes.md`
+- バトル固有のノード・部品・MotionStep: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/` と `Scripts/Runtime/Motion/` のソース（フィールドの Tooltip、`Summary`）
 - データ配置: `Document/Battle/DataStore.md`
 
 ## 大原則

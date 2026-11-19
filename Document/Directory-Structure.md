@@ -1,38 +1,35 @@
 # Directory Structure
 
-このドキュメントは、Magic-science-world のディレクトリと主要ファイルの配置を説明する。
-各項目の末尾に、そのディレクトリまたはファイルの役割を一言で記載する。
+このドキュメントは、Magic-science-world のディレクトリ構成と、各フォルダに何を置くかを説明する。
+個々のファイルは列挙せず、フォルダ単位の役割と置き場所のルールを記載する。
 
 ## Root
 
 ```text
-Magic_science_world/
-├── .github/                # GitHub Actions など GitHub 関連設定。
-├── .idea/                  # Rider/JetBrains IDE のローカル設定。
-├── .serena/                # Serena など開発補助ツールの設定。
+The-MagiXience/
+├── .claude/                # Claude Code のスキル・コマンド・設定。
+├── .github/                # GitHub Actions のワークフローと Copilot 向け指示。
+├── .serena/                # Serena MCP のプロジェクト設定。
 ├── Assets/                 # Unity アセットとゲーム実装本体。
 ├── Document/               # プロジェクト説明・設計資料。
-├── Library/                # Unity が生成するローカルキャッシュ。
-├── Logs/                   # Unity 実行・インポートログ。
-├── obj/                    # IDE/ビルド補助の中間生成物。
 ├── Packages/               # Unity Package Manager の依存定義。
 ├── ProjectSettings/        # Unity プロジェクト設定。
-├── Temp/                   # Unity 実行中の一時生成物。
-├── UserSettings/           # ローカルユーザー設定。
 ├── .editorconfig           # エディタ共通の整形ルール。
 ├── .gitignore              # Git 管理から除外するファイル定義。
 ├── .vsconfig               # Visual Studio 構成。
+├── AGENTS.md / CLAUDE.md   # AI エージェント向けのプロジェクト指示。
 ├── README.md               # プロジェクト概要。
-├── WARP.md                 # 開発補助ツール向けメモ。
-└── Magic_science_world.sln  # Rider/IDE 用ソリューション。
+└── WARP.md                 # Warp 向けのプロジェクトメモ。
 ```
+
+`Library/` `Temp/` `Logs/` `UserSettings/` `obj/` や `*.sln` / `*.csproj` は Unity・IDE がローカルに生成するもので、Git 管理外。
 
 ## Document
 
 ```text
 Document/
-├── Architecture.eddx       # アーキテクチャ図の元データ。
-├── Architecture.md         # MVP など基本設計方針の説明。
+├── Battle/                 # Battle シーン (BehaviorTree・ノード・DataStore・Tips) の設計資料。
+├── Architecture.md         # MVP など基本設計方針の説明 (図の元データは Architecture.eddx)。
 ├── Directory-Structure.md  # ディレクトリ構造の説明。
 └── Document.md             # AI/開発者向けの全体構造・責務リファレンス。
 ```
@@ -49,24 +46,28 @@ Packages/
 
 - `com.unity.addressables`: Addressables によるアセット管理。
 - `com.unity.inputsystem`: キーボード/ゲームパッド入力管理。
-- `com.unity.render-pipelines.universal`: URP/2D 描画基盤。
-- `com.unity.timeline`: manifest に残っているが、旧バトル方式（Timeline 駆動）の削除後はどのコードからも使われていない。バトル進行は自前の BehaviorTree で行う。
+- `com.unity.render-pipelines.universal` / `com.unity.feature.2d`: URP/2D 描画基盤。
 - `com.unity.ugui`: UI 表示基盤。
 - `com.mackysoft.serializereference-extensions`: SerializeReference の Inspector 拡張。
+- `com.coplaydev.unity-mcp`: Unity MCP (Editor を MCP から操作する)。
+- `com.unity.timeline`: manifest にあるが、コードからは参照されていない。
+
+UniRx / UniTask / DOTween は `Assets/Plugins/`、ZString は `Assets/Scripts/ZString/` に同梱している。
 
 ## Assets
 
 ```text
 Assets/
 ├── AddressableAssetsData/  # Addressables のグループ・ビルド設定。
-├── Editor/                 # Project 外のエディタ専用補助データ。
-├── Fonts/                  # フォントアセット。
+├── Editor/                 # Project 外のエディタ専用補助データ (会話 JSON)。
+├── Fonts/                  # UI 用ドットフォントと TMP フォントアセット。
 ├── Plugins/                # UniRx, UniTask, DOTween など外部ライブラリ。
 ├── Project/                # ゲーム固有のコード・シーン・データ・画像。
 ├── Resources/              # DOTweenSettings など Resources ロード対象。
+├── Screenshots/            # 開発中のスクリーンショット。
 ├── Scripts/ZString/        # ZString の同梱ソース。
-├── Settings/               # URP/Renderer/Build Profile など Unity 設定。
-└── TextMesh Pro/           # TMP 設定・フォント・スプライト。
+├── Settings/               # URP/Renderer/Build Profile/シーンテンプレートなど Unity 設定。
+└── TextMesh Pro/           # TMP 設定・フォント・スプライト・シェーダー。
 ```
 
 ## Assets/Project
@@ -74,13 +75,13 @@ Assets/
 ```text
 Assets/Project/
 ├── Commons/                # 複数シーンで使う UI/デバッグ/プレイヤー共通部品。
-├── DataStore/              # ScriptableObject データベースとデモ用 UserData。
-├── DeprecatedResources/    # 旧 Resources 運用時代の退避アセット。
-├── Editor/                 # プロジェクト固有のエディタ拡張。
-├── Samples/                # MVP サンプルコード。
+├── DataStore/              # ScriptableObject データ (ステージ・BGM・SE・キャラ・BT)。
+├── DeprecatedResources/    # 使われなくなった画像・会話データの退避先。Addressables に登録しない。
+├── Editor/                 # プロジェクト固有のエディタ拡張とシナリオ原稿。
+├── Samples/                # MVP 構成のサンプル (asmref のみ)。
 ├── Scenes/                 # Unity シーンとシーン固有スクリプト。
-├── Scripts/                # シーン横断の共通コード。
-└── Textures/               # Addressables で参照する画像・音声素材。
+├── Scripts/                # シーン横断の共通コード (グローバル asmdef)。
+└── Textures/               # Addressables で参照する画像・フォント・音声素材。
 ```
 
 ## Commons
@@ -88,47 +89,33 @@ Assets/Project/
 ```text
 Assets/Project/Commons/
 ├── Debugger/               # 開発用デバッグ補助。
-│   ├── Prefabs/            # デバッグ用プレハブ。
-│   └── Scripts/            # デバッグ用スクリプト。
-│       └── Presenter/
-│           └── DebugRuntimeModelInitializer.cs  # 実行時状態を開発用に初期化する。
-├── Player/                 # 共通プレイヤー素材の置き場。
+│   ├── Prefabs/            # デバッグ用プレハブ (DebuggerObject)。
+│   └── Scripts/Presenter/  # 実行時状態のデバッグ初期化、MV 撮影用シーン (MVCapture.unity) の進行役。
+├── Player/                 # 共通プレイヤー素材。
 │   ├── Prefabs/            # プレイヤー関連プレハブ。
-│   └── Scripts/            # プレイヤー共通スクリプト用の予約領域。
+│   └── Scripts/            # プレイヤー共通スクリプト用 (asmref のみ)。
 └── UI/                     # 共通 UI 部品とモーダル。
-    ├── Prefabs/            # 共通 UI プレハブ。
+    ├── Prefabs/            # 共通ボタンなどの UI プレハブ。
     └── Scripts/
-        ├── Presenter/      # 共通モーダルの制御。
-        └── View/           # 共通ボタン・リスト・モーダル表示。
+        ├── Presenter/      # Global シーンに常駐するモーダルの制御 (Option / Pause / GameOver / Tutorial)。
+        └── View/           # ボタン・ボタンリストの基底、モーダル表示、音量ゲージ、Global カメラを他シーンの Canvas へ割り当てる補助。
 ```
 
-共通 UI の主要ファイル:
-
-- `ButtonBase.cs`: ボタン UI の基底処理。
-- `SimpleButton.cs`: 単体ボタンの入力イベントを扱う。
-- `MovableButton.cs`: 選択状態を持つ移動可能なボタン。
-- `ButtonListBase.cs`: 複数ボタンの選択・決定処理の基底。
-- `ScrollableButtonList.cs`: スクロール可能なボタンリスト。
-- `PointerAddon.cs`: ポインタ/選択装飾を補助する。
-- `OptionModalPresenter.cs` / `OptionModalView.cs`: 音量などオプション画面を扱う。
-- `PauseModalPresenter.cs` / `PauseModalView.cs`: バトル中のポーズ画面を扱う。
-- `GameOverModalPresenter.cs` / `GameOverModalView.cs`: ゲームオーバー画面を扱う。
-- `TutorialModalPresenter.cs` / `TutorialModalView.cs`: 初回チュートリアル表示を扱う。
+- モーダルは `<名前>ModalPresenter.cs` (Presenter/) と `<名前>ModalView.cs` (View/) の組で置く。
+- 共通 UI のボタンは `ButtonBase` / `ButtonListBase` を基底にする。
 
 ## DataStore
 
 ```text
 Assets/Project/DataStore/
-├── BgmData.asset           # BGM 定義データベース。
-├── CharacterData.asset     # キャラクター定義データベース。
-├── SeData.asset            # SE 定義データベース。
-├── StageData.asset         # ステージ定義データベース。
-├── UserData.json           # Editor 実行時のユーザーセーブデータ。
-├── Commons/BT/Enemy.asset  # 全ステージ共通の雑魚ツリー。
+├── BgmData.asset / SeData.asset / CharacterData.asset / StageData.asset  # 種類ごとの定義データベース。
+├── Commons/BT/             # 全ステージ共通の BehaviorTree (共通の雑魚ツリー)。
 ├── Stage1/ 〜 Stage4/      # 各ステージのバトル (BT)・シナリオデータ。
-├── MVCapture/              # MV キャプチャ用のシナリオ。
-└── Test/                   # バトルデータ検証用アセット。
+├── MVCapture/              # MV 撮影用シーンで流すシナリオ。
+└── Test/                   # BT の動作確認・エディタ確認用アセット。
 ```
+
+Editor で Play すると、セーブデータ `UserData.json` がこのフォルダに作られる (Git 管理外)。
 
 `Stage{N}` の内訳:
 
@@ -137,13 +124,13 @@ Stage{N}/
 ├── BT/                     # BehaviorTree 形式のバトルデータ。
 │   ├── Stage{N}_BT.asset   # BattleStageAsset (StageData.stageAddress から参照)。
 │   ├── Stage{N}_Boss.asset # BossDefinition。
-│   ├── Stage/              # ステージツリー Stage{N}_Tree とボスのツリー Stage{N}Boss_Tree。
+│   ├── Stage/              # ステージツリーとボスのツリー。
 │   ├── Attack/             # 攻撃パターンのツリー (雑魚の attack パラメータ、ボスの SubTree から参照)。
 │   ├── Motion/             # 移動ステップ列の MotionPreset。
-│   ├── Enemy/              # 共通ツリーに収まらない敵の専用ツリー (Stage2 のみ中身あり)。
-│   └── Trail/              # TrailPath (Stage2 のみ)。
+│   ├── Enemy/              # 共通ツリーに収まらない敵の専用ツリー (必要なステージのみ)。
+│   └── Trail/              # TrailPath (必要なステージのみ)。
 ├── Scenario/               # ボス前の会話 Stage{N}WayScenario.asset と撃破後の会話 Stage{N}BossScenario.asset。
-└── Boss/                   # Stage1 のみ。MusicTerminologySpectrum.asset。
+└── Boss/                   # ボス固有の補助データ (必要なステージのみ)。
 ```
 
 データ構造の詳細は `Document/Battle/DataStore.md` を参照。
@@ -152,312 +139,111 @@ Stage{N}/
 
 ```text
 Assets/Project/Editor/
-├── CommonScaffold.cs                 # MVP 構成の雛形生成を補助する。
-├── CreateDB.cs                       # データベース ScriptableObject 作成を補助する。
-├── GlobalSceneAutoLoader.cs          # Play 時に Global シーンを自動ロードする。
-├── ScenarioImporter.cs               # シナリオ JSON を Unity データへ取り込む。
-├── SerializeReferenceAutoExpandEditor.cs # SerializeReference の Inspector 表示を補助する。
-└── SerializeReferenceDeduplicator.cs # SerializeReference の重複参照を整理する。
+├── *.cs                    # プロジェクト固有のエディタ拡張 (Tools メニュー、AssetPostprocessor、InitializeOnLoad)。
+└── Scenario/               # シナリオ原稿の .txt。`Tools > Import Scenario` で DataStore のシナリオアセットに取り込む。
 ```
+
+主なエディタ拡張: Play 前に Global シーンを開く `GlobalSceneAutoLoader`、ステージ・Section・ボスフェーズを指定して Battle を起動する `BattleDebugLauncher` (`Tools > Battle Debug Launcher`)、Addressables のアドレスを自動で付ける `AddressableAutoAddressAssigner`、SerializeReference の Inspector 補助、MVP 雛形生成。
 
 ## Scenes
 
 ```text
 Assets/Project/Scenes/
 ├── Entry.unity             # 起動専用シーン。
-├── Global.unity            # 常駐管理シーン。
+├── Global.unity            # 常駐管理シーン (カメラ・サウンド・画面遷移・共通モーダル)。
 ├── Title.unity             # タイトル画面。
 ├── StageList.unity         # ステージ選択画面。
+├── SoundRoom.unity         # サウンドルーム (BGM 鑑賞)。
 ├── Battle.unity            # 道中・ボス共通のバトル画面。
-├── Scenario.unity          # ノベル/会話シーン。
-├── DemoClear.unity         # デモ版クリア画面。
-├── Entry/                  # Entry シーン固有スクリプト。
-├── Global/                 # Global シーン固有スクリプト。
-├── Title/                  # Title シーン固有スクリプト。
-├── StageList/              # StageList シーン固有スクリプト。
-├── Battle/                 # Battle シーン固有スクリプト・プレハブ・Editor 拡張。
-├── Scenario/               # Scenario シーン固有スクリプト。
-└── DemoClear/              # DemoClear シーン固有スクリプト。
+├── Scenario.unity          # 会話シーン。Battle から加算ロードされる。
+├── DemoClear.unity         # ステージクリア後の画面。
+├── MVCapture.unity         # MV 撮影用シーン (Commons/Debugger の MVCaptureScenePresenter で進行)。
+└── <Scene>/                # 各シーン固有のスクリプト・プレハブ。
 ```
 
-### Entry
+シーン固有フォルダの共通ルール:
 
-```text
-Entry/Scripts/Presenter/
-└── EntryScenePresenter.cs  # Addressables 初期化後に Global と Title を加算ロードする。
-```
+- `<Scene>/Scripts/{Model,View,Presenter,Repository/ModelRepository}/` に置き、各フォルダの `.asmref` でグローバル asmdef に所属させる。
+- ファイル名は `<機能名>Model.cs` / `<機能名>View.cs` / `<機能名>Presenter.cs`。シーンの入口は `<Scene>ScenePresenter.cs`。
+- シーン固有のプレハブは `<Scene>/Prefabs/` に置く。
 
-### Global
+各シーンの中身:
 
-```text
-Global/Scripts/Presenter/
-├── GlobalScenePresenter.cs   # 常駐 UI、入力、サウンド、画面遷移を束ねる。
-├── SceneNavigator.cs         # 加算ロードと旧シーンアンロードによる画面遷移を行う。
-└── SoundManagerPresenter.cs  # BGM/SE 再生、音量反映、手動ループ再生を行う。
-```
-
-### Title
-
-```text
-Title/Scripts/
-├── Model/
-│   └── TitleModel.cs                  # タイトル画面用背景データを持つ。
-├── Presenter/
-│   └── TitleScenePresenter.cs         # タイトルメニュー操作と StageList 遷移を制御する。
-├── Repository/ModelRepository/
-│   └── TitleModelRepository.cs        # TitleModel を生成・保持する。
-└── View/
-    └── TitleMenuView.cs               # タイトルメニューの表示と入力イベントを提供する。
-```
-
-### StageList
-
-```text
-StageList/
-├── Prefabs/                           # ステージカードなどの UI プレハブ。
-└── Scripts/
-    ├── Model/
-    │   └── StageListModel.cs          # ステージ選択画面用背景データを持つ。
-    ├── Presenter/
-    │   └── StageListScenePresenter.cs # ステージ一覧表示、選択、Battle 遷移を制御する。
-    ├── Repository/ModelRepository/
-    │   └── StageListModelRepository.cs # StageListModel を生成・保持する。
-    └── View/
-        ├── StageCardListView.cs       # ステージカード一覧の選択と決定イベントを扱う。
-        ├── StageCardView.cs           # 個別ステージカードの表示を扱う。
-        └── StageListSceneView.cs      # ステージ選択画面背景を扱う。
-```
-
-### Scenario
-
-```text
-Scenario/Scripts/
-├── Model/
-│   ├── ScenarioData.cs                # シナリオステップのデータ形式を定義する。
-│   └── ScenarioModel.cs               # シナリオ進行状態とキャラ画像を保持する。
-├── Presenter/
-│   └── ScenarioScenePresenter.cs      # シナリオコマンドを解釈し View/Battle/RuntimeModel に反映する。
-├── Repository/ModelRepository/
-│   └── ScenarioModelRepository.cs     # RuntimeModel から読むべきシナリオを決定して生成する。
-└── View/
-    └── ScenarioView.cs                # メッセージ、立ち絵、表情、ログ表示を扱う。
-```
-
-### DemoClear
-
-```text
-DemoClear/Scripts/
-├── Presenter/
-│   └── DemoClearScenePresenter.cs     # 任意キー入力後に Title へ戻す。
-└── View/
-    └── DemoClearView.cs               # デモクリア表示と入力イベントを扱う。
-```
+- `Entry/`: Addressables 初期化と Global・Title の加算ロード。
+- `Global/`: 常駐 UI・入力・サウンド (`SoundManagerPresenter`)・画面遷移 (`SceneNavigator`) を束ねる。
+- `Title/`: タイトルメニューと StageList / SoundRoom への遷移。
+- `StageList/`: ステージカード一覧と Battle への遷移。カードのプレハブは `Prefabs/`。
+- `SoundRoom/`: 解放済み BGM の一覧と再生。
+- `Scenario/`: シナリオデータの形式 (Model)、会話の表示とスキップ確認モーダル (View/Presenter)、流すシナリオの受け渡し (ModelRepository)。
+- `DemoClear/`: クリア表示と StageList への遷移。
+- `Battle/`: 下記。
 
 ### Battle
 
 ```text
 Battle/
-├── Documents/                         # Battle 固有の設計メモ置き場 (旧方式時代のもの)。
-├── Editor/                            # Battle 用のエディタ拡張 (SpectrumBarHeightRecorder)。
-│   └── BehaviorTree/                  # BehaviorTree エディタ (GraphView)。
-├── Prefabs/                           # Player/敵/ステージ用バトルプレハブ。
+├── Documents/                         # Battle 固有の設計メモ。
+├── Editor/                            # Battle 用のエディタ拡張。
+│   └── BehaviorTree/                  # BehaviorTree エディタ (GraphView、ノードパレット、パラメータ欄)。
+├── Prefabs/                           # バトル用プレハブ。
+│   ├── Commons/                       # ステージ共通 (ボス HP バー、汎用弾)。
+│   ├── Player/                        # 自機と自機弾。
+│   └── Stage1/ 〜 Stage4/             # ステージ固有の敵・ボス・弾・演出。
+├── Shaders/                           # Battle 固有のシェーダー (風向き矢印)。
 └── Scripts/
     ├── BehaviorTree/                  # BT のコアとノード定義。
-    │   ├── Core/                      # Node (ノードの基底) / BehaviorTreeAsset と種類 (Stage / Enemy / Bullet / Common) / BattleStageAsset / パラメータと複製 / Runner。
-    │   ├── Composite/                 # Sequence / Selector / Parallel / Random。
-    │   ├── Decorator/                 # Loop / Repeat / Until / Delay / Inverter / ForceSuccess。
-    │   ├── Condition/                 # 条件定義と CheckCondition / WaitUntil。
-    │   ├── Action/                    # Wait / Log / SubTree。
-    │   └── Battle/                    # 発射・ビーム・移動・出現・ステージ演出のバトル固有ノード。
-    ├── Runtime/                       # BT の実行基盤 (BattleFlow / BattleWorld / BattleClock / IAgent / EnemyAgent / BulletAgent / EnemySpawner / EnemyPool / BulletSystem / TreePool / 消える理由 / 合図)。
-    │   ├── Stage/                     # ステージサービス (StageContext / WindService) と外力の受け口。
-    │   └── Motion/                    # 敵・ボス・弾共通の移動定義 MotionStep と実行器。
-    ├── Model/                         # Battle の純粋データ・Entity Model・風の設定型。
-    ├── Presenter/                     # Battle 全体の進行とエンティティ制御。
-    ├── Repository/                    # asmref だけが残る (スクリプトなし)。
-    └── View/                          # Battle 表示と当たり判定補助。
+    │   ├── Core/                      # ノード基底、ツリーアセット (Stage / Enemy / Bullet / Common)、BattleStageAsset、パラメータ (Bt*)、複製、Runner。
+    │   ├── Composite/                 # 子を複数持つノード (Sequence / Selector / Parallel、ステージ進行の Stage / PlayScenario など)。
+    │   ├── Decorator/                 # 子を 1 つ持つノード (Loop / Phase / Section / WithWind など)。
+    │   ├── Action/                    # 葉ノード (Wait / SubTree、弾を撃つ・ビーム・移動・出現・BGM/SE・ボス戦など)。
+    │   ├── Condition/                 # 条件の定義 (HpBelow / NoActiveEnemies / Signaled など)。
+    │   └── Parts/                     # ノードではない部品 (ShotPattern・DirectionSource・SpawnLayout・BulletConfig・ビーム) と BossDefinition / TrailPath。
+    ├── Runtime/                       # BT の実行基盤 (BattleFlow / BattleWorld / BattleClock、Agent、出現・プール、弾の実行、会話の受け口、合図)。
+    │   ├── Stage/                     # ステージサービス (StageContext / WindService) と自機・弾への外力の受け口。
+    │   └── Motion/                    # 敵・ボス・弾共通の移動定義 (MotionStep と `*Motion.cs`)、実行器、MotionPreset。
+    ├── Model/                         # Battle の純粋データ (風の設定型、背景状態、画面境界)。
+    │   └── Entity/                    # Player / Enemy / Boss / Bullet / SpectrumBar の EntityModel。
+    ├── Presenter/                     # Battle 全体の進行 (BattleScenePresenter)、背景・壁・弾消去・敵数監視・風向き矢印。
+    │   └── Entity/                    # エンティティ制御 (自機・敵・ボス・弾・ビーム)、死亡演出、ステージ固有のボス挙動。
+    ├── Repository/ModelRepository/    # asmref のみ。
+    └── View/                          # 背景・予告線・ビーム・風向き矢印・曲名表示・当たり判定補助。
+        └── Entity/                    # エンティティ View の基底と各 View。
 ```
 
-`Scripts/BehaviorTree/` と `Scripts/Runtime/` は `Project.Scenes.Battle.Presenter.asmref` で Presenter アセンブリに含まれる。仕組みは `Document/Battle/BehaviorTree.md`、ノードの一覧は `Document/Battle/BehaviorTree-Nodes.md` を参照。
-
-Battle BehaviorTree:
-
-- `Core/BattleStageAsset.cs`: 1 ステージ (道中・会話・ボス戦) 全体の定義 (ステージサービス、ステージツリー)。
-- `Core/BehaviorTreeAsset.cs`: ツリー 1 本の ScriptableObject の抽象基底 (root、未接続ノード、パラメータ、置けるノードと SubTree の判定)。
-- `Core/StageTreeAsset.cs` / `Core/EnemyTreeAsset.cs` / `Core/BulletTreeAsset.cs` / `Core/CommonTreeAsset.cs`: ツリーの種類。`Create > Battle > Behavior Tree > Stage / Enemy / Bullet / Common` で作る。
-- `Core/Node.cs` / `Core/CompositeNode.cs` / `Core/DecoratorNode.cs` / `Core/ActionNode.cs` / `Core/EnemyActionNode.cs`: ノードの基底。設定・実行中の状態・処理を 1 クラスに持ち、Enter/Tick/Abort/Exit の順を保証する。`EnemyActionNode` は敵のツリーにだけ置けるノードの基底。
-- `Core/TreeScope.cs` / `Core/TreeParameter.cs` / `Core/Bt*.cs` / `Core/NodeCloner.cs`: パラメータ解決 (`BtInt` などの `$param`)・SubTree の循環検出と、実行用にノードを複製する `NodeCloner`。
-- `Core/BattleContext.cs` / `Core/BehaviorTreeRunner.cs`: ツリー 1 本の実行文脈と駆動。
-- 1 ファイル 1 型。ノードは基底クラスごとのフォルダ (`Composite/` / `Decorator/` / `Action/` / `Condition/`) に置き、ファイル名は型名と同じ。
-- `Composite/`: Sequence / Selector / Parallel / RandomSelect / If / Cycle / HpSections、ステージ進行の Stage / PlayScenario。
-- `Decorator/`: Loop / Repeat / Until / Phase / Delay / Inverter / ForceSuccess、WarningLine、Section / OnCommand、WithWind / WithPrefab。
-- `Action/`: Wait / Log / SubTree、弾を撃つノード (SingleShot / NWayShot など)、ChargeEffect、BulletBeam / SpriteBeam / MoveTrailFan、MoveSelf / Move / MovePath / PlaceAlongPath、Spawn / Despawn / SetDespawnBehavior / SetInvincible / SendSignal / PlaySe、Wave / PlayBgm / SpawnBoss / BossBattle、ClearBullets / BossWindCue、CheckCondition / WaitUntil。
-- `Condition/`: 条件の基底と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies / Compare / BgmSamples / Signaled。
-- `Parts/`: ノードではない部品 (ShotPattern 系、DirectionSource / RotationSource 系、SpawnLayout 系、BulletConfig、Emitter、EmitContext、BeamAim / BeamLine / IBeam、TrailPolyline) と、ScriptableObject の `BossDefinition` / `TrailPath`。
-
-Battle Runtime:
-
-- `BattleFlow.cs`: バトル 1 回分の BT 実行 (ステージサービス、弾・敵の事前生成、ステージツリー・ボスツリーの開始、停止) を管理する。
-- `BattleWorld.cs`: フレーム番号・乱数・予約実行・合図の配送・ツリーの使い回し・サービスを持ち、1 フレームを進める。
-- `BattleClock.cs`: 固定 60fps で BattleWorld を進める MonoBehaviour。
-- `IAgent.cs`: ツリーの Self になるもの (敵・弾) の共通インターフェース。
-- `EnemyAgent.cs`: 敵/ボスに付けてツリーを毎フレーム進め、撃破・寿命・画面外で消えるかを判定する。
-- `BulletAgent.cs`: 弾 1 発分の Self。BulletSystem が出し入れする。
-- `TreePool.cs`: 複製したツリーを (アセット, 上書きパラメータ) ごとに使い回す。
-- `DespawnReason.cs` / `DespawnBehavior.cs`: 敵・弾が消えた理由と、消えるときに 1 回だけ実行するツリー。
-- `Signal.cs` / `SignalInbox.cs`: ツリー間の合図とその受け箱。
-- `EnemySpawn.cs` / `BulletSpawn.cs`: EnemySpawner / BulletSystem に渡す出現内容。
-- `EnemySpawner.cs`: 敵・ビーム・障害物 Prefab を生成 (プール対象は EnemyPool から取得) し、ツリー指定時と敵 Prefab には EnemyAgent を付ける。
-- `EnemyPool.cs` / `PooledEnemy.cs` / `NoEnemyPool.cs` / `IPoolableEnemy.cs` / `EnemyDespawn.cs`: 敵を Prefab ごとに使い回すプールと、敵を消す共通の入口 `EnemyDespawn`。
-- `StagePrefabCollector.cs`: BattleStageAsset から参照をたどり、事前生成する弾・出現物の Prefab を集める。
-- `BulletSystem.cs`: 敵弾・自機弾のツリーを固定フレームで実行し、位置の反映と消えるかの判定 (当たり・寿命・飛距離・画面外)、プールへの返却を行う。
-- `Stage/`: ステージサービスの仕組み (`StageContext` / `IStageService` / `StageServiceDefinition`)、風 (`WindService` / `WindServiceDefinition`)、自機・弾への外力の受け口 (`IMoveModifier` / `IBulletForce`)。
-- `Motion/`: MotionStep の基底と各ステップ (`*Motion.cs`)、実行器 (`MotionRunner` / `PullRunner` / `DelegatePullRunner` / `TweenRunner` / `MotionSequence`)、MotionPreset / EaseCurveAsset / BattleTargets (自機の Transform)。
-
-Battle BehaviorTree Editor:
-
-- `BehaviorTreeEditorWindow.cs`: `Window > Battle > Behavior Tree Editor`。BT アセットのダブルクリックでも開く。
-- `BehaviorTreeGraphView.cs` / `BehaviorTreeNodeView.cs` / `BehaviorTreePort.cs` / `BehaviorTreeEdge.cs`: グラフ表示と編集。
-- `NodePaletteView.cs` / `NodeCatalog.cs` / `NodeSearchWindowProvider.cs`: ノード一覧・検索・ドラッグ作成。
-- `NodeInspectorView.cs`: 右ペイン Node タブ。選択中のノードの説明と設定欄。
-- `ParameterPanelView.cs` / `BtValueDrawer.cs` / `ParameterUtility.cs`: パラメータ一覧と値欄の結びつけ。パラメータ名の変更は値欄・`bindToParent`・`*Param` 欄に追従する。
-
-Battle Model:
-
-- `BattleWindSettings.cs` / `WindInterval.cs` / `WindDirection.cs`: 風の設定型。
-- `BossWindCueSettings.cs`: BossWindCue ノードの設定。
-- `BattleBackgroundModel.cs`: 背景の状態。
-- `ScreenBoundsCache.cs`: Battle シーンの画面境界をキャッシュする。
-- `IEnemyTracker.cs`: 敵数監視の抽象インターフェース。
-- `Entity/`: Player/Enemy/Boss/Bullet/SpectrumBar などの純粋 EntityModel。
-
-Battle Presenter:
-
-- `BattleScenePresenter.cs`: バトル全体の初期化、BattleStageAsset のロード、BattleFlow による Way/Boss 進行、Scenario 遷移、Retry/Title 戻りを制御する。
-- `WindArrowsPresenter.cs`: 風向き矢印を表示する。WindService が生成する。
-- `BackgroundPresenter.cs`: バトル背景の初期化・スクロール・減速を制御する。
-- `BattleWallPresenter.cs`: バトル画面の壁/境界関連を制御する。
-- `BulletClearReceiver.cs`: 弾・警告線・ビームや敵をまとめて消去する (ClearBullets ノード、Retry)。
-- `EnemyTracker.cs`: 生存中の敵数を `EnemyEntityPresenter.OnRemoved` で数え、NoActiveEnemies 条件へ提供する。
-
-Battle Entity Presenter:
-
-- `PlayerEntityPresenter.cs`: プレイヤー移動、攻撃、チャージ、被弾、死亡演出を制御する。
-- `EnemyEntityPresenter.cs`: 通常敵の HP・被弾点滅・効かない攻撃の SE・寿命と画面外マージンの設定値・接触を扱う (移動と攻撃は EnemyAgent のツリー、消える判定は EnemyAgent)。EnemyPool での出し入れに対応する。
-- `BossEntityPresenter.cs`: ボスの HP・被弾・撃破演出・登場直後の当たり判定オフを扱う。
-- `BulletEntityPresenter.cs`: 弾の見た目・衝突・外力の倍率・画面外マージンを扱う (位置・寿命・消える判定・プール返却は BulletSystem)。
-- `BulletPool.cs`: 弾 Prefab ごとの共有 ObjectPool (`GetOrCreateSharedPool` / `Prewarm`) と、撃ち手の弾 Prefab の保持。
-- `PhysicsBallPresenter.cs`: 物理挙動を持つ Battle エンティティを制御する。
-- `AudioSpectrumPresenter.cs`: 音声スペクトラム表現を制御する。
-- `BossPhaseProgressGauge.cs`: ボスフェーズ進行ゲージを表示する。
-- `DeathDirectorBase.cs`: 死亡演出の共通基底。
-- `PlayerDeathDirector.cs`: プレイヤー死亡演出を実行する。
-- `BossDeathDirector.cs`: ボス死亡演出を実行する。
-- `SpectrumBarCollisionRelay.cs`: スペクトラムバー衝突をエンティティへ中継する。
-- `IEntityPresenter.cs`: MonoBehaviour Presenter から EntityModel を取得する共通契約。
-- `IDeathDirector.cs`: 死亡演出の共通契約。
-
-Battle Repository/View:
-
-- `BackgroundView.cs`: 背景表示とスクロール見た目を扱う。
-- `FanCollider2D.cs`: 扇形当たり判定を提供する。
-- `StaffNotationPresenter.cs`: 五線譜風表示を制御する。
-- `EntityViewBase.cs`: Battle Entity View の共通基底。
-- `PlayerEntityView.cs`: プレイヤーの見た目・アニメーション・HP 表示を扱う。
-- `EnemyEntityView.cs`: 敵の見た目・位置・被弾フラッシュを扱う。
-- `BossEntityView.cs`: ボスの見た目・HP ゲージ・被弾表示を扱う。
-- `BulletEntityView.cs`: 弾の見た目と表示状態を扱う。
-- `SpectrumBarView.cs`: スペクトラムバーの見た目を扱う。
+- `Scripts/BehaviorTree/` と `Scripts/Runtime/` は `Project.Scenes.Battle.Presenter.asmref` で Presenter アセンブリに含まれる。
+- BT は 1 ファイル 1 型。ノードは基底クラスごとのフォルダ (`Composite/` / `Decorator/` / `Action/` / `Condition/`) に置き、ファイル名は型名と同じにする。ノードではない部品は `Parts/` に置く。
+- ステージ固有のサービスは `Runtime/Stage/` に `IStageService` と `StageServiceDefinition` の組で置く。
+- 移動ステップは `Runtime/Motion/` に `<名前>Motion.cs` で置く。
+- BT エディタ (`Window > Battle > Behavior Tree Editor`) のコードは `Editor/BehaviorTree/` に置く。
+- 仕組みは `Document/Battle/BehaviorTree.md`、ノードの一覧は `Document/Battle/BehaviorTree-Nodes.md` を参照。
 
 ## Scripts
 
 ```text
 Assets/Project/Scripts/
-├── Extensions/             # enum、入力イベント、共通拡張、定数。
-├── Infra/                  # ScriptableObject/JSON のデータ定義。
-├── Model/                  # シーン横断の純粋 Model。
-├── Presenter/              # シーン横断 Presenter 基底と起動補助。
-├── Repository/             # シーン横断の Model/Asset Repository。
+├── Extensions/             # enum (SceneType / BattleStageType / BgmType / SeType)、入力、共通拡張、定数。
+│   └── Message/            # UniRx MessageBroker で流すメッセージ (入力・画面遷移・シナリオコマンド)。
+├── Infra/                  # ScriptableObject/JSON のデータ定義 (`*DataObject.cs`、UserData、KeyConfigData)。
+├── Model/                  # シーン横断の純粋 Model (UserModel / RuntimeModel / StageModel など)。
+├── Presenter/              # シーン横断 Presenter 基底 (MonoPresenter) と起動補助。
+├── Repository/             # シーン横断の Repository。
+│   ├── AssetRepository/    # Addressables 初期化、Sprite/AudioClip のロード (`*AssetRepository.cs`)。
+│   └── ModelRepository/    # Model の生成・キャッシュ・DataStore のロード (`*ModelRepository.cs`)。
 └── View/                   # シーン横断 View アセンブリ定義。
 ```
 
-Extensions:
-
-- `SceneType.cs`: Scene enum と実シーン名への変換を定義する。
-- `BattleStageType.cs`: ステージ enum と番号変換を定義する。
-- `BgmType.cs`: BGM 種別 enum。
-- `SeType.cs`: SE 種別 enum。
-- `GamePath.cs`: Addressables で使う基準パス定数。
-- `InputManager.cs`: Input System の Action を UniRx MessageBroker へ変換する。
-- `InputSystemActions.cs`: Input System 生成コード。
-- `Message/InputActionMessage.cs`: 入力イベントメッセージ群。
-- `Message/SceneNavigationMessage.cs`: 画面遷移状態メッセージ。
-- `ObservableExtensions.cs`: UniRx 購読補助。
-- `BoolExtensions.cs`, `StringExtensions.cs`: 小さな型拡張。
-- `ReadOnlyAttribute.cs`: Inspector 読み取り専用表示用属性。
-
-Infra:
-
-- `StageDataObject.cs`: ステージ番号、タイトル、キャラ、背景、BattleStageAsset のアドレスを定義する。
-- `CharacterDataObject.cs`: キャラクター ID/名前/英名を定義する。
-- `BgmDataObject.cs`: BGM 種別、対象シーン、ループ位置を定義する。
-- `SeDataObject.cs`: SE 種別とループ位置を定義する。
-- `KeyConfigData.cs`: キー設定保存用データを定義する。
-- `UserData.cs`: セーブデータ、音量、初回チュートリアル状態を定義する。
-
-Model:
-
-- `ModelBase.cs`: UserModel/RuntimeModel 参照を持つ Model 基底。
-- `AddressablesModel.cs`: Addressables 初期化処理を表す。
-- `RuntimeModel.cs`: 現在ステージと Way/Boss 状態を保持する。
-- `SceneRouterModel.cs`: シーン名定数を定義する。
-- `StageModel.cs`: ステージ開放/クリア状態と BattleStageAsset のアドレスを持つ。
-- `UserModel.cs`: UserData の読み書きと進行状態/音量を管理する。
-- `CharacterModel.cs`: キャラクターデータを表す。
-- `BgmModel.cs`: BGM データと AudioClip を表す。
-- `SeModel.cs`: SE データと AudioClip を表す。
-- `KeyConfigModel.cs`: InputActionAsset とキー設定を扱う。
-
-Presenter:
-
-- `MonoPresenter.cs`: GlobalScenePresenter、SoundManager、Repository への共通入口を提供する。
-- `GameBootStrapper.cs`: ゲーム起動時の補助処理を置く。
-
-Repository:
-
-```text
-Repository/
-├── AssetRepository/        # Sprite/Audio/Addressables 初期化などアセットロード。
-└── ModelRepository/        # Model の生成・キャッシュ・データロード。
-```
-
-AssetRepository:
-
-- `AssetRepositoryBase.cs`: アセット Repository の基底。
-- `AddressablesInitializeAssetRepository.cs`: Addressables 初期化を行う。
-- `StillAssetRepository.cs`: キャラクタースチル Sprite を読み込む。
-- `FaceAssetRepository.cs`: キャラクター表情 Sprite 群を読み込む。
-- `AllCharacterStillAssetRepository.cs`: 全キャラクターのスチルを読み込む。
-- `BackGroundAssetRepository.cs`: 背景 Sprite を読み込む。
-- `SoundAssetRepository.cs`: BGM/SE AudioClip を読み込む。
-
-ModelRepository:
-
-- `ModelRepositoryBase.cs`: DataStore Addressables アドレス生成と共通ロード処理。
-- `RuntimeModelRepository.cs`: RuntimeModel のシングルトンを提供する。
-- `UserModelRepository.cs`: UserModel のシングルトンを提供する。
-- `StageModelRepository.cs`: StageData から StageModel 一覧を生成する。
-- `SoundModelRepository.cs`: BgmData/SeData から BgmModel/SeModel を生成する。
-- `CharacterModelRepository.cs`: CharacterData から CharacterModel を生成する。
-- `KeyConfigModelRepository.cs`: InputActionAsset を受け取り KeyConfigModel を生成する。
+- `RuntimeModel` は実行中のステージ (`CurrentStageType`) とリトライで戻る Section 番号 (`CheckpointSection`) を持つ。
+- `UserModel` は `UserData.json` の読み書きと進行状態・音量を扱う。
+- `SceneRouterModel` にシーン名の定数を置く。
 
 ## Textures
 
 ```text
 Assets/Project/Textures/
-├── Character/              # キャラクター立ち絵・表情・ドット画像。
+├── Character/              # キャラクター立ち絵・表情・ドット画像 (キャラ名ごと)。
 ├── Enemies/                # 敵キャラクター画像。
-├── Images/                 # 背景、ボタン、装飾、ロゴ、テキストボックス。
+├── Fonts/                  # 会話・UI 用フォントと TMP フォントアセット。
+├── Images/                 # 背景、弾、ボタン、装飾、ロゴ、テキストボックス、サウンドルーム用画像。
 ├── Player/                 # プレイヤー画像。
 ├── Scenario/               # シナリオ用画像。
 └── Sounds/                 # BGM/SE 音声ファイル。
@@ -476,15 +262,19 @@ Character/{Name}/
 
 ```text
 Assets/Project/Scripts/
-├── Extensions/Extensions.asmdef              # 共通 enum/拡張/メッセージ。
-├── Infra/Infra.asmdef                        # データ定義。
-├── Model/Model.asmdef                        # 共通 Model。
-├── Presenter/Presenter.asmdef                # 共通 Presenter。
-├── Repository/Repository.asmdef              # Repository ルート。
-├── Repository/AssetRepository/AssetRepository.asmdef # アセットロード。
-├── Repository/ModelRepository/ModelRepository.asmdef # Model 生成。
-└── View/View.asmdef                          # 共通 View。
+├── Extensions/Extensions.asmdef                       # 共通 enum/拡張/メッセージ。
+├── Infra/Infra.asmdef                                 # データ定義。
+├── Model/Model.asmdef                                 # Model。
+├── Presenter/Presenter.asmdef                         # Presenter。
+├── Repository/Repository.asmdef                       # Repository ルート。
+├── Repository/AssetRepository/AssetRepository.asmdef  # アセットロード。
+├── Repository/ModelRepository/ModelRepository.asmdef  # Model 生成。
+└── View/View.asmdef                                   # View。
 ```
+
+- `Scenes/` と `Commons/` / `Samples/` のスクリプトは asmdef を持たず、各レイヤフォルダの `.asmref` で上記 Model / View / Presenter / ModelRepository に所属する。
+- `Assets/Project/Editor/` と `Scenes/Battle/Editor/` は asmdef を持たない Editor フォルダ。
+- ZString は `Assets/Scripts/ZString/ZString.asmdef`。
 
 ## Runtime Scene Flow
 
@@ -497,16 +287,26 @@ Entry
 
 Title
   -> StageList
+  -> SoundRoom (-> Title)
 
 StageList
   -> set RuntimeModel.CurrentStageType
-  -> set RuntimeModel.CurrentSituation = Way
+  -> set RuntimeModel.CheckpointSection = 0
   -> Battle
 
-Battle
+Battle (BattleScenePresenter)
   -> load BattleStageAsset and run the stage tree (BattleFlow)
   -> Section "Way": waves
   -> Section "Boss": load Scenario additively, spawn boss, boss battle, load Scenario additively
-  -> stage tree completes and the stage is cleared
-  -> DemoClear in current demo flow
+  -> stage tree completes: clear the stage and open the next stage
+  -> load DemoClear additively
+
+DemoClear
+  -> any key: load StageList, unload Battle and DemoClear
+
+Pause / GameOver
+  -> Retry: restart from RuntimeModel.CheckpointSection
+  -> Title
 ```
+
+Scenario は `ScenarioScenePresenter` が会話を表示し、演出以外のコマンドは `ScenarioCommandMessage` で Battle のツリーへ渡す。会話が終わると自身をアンロードする。
