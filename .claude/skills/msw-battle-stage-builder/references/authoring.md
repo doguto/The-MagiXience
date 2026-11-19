@@ -109,7 +109,7 @@ overrides.Add(attack);
 // death (撃破時のツリー。CommonTreeAsset) も同様。共通ツリー Enemy のパラメータは attack と death だけ
 ```
 
-- フィールド名は `Document/Battle/BehaviorTree-Nodes.md` か、`Assets/Project/Scenes/Battle/Scripts/BehaviorTree/` のソースで確認する。推測で書かない。
+- フィールド名は `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/` のソースで確認する。推測で書かない。
 - 作ったツリーは BT エディタで開いて構造を確認してからユーザーに見せる（配置は自動整列される）。
 - ツリーアセットは種類ごとの型（`StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`）で `CreateInstance` する。`BehaviorTreeAsset` は抽象クラス。
 - フォルダを作る `AssetDatabase.CreateFolder` は再インポートを起こすことがある。フォルダを先に作り、アセットは `AssetDatabase.StartAssetEditing` / `StopAssetEditing` の間でまとめて作る。

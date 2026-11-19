@@ -1,9 +1,7 @@
 # Battle BehaviorTree 構造解説
 
 このドキュメントは、バトルシーンの進行（道中・ボス戦・敵と弾の行動）を駆動する BehaviorTree（以下 BT）方式の構造を解説する。
-個々のノードのフィールドや戻り値の詳細は [BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md) を参照すること。
-
-旧方式（`BattleSequenceAsset` / `BattleTimelineBuilderAsset` による Unity Timeline 駆動）と旧攻撃タイムライン（`AttackPreset` / `AttackTimeline` / `MovementPreset`）は削除済みである。
+汎用ノードは [BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md)、バトル固有のノード・部品・`MotionStep` はソースの Tooltip / `Summary` を参照すること。
 
 本ドキュメントはソースコードを正として書いている。食い違いがあればソースコードを優先すること。
 
@@ -50,15 +48,15 @@ BT の適用範囲は次の 3 層である。
 
 | パス | 内容 |
 |---|---|
-| `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/` | `Node`（基底と `CompositeNode` / `DecoratorNode` / `ActionNode` / `EnemyActionNode`）/ `BehaviorTreeAsset` と種類ごとの派生（`StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`）/ `TreeScope`（`NodeCloner` を含む）/ `TreeParameter` / `BattleContext` / `BehaviorTreeRunner` / `BattleStageAsset` |
-| `.../BehaviorTree/Composite/` | Sequence / Selector / Parallel / RandomSelect と、ステージ進行の Stage / PlayScenario |
-| `.../BehaviorTree/Decorator/` | Loop / Repeat / Until / Delay / Inverter / ForceSuccess / WarningLine / Section / OnCommand / WithWind / WithPrefab |
-| `.../BehaviorTree/Condition/` | 条件の基底 `Condition` と Constant / FrameElapsed / BgmReached / And / Or / Not / HpBelow / NoActiveEnemies など |
-| `.../BehaviorTree/Action/` | Wait / Log / SubTree / CheckCondition / WaitUntil、発射・ビーム・移動・出現・ステージ演出・ステージ進行の Action ノード |
-| `.../BehaviorTree/Parts/` | ノードではない部品 (ShotPattern / DirectionSource / RotationSource / SpawnLayout / BulletConfig / Emitter / BeamAim など) と `BossDefinition` / `TrailPath` |
-| `Assets/Project/Scenes/Battle/Scripts/Runtime/` | `BattleWorld` / `BattleServices` / `BattleClock` / `BattleFlow` / `IAgent` / `EnemyAgent` / `BulletAgent` / `EnemySpawner` / `BulletSystem` / `TreePool`、消えるとき (`DespawnReason` / `DespawnBehavior`)、合図 (`Signal` / `SignalInbox`)、`IScenarioService` / `IBossHost` / `StageProgress`、敵のプール（`EnemyPool` / `IPoolableEnemy` / `EnemyDespawn` / `PooledEnemy` / `NoEnemyPool`）、事前生成用の `StagePrefabCollector` |
-| `.../Runtime/Stage/` | `StageContext` / `IStageService` / `WindService` / 外力の受け口 (`IMoveModifier` / `IBulletForce`) |
-| `.../Runtime/Motion/` | `MotionStep` と各ステップ (`*Motion.cs`)、実行器 (`MotionRunner` / `PullRunner` / `MotionSequence`)、`MotionPreset` / `EaseCurveAsset` / `BattleTargets`（自機の Transform） |
+| `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/` | ノードの基底、`BehaviorTreeAsset` とツリーの種類、パラメータ、`BehaviorTreeRunner`、`BattleStageAsset` |
+| `.../BehaviorTree/Composite/` | 子を複数持つノード |
+| `.../BehaviorTree/Decorator/` | 子を 1 つ持つノード |
+| `.../BehaviorTree/Condition/` | 条件（`Condition` の派生） |
+| `.../BehaviorTree/Action/` | 子を持たないノード |
+| `.../BehaviorTree/Parts/` | ノードではない部品（撃ち方・方向・弾の設定・出現の並びなど）と `BossDefinition` |
+| `Assets/Project/Scenes/Battle/Scripts/Runtime/` | ツリーの実行基盤（`BattleWorld` / `BattleClock` / `BattleFlow`、敵と弾の `IAgent`、出現・プール、消えるとき、合図） |
+| `.../Runtime/Stage/` | ステージサービスと外力の受け口 |
+| `.../Runtime/Motion/` | `MotionStep` と各ステップ、実行器、`MotionPreset` / `EaseCurveAsset` |
 | `Assets/Project/Scenes/Battle/Editor/BehaviorTree/` | GraphView ベースの BT エディタ |
 | `Assets/Project/DataStore/Stage{N}/BT/` | 各ステージの BT データ（[DataStore.md](./DataStore.md) 参照） |
 
@@ -216,7 +214,7 @@ Abort(ctx):
   IsActive = false; OnAbort(ctx); OnExit(ctx)
 ```
 
-- `Tick` は 1 フレームに 1 回が原則。ただし Sequence / Loop など一部の複合ノードは、子が完了したフレームのうちに次の子を開始する（詳細はノードリファレンス）。
+- `Tick` は 1 フレームに 1 回が原則。ただし Sequence / Loop など一部の複合ノードは、子が完了したフレームのうちに次の子を開始する。
 - 完了したノードを再び `Tick` すると `OnEnter` からやり直しになる。Loop や Until(Restart) の繰り返しはこの性質を使っている。
 - 親が子を中断するときは `Abort` を呼ぶ。`OnExit` は完了・中断のどちらでも必ず呼ばれるため、「子の実行中だけ有効」な処理（WithWind、WithPrefab、Move の停止）は `OnExit` で後始末する。
 - `NodeStatus` は `Running` / `Success` / `Failure` の 3 値。
@@ -360,7 +358,7 @@ Spawn（Wave の entries を含む）で `behavior = Enemy` とし、移動は S
 
 ### 6.1 ステージツリーの形
 
-Stage1〜4 の実データは次の形をとる（各ノードの詳細は [BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md) 7.5）。
+Stage1〜4 の実データは次の形をとる。
 
 ```text
 Stage
@@ -492,9 +490,9 @@ public abstract class StageServiceDefinition
 
 ### 8.1 弾の発射
 
-発射系ノード（SingleShot / NWayShot などの弾を撃つノード、BulletBeam、MoveTrailFan、PlaceAlongPath）はすべて `Parts/Emitter.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
+弾を出すノードはすべて `Parts/Emitter.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
 
-- 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletConfig`、撃ち方は `ShotPattern` で指定する（詳細はノードリファレンス）。
+- 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletConfig`、撃ち方は `ShotPattern` で指定する。
 - 発射位置は「撃つ敵の位置 + muzzleOffset + パターンごとのずれ」。ステージ直下（`Self == null`）なら原点基準。
 - パターンの `SpawnDelayFrames` が付いた弾は `BattleWorld.Schedule` で予約され、予約時点ではなく出現時点の撃ち手の位置から出る。撃ち手（敵・弾）が消えると予約は取り消される（消えるときのツリーから撃った弾は取り消し対象にしない）。
 - 方向は発射ノードを実行したフレームに 1 回だけ決める。
@@ -517,7 +515,7 @@ public abstract class StageServiceDefinition
 - `BulletSystem.Clear()` は全弾を `Cleared` で消す。`BulletClearReceiver.ClearAllBullets`（`BattleFlow` がバトル開始時に `BindBulletSystem` で `BulletSystem` を渡す）と ClearBullets ノードがこれを呼び、加えて警告線・ビームを `ClearAllBeams` で消す。
 
 - 撃ち手の Prefab に付いた `BulletPool` コンポーネントは、弾 Prefab の保持（`BulletPrefab`）と共有プールの作成だけを行う。共有プールは作ったシーンが閉じたときだけ破棄される（会話シーンの開閉では破棄しない）。
-- 自機の弾も `BulletSystem` で撃つ。`PlayerEntityPresenter` は `BattleFlow` から `BindBulletSystem` で受け取った `BulletSystem` に、`VelocityMotion`（速さは Inspector の `normalShotSpeed` = 5 / `chargedShotSpeed` = 0）の弾を出す。旧来と同じく OutQuad の時間写像（8.3）が掛かるので、速さ 5 は実際には約 10/秒で飛ぶ。チャージ弾は `BulletSpawn.IsPlayerChargeBullet` を ON にして出す（`BulletEntityModel.IsPlayerChargeBullet` になり、「チャージ攻撃のみ有効」の敵に効く）。
+- 自機の弾も `BulletSystem` で撃つ。`PlayerEntityPresenter` は `BattleFlow` から `BindBulletSystem` で受け取った `BulletSystem` に、`VelocityMotion`（速さは Inspector の `normalShotSpeed` = 5 / `chargedShotSpeed` = 0）の弾を出す。OutQuad の時間写像（8.3）が掛かるので、速さ 5 は実際には約 10/秒で飛ぶ。チャージ弾は `BulletSpawn.IsPlayerChargeBullet` を ON にして出す（`BulletEntityModel.IsPlayerChargeBullet` になり、「チャージ攻撃のみ有効」の敵に効く）。
 - Stage3 の双子中ボス（`TwinParabolaMidBossController`）は行動を自前で進めるが、放物線弾は `BulletSystem` に `VertexParabolaMotion` で渡す。
 
 - 移動は MoveSelf が `MotionSequence` で進める。`Motion` が空なら `VelocityMotion`（発射方向へ等速）を使う。
@@ -536,7 +534,7 @@ public abstract class StageServiceDefinition
 - `MotionPreset`（`Create > Battle > Motion Preset`）はステップ列の共有用アセット。`EaseCurveAsset`（`Create > Battle > Ease Curve`）はカスタム Ease カーブの共有用アセット。
 - 対象は `IMotionBody`。敵/ボスは Transform そのもの (`TransformBody`)、弾は外力補正前の「本来の軌道」。
 
-旧実装との互換のため、`StepClock`（`PullRunner.cs`）は旧 `PullMovementHelper` の挙動を再現する。旧実装では Ease 未指定の移動に DOTween 既定の OutQuad が掛かっていたため、`legacyOutQuad` が ON のステップ（Velocity、AimStraight、Forward、Homing、StraightWithHoming、Sine、Reflect、FadeMove）では実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使う。duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。この癖は意図的に残している。同様に `MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
+`StepClock`（`PullRunner.cs`）は、`legacyOutQuad` が ON のステップで時間の進みに OutQuad を掛ける。実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使い、duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。`MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
 
 ## 9. エディタ
 
@@ -576,14 +574,14 @@ public abstract class StageServiceDefinition
 | ツリーの種類 | `BehaviorTreeAsset` を Stage / Enemy / Bullet / Common に分け、置けるノードと SubTree の参照先を種類で制限する。敵を前提とするノードは属性ではなく `EnemyActionNode` の継承で表す |
 | 消える処理の一本化 | 敵・弾が消えるかの判定は `EnemyAgent` / `BulletSystem` が行い、Presenter は自分で消えない。理由（`DespawnReason`）ごとに `SetDespawnBehavior` のツリーを実行する |
 | 合図 | ツリー間の連絡は `SendSignal` / `Signaled` で、次のフレームの頭に一斉に届ける。処理順で結果が変わらないようにするため |
-| 時間の基準 | BT はフレーム基準（60fps 固定）。描画フレームとは独立した `BattleClock` で進めるため、処理落ちしても弾幕の相対タイミングが崩れない。移動 (`MotionStep`) の長さは旧データとの互換で秒指定 |
+| 時間の基準 | BT はフレーム基準（60fps 固定）。描画フレームとは独立した `BattleClock` で進めるため、処理落ちしても弾幕の相対タイミングが崩れない。移動 (`MotionStep`) の長さは秒指定 |
 | 割り込み | 「条件成立で中断」は Until デコレータで表す。毎フレーム子より先に条件を評価し、成立したら子を Abort する。フェーズの終了条件・HP による打ち切りはすべてこれ |
 | Blackboard を持たない | ノード間の動的な値の受け渡しはしない。共通化したい値はツリーパラメータで `Setup` 時に解決する |
 | 再利用 | 攻撃パターンや敵の行動は `BehaviorTreeAsset` として切り出し、SubTree / Spawn.behavior で参照する。コピーせず参照するので、元アセットの修正がすべての使用箇所に効く。雑魚は共通ツリー `Enemy` に攻撃・撃破時の行動をパラメータで、移動を Spawn の `motionPreset` / `motion` で渡す |
 | 敵のプール | 雑魚は `EnemyPool` で使い回し、ステージ開始時に事前生成する。敵を消す処理は `EnemyDespawn.Despawn` に一本化する |
 | ノードの形 | ノード 1 種類 = 1 クラス（設定・状態・処理を 1 つに持つ）。アセット上のノードは雛形で、実行するツリーごとに複製する。OSS の BT と同じ形で、「設定のクラス」と「実行時のクラス」を 2 つ組で書かない |
 | 保存形式 | ScriptableObject + `[SerializeReference]`。実行中の状態は `[NonSerialized]` にしてアセットに残さない |
-| 旧挙動の再現 | 旧実装の「Ease 未指定時は OutQuad」の癖は `StepClock` / `MotionEasing` で再現し、移行前後で弾道を変えない |
+| Ease 未指定 | Ease 未指定の移動は `StepClock` / `MotionEasing` で OutQuad として扱う |
 | ボスと雑魚の統一 | ボスと通常敵は同じ `EnemyAgent` + 同じノード群で攻撃・移動を解釈する。ボス固有なのは HP 系条件の対象 (`HpTarget.Boss`) と、HpSections が設定する HP ゲージの区切り・被ダメージ倍率程度 |
 | ステージ固有機能 | `BattleStageAsset.services` に宣言するステージサービスとしてカプセル化する。サービスが自機・弾へ働きかけ、自機・弾は汎用の受け口だけを持つ |
 | 進行もツリーに書く | 道中・会話・ボス戦の順序と、会話中のコマンド（ボスの出現・BGM）はステージツリーに書く。Presenter はツリーからの通知に演出で応えるだけで、進行を判断しない |
@@ -599,6 +597,5 @@ public abstract class StageServiceDefinition
 - **合図は届いたフレームだけ**: `Signaled` はそのフレームに届いた合図しか見ない。届いたフレームに評価されない位置（未開始のノードの中など）にあると取りこぼす。
 - **TreePool で使い回すノードの状態**: 実行中の状態を `OnEnter` で初期化しないノードは、使い回されたときに前の弾の状態が残る。
 - **ツリー開始は翌フレーム**: 出現させた敵のツリー、`StartStage` で登録したステージツリーは次の `Step` から動く。
-- **秒とフレームの混在**: BT ノードの時間はフレーム、`MotionStep` と一部のバトルノードのフィールド（Spawn.beamDuration、SpriteBeam.bodyDuration、MoveTrailFan.moveDuration、ScreenEdgeDirection など）は秒。各フィールドの単位はノードリファレンスを参照。
-- **型の置き場所**: `WindDirection` / `WindInterval` / `BattleWindSettings` は `Model/` に 1 型 1 ファイルで、`BossWindCueSettings` は `Model/BossWindCueSettings.cs`、自機の Transform を持つ `BattleTargets` は `Runtime/Motion/BattleTargets.cs` にある。
-- `BossEntityPresenter` は HP・被弾・撃破演出・登場直後の当たり判定オフだけを持つ。`Stage3WindBossController` は BossWindCue ノードの腕上げ演出の受け手（`IWindCueReceiver`）として残っている。
+- **秒とフレームの混在**: BT ノードの時間はフレーム、`MotionStep` と一部のバトルノードのフィールドは秒。単位は各フィールドの Tooltip を参照。
+- `BossEntityPresenter` は HP・被弾・撃破演出・登場直後の当たり判定オフだけを持つ。`Stage3WindBossController` は BossWindCue ノードの腕上げ演出の受け手（`IWindCueReceiver`）。

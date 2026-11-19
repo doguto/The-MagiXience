@@ -1,6 +1,6 @@
 # よく使う組み方
 
-ノードの細かい設定項目は `Document/Battle/BehaviorTree-Nodes.md` を参照する。ここでは実データ（`DataStore/Stage{1-4}/BT/`）で使っている形と、避けるべき書き方をまとめる。
+ノードの細かい設定項目はソース（`Assets/Project/Scenes/Battle/Scripts/BehaviorTree/`）を参照する。ここでは実データ（`DataStore/Stage{1-4}/BT/`）で使っている形と、避けるべき書き方をまとめる。
 
 ## 基本の考え方
 
@@ -64,7 +64,7 @@ Sequence
   Until #MelodyA (BgmSamples) …
 ```
 
-発狂（Strong）版を持つフェーズ（区切りは `HpSections` 1 か所。詳細は `Document/Battle/BehaviorTree-Nodes.md` の「発狂」）:
+発狂（Strong）版を持つフェーズ（区切りは `HpSections` 1 か所。詳細は `Composite/HpSections.cs`）:
 ```
 HpSections 25% 次の Phase から → $stage
   …
