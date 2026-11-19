@@ -3,8 +3,6 @@
 このドキュメントは、バトルシーンの進行（道中・ボス戦・敵と弾の行動）を駆動する BehaviorTree（以下 BT）方式の構造を解説する。
 個々のノードのフィールドや戻り値の詳細は [BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md) を参照すること。
 
-旧方式（`BattleSequenceAsset` / `BattleTimelineBuilderAsset` による Unity Timeline 駆動）と旧攻撃タイムライン（`AttackPreset` / `AttackTimeline` / `MovementPreset`）は削除済みである。
-
 本ドキュメントはソースコードを正として書いている。食い違いがあればソースコードを優先すること。
 
 ## 1. 全体像
@@ -536,7 +534,7 @@ public abstract class StageServiceDefinition
 - `MotionPreset`（`Create > Battle > Motion Preset`）はステップ列の共有用アセット。`EaseCurveAsset`（`Create > Battle > Ease Curve`）はカスタム Ease カーブの共有用アセット。
 - 対象は `IMotionBody`。敵/ボスは Transform そのもの (`TransformBody`)、弾は外力補正前の「本来の軌道」。
 
-旧実装との互換のため、`StepClock`（`PullRunner.cs`）は旧 `PullMovementHelper` の挙動を再現する。旧実装では Ease 未指定の移動に DOTween 既定の OutQuad が掛かっていたため、`legacyOutQuad` が ON のステップ（Velocity、StraightWithHoming、Sine、Reflect、FadeMove）では実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使う。duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。この癖は意図的に残している。同様に `MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
+`StepClock`（`PullRunner.cs`）は、`legacyOutQuad` が ON のステップ（Velocity、StraightWithHoming、Sine、Reflect、FadeMove）で時間の進みに OutQuad を掛ける。実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使い、duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。`MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
 
 ## 9. エディタ
 
@@ -576,14 +574,14 @@ public abstract class StageServiceDefinition
 | ツリーの種類 | `BehaviorTreeAsset` を Stage / Enemy / Bullet / Common に分け、置けるノードと SubTree の参照先を種類で制限する。敵を前提とするノードは属性ではなく `EnemyActionNode` の継承で表す |
 | 消える処理の一本化 | 敵・弾が消えるかの判定は `EnemyAgent` / `BulletSystem` が行い、Presenter は自分で消えない。理由（`DespawnReason`）ごとに `SetDespawnBehavior` のツリーを実行する |
 | 合図 | ツリー間の連絡は `SendSignal` / `Signaled` で、次のフレームの頭に一斉に届ける。処理順で結果が変わらないようにするため |
-| 時間の基準 | BT はフレーム基準（60fps 固定）。描画フレームとは独立した `BattleClock` で進めるため、処理落ちしても弾幕の相対タイミングが崩れない。移動 (`MotionStep`) の長さは旧データとの互換で秒指定 |
+| 時間の基準 | BT はフレーム基準（60fps 固定）。描画フレームとは独立した `BattleClock` で進めるため、処理落ちしても弾幕の相対タイミングが崩れない。移動 (`MotionStep`) の長さは秒指定 |
 | 割り込み | 「条件成立で中断」は Until デコレータで表す。毎フレーム子より先に条件を評価し、成立したら子を Abort する。フェーズの終了条件・HP による打ち切りはすべてこれ |
 | Blackboard を持たない | ノード間の動的な値の受け渡しはしない。共通化したい値はツリーパラメータで `Setup` 時に解決する |
 | 再利用 | 攻撃パターンや敵の行動は `BehaviorTreeAsset` として切り出し、SubTree / Spawn.behavior で参照する。コピーせず参照するので、元アセットの修正がすべての使用箇所に効く。雑魚は共通ツリー `Enemy` に攻撃・撃破時の行動をパラメータで、移動を Spawn の `motionPreset` / `motion` で渡す |
 | 敵のプール | 雑魚は `EnemyPool` で使い回し、ステージ開始時に事前生成する。敵を消す処理は `EnemyDespawn.Despawn` に一本化する |
 | ノードの形 | ノード 1 種類 = 1 クラス（設定・状態・処理を 1 つに持つ）。アセット上のノードは雛形で、実行するツリーごとに複製する。OSS の BT と同じ形で、「設定のクラス」と「実行時のクラス」を 2 つ組で書かない |
 | 保存形式 | ScriptableObject + `[SerializeReference]`。実行中の状態は `[NonSerialized]` にしてアセットに残さない |
-| 旧挙動の再現 | 旧実装の「Ease 未指定時は OutQuad」の癖は `StepClock` / `MotionEasing` で再現し、移行前後で弾道を変えない |
+| Ease 未指定 | Ease 未指定の移動は `StepClock` / `MotionEasing` で OutQuad として扱う |
 | ボスと雑魚の統一 | ボスと通常敵は同じ `EnemyAgent` + 同じノード群で攻撃・移動を解釈する。ボス固有なのは HP 系条件の対象 (`HpTarget.Boss`) と、HpSections が設定する HP ゲージの区切り・被ダメージ倍率程度 |
 | ステージ固有機能 | `BattleStageAsset.services` に宣言するステージサービスとしてカプセル化する。サービスが自機・弾へ働きかけ、自機・弾は汎用の受け口だけを持つ |
 | 進行もツリーに書く | 道中・会話・ボス戦の順序と、会話中のコマンド（ボスの出現・BGM）はステージツリーに書く。Presenter はツリーからの通知に演出で応えるだけで、進行を判断しない |

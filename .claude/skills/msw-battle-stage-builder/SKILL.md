@@ -6,7 +6,7 @@ description: Magic-science-world（Unity製2Dシューティング）のBattle S
 # Battle Stage Builder（BehaviorTree 版）
 
 Battle Scene のステージ進行・敵/ボス/弾の行動は BehaviorTree（以下 BT）で記述する。
-旧形式（`AttackPreset` / `AttackTimeline` / `MovementPreset` と `Stage{N}/Attack|Movement|Ease|Bullet` のデータ）はコード・データともに削除済み。敵の移動と攻撃はすべて BT で書く。
+敵の移動と攻撃はすべて BT で書く。
 
 設計の詳細とノード一覧はリポジトリのドキュメントを正とする。
 

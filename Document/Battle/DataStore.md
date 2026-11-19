@@ -10,7 +10,7 @@
 
 これに加えて、開発用の `Test` フォルダが存在する。
 
-> **旧形式について**: 旧形式のデータ（`Stage{N}/` 直下の `Attack/` / `Movement/` / `Ease/` / `Bullet/`、`Commons/` の `Attack/` / `Ease/` / `Movement/`、旧 `Way/` / `Boss/` の `BattleSequenceAsset`・`BattleTimelineBuilderAsset`）はすべて削除済み。`Stage1/Boss/` には `MusicTerminologySpectrum.asset` だけが残る。
+`Stage1/Boss/` には `MusicTerminologySpectrum.asset` だけがある。
 
 ## 全体の参照関係
 
@@ -122,10 +122,9 @@ Assets/Project/DataStore/Stage{N}/BT/
 ```
 
 - `Attack/` は中身が同じ攻撃を 1 つにまとめてある。雑魚とボスの両方から参照される。
-- `Motion/*_Move` は、雑魚のツリーにインラインで書かれていた移動を共通ツリー化のときに切り出したもの。以前は共通ツリーの `movement` パラメータで渡していたが、今は Spawn の `motionPreset` に移してある。
+- `Motion/*_Move` は雑魚の移動。Spawn の `motionPreset` から参照する。
 - `Enemy/` に残っているのは、攻撃中に移動を変える `Stage2/BT/Enemy/S2_2_WayAzuma`（EnemyTreeAsset）と、撃破時の行動ツリー `S2_2_WayEnemy1_death_Death`（CommonTreeAsset）だけ。Stage1・3・4 の `Enemy/` は空。
 - `EaseCurveAsset` 用の `Ease/` は現状どのステージにも無い。必要になったら `Stage{N}/BT/Ease/` に置く。
-- ファイル名の `S{N}_` 接頭辞や `_2_Azuma` のような接尾辞は、旧形式から変換したときに旧アセット名から付けたもの。
 
 ### BattleStageAsset（`Stage{N}_BT.asset`）
 

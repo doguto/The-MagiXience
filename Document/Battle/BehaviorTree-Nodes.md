@@ -214,7 +214,7 @@ Repeat(×15, 12f, → $i)
 
 ### WithPrefab
 
-子の実行中だけ Prefab を出しておく（障害物・演出など。旧 Control トラック相当）。
+子の実行中だけ Prefab を出しておく（障害物・演出など）。
 
 | フィールド | 説明 |
 |---|---|
@@ -242,7 +242,7 @@ Until / CheckCondition / WaitUntil の `condition` に設定する。
 | `Not` | `condition` | 中の条件が不成立（未設定なら成立） |
 
 - `HpTarget.Self` はツリーを持つ敵自身、`Boss` は `Services.Boss`（BossBattle ノードでツリーを付けたボスの `EnemyAgent`）。ステージツリーからボスの HP を見るときは `Boss` を使う。
-- 実データの FrameElapsed は 601 や 1801 のように +1 された値が多い。旧形式から変換したとき、旧データのループ終端時刻ちょうどの発射を含めるために付けたもの。
+- 実データの FrameElapsed は 601 や 1801 のように +1 された値が多い。ループ終端ちょうどの発射を含めるため。
 
 ## 4. 基本 Action
 
@@ -371,7 +371,7 @@ Parallel(All)
 
 ### MoveTrailFan（Action/Attack）
 
-この敵が移動しながら軌跡上に弾を置き、移動後に全弾を扇状に同時に放つ（旧 MoveTrailFanBulletSignal）。移動と配置が終わるまで Running。`Self` が無ければ Failure。
+この敵が移動しながら軌跡上に弾を置き、移動後に全弾を扇状に同時に放つ。移動と配置が終わるまで Running。`Self` が無ければ Failure。
 
 | フィールド | 単位 | 説明 |
 |---|---|---|
@@ -702,7 +702,7 @@ PlayScenario の子に置く Decorator。会話が `command`（シナリオの `
 敵・ボス・弾の移動の 1 ステップ。`Move` / `Spawn.motion` / `BulletConfig.motion` / `BossDefinition.entrance` / `MotionPreset` に並べる。
 **時間はすべて秒**。`duration` が「0 で無限」のステップは終わらないため、後ろのステップに進まない。
 
-「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに旧実装の OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.3 参照）。
+「発射方向」は弾なら発射時の方向、敵/ボスでは無し（ゼロ）。「OutQuad 再現」が付いたステップは、時間の進みに OutQuad 癖が掛かる（[BehaviorTree.md](./BehaviorTree.md) 8.3 参照）。
 
 ### 基本
 

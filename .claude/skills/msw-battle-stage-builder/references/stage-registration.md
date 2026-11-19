@@ -20,7 +20,7 @@ Assets/Project/DataStore/Stage{N}/
     └─ Stage{N}BossScenario.asset  # 撃破後の会話
 ```
 
-- 旧形式のデータ（`Stage{N}/` 直下の `Attack/` `Movement/` `Ease/` `Bullet/`、`Commons/` の `Attack/` `Ease/` `Movement/`）は削除済み。`Stage{N}/` 直下に `BT/` `Scenario/` 以外のフォルダを作らない（`Stage1/Boss/MusicTerminologySpectrum.asset` だけ例外的に残っている）。
+- `Stage{N}/` 直下に `BT/` `Scenario/` 以外のフォルダを作らない（例外: `Stage1/Boss/MusicTerminologySpectrum.asset`）。
 
 `BattleStageAsset`（`Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/BattleStageAsset.cs`）の項目:
 
