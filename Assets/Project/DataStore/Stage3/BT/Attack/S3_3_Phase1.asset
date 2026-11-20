@@ -13,96 +13,42 @@ MonoBehaviour:
   m_Name: S3_3_Phase1
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671974985
+    rid: 8540148069423906920
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147961671974985
-      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540148069423906920
+      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 5853ce4cadc84fafb2c8d7ea3150cc14
-        graphPosition: {x: 230, y: 300}
+        guid: 583de8d2fd9540a7948b1c4f5df3a277
+        graphPosition: {x: 0, y: 300}
         comment: 
-        child:
-          rid: 8540147961671974986
-        condition:
-          rid: 8540147961671974987
-        onChildCompleted: 0
-    - rid: 8540147961671974986
-      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 00632c49c7ad4d4db33b2a2de8ca9477
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        child:
-          rid: 8540147961671974989
-        frames:
-          value: 30
-          param: 
-    - rid: 8540147961671974987
-      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 481
-          param: 
-    - rid: 8540147961671974989
-      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 47fb1efc6b7c42978799e88163667976
-        graphPosition: {x: 0, y: 0}
-        comment: 
-        child:
-          rid: 8540147961671975535
-        count:
-          value: 0
-          param: 
-        interval:
-          value: 150
-          param: 
-        indexParam: 
-    - rid: 8540147961671974992
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        angle:
-          value: 180
-          param: 
-    - rid: 8540147961671974993
-      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
-    - rid: 8540147961671975535
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: cb8557c0b5354e3ab165f80f17a8a81a
-        graphPosition: {x: 230, y: 900}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 0}
-          motion:
-          - rid: 8540150000000000037
-          range: 0
-          lifetime: 720
-          affectedByForce: 1
-          behavior: {fileID: 0}
-          overrides: []
-        direction:
-          rid: 8540147961671974992
-        rotation:
-          rid: 8540147961671974993
-        muzzleOffset: {x: -0.5, y: 0}
-        se: 0
-    - rid: 8540150000000000037
-      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
-      data:
-        orientation: 0
-        vertex: {x: -6, y: -4}
-        initialSpeed: 7
-        isRelative: 1
-        oscillateVertex: 0
-        vertexAmplitude: {x: 0, y: 0}
-        vertexAngularSpeed: {x: 0, y: 0}
-        attackTimeOffset: 0
+        tree: {fileID: 11400000, guid: 16ccb260d05912142bf51e6715d6c40f, type: 2}
+        treeParam: 
+        overrides:
+        - name: delay
+          kind: 1
+          floatValue: 0
+          intValue: 30
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 0}
+          bindToParent: 
+        - name: interval
+          kind: 0
+          floatValue: 150
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 0}
+          bindToParent: 
+        - name: motion
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: f006eeb0979b6a749b024cce56fe8ae6, type: 2}
+          bindToParent: 

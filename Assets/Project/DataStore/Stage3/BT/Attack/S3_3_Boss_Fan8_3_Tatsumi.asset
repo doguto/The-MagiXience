@@ -13,51 +13,34 @@ MonoBehaviour:
   m_Name: S3_3_Boss_Fan8_3_Tatsumi
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671975597
+    rid: 8540148069423906899
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147884263997652
-      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540148069423906899
+      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        maxUpAngle: 180
-        maxDownAngle: 180
-    - rid: 8540147884263997653
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0
-    - rid: 8540147961671975597
-      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: d611b9d299aa4e47a6196a6b58e651ee
+        guid: f9fab6f93b18490a938d74eb16548faa
         graphPosition: {x: 0, y: 150}
         comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: d0789b0b139bbc74f87e28c808dfccb2, type: 2}
-          motion: []
-          range: 0
-          lifetime: 600
-          affectedByForce: 1
-          behavior: {fileID: 0}
-          overrides: []
-        direction:
-          rid: 8540147884263997652
-        rotation:
-          rid: 8540147884263997653
-        muzzleOffset: {x: 0, y: 0}
-        se: 0
-        pattern:
-          wayCount:
-            value: 9
-            param: 
-          spreadAngle:
-            value: 45
-            param: 
-          radius: 0
-          startDelayFrames: 0
-          rotationOffset: 0
+        tree: {fileID: 11400000, guid: dc493300bb41d5b4e8b75e7e6a15a83e, type: 2}
+        treeParam: 
+        overrides:
+        - name: wayCount
+          kind: 1
+          floatValue: 0
+          intValue: 9
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 0}
+          bindToParent: 
+        - name: spreadAngle
+          kind: 0
+          floatValue: 45
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 0}
+          bindToParent: 

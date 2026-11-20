@@ -13,10 +13,12 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     [Serializable]
     public sealed class BulletConfig
     {
+        [Tooltip("指定すると Prefab・ダメージ・飛距離・寿命・外力はこちらの値を使う")] public BulletPreset preset;
         public BulletEntityPresenter prefab;
         [Tooltip("ツリーの Object パラメータ名。指定すると Prefab の代わりにその値を使う")] public string prefabParam;
         [Min(0)] public int damage = 10;
         [Tooltip("指定するとインラインの移動より優先")] public MotionPreset motionPreset;
+        [Tooltip("ツリーの Object パラメータ名。指定すると Motion Preset の代わりにその値を使う")] public string motionPresetParam;
         [SerializeReference, SubclassSelector] public List<MotionStep> motion = new();
         [Tooltip("飛距離の上限。0 で無制限")] public float range;
         [Min(0), Tooltip("消えるまでのフレーム数。0 で無制限")] public int lifetime;
@@ -28,8 +30,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         public IReadOnlyList<MotionStep> Motion => motionPreset != null ? motionPreset.Steps : motion;
         public override string ToString()
         {
-            var name = !string.IsNullOrEmpty(prefabParam) ? "$" + prefabParam : prefab ? prefab.name : "(弾未設定)";
-            var motion = MotionStep.Describe(Motion);
+            var basePrefab = preset != null ? preset.Prefab : prefab;
+            var name = !string.IsNullOrEmpty(prefabParam) ? "$" + prefabParam : basePrefab ? basePrefab.name : "(弾未設定)";
+            var motion = !string.IsNullOrEmpty(motionPresetParam) ? "$" + motionPresetParam : MotionStep.Describe(Motion);
             var text = string.IsNullOrEmpty(motion) ? name : $"{name} ({motion})";
             return behavior != null ? $"{text} [{behavior.name}]" : text;
         }
@@ -37,13 +40,36 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         // 定義は共有されるので、パラメータで差し替えるときは複製を返す
         public BulletConfig Resolve(TreeScope scope)
         {
-            if (string.IsNullOrEmpty(prefabParam) || scope == null || !scope.TryGet(prefabParam, out var p)) return this;
-            var resolved = p.ObjectValue as BulletEntityPresenter
-                ?? (p.ObjectValue is GameObject go ? go.GetComponent<BulletEntityPresenter>() : null);
-            if (resolved == null) return this;
+            var resolvedPrefab = ResolvePrefab(scope);
+            var resolvedMotion = ResolveMotionPreset(scope);
+            if (preset == null && resolvedPrefab == prefab && resolvedMotion == motionPreset) return this;
+
             var copy = (BulletConfig)MemberwiseClone();
-            copy.prefab = resolved;
+            if (preset != null)
+            {
+                copy.damage = preset.Damage;
+                copy.range = preset.Range;
+                copy.lifetime = preset.Lifetime;
+                copy.affectedByForce = preset.AffectedByForce;
+            }
+            copy.prefab = resolvedPrefab;
+            copy.motionPreset = resolvedMotion;
             return copy;
+        }
+
+        BulletEntityPresenter ResolvePrefab(TreeScope scope)
+        {
+            var fallback = preset != null ? preset.Prefab : prefab;
+            if (string.IsNullOrEmpty(prefabParam) || scope == null || !scope.TryGet(prefabParam, out var p)) return fallback;
+            return p.ObjectValue as BulletEntityPresenter
+                ?? (p.ObjectValue is GameObject go ? go.GetComponent<BulletEntityPresenter>() : null)
+                ?? fallback;
+        }
+
+        MotionPreset ResolveMotionPreset(TreeScope scope)
+        {
+            if (string.IsNullOrEmpty(motionPresetParam) || scope == null || !scope.TryGet(motionPresetParam, out var p)) return motionPreset;
+            return p.ObjectValue as MotionPreset ?? motionPreset;
         }
     }
 }

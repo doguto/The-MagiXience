@@ -13,52 +13,34 @@ MonoBehaviour:
   m_Name: S3_3_Phase3_Down_Wait2
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671975003
+    rid: 8540148069423906910
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147961671975003
-      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540148069423906910
+      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 156d783a93694bc3b486b55f29c9be28
+        guid: a35235e3cc2f4ed0902fa82e329cdb37
         graphPosition: {x: 0, y: 0}
         comment: 
-        child:
-          rid: 8540147961671975543
-        frames:
-          value: 120
-          param: 
-    - rid: 8540147961671975007
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        angle:
-          value: 270
-          param: 
-    - rid: 8540147961671975008
-      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
-    - rid: 8540147961671975543
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: b05eb82581574a85bea58a9bac867f0c
-        graphPosition: {x: 230, y: 450}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 11400000, guid: 20f3af0b01ee3c345a294e9ff5e6cc3a, type: 2}
-          motion: []
-          range: 0
-          lifetime: 720
-          affectedByForce: 1
-          behavior: {fileID: 0}
-          overrides: []
-        direction:
-          rid: 8540147961671975007
-        rotation:
-          rid: 8540147961671975008
-        muzzleOffset: {x: -0.5, y: 0}
-        se: 0
+        tree: {fileID: 11400000, guid: db82eeeee70df124aa9afd333635d3a2, type: 2}
+        treeParam: 
+        overrides:
+        - name: angle
+          kind: 0
+          floatValue: 270
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 0}
+          bindToParent: 
+        - name: motion
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 20f3af0b01ee3c345a294e9ff5e6cc3a, type: 2}
+          bindToParent: 
