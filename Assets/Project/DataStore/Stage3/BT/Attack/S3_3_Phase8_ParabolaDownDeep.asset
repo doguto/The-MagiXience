@@ -13,97 +13,26 @@ MonoBehaviour:
   m_Name: S3_3_Phase8_ParabolaDownDeep
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671975042
+    rid: 8540148069423906915
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147961671975042
-      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540148069423906915
+      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: 6b53e382118b469f871611839f1dbcb9
+        guid: 1984e9c2e93e475f8df233532f84d03f
         graphPosition: {x: 345, y: 300}
         comment: 
-        child:
-          rid: 8540147961671975043
-        condition:
-          rid: 8540147961671975044
-        onChildCompleted: 0
-    - rid: 8540147961671975043
-      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 7bfeebdb217d4ede979a1e2295bd2ef6
-        graphPosition: {x: 345, y: 450}
-        comment: 
-        child:
-          rid: 8540147961671975046
-        frames:
-          value: 96
-          param: 
-    - rid: 8540147961671975044
-      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 319
-          param: 
-    - rid: 8540147961671975046
-      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 5c67899420314b01ba39d4e580a0f44c
-        graphPosition: {x: 460, y: 600}
-        comment: 
-        child:
-          rid: 8540147961671975598
-        count:
-          value: 0
-          param: 
-        interval:
-          value: 72
-          param: 
-        indexParam: 
-    - rid: 8540147961671975049
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        angle:
-          value: 180
-          param: 
-    - rid: 8540147961671975050
-      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        degrees: 0
-    - rid: 8540147961671975598
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 0d07f920bf344d49a88859d532379f44
-        graphPosition: {x: 460, y: 750}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 0}
-          motion:
-          - rid: 8540150000000000042
-          range: 0
-          lifetime: 720
-          affectedByForce: 1
-          behavior: {fileID: 0}
-          overrides: []
-        direction:
-          rid: 8540147961671975049
-        rotation:
-          rid: 8540147961671975050
-        muzzleOffset: {x: -0.5, y: 0}
-        se: 0
-    - rid: 8540150000000000042
-      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
-      data:
-        orientation: 0
-        vertex: {x: -6, y: -4.65}
-        initialSpeed: 7
-        isRelative: 0
-        oscillateVertex: 0
-        vertexAmplitude: {x: 0, y: 0}
-        vertexAngularSpeed: {x: 0, y: 0}
-        attackTimeOffset: 0
+        tree: {fileID: 11400000, guid: 86d5d9e314bc6ac45b54bcfea72890ef, type: 2}
+        treeParam: 
+        overrides:
+        - name: motion
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: fab6529f6a7e2b34a83886c441aecbe7, type: 2}
+          bindToParent: 

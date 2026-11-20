@@ -13,44 +13,27 @@ MonoBehaviour:
   m_Name: S3_3_Phase2
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671974933
+    rid: 8540147961671974934
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147961671974933
-      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 60fd9fb56d2a41a99bb338f0fa4dd643
-        graphPosition: {x: 230, y: 300}
-        comment: 
-        child:
-          rid: 8540147961671974934
-        condition:
-          rid: 8540147961671974935
-        onChildCompleted: 0
     - rid: 8540147961671974934
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6a8388f6080941d4ae4ae3367322e61a
-        graphPosition: {x: 230, y: 450}
+        graphPosition: {x: 230, y: 300}
         comment: 
         child:
           rid: 8540147961671975584
         count:
-          value: 0
+          value: 4
           param: 
         interval:
           value: 150
           param: 
         indexParam: 
-    - rid: 8540147961671974935
-      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 481
-          param: 
     - rid: 8540147961671974938
       type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -64,20 +47,23 @@ MonoBehaviour:
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 48e0cbb9b9284cec9746797a00d3af50
-        graphPosition: {x: 230, y: 600}
+        graphPosition: {x: 230, y: 450}
         comment: 
         bullet:
-          prefab: {fileID: 366756060701291069, guid: 425c778c9d712ae4ca0c87e49c2a1513, type: 3}
+          preset: {fileID: 11400000, guid: 7672bd22ece9ab441ab9a5c3578f7b66, type: 2}
+          prefab: {fileID: 0}
           prefabParam: 
           damage: 10
           motionPreset: {fileID: 0}
+          motionPresetParam: 
           motion:
           - rid: 8540150000000000038
           range: 0
-          lifetime: 600
+          lifetime: 0
           affectedByForce: 1
           behavior: {fileID: 0}
           overrides: []
+          group: 
         direction:
           rid: 8540147961671974938
         rotation:

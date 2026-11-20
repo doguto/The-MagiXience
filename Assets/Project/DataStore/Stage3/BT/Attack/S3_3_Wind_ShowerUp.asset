@@ -13,96 +13,42 @@ MonoBehaviour:
   m_Name: S3_3_Wind_ShowerUp
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671975069
+    rid: 8540148069423906919
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147961671975069
-      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+    - rid: 8540148069423906919
+      type: {class: SubTree, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
-        guid: bb466b6eceab418b970ba5d9ec928f54
+        guid: 69361f53097b4e45a72fe91a5b46eeb3
         graphPosition: {x: 345, y: 300}
         comment: 
-        child:
-          rid: 8540147961671975070
-        condition:
-          rid: 8540147961671975071
-        onChildCompleted: 0
-    - rid: 8540147961671975070
-      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: b9aaae951d1d4432a71d05c2633f9ca9
-        graphPosition: {x: 345, y: 450}
-        comment: 
-        child:
-          rid: 8540147961671975073
-        frames:
-          value: 96
-          param: 
-    - rid: 8540147961671975071
-      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 319
-          param: 
-    - rid: 8540147961671975073
-      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 8660cd1c9fc14e3faaec6bbdd3433181
-        graphPosition: {x: 460, y: 600}
-        comment: 
-        child:
-          rid: 8540147961671975583
-        count:
-          value: 0
-          param: 
-        interval:
-          value: 72
-          param: 
-        indexParam: 
-    - rid: 8540147961671975076
-      type: {class: FixedDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        angle:
-          value: 180
-          param: 
-    - rid: 8540147961671975077
-      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data: 
-    - rid: 8540147961671975583
-      type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 1c6199b951f1423a906497af85f8b270
-        graphPosition: {x: 460, y: 750}
-        comment: 
-        bullet:
-          prefab: {fileID: 366756060701291069, guid: 7009cc6115b1ef542b1b1c2ae9bb9019, type: 3}
-          prefabParam: 
-          damage: 10
-          motionPreset: {fileID: 0}
-          motion:
-          - rid: 8540150000000000045
-          range: 0
-          lifetime: 720
-          affectedByForce: 1
-          behavior: {fileID: 0}
-          overrides: []
-        direction:
-          rid: 8540147961671975076
-        rotation:
-          rid: 8540147961671975077
-        muzzleOffset: {x: -0.5, y: 0}
-        se: 0
-    - rid: 8540150000000000045
-      type: {class: VertexParabolaMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
-      data:
-        orientation: 0
-        vertex: {x: -2.5, y: -4.65}
-        initialSpeed: 7
-        isRelative: 0
-        oscillateVertex: 0
-        vertexAmplitude: {x: 0, y: 0}
-        vertexAngularSpeed: {x: 0, y: 0}
-        attackTimeOffset: 0
+        tree: {fileID: 11400000, guid: 16ccb260d05912142bf51e6715d6c40f, type: 2}
+        treeParam: 
+        overrides:
+        - name: delay
+          kind: 1
+          floatValue: 0
+          intValue: 96
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 0}
+          bindToParent: 
+        - name: interval
+          kind: 0
+          floatValue: 72
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 0}
+          bindToParent: 
+        - name: motion
+          kind: 4
+          floatValue: 0
+          intValue: 0
+          boolValue: 0
+          vector2Value: {x: 0, y: 0}
+          objectValue: {fileID: 11400000, guid: 081886eedbeb0a447b4f00d4b7fc486e, type: 2}
+          bindToParent: 
