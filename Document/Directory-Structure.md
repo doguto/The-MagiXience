@@ -109,7 +109,7 @@ Assets/Project/Commons/
 ```text
 Assets/Project/DataStore/
 ├── BgmData.asset / SeData.asset / CharacterData.asset / StageData.asset  # 種類ごとの定義データベース。
-├── Commons/BT/             # 全ステージ共通の BehaviorTree (共通の雑魚ツリー)。
+├── Commons/BT/             # 全ステージ共通の BehaviorTree (共通の雑魚ツリー) と BulletPreset (Bullet/)。
 ├── Stage1/ 〜 Stage4/      # 各ステージのバトル (BT)・シナリオデータ。
 ├── MVCapture/              # MV 撮影用シーンで流すシナリオ。
 └── Test/                   # BT の動作確認・エディタ確認用アセット。
@@ -127,6 +127,7 @@ Stage{N}/
 │   ├── Stage/              # ステージツリーとボスのツリー。
 │   ├── Attack/             # 攻撃パターンのツリー (雑魚の attack パラメータ、ボスの SubTree から参照)。
 │   ├── Motion/             # 移動ステップ列の MotionPreset。
+│   ├── Bullet/             # 弾の設定をまとめた BulletPreset。
 │   ├── Enemy/              # 共通ツリーに収まらない敵の専用ツリー (必要なステージのみ)。
 │   └── Trail/              # TrailPath (必要なステージのみ)。
 ├── Scenario/               # ボス前の会話 Stage{N}WayScenario.asset と撃破後の会話 Stage{N}BossScenario.asset。
@@ -197,7 +198,7 @@ Battle/
     │   ├── Decorator/                 # 子を 1 つ持つノード (Loop / Phase / Section / WithWind など)。
     │   ├── Action/                    # 葉ノード (Wait / SubTree、弾を撃つ・ビーム・移動・出現・BGM/SE・ボス戦など)。
     │   ├── Condition/                 # 条件の定義 (HpBelow / NoActiveEnemies / Signaled など)。
-    │   └── Parts/                     # ノードではない部品 (ShotPattern・DirectionSource・SpawnLayout・BulletConfig・ビーム) と BossDefinition / TrailPath。
+    │   └── Parts/                     # ノードではない部品 (ShotPattern・DirectionSource・SpawnLayout・BulletConfig・BulletPreset・ビーム) と BossDefinition / TrailPath。
     ├── Runtime/                       # BT の実行基盤 (BattleFlow / BattleWorld / BattleClock、Agent、出現・プール、弾の実行、会話の受け口、合図)。
     │   ├── Stage/                     # ステージサービス (StageContext / WindService) と自機・弾への外力の受け口。
     │   └── Motion/                    # 敵・ボス・弾共通の移動定義 (MotionStep と `*Motion.cs`)、実行器、MotionPreset。

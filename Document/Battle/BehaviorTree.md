@@ -299,7 +299,7 @@ Spawn ノードで出す敵は `EnemyPool`（`Runtime/EnemyPool.cs`）で Prefab
 - `BtFloat` は Int パラメータも受け付け、`BtInt` は Float パラメータを四捨五入して受け付ける。
 - エディタ上では `$名前` と表示される。
 
-現状 `Bt*` 型になっているのは、Parallel.duration / Loop.count / Repeat.count, interval / Delay.frames / Wait.frames / FrameElapsed.frames / BgmReached.seconds、`ChargeEffect` の `lifetime` 以外のフィールド、MovePath.path / PlaceAlongPath.path, spacing, fireDelayFrames のみである。弾を撃つノードや Move などバトルノードのその他のフィールドは通常の値で、パラメータ化できない。
+現状 `Bt*` 型になっているのは、時間・回数（Wait / Delay / Loop / Repeat / Cycle / Parallel.duration、FrameElapsed / BgmReached / BgmSamples）、Calc / Compare の値、`FixedDirection.angle`、撃ち方の数と間隔（`NWayPattern.wayCount, spreadAngle` / `ParallelPattern.count, spacing`）、`ChargeEffect` の `lifetime` 以外のフィールド、MovePath.path / PlaceAlongPath.path, spacing, fireDelayFrames である。それ以外のバトルノード・部品のフィールドは通常の値で、パラメータ化できない。
 
 例外として、次のアセット参照は `*Param` 欄（Object パラメータ名）で差し替えられる。値の解決は `ParamObjects.Resolve`（`Parts/ParamObjects.cs`）で、欄が空なら固定値を使う。
 
@@ -308,7 +308,8 @@ Spawn ノードで出す敵は `EnemyPool`（`Runtime/EnemyPool.cs`）で Prefab
 | `Move.presetParam` | `MotionPreset` | 動かずに Success |
 | `SubTree.treeParam` | 実行するツリー | 何もしない（Success） |
 | `SetDespawnBehavior.treeParam` | 消えるときのツリー | 消えるときの行動なし |
-| `BulletConfig.prefabParam` | 弾 Prefab | `prefab` を使う |
+| `BulletConfig.prefabParam` | 弾 Prefab | `preset` の Prefab（`preset` が無ければ `prefab`）を使う |
+| `BulletConfig.motionPresetParam` | 弾の `MotionPreset` | `motionPreset` を使う |
 
 ### 5.2 TreeParameter と TreeScope
 
@@ -424,6 +425,15 @@ BGM と会話はサービス経由で Presenter が直接受ける。
 - Sequence / Cycle で飛ばした前の子には `Node.FastForward` を呼び、実行はせずに後のノードが前提にする状態だけ進める。既定は子へ順に呼ぶだけで、Until / Phase / WaitUntil は条件の `FastForward`（BGM の位置）、PlayBgm は BGM の再生、SpawnBoss はボスの登場を行う。If は条件で選ぶ方の子だけに呼ぶ。`BossBattle` より後のノードから始めることはできない（警告を出す）。
 - `bossStartHpPercent` は経路が `BossBattle` を通るときだけ使い、`BossBattle` の開始時に設定する。リトライで再開する Section がデバッグ起動した Section と同じなら、もう一度同じ経路・HP から始める。Wave で出る敵・弾のツリーと、`treeParam` で実行時に決まる SubTree の中は選べない。
 
+#### デバッグ起動しやすいツリーの組み方
+
+デバッグ起動で選べる開始位置はノード単位なので、フェーズ（ボスの攻撃の 1 区間、道中のひとまとまりの Wave など）ごとにノード 1 つへまとめておく。
+
+- フェーズの中身は Sequence / Until / Phase などのノード 1 つにまとめ、コメントを付ける。Launcher はノード 1 つを 1 行で表示し、コメントがあれば `«コメント»` で出すので、フェーズ名で開始位置を選べる。フェーズの中身を親の Sequence に平らに並べると、フェーズの始まりを Wait や発射ノードの並びから探すことになり、フェーズの途中を選びやすい。
+- 何度も使う攻撃は SubTree にする。Launcher は SubTree の中まで展開するので、中のノードからも始められる。1 箇所でしか使わない処理は SubTree にせず、Sequence などでまとめる（`treeParam` で実行時に決まる SubTree の中は選べない）。
+- フェーズの終わりを BGM に合わせるときは、Wait を並べて尺を取るのではなく、Until / Phase の終了条件 `BgmSamples` で書く。飛ばしたフェーズの `FastForward` で BGM をそのフェーズの終わりまで進められるのは `BgmSamples` だけで、Wait などは何もしない。Wait で尺を取ったフェーズを飛ばすと、BGM が前の位置のまま次のフェーズが始まり、弾幕と曲がずれる。
+- フェーズを並べる親は Sequence / Cycle / HpSections / If / RandomSelect にする。経路の途中にある Parallel / Loop / Repeat / Delay は途中から始めない（Parallel の他の子・Loop / Repeat の回数・Delay の待ち時間は最初からになる）ので、フェーズの並びはこれらの外に出す。
+
 ## 7. ステージサービス
 
 ステージ固有の機能（現状は風のみ）は、`BattleStageAsset.services` に宣言したステージでだけ存在する「ステージサービス」としてカプセル化している。
@@ -495,7 +505,8 @@ public abstract class StageServiceDefinition
 
 弾を出すノードはすべて `Parts/Emitter.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
 
-- 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletConfig`、撃ち方は `ShotPattern` で指定する。
+- 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletConfig`、撃ち方は `ShotPattern` で指定する。撃ち方ごとに発射ノードがある（例: 扇状の `NWayShot`、同じ向きの弾を向きと直角に等間隔で並べる `ParallelShot`）。
+- 弾の Prefab・ダメージ・飛距離・寿命・外力を受けるかは `BulletPreset`（`Create > Battle > Bullet Preset`）にまとめ、`BulletConfig.preset` で参照できる。指定すると `BulletConfig` 側のこれらの欄より優先する（`prefabParam` で Prefab を差し替えた場合はそちらが優先）。移動・ツリー・グループは `BulletConfig` 側で指定する。
 - 発射位置は「撃つ敵の位置 + muzzleOffset + パターンごとのずれ」。ステージ直下（`Self == null`）なら原点基準。
 - パターンの `SpawnDelayFrames` が付いた弾は `BattleWorld.Schedule` で予約され、予約時点ではなく出現時点の撃ち手の位置から出る。撃ち手（敵・弾）が消えると予約は取り消される（消えるときのツリーから撃った弾は取り消し対象にしない）。
 - 方向は発射ノードを実行したフレームに 1 回だけ決める。
@@ -547,8 +558,8 @@ public abstract class StageServiceDefinition
 
 | 領域 | 内容 |
 |---|---|
-| ツールバー | 対象アセット（パスとツリーの種類 `[Stage]` / `[Enemy]` / `[Bullet]` / `[Common]` を表示）、`Frame All`、`Side Panel`（右ペインの表示切替）、`MiniMap` |
-| 配置 | 常に自動整列（ルートから下向き、高さが重なるノード同士だけを比べて左右に詰める）。構造やノードの大きさが変わるたびに並べ直す。ドラッグは兄弟の並べ替えにだけ使い、離すと整列位置に戻る |
+| ツールバー | 対象アセット（パスとツリーの種類 `[Stage]` / `[Enemy]` / `[Bullet]` / `[Common]` を表示）、`Frame All`、`Auto Layout`、`Side Panel`（右ペインの表示切替）、`MiniMap` |
+| 配置 | ツリーを開いたときに自動整列する（ルートから下向き、高さが重なるノード同士だけを比べて左右に詰める）。編集中は並べ直さず、置いた・動かしたノードの位置をそのまま保存する。並べ直したいときはツールバーかキャンバスの右クリックの `Auto Layout`（Undo 可）。子の実行順は x 座標で決まるので、ノードを左右に動かすと兄弟の順番も入れ替わる |
 | 左ペイン (`NodePaletteView`) | ノード一覧（Composite / Decorator / Condition / Action とサブカテゴリ）と SubTree 用の BT アセット一覧。検索欄あり。項目をキャンバスへドラッグして作成 |
 | 中央 (`BehaviorTreeGraphView`) | ノードグラフ。上が親、子は左から右の順に実行される。ヘッダーの番号は親の中での実行順。Wait を含む Sequence の子には、Sequence 開始から何フレーム目に動くか（`@150f`）も出す。時間の読めない子（Move / SubTree など）より後ろには出さない |
 | 右ペイン `Node` タブ (`NodeInspectorView`) | 選択中のノードの種類・分類・説明・要約・コメント・設定欄。再生中は実行中かどうかも出す。設定欄はノード内の欄と同じ値に結びついており、どちらで編集してももう片方に反映される。複数選択時は個数だけを出す |
@@ -593,7 +604,7 @@ public abstract class StageServiceDefinition
 ## 11. 既知の制約・注意点
 
 - **乱数は再現性がない**: `BattleWorld` の乱数シードは `Environment.TickCount` のため、同じ入力でも同じ展開にはならない。
-- **パラメータ化できるフィールドが限られる**: `Bt*` 型のフィールドは時間・回数系などの一部だけ、アセット参照は `*Param` 欄のある 4 つだけ（5.1 参照）。
+- **パラメータ化できるフィールドが限られる**: `Bt*` 型のフィールドは時間・回数系などの一部だけ、アセット参照は `*Param` 欄のある 5 つだけ（5.1 参照）。
 - **プール品の状態**: 使い回す敵の Prefab に、`Start` などで一度だけ状態を作るコンポーネントがあると 2 体目以降で動きが変わる。`IPoolableEnemy` で戻せないものは `NoEnemyPool` を付ける。
 - **消えるときのツリーは 1 フレームだけ**: `SetDespawnBehavior` のツリーは 1 回 Tick して返却する。Wait や Delay を含めても後半は実行されない。
 - **撃破時の行動は次の Step**: 敵の撃破は Step の外（物理演算）で起きるため、消えるときのツリーは次の Step の手順 6 で実行される（撃破から最大 1 フレーム遅れる）。

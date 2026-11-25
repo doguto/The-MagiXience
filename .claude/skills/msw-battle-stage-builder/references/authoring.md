@@ -119,6 +119,7 @@ overrides.Add(attack);
 
 1. `read_console` でコンパイルエラーがないことを確認する。`refresh_unity` のあと、型がまだ読み込まれていない場合はもう一度確認する。
 2. `Tools/Battle Debug Launcher` でステージ番号と開始 Section を選んで再生する。MCP から行う場合は、Battle シーンの `DebugRuntimeModelInitializer` の `stageNumber` / `startSection`（Stage 直下の並び順）を設定して Play にする。途中の Section から始めると、その Section の `skipOnResume` の会話は飛ばしてコマンドだけ実行される。**シーンは保存しない。** 誤って保存した場合は `startSection` などの値を元に戻す。
+   - Launcher ではツリーの任意のノードから始められる。フェーズ単位で始められるよう、フェーズごとに Sequence / Until / Phase などのノード 1 つにまとめてコメントを付け、BGM に合わせるフェーズの終わりは Wait ではなく `BgmSamples` で書く（詳細は Document/Battle/BehaviorTree.md 6.5「デバッグ起動しやすいツリーの組み方」）。
 3. フレームを確実に進めたい場合は、`EditorApplication.isPaused = true` にしてから `execute_code` 内で `BattleWorld.Step()` を必要な回数呼ぶ。`BattleWorld` は `BattleScenePresenter` の private フィールド `flow`（`BattleFlow.World`）から取れる。
    - エディタがバックグラウンドだと Unity のフレームが進まないことがある。そのときは手動で `Step()` を呼ぶ方法が確実。
    - BGM の再生位置で進むフェーズ（`BgmSamples`）は、手動で進めても BGM が進まない。Pause を解除して実時間で流して確認する。

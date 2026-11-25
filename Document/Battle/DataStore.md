@@ -5,7 +5,7 @@
 `DataStore` は ScriptableObject を使ったマスターデータ・ステージ進行データの置き場である。データは大きく分けて以下の3系統から成る。
 
 - **マスターデータ系**（`BgmData` / `SeData` / `CharacterData` / `StageData`）: 単純な `List<T>` を持つだけの ScriptableObject。
-- **バトル進行系**（`Commons/BT/` と `Stage{N}/BT/` 配下の `BattleStageAsset` / `BossDefinition` / ツリー（`StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`）/ `MotionPreset` / `EaseCurveAsset`）: BehaviorTree 形式のステージ・ボス・敵・攻撃データ。ノードは `SerializeReference + SubclassSelector` によるポリモーフィックな構成で保存される。
+- **バトル進行系**（`Commons/BT/` と `Stage{N}/BT/` 配下の `BattleStageAsset` / `BossDefinition` / ツリー（`StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`）/ `MotionPreset` / `BulletPreset` / `EaseCurveAsset`）: BehaviorTree 形式のステージ・ボス・敵・攻撃データ。ノードは `SerializeReference + SubclassSelector` によるポリモーフィックな構成で保存される。
 - **シナリオ系**（`Stage{N}/Scenario/` 配下の `ScenarioData`）: 会話・演出イベントを `function` / `args` という汎用コマンド列で表現する簡易スクリプト形式。
 
 これに加えて、開発用の `Test` フォルダが存在する。
@@ -27,7 +27,8 @@ StageData.asset
                                         ├─ prefab / spawnPosition / entrance (MotionStep[])
                                         └─ tree ──► Stage{N}/BT/Stage/Stage{N}Boss_Tree.asset
                                                      ├─ SubTree ノード ──► Stage{N}/BT/Attack/*.asset
-                                                     └─ Move / BulletConfig.motionPreset ──► Stage{N}/BT/Motion/*.asset
+                                                     ├─ Move / BulletConfig.motionPreset ──► Stage{N}/BT/Motion/*.asset
+                                                     └─ BulletConfig.preset ──► Stage{N}/BT/Bullet/*.asset (BulletPreset)
 
 BgmData.asset / SeData.asset
  └─ BgmData のループ位置 (サンプル) が BgmSamples 条件の thresholdSamples と、
@@ -103,7 +104,8 @@ BehaviorTree 方式のバトルデータ。仕組みは [BehaviorTree.md](./Beha
 
 ```text
 Assets/Project/DataStore/Commons/BT/
-└── Enemy.asset             # 全ステージ共通の雑魚ツリー (EnemyTreeAsset。BehaviorTree.md 5.4)
+├── Enemy.asset             # 全ステージ共通の雑魚ツリー (EnemyTreeAsset。BehaviorTree.md 5.4)
+└── Bullet/                 # 全ステージ共通の BulletPreset
 
 Assets/Project/DataStore/Stage{N}/BT/
 ├── Stage{N}_BT.asset       # BattleStageAsset (StageData.stageAddress の参照先)
@@ -111,6 +113,7 @@ Assets/Project/DataStore/Stage{N}/BT/
 ├── Stage/                  # ステージツリー Stage{N}_Tree (StageTreeAsset) とボスのツリー Stage{N}Boss_Tree (EnemyTreeAsset)
 ├── Attack/                 # 攻撃パターンのツリー S{N}_* (CommonTreeAsset)。雑魚の attack パラメータやボスの SubTree から参照
 ├── Motion/                 # MotionPreset (移動ステップ列)。Spawn.motionPreset (敵の移動)、Move、弾の移動に使う
+├── Bullet/                 # BulletPreset (弾の Prefab・ダメージ・飛距離・寿命・外力)。BulletConfig.preset から参照
 ├── Enemy/                  # 共通ツリーに収まらない特殊な敵の専用ツリー
 └── Trail/                  # TrailPath (経路)
 ```
@@ -176,6 +179,13 @@ Addressables には「アドレス = アセットパス」で Default Local Grou
 - 定義: `Assets/Project/Scenes/Battle/Scripts/Runtime/Motion/MotionPreset.cs`（`Create > Battle > Motion Preset`）
 - `[SerializeReference] List<MotionStep> steps` を持つだけ。時間は秒指定。
 - `Move` の `preset`、`Spawn.motionPreset`（共通ツリー `Enemy` の雑魚の移動）、`BulletConfig.motionPreset`、`LoopMotion` のエントリから参照する。
+
+### BulletPreset（`Bullet/`）
+
+- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Parts/BulletPreset.cs`（`Create > Battle > Bullet Preset`）
+- 弾の `prefab` / `damage` / `range`（0 で無制限）/ `lifetime`（フレーム、0 で無制限）/ `affectedByForce` を持つ。
+- 発射ノードの `BulletConfig.preset` から参照する。指定すると `BulletConfig` 側の同じ欄より優先する。移動・ツリー・グループは `BulletConfig` 側で指定する。
+- ステージ共通の弾は `Commons/BT/Bullet/`、ステージ固有の弾は `Stage{N}/BT/Bullet/` に置く。
 
 ### EaseCurveAsset
 
