@@ -70,8 +70,11 @@ namespace Project.Scenes.StageList.Scripts.Presenter
             stageCardListView.SetCharaImage(charaImage, isCleared);
         }
 
+        // カード決定 (Battle へ) とキャンセル (Title へ) は別の購読なので、SubscribeBlocking だけでは両方の遷移が走りうる。遷移中は無視する
         async UniTask BackToTitle()
         {
+            if (globalScenePresenter.SceneNavigator.IsNavigating) return;
+
             soundManager.PlaySEAsync(SeType.Cancel).Forget();
             stageListModelRepository.Refresh();
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Title, SceneRouterModel.StageList);
@@ -81,7 +84,9 @@ namespace Project.Scenes.StageList.Scripts.Presenter
         {
             // DEMO: 1面以外のバトルシーンをロードできないようにする
             // if (buttonIndex != 0) return;
-            
+
+            if (globalScenePresenter.SceneNavigator.IsNavigating) return;
+
             soundManager.PlaySEAsync(SeType.Click).Forget();
 
             var runtimeModel = RuntimeModelRepository.Get();

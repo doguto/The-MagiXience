@@ -2,6 +2,7 @@ using System;
 using Project.Commons.UI.Scripts.View;
 using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Project.Scenes.Scenario.Scripts.View
 {
@@ -20,6 +21,20 @@ namespace Project.Scenes.Scenario.Scripts.View
             enableMashSkipButton.Init();
             skipOnceButton.Init();
             cancelButton.Init(isFocused: true);
+        }
+
+        // EventSystem の選択が外れている (null か非表示のオブジェクトを指している) とき、既定のボタンを選択し直す。
+        // 選び直した場合は true を返す
+        public bool RestoreSelectionIfLost()
+        {
+            var eventSystem = EventSystem.current;
+            if (eventSystem == null) return false;
+
+            var selected = eventSystem.currentSelectedGameObject;
+            if (selected != null && selected.activeInHierarchy) return false;
+
+            eventSystem.SetSelectedGameObject(cancelButton.gameObject);
+            return true;
         }
     }
 }

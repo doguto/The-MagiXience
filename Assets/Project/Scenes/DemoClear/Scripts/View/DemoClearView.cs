@@ -52,7 +52,8 @@ namespace Project.Scenes.DemoClear.Scripts.View
             var elapsed = 0f;
             while (elapsed < fadeInDuration)
             {
-                elapsed += Time.deltaTime;
+                // timeScale = 0 のまま遷移してきてもフェードが止まって入力を受け付けなくならないよう、unscaled で進める
+                elapsed += Time.unscaledDeltaTime;
                 canvasGroup.alpha = Mathf.Clamp01(elapsed / fadeInDuration);
                 yield return null;
             }
