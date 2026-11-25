@@ -27,8 +27,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected override void OnEnter(BattleContext ctx)
         {
             var progress = ctx.Services.Progress;
-            index = Mathf.Clamp(progress.StartSection, 0, Mathf.Max(0, Children.Count - 1));
-            if (index < Children.Count) progress.Enter(index, SituationOf(Children[index]), progress.ResumeStart);
+            var jump = JumpTarget(ctx);
+            index = jump >= 0 ? jump : Mathf.Clamp(progress.StartSection, 0, Mathf.Max(0, Children.Count - 1));
+            if (index < Children.Count) progress.Enter(index, SituationOf(Children[index]), progress.ResumeStart || jump > 0);
         }
 
         protected override NodeStatus OnTick(BattleContext ctx)

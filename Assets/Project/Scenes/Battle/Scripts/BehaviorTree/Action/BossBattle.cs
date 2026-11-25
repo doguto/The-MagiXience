@@ -27,5 +27,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             if (!started) return NodeStatus.Failure;
             return ctx.Services.BossHost.IsDefeated ? NodeStatus.Success : NodeStatus.Running;
         }
+
+        public override void FastForward(BattleContext ctx) =>
+            Debug.LogWarning("[NodeJump] BossBattle より後のノードからは始められません。ボスが残ったまま進みます");
     }
 }

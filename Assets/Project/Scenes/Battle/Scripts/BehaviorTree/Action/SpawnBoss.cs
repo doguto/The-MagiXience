@@ -24,5 +24,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             }
             return host.Spawn(boss) ? NodeStatus.Success : NodeStatus.Failure;
         }
+
+        // 後の BossBattle が出ているボスを前提にするため、飛ばしても出しておく
+        public override void FastForward(BattleContext ctx) => OnTick(ctx);
     }
 }

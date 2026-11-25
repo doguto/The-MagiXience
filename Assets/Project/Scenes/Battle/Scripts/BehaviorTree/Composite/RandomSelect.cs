@@ -35,7 +35,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override void OnEnter(BattleContext ctx)
         {
-            current = Pick(ctx.Random);
+            var jump = JumpTarget(ctx);
+            current = jump >= 0 ? jump : Pick(ctx.Random);
             previous = current;
         }
 

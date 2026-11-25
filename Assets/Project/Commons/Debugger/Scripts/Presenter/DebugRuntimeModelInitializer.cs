@@ -10,7 +10,7 @@ namespace Project.Commons.Debugger.Scripts.Presenter
     {
         [SerializeField] [Min(1)] int stageNumber = 1;
         [SerializeField, Min(0), Tooltip("開始する Section の番号 (ステージツリーの Stage 直下の並び順)")] int startSection;
-        [SerializeField, Tooltip("ボス戦をこの Phase から始める。空なら最初から")] string bossStartPhase;
+        [SerializeField, Tooltip("ステージツリーのルートから開始ノードまでの Node.Guid を ',' でつないだもの。空なら Section の頭から")] string startNodePath;
         [SerializeField, Range(1f, 100f), Tooltip("ボス戦開始時のボスの HP (%)")] float bossStartHpPercent = 100f;
 
         void Awake()
@@ -22,8 +22,8 @@ namespace Project.Commons.Debugger.Scripts.Presenter
                 return;
             }
 
-            runtimeModel.SetForDebug(stageNumber, startSection, bossStartPhase, bossStartHpPercent);
-            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, StartSection={startSection}, BossPhase={bossStartPhase}, BossHp={bossStartHpPercent}% に設定しました");
+            runtimeModel.SetForDebug(stageNumber, startSection, startNodePath, bossStartHpPercent);
+            Debug.Log($"[DebugRuntimeModelInitializer] Stage={stageNumber}, StartSection={startSection}, StartNode={startNodePath}, BossHp={bossStartHpPercent}% に設定しました");
         }
 
         void Start()

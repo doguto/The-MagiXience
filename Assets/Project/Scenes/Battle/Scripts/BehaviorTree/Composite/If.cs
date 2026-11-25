@@ -16,9 +16,17 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override void OnEnter(BattleContext ctx)
         {
+            var jump = JumpTarget(ctx);
+            chosen = jump >= 0 ? Children[jump] : Choose(ctx);
+        }
+
+        public override void FastForward(BattleContext ctx) => Choose(ctx)?.FastForward(ctx);
+
+        Node Choose(BattleContext ctx)
+        {
             condition?.Reset(ctx);
             var index = condition == null || condition.Evaluate(ctx) ? 0 : 1;
-            chosen = index < Children.Count ? Children[index] : null;
+            return index < Children.Count ? Children[index] : null;
         }
 
         protected override NodeStatus OnTick(BattleContext ctx) => chosen?.Tick(ctx) ?? NodeStatus.Success;

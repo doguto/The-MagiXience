@@ -66,5 +66,11 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         }
 
         protected override void OnAbort(BattleContext ctx) => Child.Abort(ctx);
+
+        public override void FastForward(BattleContext ctx)
+        {
+            condition?.FastForward(ctx);
+            base.FastForward(ctx);
+        }
     }
 }

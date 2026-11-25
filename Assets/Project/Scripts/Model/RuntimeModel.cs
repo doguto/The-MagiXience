@@ -24,15 +24,17 @@ namespace Project.Scripts.Model
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // ボス戦をこのフェーズ・HP (%) から始める。空 / 100 なら指定なし
-        public string DebugBossStartPhase { get; private set; }
+        // DebugStartSection を始めるときは、ツリーの DebugStartPath のノードから・ボスの HP (%) を DebugBossStartHpPercent にして始める
+        public int DebugStartSection { get; private set; }
+        public string DebugStartPath { get; private set; }
         public float DebugBossStartHpPercent { get; private set; } = 100f;
 
-        public void SetForDebug(int stageNumber, int startSection, string bossStartPhase, float bossStartHpPercent)
+        public void SetForDebug(int stageNumber, int startSection, string startPath, float bossStartHpPercent)
         {
             CurrentStageType = BattleStageTypeExtensions.FromInt(stageNumber);
             CheckpointSection = startSection;
-            DebugBossStartPhase = bossStartPhase;
+            DebugStartSection = startSection;
+            DebugStartPath = startPath;
             DebugBossStartHpPercent = bossStartHpPercent;
         }
 #endif

@@ -310,9 +310,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         {
             awaitingFirstSection = true;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // リトライでも、デバッグ起動した Section からならもう一度同じ位置から始める
             var runtime = RuntimeModelRepository.Get();
-            flow.DebugBossStartPhase = runtime.DebugBossStartPhase;
-            flow.DebugBossStartHpPercent = runtime.DebugBossStartHpPercent;
+            var fromDebugStart = section == runtime.DebugStartSection;
+            flow.DebugStartPath = fromDebugStart ? runtime.DebugStartPath : null;
+            flow.DebugBossStartHpPercent = fromDebugStart ? runtime.DebugBossStartHpPercent : 100f;
 #endif
             flow.StartStage(stage, section, resume);
         }
