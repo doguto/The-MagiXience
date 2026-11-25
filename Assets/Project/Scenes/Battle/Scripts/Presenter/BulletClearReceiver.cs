@@ -45,7 +45,14 @@ namespace Project.Scenes.Battle.Scripts.Presenter
                 Runtime.EnemyDespawn.Despawn(enemy.gameObject);
             }
 
-            Debug.Log($"[BulletClearReceiver] Cleared {enemies.Length} enemies.", this);
+            // 物理ボール (1 面ボスの ChorusBall など) は Spawn で出す敵だが EnemyEntityPresenter を持たないので個別に消す
+            var balls = FindObjectsByType<PhysicsBallPresenter>(FindObjectsSortMode.None);
+            foreach (var ball in balls)
+            {
+                Runtime.EnemyDespawn.Despawn(ball.gameObject);
+            }
+
+            Debug.Log($"[BulletClearReceiver] Cleared {enemies.Length} enemies and {balls.Length} physics balls.", this);
         }
     }
 }
