@@ -13,44 +13,27 @@ MonoBehaviour:
   m_Name: S2_1-Way-Homing
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671974921
+    rid: 8540147961671974922
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147961671974921
-      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 9336e7d9871e467884d6602f01dfbd5a
-        graphPosition: {x: 460, y: 300}
-        comment: 
-        child:
-          rid: 8540147961671974922
-        condition:
-          rid: 8540147961671974923
-        onChildCompleted: 0
     - rid: 8540147961671974922
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: d7badb54cfaf4d69b5f69aafbb8324b6
-        graphPosition: {x: 460, y: 450}
+        graphPosition: {x: -120, y: 125}
         comment: 
         child:
           rid: 8540147961671975623
         count:
-          value: 0
+          value: 5
           param: 
         interval:
           value: 120
           param: 
         indexParam: 
-    - rid: 8540147961671974923
-      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 481
-          param: 
     - rid: 8540147961671974926
       type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
@@ -64,19 +47,22 @@ MonoBehaviour:
       type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 85d17cbe3e0345e8adb39d6f99669673
-        graphPosition: {x: 460, y: 600}
+        graphPosition: {x: -137, y: 297}
         comment: 
         bullet:
-          prefab: {fileID: -4487681364143076941, guid: 53b7f41feaeebca48a6de2d3686c79a8, type: 3}
+          preset: {fileID: 11400000, guid: 897266a7b9590c8498746a2bd769dcc2, type: 2}
+          prefab: {fileID: 0}
           prefabParam: 
           damage: 10
           motionPreset: {fileID: 11400000, guid: 3866b47cb7ed86d4a926e25289143a01, type: 2}
+          motionPresetParam: 
           motion: []
           range: 0
-          lifetime: 480
+          lifetime: 0
           affectedByForce: 1
           behavior: {fileID: 0}
           overrides: []
+          group: 
         direction:
           rid: 8540147961671974926
         rotation:

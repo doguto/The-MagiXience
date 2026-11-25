@@ -13,50 +13,33 @@ MonoBehaviour:
   m_Name: S4_Phase1_Small_M-SlowInFallDown_Attack
   m_EditorClassIdentifier: 
   root:
-    rid: 8540147961671975342
+    rid: 8540147961671975343
   detachedNodes: []
   parameters: []
   references:
     version: 2
     RefIds:
-    - rid: 8540147961671975342
-      type: {class: Until, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        guid: 0971e394bf404ceaac6a1f8a84e64fba
-        graphPosition: {x: 345, y: 300}
-        comment: Phase 0
-        child:
-          rid: 8540147961671975343
-        condition:
-          rid: 8540147961671975344
-        onChildCompleted: 0
     - rid: 8540147961671975343
       type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 5e84b1e9bf5e4b94a11e5cc80ba2650e
-        graphPosition: {x: 345, y: 450}
+        graphPosition: {x: 345, y: 300}
         comment: 
         child:
           rid: 8540147961671975346
         frames:
           value: 48
           param: 
-    - rid: 8540147961671975344
-      type: {class: FrameElapsed, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
-      data:
-        frames:
-          value: 241
-          param: 
     - rid: 8540147961671975346
       type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 91a8a24d818644bab89ef98dce123a8f
-        graphPosition: {x: 460, y: 600}
+        graphPosition: {x: 460, y: 450}
         comment: 
         child:
           rid: 8540147961671975626
         count:
-          value: 0
+          value: 3
           param: 
         interval:
           value: 78
@@ -75,20 +58,23 @@ MonoBehaviour:
       type: {class: SingleShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 572348ef256547e5a371d827adcc0e33
-        graphPosition: {x: 460, y: 750}
+        graphPosition: {x: 460, y: 600}
         comment: 
         bullet:
-          prefab: {fileID: 366756060701291069, guid: 67ed420ca909000448078ddced7509ff, type: 3}
+          preset: {fileID: 11400000, guid: 75f0fbdeda4cab04bb2f30fe3f979c87, type: 2}
+          prefab: {fileID: 0}
           prefabParam: 
           damage: 10
           motionPreset: {fileID: 0}
+          motionPresetParam: 
           motion:
           - rid: 8540150000000000048
           range: 0
-          lifetime: 600
+          lifetime: 0
           affectedByForce: 1
           behavior: {fileID: 0}
           overrides: []
+          group: 
         direction:
           rid: 8540147961671975349
         rotation:
