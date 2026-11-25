@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
+  m_Name: S1_GhostMidBoss_Attack
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147960821842863
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147960821842863
+      type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 02fc222a4dc7414488b4cf2a10073c08
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        child:
+          rid: 8540147960821842865
+        frames:
+          value: 120
+          param: 
+    - rid: 8540147960821842865
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9e9da2cbee0f4592a7f6178558931310
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        child:
+          rid: 8540147960821842866
+        count:
+          value: 0
+          param: 
+        interval:
+          value: 360
+          param: 
+        indexParam: 
+    - rid: 8540147960821842866
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 9415c75fe42d4269b5180bf45e5955aa
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        child:
+          rid: 8540147961671975593
+        count:
+          value: 5
+          param: 
+        interval:
+          value: 45
+          param: 
+        indexParam: 
+    - rid: 8540147960821842869
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147960821842870
+      type: {class: InheritRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data: 
+    - rid: 8540147961671975593
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: b9c9841de19349b587051e0140f8ea96
+        graphPosition: {x: 460, y: 900}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: 7672bd22ece9ab441ab9a5c3578f7b66, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: e5f17cd3b38bd6c4bb52e0b29cfbd044, type: 2}
+          motionPresetParam: 
+          motion: []
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147960821842869
+        rotation:
+          rid: 8540147960821842870
+        muzzleOffset: {x: -0.765, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 13
+            param: 
+          spreadAngle:
+            value: 30
+            param: 
+          radius: 0
+          startDelayFrames: 0
+          rotationOffset: 0
