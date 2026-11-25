@@ -63,6 +63,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
         BulletSystem bulletSystem;
         float lastShootTime;
         Vector2 currentMoveInput;
+        bool isChargeKeyHeld;
         Vector2 pendingPush;
         Vector3 initialPosition;
         readonly CompositeDisposable disposables = new();
@@ -118,6 +119,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             BindModelToView();
             SubscribeToMoveInput();
             SubscribeToSpectrumBarPush();
+            SubscribeToChargeKeyState();
         }
 
         void OnEnteredScene(SceneNavigationMessage message)
@@ -253,36 +255,51 @@ namespace Project.Scenes.Battle.Scripts.Presenter.Entity
             // スニークボタンの押下/解除
             MessageBroker.Default.Receive<PlayerChargeMessage>()
                          .Where(_ => !IsPaused())
-                         .Subscribe(msg =>
-                         {
-                             if (msg.isPressed)
-                             {
-                                 model.SetSneaking(true);
-                                 view.EnterCharge();
-                                 soundManager?.PlayLoopSE(SeType.Charge);
-                             }
-                             else
-                             {
-                                 soundManager?.StopLoopSE();
-
-                                 bool chargeSucceeded = model.IsChargeComplete;
-                                 if (chargeSucceeded)
-                                 {
-                                     FireChargedShot();
-                                     model.ResetCharge();
-                                 }
-
-                                 model.SetSneaking(false);
-
-                                 // 成功時: FireChargedShot 内の EnterAttack に任せる
-                                 // 失敗時: Run に戻す
-                                 if (!chargeSucceeded)
-                                 {
-                                     view.EnterRun();
-                                 }
-                             }
-                         })
+                         .Subscribe(msg => ApplyChargeInput(msg.isPressed))
                          .AddTo(inputDisposables);
+
+            // ポーズ中の押下/解除は見た目を変えないよう捨て、閉じた瞬間のキー状態に合わせる
+            globalScenePresenter?.PauseModalPresenter?.OnClosed
+                .Subscribe(_ => ApplyChargeInput(isChargeKeyHeld))
+                .AddTo(inputDisposables);
+        }
+
+        void SubscribeToChargeKeyState()
+        {
+            MessageBroker.Default.Receive<PlayerChargeMessage>()
+                         .Subscribe(msg => isChargeKeyHeld = msg.isPressed)
+                         .AddTo(disposables);
+        }
+
+        void ApplyChargeInput(bool isPressed)
+        {
+            if (isPressed == model.IsSneaking.Value) return;
+
+            if (isPressed)
+            {
+                model.SetSneaking(true);
+                view.EnterCharge();
+                soundManager?.PlayLoopSE(SeType.Charge);
+                return;
+            }
+
+            soundManager?.StopLoopSE();
+
+            bool chargeSucceeded = model.IsChargeComplete;
+            if (chargeSucceeded)
+            {
+                FireChargedShot();
+                model.ResetCharge();
+            }
+
+            model.SetSneaking(false);
+
+            // 成功時: FireChargedShot 内の EnterAttack に任せる
+            // 失敗時: Run に戻す
+            if (!chargeSucceeded)
+            {
+                view.EnterRun();
+            }
         }
 
         public void UnsubscribeFromAttackInput()
