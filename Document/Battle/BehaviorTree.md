@@ -425,6 +425,15 @@ BGM と会話はサービス経由で Presenter が直接受ける。
 - Sequence / Cycle で飛ばした前の子には `Node.FastForward` を呼び、実行はせずに後のノードが前提にする状態だけ進める。既定は子へ順に呼ぶだけで、Until / Phase / WaitUntil は条件の `FastForward`（BGM の位置）、PlayBgm は BGM の再生、SpawnBoss はボスの登場を行う。If は条件で選ぶ方の子だけに呼ぶ。`BossBattle` より後のノードから始めることはできない（警告を出す）。
 - `bossStartHpPercent` は経路が `BossBattle` を通るときだけ使い、`BossBattle` の開始時に設定する。リトライで再開する Section がデバッグ起動した Section と同じなら、もう一度同じ経路・HP から始める。Wave で出る敵・弾のツリーと、`treeParam` で実行時に決まる SubTree の中は選べない。
 
+#### デバッグ起動しやすいツリーの組み方
+
+デバッグ起動で選べる開始位置はノード単位なので、フェーズ（ボスの攻撃の 1 区間、道中のひとまとまりの Wave など）ごとにノード 1 つへまとめておく。
+
+- フェーズの中身は Sequence / Until / Phase などのノード 1 つにまとめ、コメントを付ける。Launcher はノード 1 つを 1 行で表示し、コメントがあれば `«コメント»` で出すので、フェーズ名で開始位置を選べる。フェーズの中身を親の Sequence に平らに並べると、フェーズの始まりを Wait や発射ノードの並びから探すことになり、フェーズの途中を選びやすい。
+- 何度も使う攻撃は SubTree にする。Launcher は SubTree の中まで展開するので、中のノードからも始められる。1 箇所でしか使わない処理は SubTree にせず、Sequence などでまとめる（`treeParam` で実行時に決まる SubTree の中は選べない）。
+- フェーズの終わりを BGM に合わせるときは、Wait を並べて尺を取るのではなく、Until / Phase の終了条件 `BgmSamples` で書く。飛ばしたフェーズの `FastForward` で BGM をそのフェーズの終わりまで進められるのは `BgmSamples` だけで、Wait などは何もしない。Wait で尺を取ったフェーズを飛ばすと、BGM が前の位置のまま次のフェーズが始まり、弾幕と曲がずれる。
+- フェーズを並べる親は Sequence / Cycle / HpSections / If / RandomSelect にする。経路の途中にある Parallel / Loop / Repeat / Delay は途中から始めない（Parallel の他の子・Loop / Repeat の回数・Delay の待ち時間は最初からになる）ので、フェーズの並びはこれらの外に出す。
+
 ## 7. ステージサービス
 
 ステージ固有の機能（現状は風のみ）は、`BattleStageAsset.services` に宣言したステージでだけ存在する「ステージサービス」としてカプセル化している。
