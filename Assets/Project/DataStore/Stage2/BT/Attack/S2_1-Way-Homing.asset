@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
+  m_Name: S2_1-Way-Homing
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147961671974922
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147961671974922
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d7badb54cfaf4d69b5f69aafbb8324b6
+        graphPosition: {x: -120, y: 125}
+        comment: 
+        child:
+          rid: 8540147961671975623
+        count:
+          value: 5
+          param: 
+        interval:
+          value: 120
+          param: 
+        indexParam: 
+    - rid: 8540147961671974926
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147961671974927
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975623
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 85d17cbe3e0345e8adb39d6f99669673
+        graphPosition: {x: -137, y: 297}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: 897266a7b9590c8498746a2bd769dcc2, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 3866b47cb7ed86d4a926e25289143a01, type: 2}
+          motionPresetParam: 
+          motion: []
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147961671974926
+        rotation:
+          rid: 8540147961671974927
+        muzzleOffset: {x: 0, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 1
+            param: 
+          spreadAngle:
+            value: 30
+            param: 
+          radius: 0.5
+          startDelayFrames: 0
+          rotationOffset: 0

@@ -78,7 +78,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1126924755
-  m_SortingLayer: 1
+  m_SortingLayer: -1
   m_SortingOrder: 1
   m_Sprite: {fileID: -6939695964637348897, guid: 385732460e736204481fd406bfec2c57, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -162,18 +162,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfd5daf7fba3164387b3052b7eeb571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSteps:
-  - rid: 1000
   view: {fileID: 8877745320614750256}
   spriteRenderer: {fileID: 1851957906713825068}
-  lifetime: 0.8
-  references:
-    version: 2
-    RefIds:
-    - rid: 1000
-      type: {class: InfiniteMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        velocity: {x: 5, y: 0, z: 0}
+  forceInfluence: 1
 --- !u!50 &-2738201287911355600
 Rigidbody2D:
   serializedVersion: 5

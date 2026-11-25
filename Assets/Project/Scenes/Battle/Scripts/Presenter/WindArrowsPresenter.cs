@@ -6,7 +6,7 @@ using Project.Scripts.Presenter;
 namespace Project.Scenes.Battle.Scripts.Presenter
 {
     /// <summary>
-    /// BattleWindの向き・強さに合わせて矢印グリッドを流す。背景のスクロール分も足して海の上を流れて見せる。
+    /// WindService が生成し、風の向き・強さに合わせて矢印グリッドを流す。背景のスクロール分も足して海の上を流れて見せる。
     /// 風が無効、または無風(None)の間は非表示。
     /// </summary>
     public class WindArrowsPresenter : MonoPresenter
@@ -17,15 +17,22 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         float speedPerRatio = 150f;
 
         Vector2 offset;
+        Project.Scenes.Battle.Scripts.Runtime.WindService wind;
+
+        public void Bind(Project.Scenes.Battle.Scripts.Runtime.WindService value, BackgroundPresenter background)
+        {
+            wind = value;
+            if (background != null) backgroundPresenter = background;
+        }
 
         void Update()
         {
-            Vector2 direction = BattleWind.Vector;
+            Vector2 direction = wind != null ? wind.Vector : Vector2.zero;
             bool visible = direction != Vector2.zero;
             foreach (var view in views) view.SetVisible(visible);
             if (!visible) return;
 
-            Vector2 velocity = direction * (speedPerRatio * BattleWind.PlayerSpeedRatio);
+            Vector2 velocity = direction * (speedPerRatio * wind.PlayerSpeedRatio);
             if (backgroundPresenter != null) velocity += backgroundPresenter.ScrollVelocityPixels;
             offset += velocity * Time.deltaTime;
 

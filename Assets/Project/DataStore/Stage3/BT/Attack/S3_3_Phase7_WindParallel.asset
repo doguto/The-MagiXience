@@ -1,0 +1,260 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
+  m_Name: S3_3_Phase7_WindParallel
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147961671975088
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147961671975088
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2bbd531c9c3f437b8f2cdebb38a5c38a
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        children:
+        - rid: 8540147961671975089
+        - rid: 8540148069423906891
+        - rid: 8540147961671975093
+        - rid: 8540148069423906892
+        - rid: 8540147961671975097
+        - rid: 8540148069423906893
+        - rid: 8540147961671975101
+        - rid: 8540148069423906894
+    - rid: 8540147961671975089
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a26b4643e2e84731ac7971a0175fa005
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 90
+          param: 
+    - rid: 8540147961671975093
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 57c4fb4e153540c98521eaffcb053405
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 258
+          param: 
+    - rid: 8540147961671975097
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 32190619e6e94c6295b9bfa88257b083
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 258
+          param: 
+    - rid: 8540147961671975101
+      type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: c60360b05c934078874b87d5cc0d0344
+        graphPosition: {x: 0, y: 0}
+        comment: 
+        frames:
+          value: 258
+          param: 
+    - rid: 8540147961671975109
+      type: {class: ScreenEdgeDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 5.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 8540147961671975110
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975118
+      type: {class: ScreenEdgeDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: 0
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 8540147961671975119
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975127
+      type: {class: ScreenEdgeDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: -5.5
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 8540147961671975128
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975136
+      type: {class: ScreenEdgeDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        fromLeft: 0
+        followWind: 1
+        edgeInset: 0
+        verticalMargin: 2.4
+        lateralOffset: -2
+        angularSpeed: 0
+        attackTimeOffset: 0.9
+    - rid: 8540147961671975137
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540148069423906891
+      type: {class: ParallelShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: a98a33684a6143248a41fe8b949abd9b
+        graphPosition: {x: 460, y: 600}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: d0aa6507b2c11354fba3c33ba59e3721, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 7a02ab6752104fa4dbf3184d4dca59aa, type: 2}
+          motionPresetParam: 
+          motion: []
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147961671975109
+        rotation:
+          rid: 8540147961671975110
+        muzzleOffset: {x: -0.5, y: 0}
+        se: 0
+        pattern:
+          count:
+            value: 3
+            param: 
+          spacing:
+            value: 2
+            param: 
+    - rid: 8540148069423906892
+      type: {class: ParallelShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: c745978cb853473db6b4eb0de3a4187a
+        graphPosition: {x: 1150, y: 600}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: d0aa6507b2c11354fba3c33ba59e3721, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 7a02ab6752104fa4dbf3184d4dca59aa, type: 2}
+          motionPresetParam: 
+          motion: []
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147961671975118
+        rotation:
+          rid: 8540147961671975119
+        muzzleOffset: {x: -0.5, y: 0}
+        se: 0
+        pattern:
+          count:
+            value: 3
+            param: 
+          spacing:
+            value: 2
+            param: 
+    - rid: 8540148069423906893
+      type: {class: ParallelShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2fe7b901256a41278bed187082a7f0dd
+        graphPosition: {x: 1840, y: 600}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: d0aa6507b2c11354fba3c33ba59e3721, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 7a02ab6752104fa4dbf3184d4dca59aa, type: 2}
+          motionPresetParam: 
+          motion: []
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147961671975127
+        rotation:
+          rid: 8540147961671975128
+        muzzleOffset: {x: -0.5, y: 0}
+        se: 0
+        pattern:
+          count:
+            value: 3
+            param: 
+          spacing:
+            value: 2
+            param: 
+    - rid: 8540148069423906894
+      type: {class: ParallelShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 60431bec2047477c98a613c3e43d4ec8
+        graphPosition: {x: 2530, y: 600}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: d0aa6507b2c11354fba3c33ba59e3721, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 7a02ab6752104fa4dbf3184d4dca59aa, type: 2}
+          motionPresetParam: 
+          motion: []
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147961671975136
+        rotation:
+          rid: 8540147961671975137
+        muzzleOffset: {x: -0.5, y: 0}
+        se: 0
+        pattern:
+          count:
+            value: 3
+            param: 
+          spacing:
+            value: 2
+            param: 

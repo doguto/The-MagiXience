@@ -2,11 +2,11 @@
 
 このドキュメントは `Assets/Project/DataStore` 配下に置かれているデータ（主にバトルシーン関連）の構造について解説する。
 
-`DataStore` は ScriptableObject を使ったマスターデータ・ステージ演出データの置き場である。データは大きく分けて以下の3系統から成る。
+`DataStore` は ScriptableObject を使ったマスターデータ・ステージ進行データの置き場である。データは大きく分けて以下の3系統から成る。
 
 - **マスターデータ系**（`BgmData` / `SeData` / `CharacterData` / `StageData`）: 単純な `List<T>` を持つだけの ScriptableObject。
-- **バトル演出系**（`BattleSequenceAsset` を頂点とする Way / Boss / Attack / Movement / Ease 群）: `SerializeReference + SubclassSelector` によるポリモーフィックな構成が多用されており、1つのフェーズに対して「移動」「攻撃」「敵の出現」などの部品を組み合わせて表現する。
-- **シナリオ系**（`ScenarioData`）: 会話・演出イベントを `function` / `args` という汎用コマンド列で表現する簡易スクリプト形式。
+- **バトル進行系**（`Commons/BT/` と `Stage{N}/BT/` 配下の `BattleStageAsset` / `BossDefinition` / ツリー（`StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`）/ `MotionPreset` / `EaseCurveAsset`）: BehaviorTree 形式のステージ・ボス・敵・攻撃データ。ノードは `SerializeReference + SubclassSelector` によるポリモーフィックな構成で保存される。
+- **シナリオ系**（`Stage{N}/Scenario/` 配下の `ScenarioData`）: 会話・演出イベントを `function` / `args` という汎用コマンド列で表現する簡易スクリプト形式。
 
 これに加えて、開発用の `Test` フォルダが存在する。
 
@@ -14,27 +14,24 @@
 
 ```
 StageData.asset
- ├─ waySequenceAddress ──► Stage1Way.asset (BattleSequenceAsset, situation=Way)
- │                          └─ sequenceGroups[].phases[]
- │                              ├─ timelineBuilder / timelineBuilderStrong ──► Phase1〜9.asset (BattleTimelineBuilderAsset)
- │                              │     └─ enemySpawnTracks[].clips[].prefab ──► 敵Prefab
- │                              └─ exitConditionConfig (SerializeReference)
- │                                    ──► TimeLimit / AllEnemiesDefeated / BgmPosition / BossHpThreshold / Composite
- │
- └─ bossSequenceAddress ──► Stage1Boss.asset (BattleSequenceAsset, situation=Boss)
-                             ├─ bossPrefab / bossSpawnPosition / bossEntranceMovement (IMovementStep[])
-                             └─ sequenceGroups[].phases[]
-                                 └─ timelineBuilder ──► Intro / MelodyA / MelodyB / Chorus.asset
-                                       ├─ bossAttackPreset ──► Attack/*.asset
-                                       └─ bossMovementPreset ──► Movement/*.asset (Ease/*.assetを参照する場合あり)
-
-Stage1WayScenario.asset / Stage1BossScenario.asset (ScenarioData)
- └─ 会話・演出コマンド列。ScenarioScenePresenter が解釈し、
-    "SpawnBoss" / "PlayBossBgm" コマンドで上記バトル演出系と連動する。
+ └─ stageAddress ──► Stage{N}/BT/Stage{N}_BT.asset (BattleStageAsset)
+                      ├─ services[] (例: WindServiceDefinition)
+                      └─ tree ──► Stage{N}/BT/Stage/Stage{N}_Tree.asset (ステージツリー)
+                                   ├─ Wave / Spawn ノード
+                                   │    ├─ prefab    ──► 敵 Prefab
+                                   │    ├─ behavior  ──► Commons/BT/Enemy.asset (共通の雑魚ツリー。特殊な敵は Stage{N}/BT/Enemy/*.asset)
+                                   │    ├─ motionPreset ──► Stage{N}/BT/Motion/*.asset (敵に渡す移動。MoveSelf が実行)
+                                   │    └─ overrides ──► attack: Stage{N}/BT/Attack/*.asset, death: 撃破時のツリー
+                                   ├─ PlayScenario ノード ──► Stage{N}/Scenario/Stage{N}WayScenario.asset / Stage{N}BossScenario.asset
+                                   └─ SpawnBoss / BossBattle ノード ──► Stage{N}/BT/Stage{N}_Boss.asset (BossDefinition)
+                                        ├─ prefab / spawnPosition / entrance (MotionStep[])
+                                        └─ tree ──► Stage{N}/BT/Stage/Stage{N}Boss_Tree.asset
+                                                     ├─ SubTree ノード ──► Stage{N}/BT/Attack/*.asset
+                                                     └─ Move / BulletConfig.motionPreset ──► Stage{N}/BT/Motion/*.asset
 
 BgmData.asset / SeData.asset
- └─ SceneType / BgmType / SeType の値が、Attack系(seType)や
-    ExitCondition系(BgmPositionExitConditionConfig.thresholdSamples)と数値的に対応している。
+ └─ BgmData のループ位置 (サンプル) が BgmSamples 条件の thresholdSamples と、
+    SeType の値が発射系ノードの se フィールドと対応している。
 ```
 
 以降、各データを個別に解説する。
@@ -51,12 +48,12 @@ BgmData.asset / SeData.asset
 | フィールド | 型 | 説明 |
 |---|---|---|
 | `name` | `string` | 曲名（表示・ログ用） |
-| `sceneType` | `SceneType` | どのシーンで使われる曲かの分類（`Global, Title, StageList, Stage1〜6, StageEx, Scenario, Entry`） |
-| `bgmType` | `BgmType` | 同一シーン内での用途分類（`Default, BattleWay, BattleBoss, Tutorial, Phase1, Phase2`） |
+| `sceneType` | `SceneType` | どのシーンで使われる曲かの分類 |
+| `bgmType` | `BgmType` | 同一シーン内での用途分類 |
 | `loopStartSamples` | `int` | ループ開始位置（サンプル数） |
 | `loopEndSamples` | `int` | ループ終了位置（`0`ならクリップ全体長） |
 
-`loopStartSamples`/`loopEndSamples` は後述する Boss 系の `BgmPositionExitConditionConfig.thresholdSamples` と同じ数値が使われることがあり、BGMの再生位置をトリガーにボス戦のフェーズを進行させる設計と対応している。
+`loopStartSamples`/`loopEndSamples` はボスツリーの `BgmSamples` 条件の `thresholdSamples` と同じ数値が使われることがあり、BGMの再生位置をトリガーにボス戦のフェーズを進行させる設計と対応している。
 
 ### SeData（`SeData.asset`）
 
@@ -65,10 +62,10 @@ BgmData.asset / SeData.asset
 | フィールド | 型 | 説明 |
 |---|---|---|
 | `name` | `string` | SE名 |
-| `seType` | `SeType` | `None, Click, Cancel, EnemyShotShort, EnemyShotLong, Attack, Charge, ChargeRelease, Damage, LocoAttack1, LocoAttack2` |
+| `seType` | `SeType` | SE の種類 |
 | `loopStartSamples` / `loopEndSamples` | `int` | ループ再生用（`PlayLoopSE`使用時のみ参照） |
 
-`seType` は後述する Attack 系の `AttackTimelineEntry.seType` からも参照され、攻撃イベント発火時に鳴らすSEの指定に使われる。
+`seType` は BT のノードの `se` フィールドからも参照される。
 
 ### CharacterData（`CharacterData.asset`）
 
@@ -80,407 +77,114 @@ BgmData.asset / SeData.asset
 | `name` | `string` | 日本語表示名 |
 | `englishName` | `string` | アセット参照キー（`StageData.charaStillAddress` やシナリオ側の立ち絵ロード処理と一致する文字列） |
 
-実データには8キャラが登録されている（テン/Ten, ロコ/Loco, アズマ/Azuma, タツミ/Tatsumi, ウシトラ/Ushitora, スイ/Sui, ハナレ/Hanare, コン/Kon）。
-
 ### StageData（`StageData.asset`）
 
 - 定義: `Assets/Project/Scripts/Infra/StageDataObject.cs`
 
 | フィールド | 型 | 説明 |
 |---|---|---|
-| `id` | `string` | ステージID（"1"〜"6", "EX"など） |
+| `id` | `string` | ステージID |
 | `stageNumber` | `int` | 数値のステージ番号 |
 | `charaStillAddress` | `string` | ステージ画面に表示する立ち絵のアドレス（`CharacterData.englishName`と対応） |
+| `backgroundAddress` | `string` | バトル背景画像のアドレス |
 | `title` | `string` | ステージタイトル |
-| `waySequenceAddress` | `string` | 道中の `BattleSequenceAsset` へのパス |
-| `bossSequenceAddress` | `string` | ボス戦の `BattleSequenceAsset` へのパス |
+| `stageAddress` | `string` | `BattleStageAsset`（`Stage{N}/BT/Stage{N}_BT.asset`）の Addressables アドレス |
+| `scenarioEnemyStillOffset` | `Vector2` | シナリオ中の敵立ち絵の表示位置補正（UI座標） |
+| `scenarioEnemyStillScale` | `float` | シナリオ中の敵立ち絵の拡大率（0以下は1倍） |
 
-実データは7エントリ（Stage1〜6、EX）だが、`waySequenceAddress`/`bossSequenceAddress` が設定済みなのは Stage1・Stage2 のみで、Stage3以降は未実装（空文字）。
+アドレスはアセットパスそのもの（例: `Assets/Project/DataStore/Stage1/BT/Stage1_BT.asset`）で、Default Local Group に登録する。`BattleScenePresenter` が `Addressables.LoadAssetAsync<BattleStageAsset>` で読み込む。
 
----
-
-## 2. Way / Boss 系（`BattleSequenceAsset`）
-
-道中（Way）とボス戦（Boss）は同一のクラス `BattleSequenceAsset` で表現される。
-
-```csharp
-// Assets/Project/Scenes/Battle/Scripts/Model/BattleSequenceAsset.cs
-public class BattleSequenceAsset : ScriptableObject
-{
-    BattleSituation situation;                  // Way or Boss
-    List<SequenceGroup> sequenceGroups;
-
-    GameObject bossPrefab;                      // Boss用: ボスのPrefab
-    Vector3 bossSpawnPosition;                  // Boss用: 出現位置
-    List<IMovementStep> bossEntranceMovement;   // Boss用: 入場演出（SerializeReference）
-}
-
-public class SequenceGroup
-{
-    bool loop;
-    int loopCount;                // 0 = 無限ループ
-    List<BattlePhaseDefinition> phases;
-}
-
-public class BattlePhaseDefinition
-{
-    string phaseId;
-    BattleTimelineBuilderAsset timelineBuilder;        // 通常
-    BattleTimelineBuilderAsset timelineBuilderStrong;  // 強化(発狂)版。未設定可
-    IExitConditionConfig exitConditionConfig;          // フェーズ終了条件（SerializeReference）
-}
-```
-
-`situation` は `OnValidate()` によってエディタ上でアセット名に "Boss" / "Way" が含まれるかどうかで自動的に上書きされる（手動で矛盾した値を設定してもエディタが訂正してくれる）。
-
-> **補足**: `BattlePhaseDefinition` は実データYAML上に `strongAttackHpThresholdPercent` という値が残存しているが、現行のクラス定義には存在しないフィールドである。Unityは未知のYAMLフィールドを無視するため実害はないが、過去のリファクタで削除された仕様の名残りと考えられる。
-
-### フェーズ終了条件（`IExitConditionConfig`）
-
-`Assets/Project/Scenes/Battle/Scripts/Model/ExitCondition/` 配下。すべて `[Serializable]` なPOCOで、`SerializeReference + SubclassSelector` により `BattlePhaseDefinition.exitConditionConfig` にインスペクタ上でポリモーフィックに差し込める。共通インターフェースは以下の1メソッドのみを持つ。
-
-```csharp
-public interface IExitConditionConfig
-{
-    // フェーズ終了判定を行う実行用モデルを生成する
-    BattlePhaseModelBase CreatePhaseModel(
-        BattlePhaseDefinition definition,
-        IEnemyTracker enemyTracker,
-        Func<EntityBase> getBossModel = null);
-}
-```
-
-`CreatePhaseModel()` はアセット（設計図）から実行時の判定モデル（`XxxBattlePhaseModel`）を組み立てるファクトリメソッドで、各実装クラスはこれを実装するだけの薄いラッパーになっている。
-
-#### `TimeLimitExitConditionConfig` — 制限時間経過で終了
-
-```csharp
-[Serializable]
-public class TimeLimitExitConditionConfig : IExitConditionConfig
-{
-    [SerializeField, Min(0.1f)] float timeLimitSeconds = 10f;
-
-    public BattlePhaseModelBase CreatePhaseModel(
-        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
-    {
-        return new TimeLimitBattlePhaseModel(definition, timeLimitSeconds);
-    }
-}
-```
-
-`timeLimitSeconds` は `[Min(0.1f)]` によりインスペクタ上で0以下を入力できないよう制約されている（既定値10秒）。
-
-#### `AllEnemiesDefeatedExitConditionConfig` — 敵を全滅させたら終了
-
-```csharp
-[Serializable]
-public class AllEnemiesDefeatedExitConditionConfig : IExitConditionConfig
-{
-    public BattlePhaseModelBase CreatePhaseModel(
-        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
-    {
-        return new AllEnemiesDefeatedBattlePhaseModel(definition, enemyTracker);
-    }
-}
-```
-
-固有フィールドを持たない最もシンプルな実装。判定に必要な敵の生存数は引数の `enemyTracker`（＝呼び出し側が管理する共有インスタンス）から取得するため、このクラス自身は状態を持つ必要がない。Way側の全フェーズで使われている（[実データ: Way](#実データ-waystage1waystage1wayasset)を参照）。
-
-#### `BgmPositionExitConditionConfig` — BGMが指定サンプル位置に達したら終了
-
-```csharp
-[Serializable]
-public class BgmPositionExitConditionConfig : IExitConditionConfig
-{
-    [SerializeField] int thresholdSamples;
-
-    public Func<AudioSource> GetBgmAudioSource { get; set; }
-
-    public BattlePhaseModelBase CreatePhaseModel(
-        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
-    {
-        return new BgmPositionBattlePhaseModel(definition, thresholdSamples, GetBgmAudioSource);
-    }
-}
-```
-
-`GetBgmAudioSource`（`Func<AudioSource>`）はアセットにシリアライズされないランタイム専用プロパティで、`CreatePhaseModel()` を呼ぶ側（Presenter層）が実行時に注入する。Boss戦のフェーズ進行で使われ、`thresholdSamples` は `BgmData.asset` の `loopStartSamples`/`loopEndSamples` と一致させる必要がある（詳細は[実データ: Boss](#実データ-bossstage1bossstage1bossasset)を参照）。
-
-#### `BossHpThresholdExitConditionConfig` — ボスHPが閾値を下回ったら終了
-
-```csharp
-[Serializable]
-public class BossHpThresholdExitConditionConfig : IExitConditionConfig
-{
-    [SerializeField, Range(0f, 100f)] float hpThresholdPercent = 50f;
-
-    public BattlePhaseModelBase CreatePhaseModel(
-        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
-    {
-        return new BossHpThresholdBattlePhaseModel(definition, hpThresholdPercent / 100f, getBossModel);
-    }
-}
-```
-
-`hpThresholdPercent` はインスペクタ上 `[Range(0f, 100f)]` のスライダーで0〜100（%）として入力するが、`CreatePhaseModel()` 内で `/ 100f` して0〜1の比率に変換してから渡している。ボスの現在HPは第3引数 `getBossModel`（`Func<EntityBase>`）経由で遅延取得する設計で、これは終了条件アセットが生成される時点ではまだボスがシーンに存在しない場合があるため（Boss登場前にフェーズ定義だけ先に構築されるケースへの対応）。
-
-#### `CompositeExitConditionConfig` — 複数条件の合成（入れ子可）
-
-```csharp
-public enum CompositeMode { And, Or }
-
-[Serializable]
-public class CompositeExitConditionConfig : IExitConditionConfig
-{
-    [SerializeField] CompositeMode mode = CompositeMode.And;
-
-    [SerializeReference, SubclassSelector]
-    List<IExitConditionConfig> conditions = new();
-
-    public BattlePhaseModelBase CreatePhaseModel(
-        BattlePhaseDefinition definition, IEnemyTracker enemyTracker, Func<EntityBase> getBossModel = null)
-    {
-        var innerModels = new List<BattlePhaseModelBase>(conditions.Count);
-        foreach (var condition in conditions)
-            innerModels.Add(condition.CreatePhaseModel(definition, enemyTracker, getBossModel));
-
-        return new CompositeBattlePhaseModel(definition, mode, innerModels);
-    }
-}
-```
-
-`conditions` フィールド自身が `List<IExitConditionConfig>` であるため、`CompositeExitConditionConfig` の中にさらに `CompositeExitConditionConfig` を入れる入れ子構成も型上は可能（例:「制限時間 OR (敵全滅 AND ボスHP50%以下)」のような複合条件）。`CreatePhaseModel()` は自分の子条件全てに対して再帰的に `CreatePhaseModel()` を呼び出し、生成された `BattlePhaseModelBase` のリストを `CompositeBattlePhaseModel` にまとめて渡す、Compositeパターンそのものの実装になっている。
-
-### 実データ: Way（`Stage1/Way/Stage1Way.asset`）
-
-`situation: Way`、`sequenceGroups` は1グループのみで `loop: false`。中に `phaseId 1〜6` の6フェーズがあり、各フェーズの `exitConditionConfig` はすべて `AllEnemiesDefeatedExitConditionConfig`（=敵を全滅させたら次フェーズへ）。
-
-各フェーズの `timelineBuilder` は `Stage1/Way/Phase1.asset`〜`Phase6.asset` を参照する。中身は `BattleTimelineBuilderAsset` の `enemySpawnTracks` に、時刻と出現位置を指定した敵スポーン定義が並んでいるだけのシンプルな構成（例: `Phase1.asset` は12件のスポーン定義を持つ1トラック）。
-
-`Way`フォルダには `Phase7〜9.asset` も存在するが、`Stage1Way.asset` 側は6フェーズしか参照していない。将来の拡張用に用意された未使用アセットと見られる。
-
-> **補足**: WayとBossが同じ `BattleSequenceAsset` クラスを共有しているのは、「フェーズの列を順に消化し、条件を満たしたら次へ進む」という制御フローが道中もボス戦も本質的に同じであるため。差分は `bossPrefab` 等の追加フィールドと `bossAttackPreset`/`bossMovementPreset` の有無だけで表現されている。
-
-### 実データ: Boss（`Stage1/Boss/Stage1Boss.asset`）
-
-```yaml
-situation: Boss
-sequenceGroups:
-  # イントロ専用グループ（1回のみ）
-  - loop: false
-    loopCount: 1
-    phases:
-      - timelineBuilder: Intro
-        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 422391 }
-  # 無限ループグループ：MelodyA → MelodyB → Chorus
-  - loop: true
-    loopCount: 0
-    phases:
-      - timelineBuilder: MelodyA
-        timelineBuilderStrong: MelodyAStrong  # 発狂版あり
-        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 1263874 }
-      - timelineBuilder: MelodyB
-        timelineBuilderStrong: MelodyBStrong
-        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 2976121 }
-      - timelineBuilder: Chorus
-        timelineBuilderStrong: ChorusStrong
-        exitConditionConfig: { type: BgmPositionExitConditionConfig, thresholdSamples: 3897391 }
-bossPrefab: <ボスPrefab>
-bossSpawnPosition: { x: 10, y: 0, z: 0 }
-bossEntranceMovement:
-  - type: TweenMovementConfig
-    targetOffset: { x: 3.7, y: 0, z: 0 }
-    duration: 2
-    easeValue: 6  # DG.Tweening.Ease の数値（下記参照）
-    isRelative: false
-```
-
-> **補足（Ease値について）**: `easeValue` はDOTweenの `DG.Tweening.Ease` enumを `int` にキャストした値（`0=Linear, 1=InSine, 2=OutSine, 3=InOutSine, 4=InQuad, 5=OutQuad, 6=InOutQuad, ...`）。以降の実データ例でも同様にenum名ではなく生の数値で表記する。
-
-ボス戦は「BGMの再生サンプル位置」でフェーズを進行させる設計になっている。`thresholdSamples` の値は `BgmData.asset` 内の対応曲（Stage1のBattleBoss曲、`loopStartSamples: 422391` / `loopEndSamples: 3897391`）と一致しており、イントロ→ループ境界→曲終端のタイミングに合わせてフェーズが切り替わる。無限ループグループが `MelodyA → MelodyB → Chorus` の3フェーズを繰り返すのも、BGM自体のループ構造をそのままフェーズ構造に対応させたものである。
-
-`Intro.asset`（`BattleTimelineBuilderAsset`）はトラックがすべて空で、`bossAttackPreset` / `bossMovementPreset` だけが設定されている。つまり Boss 用の Timeline は Way 用と違い、**敵の攻撃パターンと移動パターンをフェーズごとに差し替える**のが主な役目になっている。
-
-> **補足**: BGMのサンプル位置で戦闘フェーズを同期させる設計のため、`BgmData` 側の `loopStartSamples`/`loopEndSamples` と `thresholdSamples` の数値は必ず一致させる必要がある。片方だけ変更すると、BGMのループタイミングとフェーズ切り替えのタイミングがズレてしまう。
 
 ---
 
-## 3. Attack系（弾幕・攻撃パターンプリセット）
+## 2. バトル進行系（`Commons/BT/` / `Stage{N}/BT/`）
 
-- 定義: `Assets/Project/Scenes/Battle/Scripts/Model/Attack/AttackPreset.cs`
-- `AttackPreset : ScriptableObject` は `AttackTimeline attackTimeline` を1つだけ持つ。`CreateTimeline()` で `DeepCopy()` した実行用インスタンスを生成する。
+BehaviorTree 方式のバトルデータ。仕組みは [BehaviorTree.md](./BehaviorTree.md) を参照すること。
 
-```csharp
-[Serializable]
-class AttackTimeline : IAttackStrategy
-{
-    bool loop;
-    float loopStart;
-    float loopEnd;          // 既定 5
-    float cycleDuration;    // 既定 2。ループ時の1サイクルの長さ
-    List<AttackTimelineEntry> entries;
-}
+```text
+Assets/Project/DataStore/Commons/BT/
+└── Enemy.asset             # 全ステージ共通の雑魚ツリー (EnemyTreeAsset。BehaviorTree.md 5.4)
 
-[Serializable]
-class AttackTimelineEntry
-{
-    float time;                                  // 発火時刻
-    IAttackSignal signal;                         // 何を撃つか（SerializeReference）
-    IDirectionProvider directionProvider;         // 方向をどう決めるか
-    IRotationProvider rotationProvider;           // 回転をどう決めるか
-    ISourceIndexProvider sourceIndexProvider;     // 発射口インデックス
-    SeType seType;                                // 発射音
-}
+Assets/Project/DataStore/Stage{N}/BT/
+├── Stage{N}_BT.asset       # BattleStageAsset (StageData.stageAddress の参照先)
+├── Stage{N}_Boss.asset     # BossDefinition (SpawnBoss / BossBattle ノードの参照先)
+├── Stage/                  # ステージツリー Stage{N}_Tree (StageTreeAsset) とボスのツリー Stage{N}Boss_Tree (EnemyTreeAsset)
+├── Attack/                 # 攻撃パターンのツリー S{N}_* (CommonTreeAsset)。雑魚の attack パラメータやボスの SubTree から参照
+├── Motion/                 # MotionPreset (移動ステップ列)。Spawn.motionPreset (敵の移動)、Move、弾の移動に使う
+├── Enemy/                  # 共通ツリーに収まらない特殊な敵の専用ツリー
+└── Trail/                  # TrailPath (経路)
 ```
 
-`loop: true` の場合、`loopStart`〜`loopEnd` の範囲を `cycleDuration` 間隔で繰り返し、各 `entry.time` オフセットで攻撃を発火する。
+- `Attack/` は中身が同じ攻撃を 1 つにまとめてある。雑魚とボスの両方から参照される。
+- `Motion/*_Move` は雑魚の移動。Spawn の `motionPreset` から参照する。
+- `EaseCurveAsset` は `Stage{N}/BT/Ease/` に置く。
 
-### `IAttackSignal`（何を撃つか）
+### BattleStageAsset（`Stage{N}_BT.asset`）
 
-| クラス | フィールド | 説明 |
+- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/BattleStageAsset.cs`
+- 1 ステージ = 1 アセット。
+
+| フィールド | 型 | 説明 |
 |---|---|---|
-| `SingleBulletSignal` | なし | 単発弾 |
-| `NWaySignal` | `wayCount`(既定3), `spreadAngle`(既定60) | N-way弾 |
-| `NWayEnemySpawnAttackSignal` | `wayCount`, `spreadAngle`, `offset` | N方向へ敵をスポーン |
-| `EnemySpawnAttackSignal` | `offset` | 単一の敵スポーン |
-| `PresetAttackSignal` | `preset`, `loop`, `loopCount`, `cycleDuration` | 他の`AttackPreset`をネストして展開する合成ノード（最大深さ8、循環参照防止あり） |
+| `services` | `List<StageServiceDefinition>` | このステージでだけ有効な機能（例: `WindServiceDefinition`） |
+| `tree` | `StageTreeAsset` | ステージツリー（`Stage/Stage{N}_Tree`）。Success で完了するとステージクリア |
 
-### 方向・回転・発射口の決定方式
+Addressables には「アドレス = アセットパス」で Default Local Group に登録する。`StageData.stageAddress` にそのパスを書く。ツリー・BossDefinition・会話など、ここから参照されるアセットは依存として一緒に読み込まれるので個別の登録は要らない。
 
-- `IDirectionProvider`: `FixedDirectionConfig`（固定方向）/ `AimDirectionConfig`（自機狙い）/ `ForwardDirectionConfig`（親の正面）
-- `IRotationProvider`: `FixedRotationConfig` / `AimRotationConfig` / `OffsetRotationConfig` / `InheritParentRotationConfig`
-- `ISourceIndexProvider`: `ConstantSourceIndex` / `RandomSourceIndex`
+### BossDefinition（`Stage{N}_Boss.asset`）
 
-### 実データ: `Stage1/Attack/IntroNormal.asset`
+- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Parts/BossDefinition.cs`（`Create > Battle > Boss Definition`）
 
-```yaml
-attackTimeline:
-  loop: true
-  loopStart: 1
-  loopEnd: 10
-  cycleDuration: 1
-  entries:
-    - time: 0
-      signal: { type: NWaySignal, wayCount: 3, spreadAngle: 30 }
-      directionProvider: { type: AimDirectionConfig }  # 自機狙い
-      sourceIndex: 0
-      seType: 0  # SeType.None
-```
-
-1〜10秒の間、1秒おきに自機狙いの3-way弾（拡散30度）を撃ち続ける設定。
-
-> **補足**: `PresetAttackSignal` による「プリセットのネスト」は、弾幕STGでよくある「基本パターンを組み合わせて複雑なパターンを作る」ためのコンポジション設計。最大深さ8・循環参照防止が実装されており、`AttackPreset` 同士が意図せず互いを参照してしまう事故を想定済みである。
-
----
-
-## 4. Movement系（敵の移動プリセット）
-
-- 定義: `Assets/Project/Scenes/Battle/Scripts/Model/Movement/MovementPreset.cs`
-- `MovementPreset : ScriptableObject` は `List<IMovementStep> steps` を持ち、各ステップを順番に実行する（Sequence的な構成）。
-- `IMovementStep.Play(Transform target, Vector2 direction, Animator animator) : Tween` — DOTweenの`Tween`を返し、呼び出し側でSequenceに繋げる想定。
-
-| クラス | 主なフィールド | 説明 |
+| フィールド | 型 | 説明 |
 |---|---|---|
-| `TweenMovementConfig` | `targetOffset`, `duration`, `easeValue`, `customCurve`, `curvePreset`, `isRelative` | DOTweenネイティブ移動。`isRelative`で相対/絶対移動を切替 |
-| `PathMovementConfig` | `waypoints[]`, `duration`, `pathType`(CatmullRom/Linear), `easeValue`, `curvePreset` | 複数ウェイポイント経由の移動 |
-| `WaitMovementConfig` | `duration` | その場で待機 |
-| `ForwardMovementConfig` | `speed`, `duration` | 現在の向き（右方向）へ直進 |
-| `AimStraightMovementConfig` | `speed`, `duration` | 自機方向へ直進 |
-| `AimRotateConfig` | `duration`, `ease` | 自機方向へ回転のみ（位置は不変） |
-| `AcceleratedMovementConfig` | `direction`, `initialSpeed`, `acceleration`, `maxSpeed`, `minSpeed`, `duration` | 加減速移動 |
-| `QuadraticMovementConfig` | `initialVelocity`, `acceleration`, `duration` | 放物線移動 |
-| `SineMovementConfig` | `baseVelocity`, `amplitude`, `frequency`, `duration` | 基準速度＋直交軸のサイン波揺れ |
-| `InfiniteMovementConfig` | `velocity` | 無限に等速移動 |
-| `DriftMovementConfig` | `anchor`, `pullStrength`, `moveDistance`, `moveBounds`, `moveDuration`, `pauseDuration`, `moveEase`, `duration` | anchor中心に「移動→停止」をランダム方向に繰り返す居座り移動 |
-| `ReflectMovementConfig` | `speed`, `maxReflections`, `reflectTop/Bottom/Left/Right` | 画面端で反射する移動 |
-| `AnimationMovementConfig` | `clip`, `layerIndex` | 指定アニメクリップを再生し終了まで待機 |
+| `prefab` | `GameObject` | ボス Prefab（`BossEntityPresenter` 必須） |
+| `spawnPosition` | `Vector3` | 生成位置 |
+| `entrance` | `List<MotionStep>` | 登場の移動（秒指定）。戦闘開始時に終わっていなければ終点まで進める |
+| `tree` | `EnemyTreeAsset` | ボス自身が実行するツリー（`Stage/Stage{N}Boss_Tree`）。BossBattle ノードで別のツリーを指定しなければこれを使う |
 
-### `LoopMovementConfig`（複合ループ移動）
+### BehaviorTreeAsset（`Commons/BT/Enemy` と `Stage/` `Attack/` `Enemy/`）
 
-```csharp
-class LoopMovementConfig : IMovementStep
-{
-    bool loop;                        // 既定 true
-    int loopCount;                    // 既定 0 = 無限
-    List<LoopMovementEntry> entries;
-}
+- 定義: `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/BehaviorTreeAsset.cs`（抽象クラス）と、種類ごとの派生 `StageTreeAsset` / `EnemyTreeAsset` / `BulletTreeAsset` / `CommonTreeAsset`（同じフォルダ）
 
-class LoopMovementEntry
-{
-    MovementPreset preset;                  // プリセット参照（優先）
-    List<IMovementStep> inlineSteps;        // プリセット未指定時のインラインステップ
-    int repeatCount;                        // 既定 1。このエントリの繰り返し回数
-}
-```
+| 種類 | 作り方 | このフォルダでの使い道 |
+|---|---|---|
+| `StageTreeAsset` | `Create > Battle > Behavior Tree > Stage` | `Stage/Stage{N}_Tree` |
+| `EnemyTreeAsset` | `Create > Battle > Behavior Tree > Enemy` | `Commons/BT/Enemy`、`Stage/Stage{N}Boss_Tree`、`Enemy/` の専用ツリー |
+| `BulletTreeAsset` | `Create > Battle > Behavior Tree > Bullet` | `BulletConfig.behavior` に指定する弾のツリー |
+| `CommonTreeAsset` | `Create > Battle > Behavior Tree > Common` | `Attack/` の攻撃と撃破時の行動ツリーなど、SubTree / SetDespawnBehavior で使うもの |
 
-「プリセットA×2回 → プリセットB×1回」のような組み合わせを構成でき、ボスの周回パターンなどに使われる。
+種類によって置けるノードと SubTree で参照できるツリーが決まる（[BehaviorTree.md](./BehaviorTree.md) 3.2）。`Attack/` のツリーは敵からも弾からも使えるよう Common で作る。
 
-### 実データ: `Stage1/Movement/Straight1.asset`
+| フィールド | 説明 |
+|---|---|
+| `root` | ルートノード（`[SerializeReference]`） |
+| `detachedNodes` | エディタ上で未接続のノード。実行時は使わない |
+| `parameters` | ツリーパラメータ（`TreeParameter`）。SubTree / Spawn から上書きできる |
 
-```yaml
-steps:
-  - type: TweenMovementConfig
-    targetOffset: { x: -5, y: 0, z: 0 }
-    duration: 1
-    easeValue: 1  # InSine
-    isRelative: true
-  - type: WaitMovementConfig
-    duration: 6
-  - type: TweenMovementConfig
-    targetOffset: { x: 5, y: 0, z: 0 }
-    duration: 1
-    easeValue: 1  # InSine
-    isRelative: true
-```
+ノードはすべて同じアセットの `references` セクションに `rid` 付きで保存される（`SerializeReference` の YAML 形式）。手で YAML を編集せず、`Window > Battle > Behavior Tree Editor` で編集すること。
 
-左へ5進む → 6秒待機 → 右へ5戻る、という往復移動。
+役割ごとの典型的な形:
 
-### 実データ: `Stage1/Movement/DriftSample.asset`
+- `Stage/Stage{N}_Tree`: `Stage[ Section "Way"[ PlayBgm, Wave..., Wait ], Section "Boss"[ PlayScenario{OnCommand SpawnBoss / PlayBossBgm}, BossBattle, Wait, PlayScenario ] ]`（[BehaviorTree.md](./BehaviorTree.md) 6.1）
+- `Stage/Stage{N}Boss_Tree`: フェーズごとの `Until(条件){...}` を Sequence / Loop / RandomSelect / Selector で組んだもの。BGM 同期（`BgmSamples`）、HP の区切り（`HpSections`。区切りは HP ゲージにも出る）、発狂（`HpSections` の `NextPhase` + `If($stage ≧ 1)`）など
+- `Commons/BT/Enemy`: `Parallel(All)[ MoveSelf, Sequence[ SetDespawnBehavior($death), SubTree($attack) ] ]`。パラメータ `attack` / `death`（BehaviorTreeAsset）を Spawn の `overrides` で、移動を Spawn の `motionPreset` / `motion` で渡す
+- `Attack/*`: 雑魚の攻撃やボスの 1 フェーズ分の攻撃
+- `Enemy/*`: 共通ツリーで表せない敵の専用ツリー（攻撃の途中で移動を変えるなど）
 
-```yaml
-steps:
-  # (6,0,0)へ入場
-  - type: TweenMovementConfig
-    targetOffset: { x: 6, y: 0, z: 0 }
-    duration: 1.5
-    easeValue: 3  # InOutSine
-    isRelative: false
-  - type: WaitMovementConfig
-    duration: 1.5
-  # 40秒間ドリフト
-  - type: DriftMovementConfig
-    anchor: { x: 6, y: 0, z: 0 }
-    pullStrength: 10
-    moveDistance: 3
-    moveBounds: { x: 2, y: 5 }
-    moveDuration: 2
-    pauseDuration: 10
-    moveEase: 4  # InQuad
-    duration: 40
-  # (12,0,0)へ退場
-  - type: TweenMovementConfig
-    targetOffset: { x: 12, y: 0, z: 0 }
-    duration: 3
-    easeValue: 2  # OutSine
-    isRelative: false
-```
+### MotionPreset（`Motion/`）
 
-「入場 → 居座り → 退場」という、ボス敵の典型的な移動パターンの実例。
+- 定義: `Assets/Project/Scenes/Battle/Scripts/Runtime/Motion/MotionPreset.cs`（`Create > Battle > Motion Preset`）
+- `[SerializeReference] List<MotionStep> steps` を持つだけ。時間は秒指定。
+- `Move` の `preset`、`Spawn.motionPreset`（共通ツリー `Enemy` の雑魚の移動）、`BulletConfig.motionPreset`、`LoopMotion` のエントリから参照する。
+
+### EaseCurveAsset
+
+- 定義: `Runtime/Motion/EaseCurveAsset.cs`（`Create > Battle > Ease Curve`）
+- `AnimationCurve curve` を 1 つ持つだけ。`MotionEase.easeValue = -1`（カスタムカーブ）のときに `curvePreset` として参照される。
 
 ---
 
-## 5. Ease系（イージングカーブプリセット）
-
-- 定義: `Assets/Project/Scenes/Battle/Scripts/Model/Movement/EaseCurvePreset.cs`
-- `EaseCurvePreset : ScriptableObject` は `AnimationCurve curve` を1つ持つだけ（既定はLinear）。
-
-`TweenMovementConfig`/`PathMovementConfig` の `easeValue` がカスタムカーブを示す値の場合、`curvePreset`（優先）または `customCurve` がイージングとして適用される。同じカーブを複数の移動アセット間で使い回すための共有プリセットである。
-
-実データ `Stage1/Ease/InQuadOutLinear.asset` は3キーフレームのカスタムカーブで、名前の通り「入りはQuad的、抜けはLinear的」な挙動を表現している。
-
----
-
-## 6. Scenario系（会話イベント・演出シナリオ）
+## 3. Scenario系（会話イベント・演出シナリオ）
 
 - 定義: `Assets/Project/Scenes/Scenario/Scripts/Model/ScenarioData.cs`
 
@@ -508,70 +212,42 @@ public class ScenarioStep
 - `@関数名,引数1,引数2,...` の形式（カンマ区切り）がコマンド行。
 - `ShowCastMessage` / `ShowMessage` は特別扱いで、コマンド行の直後にある地の文（複数行可）を改行結合して最後の引数（メッセージ本文）に追加する。これにより会話テキストを複数行で書ける。
 
-生成された `.asset` は `Assets/Project/DataStore/{ファイル名}.asset` として保存される（`Stage1WayScenario.asset` などはこの仕組みで生成されたもの）。
+ファイル名が `{N}面ボス前` / `{N}面ボス後` の場合、生成された `.asset` は `Stage{N}/Scenario/Stage{N}WayScenario.asset` / `Stage{N}/Scenario/Stage{N}BossScenario.asset` に上書き保存される。既存アセットを上書きするので、ステージツリーの PlayScenario ノードからの参照はそのまま保たれる。それ以外のファイル名は保存先をダイアログで選ぶ。
+
+### 実データの配置と参照
+
+```text
+Assets/Project/DataStore/Stage{N}/Scenario/
+├── Stage{N}WayScenario.asset    # ボス前の会話 (Section "Boss" の最初の PlayScenario ノード)
+└── Stage{N}BossScenario.asset   # 撃破後の会話 (Section "Boss" の最後の PlayScenario ノード)
+```
+
+会話はステージツリーの PlayScenario ノードが直接参照する。Addressables への登録は不要。流す会話は PlayScenario ノードから `ScenarioModelRepository.SetData(ScenarioData)` で指定される。
 
 ### 実行時の解釈: `ScenarioScenePresenter.cs`
 
-代表的な `function` とその意味:
+会話シーンが自分で処理する演出関数は `ScenarioData` に列挙されたものだけである。
 
 | function | args | 説明 |
 |---|---|---|
 | `ShowCastMessage` | キャラ名, メッセージ | キャラ立ち絵付きの会話表示。決定入力待ちが発生する |
 | `ShowMessage` | キャラ名, メッセージ | 地の文的メッセージ表示（同様に入力待ちあり） |
+| `TypeWriter` | true/false, 1秒あたりの文字数 または `default` | 1文字ずつの表示の切り替え |
+| `AutoAdvance` | true/false, 秒数 または `auto` | 自動送りの切り替え |
 | `ShowCast` | キャラ名, ?, 表情差分, 表示時間, 位置(LL/RR), ? | キャラ立ち絵の登場演出。LL＝プレイヤー側、RR＝敵側の表情辞書から取得 |
-| `SpawnBoss` | なし | `BattleScenePresenter.SpawnBoss()` を呼びボスを出現させる（Way→Bossの橋渡し） |
-| `PlayBossBgm` | なし | ボス戦BGMの再生を開始する |
 | `HideCast` | キャラ名, フェード秒数 | 立ち絵をフェードアウト |
 | `ChangeCastAnimation` | キャラ名, 表情差分 | 表情差し替え |
+| `ShakeCastV` | | 演出として扱うが何もしない（コマンドとしても通知しない） |
 
-一覧に無い関数名（実データに存在する `ShakeCastV` など）は現状**未実装**で、黙って次のステップへ進む。全ステップ終了後は `RuntimeModel.AdvanceToNextSequence()` によりWay→Boss、あるいはBoss→次ステージへと状態が進む。
+それ以外の行（例: `SpawnBoss` / `PlayBossBgm`）は **コマンド** として `MessageBroker` の `ScenarioCommandMessage` で通知されるだけで、会話シーンは処理しない。処理はステージツリーの PlayScenario ノードが、同名の OnCommand の子で行う（[BehaviorTree.md](./BehaviorTree.md) 6.4）。
 
-> **注意**: `function`/`args` 形式は拡張性が高い一方、`ShakeCastV` のように未実装の関数がデータ上に残っていても実行時にエラーにならず黙って無視される。「シナリオにコマンドを書いたのに演出が反映されない」不具合に気づきにくいので、新規演出コマンドを追加する際はPresenter側の分岐漏れに注意する必要がある。
+> **注意**: 会話に書いたコマンドに対応する OnCommand が無いと、実行時に警告が出るだけで何も起きない。PlayScenario ノードの要約欄に過不足が ⚠ で表示されるので、BT エディタで確認すること。
 
----
-
-## 7. Test配下（テスト用データ）
-
-開発時の動作確認用に用意された最小構成のデータ。
-
-- `Test/TestSequence.asset`: `BattleSequenceAsset`（`situation: Way`）。1フェーズのみで `exitConditionConfig` は `AllEnemiesDefeatedExitConditionConfig`。`timelineBuilder` は `TestTimeline.asset` を参照。
-- `Test/TestTimeline.asset`: `BattleTimelineBuilderAsset`。`enemySpawnTracks` に1トラック・1エントリのみを持つ。
 
 ---
 
-## 8. BattleTimelineBuilderAsset とトラック定義（Way/Boss共通の中核）
+## 4. Test配下（テスト用データ）
 
-```csharp
-// Assets/Project/Scenes/Battle/Scripts/Model/BattleTimelineBuilderAsset.cs
-public class BattleTimelineBuilderAsset : ScriptableObject
-{
-    List<SignalTrackDefinition> signalTracks;
-    List<AnimationTrackDefinition> animationTracks;
-    List<ActivationTrackDefinition> activationTracks;
-    List<AudioTrackDefinition> audioTracks;
-    List<ControlTrackDefinition> controlTracks;
-    List<EnemySpawnTrackDefinition> enemySpawnTracks;
-    List<BulletClearTrackDefinition> bulletClearTracks;
+開発時の動作確認用のデータ。
 
-    AttackPreset bossAttackPreset;      // Boss用途のみ意味を持つ
-    MovementPreset bossMovementPreset;  // Boss用途のみ意味を持つ
-
-    public TimelineAsset BuildTimeline();  // 各トラック定義から実行時TimelineAssetを動的生成
-}
-```
-
-各トラック定義は共通基底 `TrackDefinitionBase<TTrack, TClipDefinition>`（`Definitions/TrackDefinitionBase.cs`）を継承し、`trackName` と `clips` を持つ。
-
-| トラック定義 | 生成されるTrack | クリップの主なフィールド | 説明 |
-|---|---|---|---|
-| `SignalTrackDefinition` | `SignalTrack` | `time`, `signal`(既存の`SignalAsset`) | 汎用シグナル発火 |
-| `AnimationTrackDefinition` | `AnimationTrack` | `start`, `duration`, `animationClip` | アニメーション再生 |
-| `ActivationTrackDefinition` | `ActivationTrack` | `start`, `duration` | GameObjectのActive切替 |
-| `AudioTrackDefinition` | `AudioTrack` | `start`, `duration`, `audioClip` | 音声再生 |
-| `ControlTrackDefinition` | `ControlTrack` | `start`, `duration`, `sourceObject` | Timeline Control Track（Prefab制御） |
-| `EnemySpawnTrackDefinition` | `SignalTrack` | `time`, `spawnPosition`, `prefab` | 敵の出現。ビルド時に`EnemySpawnSignal`を動的生成 |
-| `BulletClearTrackDefinition` | `SignalTrack` | `time` のみ | 画面上の弾を一掃するタイミング。ビルド時に`BulletClearSignal`を動的生成 |
-
-`BuildTimeline()` はこれらの定義から `HideFlags.DontSave` の使い捨て `TimelineAsset` を生成する。ScriptableObjectのアセットデータ自体は「設計図」であり、実際のバトル進行時にはこの設計図から都度Timelineが組み立てられる、という点が重要である。
-
-> **補足**: `EnemySpawnTrackDefinition` や `BulletClearTrackDefinition` が最終的に `SignalTrack` へ変換されているのは、Unity Timelineに「敵をスポーンさせるTrack」や「弾を消すTrack」が標準で存在しないため。汎用の `SignalTrack` + 動的生成した `SignalAsset`（`EnemySpawnSignal`/`BulletClearSignal`）で代用し、Presenter側で `SignalReceiver` として購読する設計になっていると考えられる。標準Trackで表現できない独自のゲームロジックをTimelineに載せる際の定番テクニックである。
+- BT エディタの動作確認用の `BehaviorTreeAsset`（`BT_EditorPreview` など）が置かれている。ゲーム本編からは参照されない。

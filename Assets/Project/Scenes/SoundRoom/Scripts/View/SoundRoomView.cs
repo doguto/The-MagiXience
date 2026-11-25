@@ -15,6 +15,10 @@ namespace Project.Scenes.SoundRoom.Scripts.View
         [SerializeField] List<TMP_Text> trackIndexTexts;
         [SerializeField] List<TMP_Text> trackTitleTexts;
 
+        [Header("BackGround")]
+        [Tooltip("タイトルと同じ背景画像を表示するSpriteRenderer")]
+        [SerializeField] SpriteRenderer backGroundRenderer;
+
         [Header("Card Image")]
         [Tooltip("ステージ番号ごとのカード画像。Element0=黒カード, 1〜6=各ステージ, 7=EX")]
         [SerializeField] List<Sprite> cardSpritesByStage;
@@ -36,14 +40,14 @@ namespace Project.Scenes.SoundRoom.Scripts.View
 
         public int TrackCount => trackButtons.Count;
 
-        public void Init(int trackCount)
+        public void Init(IReadOnlyList<bool> isUnlockedList, int initialFocusIndex)
         {
             scrollableButtonList.Init(ButtonListType.Vertical, isActive: true);
             // 何も再生していない間はポインタを出さない
             if (playingPointer != null) playingPointer.SetActive(false);
 
             // データより多いカードは非表示にし、表示するカードだけをスクロールの管理下に置く
-            var visibleCount = Mathf.Min(trackCount, trackButtons.Count);
+            var visibleCount = Mathf.Min(isUnlockedList.Count, trackButtons.Count);
             var visibleButtons = new List<MovableButton>(visibleCount);
             for (var i = 0; i < trackButtons.Count; i++)
             {
@@ -51,15 +55,24 @@ namespace Project.Scenes.SoundRoom.Scripts.View
                 trackButtons[i].gameObject.SetActive(i < visibleCount);
                 if (i >= visibleCount) continue;
 
-                // 未発見の曲もカーソルを合わせられるよう、ボタン自体は常に開放状態にする
-                trackButtons[i].Init(isOpened: true, isFocused: i == 0);
+                // 未発見の曲はinteractable=falseになり、ScrollableButtonListのフォーカス移動先から外れる
+                trackButtons[i].Init(isOpened: isUnlockedList[i], isFocused: i == initialFocusIndex);
                 trackButtons[i].OnFocusedEvent.Subscribe(_ => onTrackFocused.OnNext(index)).AddTo(this);
                 trackButtons[i].OnPressed.Subscribe(_ => onTrackPressed.OnNext(index)).AddTo(this);
                 visibleButtons.Add(trackButtons[i].GetComponent<MovableButton>());
             }
             scrollableButtonList.SetButtons(visibleButtons);
-            // ステージ選択と同様、端で上下を押したら反対側の端へ回り込む
-            scrollableButtonList.SetLoop(true);
+
+            // ステージ選択と同様、全曲発見後のみ端で上下を押したら反対側の端へ回り込む
+            var isAllUnlocked = true;
+            for (var i = 0; i < visibleCount; i++) isAllUnlocked &= isUnlockedList[i];
+            scrollableButtonList.SetLoop(isAllUnlocked);
+        }
+
+        public void SetBackGround(Sprite sprite)
+        {
+            if (backGroundRenderer == null) return;
+            backGroundRenderer.sprite = sprite;
         }
 
         public void SetTrack(int index, string indexText, string title, int cardStageNumber)

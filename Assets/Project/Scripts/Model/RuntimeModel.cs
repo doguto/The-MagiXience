@@ -1,7 +1,8 @@
-﻿using Project.Scripts.Extensions;
+using Project.Scripts.Extensions;
 
 namespace Project.Scripts.Model
 {
+    // ステージツリーの Section に付ける種類。BGM や背景など、シーン側の扱いを分けるのに使う
     public enum BattleSituation
     {
         Way,
@@ -12,37 +13,14 @@ namespace Project.Scripts.Model
     {
         public BattleStageType CurrentStageType { get; set; } = BattleStageType.Null;
         public bool IsInGame => CurrentStageType != BattleStageType.Null;
-        public BattleSituation CurrentSituation { get; set; } = BattleSituation.Way;
 
-        public int GetScenarioNumber()
-        {
-            return (CurrentStageType.AsInt() - 1) * 2 + (CurrentSituation == BattleSituation.Boss ? 2 : 1);
-        }
-
-        public void SetSituation(BattleSituation situation)
-        {
-            CurrentSituation = situation;
-        }
-
-        public void AdvanceToNextSequence()
-        {
-            if (CurrentSituation == BattleSituation.Way)
-            {
-                CurrentSituation = BattleSituation.Boss;
-                UnityEngine.Debug.Log($"[RuntimeModel] Stage {CurrentStageType.AsInt()}: Way → Boss");
-            }
-            else
-            {
-                CurrentStageType = CurrentStageType.Next();
-                CurrentSituation = BattleSituation.Way;
-                UnityEngine.Debug.Log($"[RuntimeModel] Stage advanced: {CurrentStageType.AsInt() - 1} → {CurrentStageType.AsInt()}");
-            }
-        }
+        // リトライで戻る Section の番号 (ステージツリーの Stage ノード直下の並び順)
+        public int CheckpointSection { get; set; }
 
         public void ExitStage()
         {
             CurrentStageType = BattleStageType.Null;
-            CurrentSituation = BattleSituation.Way;
+            CheckpointSection = 0;
             ExitRush();
         }
 
@@ -60,7 +38,7 @@ namespace Project.Scripts.Model
             RushCarryHp = 0;
             RushContinueCount = 0;
             CurrentStageType = firstStage;
-            CurrentSituation = BattleSituation.Way;
+            CheckpointSection = 0;
         }
 
         // ステージクリア時に、次のステージへ引き継ぐ状態を保存する
@@ -78,16 +56,16 @@ namespace Project.Scripts.Model
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        /// <summary>
-        /// デバッグ起動時の開始フェーズ。シーケンス内の全グループを通した連番で、0 が先頭。
-        /// </summary>
-        public int DebugStartPhaseIndex { get; private set; }
+        // ボス戦をこのフェーズ・HP (%) から始める。空 / 100 なら指定なし
+        public string DebugBossStartPhase { get; private set; }
+        public float DebugBossStartHpPercent { get; private set; } = 100f;
 
-        public void SetForDebug(int stageNumber, BattleSituation situation, int startPhaseIndex = 0)
+        public void SetForDebug(int stageNumber, int startSection, string bossStartPhase, float bossStartHpPercent)
         {
             CurrentStageType = BattleStageTypeExtensions.FromInt(stageNumber);
-            CurrentSituation = situation;
-            DebugStartPhaseIndex = startPhaseIndex;
+            CheckpointSection = startSection;
+            DebugBossStartPhase = bossStartPhase;
+            DebugBossStartHpPercent = bossStartHpPercent;
         }
 #endif
     }

@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
+  m_Name: S4_UshitoraFirst4Way_4_Ushitora
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540152000000000000
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147884263998374
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 180
+        maxDownAngle: 180
+    - rid: 8540147884263998375
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975559
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: d6ab390dda1742d88627a73d8f896036
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: 384d823f2f52ac949a6a24a73b3e9d7b, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 11400000, guid: 85b2d1f8660fb834c9029e399fec3e82, type: 2}
+          motionPresetParam: 
+          motion: []
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147884263998374
+        rotation:
+          rid: 8540147884263998375
+        muzzleOffset: {x: -0.25, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 4
+            param: 
+          spreadAngle:
+            value: 45
+            param: 
+          radius: 0.3
+          startDelayFrames: 0
+          rotationOffset: 0
+    - rid: 8540152000000000000
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 65291eb15085444f880fa5d747436403
+        graphPosition: {x: 0, y: 300}
+        comment: 
+        child:
+          rid: 8540147961671975559
+        count:
+          value: 3
+          param: 
+        interval:
+          value: 30
+          param: 
+        indexParam: 

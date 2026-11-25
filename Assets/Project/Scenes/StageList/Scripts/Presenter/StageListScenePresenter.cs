@@ -86,7 +86,7 @@ namespace Project.Scenes.StageList.Scripts.Presenter
 
             var runtimeModel = RuntimeModelRepository.Get();
             runtimeModel.CurrentStageType = stageModels[buttonIndex].BattleStageType;
-            runtimeModel.CurrentSituation = BattleSituation.Way;
+            runtimeModel.CheckpointSection = 0;
 
             stageListModelRepository.Refresh();
             await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.Battle, SceneRouterModel.StageList);

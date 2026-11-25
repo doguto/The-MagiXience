@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1086a0e0fb4aa04cac20f88c0314481, type: 3}
+  m_Name: S3_3_Phase2
+  m_EditorClassIdentifier: 
+  root:
+    rid: 8540147961671974934
+  detachedNodes: []
+  parameters: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8540147961671974934
+      type: {class: Repeat, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 6a8388f6080941d4ae4ae3367322e61a
+        graphPosition: {x: 230, y: 300}
+        comment: 
+        child:
+          rid: 8540147961671975584
+        count:
+          value: 4
+          param: 
+        interval:
+          value: 150
+          param: 
+        indexParam: 
+    - rid: 8540147961671974938
+      type: {class: AimDirection, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        maxUpAngle: 60
+        maxDownAngle: 60
+    - rid: 8540147961671974939
+      type: {class: FixedRotation, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        degrees: 0
+    - rid: 8540147961671975584
+      type: {class: NWayShot, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 48e0cbb9b9284cec9746797a00d3af50
+        graphPosition: {x: 230, y: 450}
+        comment: 
+        bullet:
+          preset: {fileID: 11400000, guid: 7672bd22ece9ab441ab9a5c3578f7b66, type: 2}
+          prefab: {fileID: 0}
+          prefabParam: 
+          damage: 10
+          motionPreset: {fileID: 0}
+          motionPresetParam: 
+          motion:
+          - rid: 8540150000000000038
+          range: 0
+          lifetime: 0
+          affectedByForce: 1
+          behavior: {fileID: 0}
+          overrides: []
+          group: 
+        direction:
+          rid: 8540147961671974938
+        rotation:
+          rid: 8540147961671974939
+        muzzleOffset: {x: -0.5, y: 0}
+        se: 0
+        pattern:
+          wayCount:
+            value: 1
+            param: 
+          spreadAngle:
+            value: 30
+            param: 
+          radius: 0.5
+          startDelayFrames: 0
+          rotationOffset: 0
+    - rid: 8540150000000000038
+      type: {class: VelocityMotion, ns: Project.Scenes.Battle.Scripts.Runtime.Motion, asm: Presenter}
+      data:
+        velocity: {x: -2.4, y: 0, z: 0}
+        duration: 0

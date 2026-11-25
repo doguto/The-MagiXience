@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8877745320614750256}
   - component: {fileID: 366756060701291069}
   m_Layer: 10
-  m_Name: BossIntro
+  m_Name: 1_BossIntro
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -77,7 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -2124711813
-  m_SortingLayer: -1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: -6384201543870444121, guid: 92d67200565a27c42bc31ef91e292caf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -161,20 +161,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfd5daf7fba3164387b3052b7eeb571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSteps:
-  - rid: 8577112795563163733
   view: {fileID: 8877745320614750256}
   spriteRenderer: {fileID: 1851957906713825068}
-  lifetime: 10
-  references:
-    version: 2
-    RefIds:
-    - rid: 8577112795563163733
-      type: {class: ReflectMovementConfig, ns: Project.Scenes.Battle.Scripts.Model.Movement, asm: Model}
-      data:
-        speed: 2
-        maxReflections: 1
-        reflectTop: 1
-        reflectBottom: 1
-        reflectLeft: 0
-        reflectRight: 0
+  forceInfluence: 1

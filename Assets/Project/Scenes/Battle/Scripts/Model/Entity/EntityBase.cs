@@ -1,7 +1,6 @@
 using System;
 using UniRx;
 using UnityEngine;
-using Project.Scenes.Battle.Scripts.Model.Attack;
 
 namespace Project.Scenes.Battle.Scripts.Model.Entity
 {
@@ -13,7 +12,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
 
         public IObservable<Unit> OnDeath => onDeath;
 
-        IAttackStrategy attackStrategy;
 
         protected EntityBase(int maxHp)
         {
@@ -58,20 +56,6 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
                 OnDeathCore();
             }
         }
-
-        public void SetAttackStrategy(IAttackStrategy strategy)
-        {
-            attackStrategy = strategy;
-            attackStrategy?.Initialize();
-        }
-
-        public void UpdateAttack(float deltaTime)
-        {
-            if (attackStrategy == null || !IsAlive) return;
-            attackStrategy.Update(deltaTime);
-        }
-
-        public IAttackStrategy AttackStrategy => attackStrategy;
 
         protected void ResetHp()
         {

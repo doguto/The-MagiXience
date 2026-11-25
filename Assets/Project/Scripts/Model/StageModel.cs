@@ -21,8 +21,7 @@ namespace Project.Scripts.Model
 
         public int StageNumber => StageData.stageNumber;
         public BattleStageType BattleStageType => BattleStageTypeExtensions.FromInt(StageData.stageNumber);
-        public string WaySequenceAddress => StageData.waySequenceAddress;
-        public string BossSequenceAddress => StageData.bossSequenceAddress;
+        public string StageAddress => StageData.stageAddress;
         public string BackgroundAddress => StageData.backgroundAddress;
 
         public Sprite CharaImage { get; }
@@ -47,6 +46,9 @@ namespace Project.Scripts.Model
 
         public void Open()
         {
+            // 未解放扱いにしているステージは、前のステージをクリアしても開放しない
+            if (UserModel.IsStageConcealed(StageData.stageNumber)) return;
+
             IsOpened = true;
         }
 

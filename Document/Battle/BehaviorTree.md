@@ -1,0 +1,601 @@
+# Battle BehaviorTree 構造解説
+
+このドキュメントは、バトルシーンの進行（道中・ボス戦・敵と弾の行動）を駆動する BehaviorTree（以下 BT）方式の構造を解説する。
+汎用ノードは [BehaviorTree-Nodes.md](./BehaviorTree-Nodes.md)、バトル固有のノード・部品・`MotionStep` はソースの Tooltip / `Summary` を参照すること。
+
+本ドキュメントはソースコードを正として書いている。食い違いがあればソースコードを優先すること。
+
+## 1. 全体像
+
+```text
+StageData.asset
+ └─ stageAddress ──► Stage{N}_BT.asset (BattleStageAsset。1 ステージ = 1 アセット)
+                      ├─ services[]  (StageServiceDefinition: 例 WindServiceDefinition)
+                      └─ tree        ──► Stage{N}_Tree.asset (ステージツリー。ルートは Stage ノード)
+                                          ├─ Section "Way"  … 道中
+                                          └─ Section "Boss" … 会話 → ボス戦 → 撃破後の会話
+                                               ├─ PlayScenario ──► ScenarioData (会話)
+                                               └─ SpawnBoss / BossBattle ──► Stage{N}_Boss.asset (BossDefinition)
+                                                                              └─ tree ──► Stage{N}Boss_Tree.asset (ボス自身が実行)
+
+BattleScenePresenter (IScenarioService を実装)
+ └─ BattleFlow (IBossHost を実装)
+     ├─ BattleClock (MonoBehaviour)  … Update で固定 60fps のステップを刻む
+     └─ BattleWorld                  … フレーム番号・乱数・予約実行・サービスを保持
+         ├─ tickables
+         │   ├─ RunnerTickable(BehaviorTreeRunner)   … ステージツリー
+         │   ├─ EnemyAgent (敵/ボスの GameObject)   … 自分のツリー (移動も MoveSelf / Move ノードで行う)、消えるかの判定
+         │   └─ MotionTickable                       … ボス登場移動
+         ├─ Trees (TreePool)  … 弾のツリーや消えるときのツリーの複製を使い回す
+         ├─ BattleServices
+         │   ├─ BulletSystem   … 敵弾・自機弾 (BulletAgent) のツリー実行・移動・消えるかの判定
+         │   ├─ EnemySpawner   … 敵・ビーム・障害物 Prefab の生成 (プール対象の敵は EnemyPool から出す)
+         │   ├─ BossHost (= BattleFlow) / Scenario (= BattleScenePresenter) / Progress (StageProgress)
+         │   ├─ BulletClearReceiver / Boss / PlaySe / PlayBgm / BgmSource / Player / Background
+         │   └─ OnPhaseStarted / PhaseProgress (Phase ノードが通知)
+         └─ StageContext  … BattleStageAsset.services から生成した IStageService 群
+```
+
+BT の適用範囲は次の 3 層である。
+
+- **ステージ層**: `BattleStageAsset.tree`（`StageTreeAsset`）。Section の並び、敵の出現、会話、ボスの出現と戦闘、BGM を表す。`ctx.Self` は `null`。
+- **敵層**: 敵・ボスの GameObject に付く `EnemyAgent` が持つツリー（`EnemyTreeAsset`）。移動・攻撃・HP による分岐を表す。`ctx.Self` はその `EnemyAgent`。
+- **弾層**: 弾 1 発ごとの `BulletAgent` が持つツリー（`BulletTreeAsset`）。`BulletSystem.Tick` の中で毎フレーム実行する。`ctx.Self` はその `BulletAgent`。`BulletConfig.behavior` が未指定の弾は、MoveSelf だけのツリー（撃った側から渡された移動を実行する）で動く。
+
+敵と弾はどちらも `IAgent`（`Runtime/IAgent.cs`）を実装し、ツリーの `Self` になる（3.5）。
+
+## 2. ディレクトリ構成
+
+| パス | 内容 |
+|---|---|
+| `Assets/Project/Scenes/Battle/Scripts/BehaviorTree/Core/` | ノードの基底、`BehaviorTreeAsset` とツリーの種類、パラメータ、`BehaviorTreeRunner`、`BattleStageAsset` |
+| `.../BehaviorTree/Composite/` | 子を複数持つノード |
+| `.../BehaviorTree/Decorator/` | 子を 1 つ持つノード |
+| `.../BehaviorTree/Condition/` | 条件（`Condition` の派生） |
+| `.../BehaviorTree/Action/` | 子を持たないノード |
+| `.../BehaviorTree/Parts/` | ノードではない部品（撃ち方・方向・弾の設定・出現の並びなど）と `BossDefinition` |
+| `Assets/Project/Scenes/Battle/Scripts/Runtime/` | ツリーの実行基盤（`BattleWorld` / `BattleClock` / `BattleFlow`、敵と弾の `IAgent`、出現・プール、消えるとき、合図） |
+| `.../Runtime/Stage/` | ステージサービスと外力の受け口 |
+| `.../Runtime/Motion/` | `MotionStep` と各ステップ、実行器、`MotionPreset` / `EaseCurveAsset` |
+| `Assets/Project/Scenes/Battle/Editor/BehaviorTree/` | GraphView ベースの BT エディタ |
+| `Assets/Project/DataStore/Stage{N}/BT/` | 各ステージの BT データ（[DataStore.md](./DataStore.md) 参照） |
+
+`BehaviorTree/` と `Runtime/` は `Project.Scenes.Battle.Presenter.asmref` により Presenter アセンブリに含まれる。
+
+## 3. データモデル
+
+### 3.1 ノード 1 種類 = 1 クラス
+
+```text
+アセット上の Node (雛形)  ──NodeCloner.Clone──►  実行用の Node (複製)  ──Setup(scope)──►  Tick
+```
+
+- ノードは種類ごとに 1 クラス（`Wait`、`Sequence`、`NWayShot` など）で、設定・実行中の状態・処理を 1 つに持つ。基底は `Core/Node.cs` の `Node`。
+  - 設定は `[SerializeField]` / `[SerializeReference]` でアセットに保存する。`guid`（エディタ・デバッグ用）、`graphPosition`、`comment` は基底が持つ。
+  - 実行中の状態（経過フレーム、現在の子の番号など）は `[NonSerialized]` のフィールドに持つ。アセットには保存されない。
+- アセット上のノードは雛形で、直接は実行しない。`BehaviorTreeAsset.Instantiate()` が `NodeCloner.Clone` で複製し、`Setup(scope)` でパラメータを解決してから実行する。そのため、同じ `BehaviorTreeAsset` を複数の敵が同時に使っても状態は共有されない。
+- `NodeCloner`（`Core/TreeScope.cs`）が複製するのはノード・条件と、それを中に持つ入れ物（`WaveEntry` など）だけ。方向・回転・弾の設定・移動・撃ち方（`ShotPattern`）などの読むだけのデータは雛形と共有する。こうしたデータのクラスに、実行中に書き換わる状態を持たせてはいけない。
+- 複製はリフレクションを使って重いため、弾のツリーと消えるときのツリーは `BattleWorld.Trees`（`Runtime/TreePool.cs`）で使い回す。キーは (アセット, 上書きパラメータ) の組で、返却時に `Abort` と `Recycle` を呼んでから積み直す。
+
+ノードの基底は 3 種類ある。
+
+| 基底 | 子 | 例 |
+|---|---|---|
+| `CompositeNode` | 複数 (`children`、左から右の順。`Setup` で空の要素を除く) | Sequence, Selector, Parallel, RandomSelect |
+| `DecoratorNode` | 1 つ (`child`、未接続なら即 Success する `EmptyNode` を入れる) | Loop, Repeat, Until, Delay, WithWind |
+| `ActionNode` | なし | Wait, NWayShot などの発射, Spawn, SubTree |
+
+条件は別系統の `Condition`（`Condition/Condition.cs`）で、`Reset` / `Evaluate` を持つ。ノードと同じく実行するツリーごとに複製され、状態（経過フレームの起点など）を `[NonSerialized]` に持つ。Until / CheckCondition / WaitUntil の `condition`、Wave の `until` に `[SerializeReference, SubclassSelector]` で入れ、持ち主のノードが `OnSetup` で条件の `Setup` を呼ぶ。
+
+新しいノードの書き方:
+- 基底のどれかを継承し、`OnTick` を実装する。必要なら `OnEnter`（開始時の初期化）/ `OnExit`（完了・中断どちらでも呼ばれる後始末）/ `OnAbort`（中断時だけ）を上書きする。
+- パラメータの解決など、実行のたびに変わらない準備は `OnSetup(scope)` で行い、結果を `[NonSerialized]` のフィールドに入れる。
+- 実行中の状態は必ず `OnEnter` で初期化する（TreePool で使い回されたツリーは前の弾の状態を持ったまま再び `Tick` されるため）。実行をまたいで持ち続ける状態（RandomSelect の前回の抽選結果など）は `OnRecycle` で戻す。
+- `[Serializable, NodeInfo("説明", "分類")]` を付けると BT エディタのパレットに出る。
+- `Self` が敵であることを必要とするノードは `EnemyActionNode` を継承し、`OnTick(ctx, enemy)` を実装する。敵のツリーにだけ置けるようになる（3.2）。属性やフラグではなく基底クラスで表す。
+
+### 3.2 BehaviorTreeAsset
+
+`Core/BehaviorTreeAsset.cs`。抽象クラスで、実際のアセットは使い道ごとの 4 種類のどれかで作る。
+
+| 種類 | Create メニュー | 使う場所 | 置けるノード | SubTree で使えるツリー |
+|---|---|---|---|---|
+| `StageTreeAsset` | `Battle > Behavior Tree > Stage` | `BattleStageAsset.tree` | `EnemyActionNode` 以外 | Common と Stage |
+| `EnemyTreeAsset` | `Battle > Behavior Tree > Enemy` | `Spawn.behavior` / `BossDefinition.tree` / `BossBattle.tree` | すべて | Common と Enemy |
+| `BulletTreeAsset` | `Battle > Behavior Tree > Bullet` | `BulletConfig.behavior` | `EnemyActionNode` 以外 | Common と Bullet |
+| `CommonTreeAsset` | `Battle > Behavior Tree > Common` | どの種類からも SubTree で使う（`BT/Attack/` の攻撃、撃破時のツリーなど） | `EnemyActionNode` 以外 | Common だけ |
+
+- `EnemyActionNode` を継承するノード（SetInvincible / BossWindCue）は敵のツリーにだけ置ける。判定は `Accepts(nodeType)`、SubTree の可否は `CanUse(subTree)`。
+- BT エディタのパレット・検索ウィンドウ・ドラッグ & ドロップ・貼り付けはこの判定で絞り込む。エディタのタイトルにはツリーの種類を出す。
+- 消えるときのツリー（`SetDespawnBehavior.tree`）は種類を問わない。敵・弾どちらの消えるときにも使うものは Common で作る。
+
+| フィールド | 説明 |
+|---|---|
+| `root` | ルートノード定義 (`[SerializeReference]`) |
+| `detachedNodes` | エディタ上で親に未接続のノード。実行時は使わない |
+| `parameters` | `List<TreeParameter>`。ツリーが公開するパラメータ（後述） |
+
+`Instantiate(parentScope, overrides)` は実行用の複製を作り、パラメータを解決して返す。アセット上のノードは書き換えない。`root` が `null` の場合は即 Success する `EmptyNode` を返す。
+
+### 3.3 BattleStageAsset
+
+`Core/BattleStageAsset.cs`（`Create > Battle > Battle Stage`）。1 ステージ（道中・会話・ボス戦）全体を 1 つで表す。
+
+| フィールド | 説明 |
+|---|---|
+| `services` | `List<StageServiceDefinition>` (`[SerializeReference]`)。このステージでだけ有効な機能（風など） |
+| `tree` | ステージツリー。ルートは Stage ノードにする。Success で完了するとステージクリア |
+
+### 3.4 BossDefinition
+
+`Battle/BossDefinition.cs`（`Create > Battle > Boss Definition`）。ボス 1 体を出すのに必要なものをまとめ、SpawnBoss / BossBattle ノードから参照する。
+
+| フィールド | 説明 |
+|---|---|
+| `prefab` | `BossEntityPresenter` を持つ Prefab |
+| `spawnPosition` | 生成位置 |
+| `entrance` | 登場の移動 (`List<MotionStep>`)。戦闘開始時に終わっていなければ終点まで進める |
+| `tree` | ボス自身が実行するツリー。BossBattle で別のツリーを指定しなければこれを使う |
+
+### 3.5 BattleContext
+
+`Core/BattleContext.cs`。ツリー 1 本分の実行文脈で、ノードの `Tick(ctx)` に渡される。
+
+- `World`: 全ツリーで共有する `BattleWorld`
+- `Self`: このツリーを持つ `IAgent`（`EnemyAgent` または `BulletAgent`。ステージ直下なら `null`）
+- `Frame` / `Random` / `BgmTime` / `Services` / `Stage` は `World` の値の委譲
+
+`IAgent`（`Runtime/IAgent.cs`）の主なメンバ:
+
+| メンバ | 内容 |
+|---|---|
+| `World` / `Body` | 所属する `BattleWorld` と、移動させる対象 (`IMotionBody`) |
+| `Motion` | 出現させた側から渡された移動。MoveSelf が実行する。敵は `Spawn.motionPreset` / `motion`、弾は `BulletConfig` の移動 |
+| `Direction` | 発射方向。敵はゼロ |
+| `AttackTime` | 発射時刻で変わる移動（頂点の揺らぎなど）に渡す時刻。敵は動き出してからの秒数、弾は撃った時点の撃ち手の時刻（子弾はそれを引き継ぐ） |
+| `IsAlive` | 生存中か。消える印が付いた時点で false |
+| `Serial` / `Owner` / `OwnerSerial` | 出すたびに変わる番号と、自分を出した敵・弾（ステージが出したなら `null`）。合図の宛先 `Spawned` の判定に使う |
+| `Group` / `Signals` | 合図のグループ名と、届いた合図（4.7） |
+| `Despawn()` / `SetDespawnBehavior(tree, reasons)` | 自分を消す / 消えるときのツリーを設定する（4.6） |
+- `SecondsToFrames(seconds)`: 秒をフレームへ四捨五入で変換
+
+BT には Blackboard が無い。値の共通化はツリーパラメータで行う。実行中に値を受け渡すのは、Repeat / Cycle / Loop の `indexParam` と Calc の `resultParam` がツリーパラメータへ書き込む場合だけ（5.2）。
+
+## 4. 実行時の流れ
+
+### 4.1 フレームの刻み方
+
+`Runtime/BattleClock.cs` は `Update` で `Time.deltaTime` を蓄積し、`BattleWorld.DeltaTime`（1/60 秒）ごとに `BattleWorld.Step()` を呼ぶ。
+
+- 1 描画フレームあたり最大 4 ステップまで追いつく。超えた分は切り捨てる（処理落ち時はスロー扱い）。
+- `Time.timeScale = 0`（ポーズ）の間は `deltaTime` が 0 なので止まる。
+
+### 4.2 BattleWorld.Step の順序
+
+`Runtime/BattleWorld.cs`:
+
+```text
+Step()
+ 1. DeliverSignals()    … 前フレーム中に送られた合図を宛先の敵・弾へ届ける (4.7)
+ 2. RunScheduled()      … Schedule() で予約された処理のうち、このフレームが期限のものを (期限, 登録順) で実行
+ 3. FlushPending()      … 前フレーム中に Register() されたもの (新しく出現した敵など) を tickables へ追加
+ 4. tickables を順に BattleTick()
+      - RunnerTickable  → BehaviorTreeRunner.Tick() (ルートを 1 回 Tick)
+      - EnemyAgent      → 自分のツリーを Tick し、寿命・画面外を判定
+      - MotionTickable  → ボス登場移動
+    完了したもの (IsFinished) を取り除く
+ 5. Services.Bullets.Tick(dt) … 全弾のツリー・外力 (風)・位置の反映・消えるかの判定・消えるときのツリー
+                                 (このとき出た弾も同じフレームのうちに処理する。連鎖は 8 周までで、超えたら警告して次のフレームへ回す)
+ 6. CompleteEnemyDespawns()   … このフレームに消える印が付いた敵の、消えるときのツリーと EnemyDespawn
+ 7. Services.Bullets.Flush(dt) … 手順 6 で出た弾 (敵が消えるときのツリーが撃った弾など) を、出たフレームのうちに 1 回動かす
+ 8. Stage.Tick(dt)            … ステージサービス (WindService など) の時間を進める
+ 9. AdvanceFrame()            … Frame++
+```
+
+注意点:
+
+- `Register()` で追加したものは次のフレームの `Step` から動く。ツリーの途中で出現させた敵のツリーは、出現の翌フレームから実行される。
+- `Schedule(delayFrames, action, owner)` は `delayFrames <= 0` なら即実行する。`owner`（`IAgent`）を渡すと、その敵・弾が消えた時点で予約が取り消される（期限到来時にも生存を確認する）。
+- 弾は出現したフレームのうちに手順 5（手順 6 で出た弾は手順 7）で 1 回処理される（`StartDelayFrames` が 0 なら 1 フレーム分動く）。
+
+### 4.3 ノードのライフサイクル
+
+`Core/Node.cs` の `Node` 基底は `Tick` / `Abort` だけを公開し、`OnEnter` / `OnTick` / `OnAbort` / `OnExit` の呼び出し順を保証する。
+
+```text
+Tick(ctx):
+  非アクティブなら IsActive = true; OnEnter(ctx)
+  status = OnTick(ctx)
+  status != Running なら IsActive = false; OnExit(ctx)
+  return status
+
+Abort(ctx):
+  アクティブでなければ何もしない
+  IsActive = false; OnAbort(ctx); OnExit(ctx)
+```
+
+- `Tick` は 1 フレームに 1 回が原則。ただし Sequence / Loop など一部の複合ノードは、子が完了したフレームのうちに次の子を開始する。
+- 完了したノードを再び `Tick` すると `OnEnter` からやり直しになる。Loop や Until(Restart) の繰り返しはこの性質を使っている。
+- 親が子を中断するときは `Abort` を呼ぶ。`OnExit` は完了・中断のどちらでも必ず呼ばれるため、「子の実行中だけ有効」な処理（WithWind、WithPrefab、Move の停止）は `OnExit` で後始末する。
+- `NodeStatus` は `Running` / `Success` / `Failure` の 3 値。
+
+`BehaviorTreeRunner`（`Core/BehaviorTreeRunner.cs`）はルートを毎フレーム `Tick` し、ルートが `Running` 以外を返したら `Result` を確定させて `Finished` を通知し、以後は何もしない。ノード内で例外が出た場合は `Debug.LogException` の上で `Failure` 扱いにする。`Stop()` はルートを `Abort` する。
+
+### 4.4 敵 (EnemyAgent)
+
+`Runtime/EnemyAgent.cs` は敵/ボスの GameObject に付けるコンポーネントで、`IAgent` を実装する。
+
+- 付与: `EnemyAgent.Attach(gameObject, world, tree, overrides, motion, owner, group)`。`EnemySpawner`（Spawn ノード経由）と `BattleFlow.StartBattle`（BossBattle ノード経由）が呼ぶ。`EnemySpawner` は `EnemyEntityPresenter` を持つ Prefab には、ツリーが無くても必ず付ける（消えるかの判定をするため）。付与時に static な `EnemyAgent.OnAttached` (IObservable) に流れる（`BossPhaseProgressGauge` が購読に使う）。
+- `Model`: 同じ GameObject の `BossEntityPresenter` または `EnemyEntityPresenter` の Model。HP 系条件はこれを見る。
+- `Motion`: Spawn ノードの `motionPreset` / `motion`。ツリーの MoveSelf が実行する。
+- `AttackTime`: 付与されてからの経過秒数（`(Frame - StartFrame) / 60`）。発射時刻で変わる移動（頂点の揺らぎなど）に渡す。
+- 消えるかの判定（雑魚のみ。ボスは撃破だけ）:
+  - 撃破: `Model.OnDeath` で `Defeated`
+  - 寿命: `EnemyEntityPresenter.LifetimeSeconds` をフレームに直した値に達したら `Expired`
+  - 画面外: 一度画面に入ってから外へ出たら `OutOfScreen`（画面外から出てくる敵がいるため）
+  - Despawn ノード: `Despawned`
+- 判定は印を付けるだけで、消えるときのツリーと `EnemyDespawn.Despawn` は `BattleWorld.Step` の手順 6 でまとめて行う（撃破は物理演算の中、つまり Step の外で起きるため）。そのため撃破時の行動は撃破の次の Step で実行される。
+- ボスの `Defeated` は消えるときのツリーを実行するだけで、ボス自身の片付けは `BossEntityPresenter` の撃破演出が行う。
+- ツリーが先に完了しても、消えるまでは tickables に残って判定を続ける。消えた後・Destroy・プールへの返却後は `IsAlive` が false になり、ツリーを停止し tickables から外れる。
+
+敵の移動と攻撃はすべて `EnemyAgent` のツリーが行う。`EnemyEntityPresenter` が持つのは HP・被弾点滅・効かない攻撃の SE・寿命と画面外マージンの設定値・接触だけで、自分では消えない（撃破時は当たり判定を切るだけ）。Spawn で `behavior` を指定しない敵はその場から動かない。
+
+### 4.5 敵のプールと事前生成
+
+Spawn ノードで出す敵は `EnemyPool`（`Runtime/EnemyPool.cs`）で Prefab ごとに使い回す。
+
+- `EnemyPool` は `BattleFlow` が初回に Battle シーンへ `"EnemyPool"` オブジェクトとして作り、リトライをまたいで使い回す（シーンと一緒に破棄される）。
+- プール対象は、`EnemyEntityPresenter` を持ち、`BossEntityPresenter` / `TwinParabolaMidBossController` / `DamageRelayToBoss` / `StaffNotationPresenter` を持たず、`NoEnemyPool` が付いていない Prefab（`EnemyPool.IsPoolable`）。任意の敵をプールから外したいときは Prefab に `NoEnemyPool` を付ける。
+- `EnemySpawner` はプール対象なら `EnemyPool.Get`、それ以外は `Instantiate` で出す。
+- 敵を消すときは必ず `EnemyDespawn.Despawn` を通す。プール品はフレームの最後（`LateUpdate`）にプールへ戻し、それ以外は `Destroy` する。`EnemyAgent` の判定（撃破・画面外・寿命・Despawn ノード）と `BulletClearReceiver.ClearAllEnemies` がすべてこれを通る（`ClearAllEnemies` は消えるときのツリーを実行しない）。
+- 出し入れ時の状態の戻しは `IPoolableEnemy`（`OnTakenFromPool` / `OnReturnedToPool`）で行う。`EnemyEntityPresenter` は再初期化と後片付け（返却時に `OnRemoved` を通知）、`EnemyAgent` はツリー・予約・消えるときの行動を片付け、次に `Attach` されるまで生存扱いを外す。`OnTakenFromPool` は 2 回目以降に出したときだけ呼ばれる（初回は `Awake` で初期化される）。
+- 同じ敵が付け直されることがあるため、`BattleWorld.Register` は登録済みのものを重複登録しない。`EnemyTracker` は破棄通知ではなく `EnemyEntityPresenter.OnRemoved` で生存数を減らす。
+
+`BattleFlow.StartStage` は、ツリー開始前に `StagePrefabCollector.Collect(stage)` でステージが参照する弾 Prefab と出現物 Prefab を集め、事前生成する。
+
+- 弾: 1 種類あたり 30 発（`BulletPool.Prewarm`）
+- プール対象の敵: 1 種類あたり 4 体（`EnemyPool.Prewarm`）。非アクティブの親の下に作るので、出すまで `Awake` は走らない
+
+`StagePrefabCollector` は `BattleStageAsset` からシリアライズされるフィールドをリフレクションで総当たりにたどる（ScriptableObject はたどるが、Prefab の中身はたどらない）。足りない分は実行中にプールが増やす。
+
+### 4.6 消えるとき (DespawnReason / SetDespawnBehavior)
+
+敵と弾は、消えた理由（`Runtime/DespawnReason.cs`、Flags）を持って消える。
+
+| 理由 | 敵 | 弾 |
+|---|---|---|
+| `Defeated` | HP が 0 になった | 何かに当たって消えた |
+| `Expired` | 寿命が尽きた | 寿命 (`BulletConfig.lifetime`) または飛距離 (`range`) が尽きた |
+| `OutOfScreen` | 一度画面に入ってから外へ出た | 画面外へ出た |
+| `Despawned` | Despawn ノード | Despawn ノード（MoveSelf の移動が開始できない場合も） |
+| `Cleared` | — | 一括消去・リトライ・バトル終了（`BulletSystem.Clear`） |
+
+- `SetDespawnBehavior`（どの種類のツリーにも置ける）で、消えるときに 1 回だけ実行するツリーと、実行する理由（既定は `Defeated`）を設定する。`Cleared` は普通は含めない（一括消去で子弾や子敵が出ないように）。
+- 消えるときのツリーは `TreePool` から取り出して **1 回だけ Tick して返す**（`Runtime/DespawnBehavior.cs`）。そのため意味を持つのは、その 1 フレームで完了する処理（発射、Spawn など）に限られる。`Self` は消えていく敵・弾自身で、発射位置もそこになる。
+- 消えるときのツリーから撃った弾は、撃ち手が既に生存扱いでないため予約の取り消し対象にならない。
+
+### 4.7 合図 (SendSignal / Signaled)
+
+敵・弾のツリー同士は「合図」で連絡できる。会話から届くコマンド（OnCommand、6.4）とは別の仕組み。
+
+- 送る: `SendSignal(key, target, group)` アクション。`BattleWorld.SendSignal` に積まれ、送り手によらず **次のフレームの頭**（Step の手順 1）に宛先へ届く。ツリーを処理する順番で結果が変わらないようにするため。
+- 受け取る: `Signaled(key)` 条件。Until / If / WaitUntil などに入れて使う。
+- 各敵・弾の `SignalInbox` はそのフレームに届いた合図だけを持つ。届いたフレームに判定されなかった合図は捨てられる。
+
+| `target` | 宛先 |
+|---|---|
+| `Spawned` | 送り手が出した敵・弾と、それらがさらに出したもの。`Owner` / `OwnerSerial` をたどって判定し、`Serial` でプールの使い回しによる取り違えを防ぐ。ステージツリー（`Self == null`）から送るとすべての敵・弾に届く |
+| `Group` | 同じグループ名の敵・弾。グループ名は `BulletConfig.group` / `Spawn.group` で付ける |
+| `All` | 場にいるすべての敵・弾（送り手を除く） |
+
+## 5. パラメータと SubTree
+
+### 5.1 値フィールド (BtInt など)
+
+`Core/TreeParameter.cs` の `BtInt` / `BtFloat` / `BtBool` / `BtVector2` / `BtObject<T>` は「固定値 `value`」と「パラメータ名 `param`」の組である。
+
+- `param` が空なら `value` を使う。
+- `param` があれば `Setup` 時に `TreeScope` から同名パラメータを探し、その値を使う。見つからなければ `value` に戻る。
+- `BtFloat` は Int パラメータも受け付け、`BtInt` は Float パラメータを四捨五入して受け付ける。
+- エディタ上では `$名前` と表示される。
+
+現状 `Bt*` 型になっているのは、Parallel.duration / Loop.count / Repeat.count, interval / Delay.frames / Wait.frames / FrameElapsed.frames / BgmReached.seconds、`ChargeEffect` の `lifetime` 以外のフィールド、MovePath.path / PlaceAlongPath.path, spacing, fireDelayFrames のみである。弾を撃つノードや Move などバトルノードのその他のフィールドは通常の値で、パラメータ化できない。
+
+例外として、次のアセット参照は `*Param` 欄（Object パラメータ名）で差し替えられる。値の解決は `ParamObjects.Resolve`（`Parts/ParamObjects.cs`）で、欄が空なら固定値を使う。
+
+| 欄 | 差し替える対象 | パラメータの値が空のとき |
+|---|---|---|
+| `Move.presetParam` | `MotionPreset` | 動かずに Success |
+| `SubTree.treeParam` | 実行するツリー | 何もしない（Success） |
+| `SetDespawnBehavior.treeParam` | 消えるときのツリー | 消えるときの行動なし |
+| `BulletConfig.prefabParam` | 弾 Prefab | `prefab` を使う |
+
+### 5.2 TreeParameter と TreeScope
+
+`TreeParameter` は `name` / `kind`（Float, Int, Bool, Vector2, Object）/ 各型の値 / `bindToParent` を持つ。
+
+`TreeScope`（`Core/TreeScope.cs`）は実行中のツリー 1 本分（SubTree ごとに 1 つ）のパラメータの値で、作るときに次を行う。
+
+1. 親スコープを辿り、同じアセットが既に含まれていれば `InvalidOperationException`（SubTree の循環検出）。
+2. このアセットの `parameters` を既定値として登録する。
+3. 呼び出し側の `overrides` で同名のものを上書きする。宣言されていない名前の上書きは警告して無視する。
+4. 上書き側の `bindToParent` が空でなければ、親スコープの同名パラメータをそのまま引き継ぐ。
+
+パラメータは基本的に **`Setup` 時に 1 回だけ解決される**（各ノードの `OnSetup`）。
+
+例外として、`TreeScope.Set(name, value)` で実行中に値を書き込める。書き込むのは Repeat / Cycle / Loop の `indexParam`（今が何回目か、0 始まり）と Calc の `resultParam` だけ。
+
+- 書き込んだ値は宣言値より優先される。`bindToParent` で引き継いだパラメータへの書き込みは親スコープへ届く。
+- 書き込んだ値が効くのは、撃つたびに読み直す欄だけ: Calc の `a` / `b`、`FixedDirection` の `angle`。他の欄は `Setup` 時の値のまま。
+- 書き込み先の名前もツリーパラメータとして宣言しておく（エディタで `$` 欄から選べるようにするため）。
+
+### 5.3 SubTree
+
+`SubTree`（`Action/SubTree.cs`）は別の `BehaviorTreeAsset` を自分の位置で実行する。
+
+- `tree`: 実行するツリー。`CommonTreeAsset` か、自分と同じ種類のツリーだけ（Common のツリーからは Common だけ）を参照できる（3.2）
+- `treeParam`: 指定すると、その Object パラメータの値のツリーを実行する（5.1）
+- `overrides`: 子ツリーのパラメータの上書き（`bindToParent` で親のパラメータを引き継げる）
+
+SubTree は `Setup` 時に子ツリーを `Instantiate(scope, overrides)` で複製して持ち、実行中はそのルートを Tick する。攻撃パターンを `BT/Attack/`（`CommonTreeAsset`）に切り出し、ボスの複数フェーズや雑魚から再利用する用途で使う。
+
+`Spawn` ノードの `behavior`（`EnemyTreeAsset`）/ `overrides` でも敵に別ツリーとパラメータ上書きを渡せる。`BulletConfig.behavior`（`BulletTreeAsset`）/ `overrides` も同様に弾へ渡す。ただしこちらは敵・弾側で親スコープ無しに複製されるため、`bindToParent` は効かない（固定値の上書きのみ有効）。
+
+### 5.4 雑魚の共通ツリー
+
+雑魚は原則として共通ツリー `DataStore/Commons/BT/Enemy.asset` で動かす。
+
+```text
+Enemy (EnemyTreeAsset。パラメータ: attack = BehaviorTreeAsset, death = BehaviorTreeAsset)
+ └─ Parallel(All)[ MoveSelf, Sequence[ SetDespawnBehavior($death), SubTree($attack) ] ]
+```
+
+Spawn（Wave の entries を含む）で `behavior = Enemy` とし、移動は Spawn の `motionPreset`（`Stage{N}/BT/Motion/`）または `motion` に、`overrides` で `attack`（`Stage{N}/BT/Attack/`）と `death` を指定する。移動はツリーのパラメータではなく `EnemyAgent.Motion` として渡り、MoveSelf が実行する。指定しないものは空なので、移動しない / 攻撃しない / 撃破時の行動なしになる（SetDespawnBehavior の `reasons` は既定の `Defeated`）。攻撃中に移動を変えるなど、この形に収まらない敵だけ専用ツリーを作る（例: `Stage2/BT/Enemy/S2_2_WayAzuma`）。
+
+## 6. ステージの流れ
+
+道中・会話・ボス戦の進行はすべてステージツリーに書く。`Scripts/Presenter/BattleScenePresenter.cs` はツリーを起動し、`Runtime/BattleFlow.cs` が出すイベントにシーン側の演出で応えるだけである。
+
+### 6.1 ステージツリーの形
+
+Stage1〜4 の実データは次の形をとる。
+
+```text
+Stage
+ ├─ Section "Way"  [Way]  : Sequence[ PlayBgm(BattleWay), 道中 (Wave の並び), Wait 120 ]
+ └─ Section "Boss" [Boss] : Sequence[ PlayScenario(ボス前の会話, skipOnResume=ON)
+                                        ├─ OnCommand "SpawnBoss"   → SpawnBoss(Stage{N}_Boss)
+                                        └─ OnCommand "PlayBossBgm" → PlayBgm(BattleBoss)
+                                    , BossBattle
+                                    , Wait 120
+                                    , PlayScenario(撃破後の会話, skipOnResume=OFF, restorePlayerControl=OFF) ]
+```
+
+### 6.2 起動とイベント
+
+```text
+InitializeAndStart()
+ ├─ StageModel.StageAddress を Addressables で BattleStageAsset としてロード
+ │    (アドレス = アセットパス。WaitForCompletion で同期ロード)
+ └─ flow.StartStage(stage, startSection = RuntimeModel.CheckpointSection, resume = startSection > 0, OnStageFinished)
+      ├─ StageContext を作り、宣言サービスを Begin
+      ├─ Services.Progress.StartSection / ResumeStart を設定
+      ├─ 弾と敵を事前生成 (4.5)
+      └─ ステージツリーを Runner として登録
+ツリーが Success で完了 → CompleteStage() (ステージクリア)
+```
+
+`BattleFlow` の通知 (IObservable) と Presenter の反応:
+
+| 出来事 | 発生元 | Presenter の反応 |
+|---|---|---|
+| `OnSectionStarted` | Stage ノードが Section に入った | `RuntimeModel.CheckpointSection` に記録。`StartStage` 後の最初の Section なら背景スクロールを初期化（Way なら流す） |
+| `OnBossSpawned` | SpawnBoss ノード（`IBossHost.Spawn`） | 自機の走りアニメを止め、背景を減速 |
+| `OnBossBattleStarted` | BossBattle ノード（`IBossHost.StartBattle`） | ボスの当たり判定を一時的に切り、自機のアニメを再開 |
+| `OnStageFinished` | ステージツリーの完了 | Success ならステージクリア |
+
+BGM と会話はサービス経由で Presenter が直接受ける。
+
+- `Services.PlayBgm`（PlayBgm ノード）→ `PlayBgm(bgmType)`: `SceneType = stageNumber + 2` と `BgmType` で再生し、曲名を表示する。
+- `Services.Scenario`（PlayScenario ノード、`IScenarioService.Play`）→ 会話シーンを Additive ロード。会話中は自機の攻撃入力と当たり判定を無効にし、終了時に当たり判定を戻す。攻撃入力は `restorePlayerControl` が ON のときだけ戻す。
+
+### 6.3 ボスの生成と戦闘
+
+`BattleFlow` が `IBossHost` を実装する。
+
+- `Spawn(BossDefinition)`: Prefab を `spawnPosition` に生成し、`entrance` を `MotionTickable` として流す。ボスは同時に 1 体まで。
+- `StartBattle(tree)`: 登場移動を終点まで一気に進めて止め、`EnemyAgent` を付けて `Services.Boss` に登録する。
+- ボス死亡 (`OnDeath`) で `Services.Boss.Stop()`、撃破演出完了 (`OnDeathSequenceCompleted`) で `IsDefeated` が true になり、BossBattle ノードが Success を返す。
+- ボス戦の勝敗はボスツリーの結果ではなくボスの撃破で決まる。ボスツリーが先に完了しても BossBattle は終わらない。
+
+### 6.4 会話とコマンド
+
+- PlayScenario ノードは `IScenarioService.Play(data, skip, restorePlayerControl)` を呼び、Presenter は `ScenarioModelRepository.SetData(data)` で流す会話を指定してから会話シーンを開く。
+- 会話シーン（`ScenarioScenePresenter`）が自分で処理するのは `ScenarioData` に列挙された演出関数（`ShowCastMessage` / `ShowMessage` / `TypeWriter` / `AutoAdvance` / `ShowCast` / `HideCast` / `ChangeCastAnimation` / `ShakeCastV`）だけで、それ以外の行は `MessageBroker` の `ScenarioCommandMessage` として通知する。会話シーンは BattleScenePresenter を直接呼ばない。
+- Presenter は届いたコマンドを `ScenarioCommandQueue` に積み、PlayScenario ノードが毎フレーム取り出して同名の OnCommand の子を実行する。
+
+### 6.5 リトライとデバッグ起動
+
+- Retry / タイトル戻り / ステージ完了では `flow.Stop()` が呼ばれ、ステージツリーの Abort（実行中の会話も閉じる）、ボスの破棄、弾の消去、`BattleClock.End()` → `BattleWorld.Clear()`（tickables・予約の破棄、`SetStage(null)` によるサービスの End）を行う。次の開始時に新しい `BattleWorld` が作られる。`EnemyPool` と弾の共有プールは作り直さず使い回す。
+- リトライは `CheckpointSection` の Section から `resume = true` で再開する。その Section の `skipOnResume` が ON の Scenario は会話を出さず、コマンドだけを順に即実行する（ボス前の会話を飛ばしてもボスは出る）。
+- `Tools/Battle Debug Launcher` と `DebugRuntimeModelInitializer` は `stageNumber` と `startSection`（Stage 直下の並び順）を指定する。途中の Section から始めた場合も resume 扱いで会話を飛ばす。
+- ボス戦の Section を選ぶと、`bossStartPhase`（ボスのツリーの Phase 名）と `bossStartHpPercent` も指定できる。指定した Phase に着くまでの Phase は即終了し、終了条件の `FastForward` で BGM をその Phase の開始位置まで進める（`BattleServices.SkipToPhase`）。HP は `BossBattle` の開始時に設定するので、`HpSections` は開始時の HP から段階を決める。Phase を使っていないボス（今は Stage2 / Stage4）は HP だけ選べる。
+
+## 7. ステージサービス
+
+ステージ固有の機能（現状は風のみ）は、`BattleStageAsset.services` に宣言したステージでだけ存在する「ステージサービス」としてカプセル化している。
+
+### 7.1 仕組み
+
+`Runtime/Stage/StageContext.cs`:
+
+```csharp
+public interface IStageService
+{
+    void Begin(StageContext stage);
+    void Tick(float dt);
+    void End();
+}
+
+[Serializable]
+public abstract class StageServiceDefinition
+{
+    public abstract IStageService Create();
+}
+```
+
+- `StageServiceDefinition` はアセットに保存する設定。実行時の状態は `Create()` が返す別インスタンスに持たせる。
+- `BattleFlow.StartStage` が `new StageContext(world, stage.Services)` を作り `BattleWorld.SetStage()` に渡す。サービスはステージ単位で、道中からボス戦まで同じものが続く。
+- `StageContext.Tick(dt)` は `BattleWorld.Step` の手順 8 で毎フレーム呼ばれる。
+- ノードからは `ctx.Stage?.Get<T>()` / `TryGet<T>()` で取得する。宣言されていないサービスを使おうとしたノードは `StageContext.WarnMissing<T>()` で 1 回だけ警告を出し、何もしない（Success は返す）。
+
+設計方針として、サービスは自分から自機・敵弾・表示へ働きかける。自機や弾の側はサービスを知らず、汎用の受け口だけを公開する（`Runtime/Stage/IMoveModifier.cs` / `IBulletForce.cs`）。
+
+| 受け口 | 実装側 | 内容 |
+|---|---|---|
+| `IMoveModifier.Modify(velocity, input, speed)` | `PlayerEntityPresenter.AddMoveModifier / RemoveMoveModifier` | 自機の移動速度に補正を加える |
+| `IBulletForce` (`Active` / `Integrate`) | `BulletSystem.AddForce / RemoveForce` | 敵弾の本来の軌道に外力によるずれを足す |
+
+### 7.2 例: WindService
+
+`Runtime/Stage/WindService.cs`。Stage3 の `Stage3_BT.asset` だけが `WindServiceDefinition` を宣言している。
+
+`WindServiceDefinition` のフィールド:
+
+| フィールド | 説明 |
+|---|---|
+| `initial` (`BattleWindSettings`) | ステージ開始時の風。`intervals` が空なら無風で始まる |
+| `arrowsPrefab` (`WindArrowsPresenter`) | 風向きを示す矢印。Begin 時に背景 (`Services.Background`) の子として生成する |
+
+`BattleWindSettings`（`Scripts/Model/BattleWindSettings.cs`）: `enabled`、`startSe`、`playerSpeedRatio`、`intervals`（`WindDirection` × `seconds` のリスト。順に繰り返す。秒単位、最小 0.1）、`bulletAcceleration`（ワールド単位/秒²）、`bulletDrag`（1/秒）。
+
+`WindService` の動作:
+
+- `Begin`: `Services.Player.AddMoveModifier(this)`、`Services.Bullets.AddForce(this)`、矢印を生成して `Bind`、`Apply(initial)`。
+- `Tick(dt)`: 予定表を秒で進め、区間が終われば次の向きへ。無風から風ありになった瞬間に `startSe` を鳴らす。
+- `End`: 受け口から自分を外し、矢印を破棄する。
+- `Apply(settings)`: 予定表を差し替えて先頭から始める。`WithWind` ノード（子の実行中だけ別の風にし、終了時に直前の風へ戻す）と `BossWindCue` ノードが使う。
+- `enabled` が OFF でも予定表は進む。このとき自機・弾への影響と矢印表示は無い。
+- 弾への影響は発射時点で決まる。`BulletSystem.Spawn` 時に風が有効で、かつ `BulletConfig.affectedByForce` が ON の弾だけが外力を受ける（`BulletEntityPresenter.ForceInfluence` を倍率として掛ける）。
+
+### 7.3 新しいサービスを追加する手順
+
+1. `Runtime/Stage/` に `IStageService` を実装したクラスと、それを生成する `[Serializable] StageServiceDefinition` 派生クラスを作る。設定値は定義側、状態はサービス側に持つ。
+2. 自機や弾に作用する場合は、既存の受け口（`IMoveModifier` / `IBulletForce`）を使う。足りなければ自機/弾側には汎用の受け口だけを追加し、ステージ固有の知識は持たせない。
+3. 必要な参照（`Player`、`Background`、`PlaySe` など）は `StageContext.World.Services` から取る。
+4. サービスを操作するノードが必要なら `BehaviorTree/Action/` などノードの種類のフォルダに追加し、`ctx.Stage?.Get<T>()` が `null` のときは `WarnMissing<T>()` を出して何もしないようにする。
+5. 使うステージの `BattleStageAsset.services` に定義を追加する。宣言しないステージでは存在しない扱いになる。
+
+## 8. 弾と移動
+
+### 8.1 弾の発射
+
+弾を出すノードはすべて `Parts/Emitter.cs` の `Emitter.Spawn` を通して `BulletSystem.Spawn` を呼ぶ。
+
+- 方向は `DirectionSource`、弾の回転は `RotationSource`、弾の設定は `BulletConfig`、撃ち方は `ShotPattern` で指定する。
+- 発射位置は「撃つ敵の位置 + muzzleOffset + パターンごとのずれ」。ステージ直下（`Self == null`）なら原点基準。
+- パターンの `SpawnDelayFrames` が付いた弾は `BattleWorld.Schedule` で予約され、予約時点ではなく出現時点の撃ち手の位置から出る。撃ち手（敵・弾）が消えると予約は取り消される（消えるときのツリーから撃った弾は取り消し対象にしない）。
+- 方向は発射ノードを実行したフレームに 1 回だけ決める。
+- 撃った弾の `Owner` は撃ち手（ステージなら `null`）、`AttackTime` は撃った時点の撃ち手の `AttackTime`。弾のツリーから撃った子弾は親弾の `AttackTime` を引き継ぐ。
+
+### 8.2 弾の実行 (BulletAgent / BulletSystem)
+
+`BulletSystem`（`Runtime/BulletSystem.cs`）は弾 Presenter を弾 Prefab ごとの共有プール（`BulletPool.GetOrCreateSharedPool`）から取り出し、`BulletEntityPresenter.InitializeDriven` で初期化して、弾 1 発ごとの `BulletAgent`（`Runtime/BulletAgent.cs`、`IAgent`）と組にする。`BulletEntityPresenter` は自前の移動を持たず、見た目・当たり判定・外力の倍率（`forceInfluence`）・画面外マージンだけを担う。被弾時は当たり判定を切って非表示にするだけ（`IsConsumed`）で、自分ではプールへ戻らない。位置は常に `BulletSystem` が与える。
+
+弾 1 発の 1 フレーム（`BulletSystem.Tick` の中）:
+
+1. 当たって消費済み（`IsConsumed`）なら `Defeated` で消える印を付ける。
+2. `StartDelayFrames` の間はその場で止まる。それ以外はツリーを Tick し（完了したツリーは以後 Tick しない）、外力を足して位置を反映する。
+3. 寿命（`LifetimeFrames`。遅延中も数える）→ `Expired`、飛距離（発射方向への進み具合が `Range` 以上）→ `Expired`、画面外 → `OutOfScreen` の順に判定する。
+4. 印の付いた弾の、消えるときのツリーを 1 回実行してから、ツリーを `TreePool` に返し、Presenter をプールへ戻す。
+
+- 弾のツリーは `BulletConfig.behavior`（`BulletTreeAsset`）で選ぶ。未指定なら MoveSelf だけの組み込みツリーで、撃った側から渡された移動（`BulletConfig` の移動。空なら `VelocityMotion`）を実行する。ツリーを指定する場合も、移動させたいならツリーに MoveSelf を置く。
+- ツリーは `World.Trees`（`TreePool`）から (アセット, `overrides`) の組で取り出し、消えるときに返す。
+- Tick 中・消えるときのツリーで出た弾も、同じフレームのうちに処理する。この連鎖は 8 周までで、超えたら警告を出して残りを次のフレームに回す。
+- `BulletSystem.Clear()` は全弾を `Cleared` で消す。`BulletClearReceiver.ClearAllBullets`（`BattleFlow` がバトル開始時に `BindBulletSystem` で `BulletSystem` を渡す）と ClearBullets ノードがこれを呼び、加えて警告線・ビームを `ClearAllBeams` で消す。
+
+- 撃ち手の Prefab に付いた `BulletPool` コンポーネントは、弾 Prefab の保持（`BulletPrefab`）と共有プールの作成だけを行う。共有プールは作ったシーンが閉じたときだけ破棄される（会話シーンの開閉では破棄しない）。
+- 自機の弾も `BulletSystem` で撃つ。`PlayerEntityPresenter` は `BattleFlow` から `BindBulletSystem` で受け取った `BulletSystem` に、`VelocityMotion`（速さは Inspector の `normalShotSpeed` = 5 / `chargedShotSpeed` = 0）の弾を出す。OutQuad の時間写像（8.3）が掛かるので、速さ 5 は実際には約 10/秒で飛ぶ。チャージ弾は `BulletSpawn.IsPlayerChargeBullet` を ON にして出す（`BulletEntityModel.IsPlayerChargeBullet` になり、「チャージ攻撃のみ有効」の敵に効く）。
+- Stage3 の双子中ボス（`TwinParabolaMidBossController`）は行動を自前で進めるが、放物線弾は `BulletSystem` に `VertexParabolaMotion` で渡す。
+
+- 移動は MoveSelf が `MotionSequence` で進める。`Motion` が空なら `VelocityMotion`（発射方向へ等速）を使う。
+- 移動ステップが `GrantsInvincibility` を返す間は、`MotionSequence` が `IInvincibleBody.Invincible` を立てて弾を無敵にする（`IInvincibleBody` を実装するのは弾だけ）。
+- 移動が開始できない設定（`Rejected`）なら MoveSelf が `Self.Despawn()` を呼んで消す（敵も同様）。
+- 外力 (`IBulletForce`) は、作者が設定した移動の速度を元に補正量を積分し、`ForceInfluence` を掛けて位置に足す。
+- 寿命は `BulletConfig.lifetime`（フレーム、0 で無制限）で指定する。弾 Prefab には寿命を持たせない。ChargeEffect は自分の `lifetime` 欄、自機（`PlayerEntityPresenter` の `normalShotLifetimeFrames` / `chargedShotLifetimeFrames`）と双子中ボス（`TwinParabolaMidBossController.parabolaLifetimeFrames`）はそれぞれの Inspector の欄で渡す。
+
+### 8.3 MotionStep
+
+`Runtime/Motion/` は敵・ボス・弾で共通の移動定義である。
+
+- `MotionStep`（定義、`[SerializeReference]`）→ `CreateRunner()` → `MotionRunner`（実行状態）という BT と同じ定義/実行の分離をとる。
+- `MotionSequence` はステップの列を順に実行し、完了したフレームのうちに次のステップを開始する。
+- 時間は **秒** で指定する（BT ノードのフレーム指定と異なる点に注意）。実行時は 1/60 秒ずつ進む。
+- `MotionPreset`（`Create > Battle > Motion Preset`）はステップ列の共有用アセット。`EaseCurveAsset`（`Create > Battle > Ease Curve`）はカスタム Ease カーブの共有用アセット。
+- 対象は `IMotionBody`。敵/ボスは Transform そのもの (`TransformBody`)、弾は外力補正前の「本来の軌道」。
+
+`StepClock`（`PullRunner.cs`）は、`legacyOutQuad` が ON のステップで時間の進みに OutQuad を掛ける。実時間 t に対し内部時間 τ = D(2u − u²)（u = t/D）を使い、duration 0（無限、内部的には D = 999999）では序盤がほぼ 2 倍速になる。`MotionEase` / `MotionEasing` でも `Ease.Unset` は OutQuad として扱う。
+
+## 9. エディタ
+
+`Window > Battle > Behavior Tree Editor`、または `BehaviorTreeAsset` をダブルクリックで開く（`Editor/BehaviorTree/BehaviorTreeEditorWindow.cs`）。
+
+画面構成:
+
+| 領域 | 内容 |
+|---|---|
+| ツールバー | 対象アセット（パスとツリーの種類 `[Stage]` / `[Enemy]` / `[Bullet]` / `[Common]` を表示）、`Frame All`、`Side Panel`（右ペインの表示切替）、`MiniMap` |
+| 配置 | 常に自動整列（ルートから下向き、高さが重なるノード同士だけを比べて左右に詰める）。構造やノードの大きさが変わるたびに並べ直す。ドラッグは兄弟の並べ替えにだけ使い、離すと整列位置に戻る |
+| 左ペイン (`NodePaletteView`) | ノード一覧（Composite / Decorator / Condition / Action とサブカテゴリ）と SubTree 用の BT アセット一覧。検索欄あり。項目をキャンバスへドラッグして作成 |
+| 中央 (`BehaviorTreeGraphView`) | ノードグラフ。上が親、子は左から右の順に実行される。ヘッダーの番号は親の中での実行順。Wait を含む Sequence の子には、Sequence 開始から何フレーム目に動くか（`@150f`）も出す。時間の読めない子（Move / SubTree など）より後ろには出さない |
+| 右ペイン `Node` タブ (`NodeInspectorView`) | 選択中のノードの種類・分類・説明・要約・コメント・設定欄。再生中は実行中かどうかも出す。設定欄はノード内の欄と同じ値に結びついており、どちらで編集してももう片方に反映される。複数選択時は個数だけを出す |
+| 右ペイン `Parameters` タブ (`ParameterPanelView`) | ツリーパラメータの一覧（名前 / 型 / 既定値）。`+` で追加、右クリックで `Select Usages` / `Delete` |
+
+操作:
+
+- ノード作成: パレットからドラッグ、キャンバスの右クリック（Create Node）で検索ウィンドウ、または出力ポートから線を引いて何もない所で離すと、その先に接続した状態で作成。ドロップ位置に子を受け付けるノードがあれば、その最後の子として接続される。
+- パレット・検索ウィンドウ・ドラッグ & ドロップ・貼り付けは、開いているツリーの種類で置けるノードと SubTree で使えるツリーだけに絞られる（3.2）。
+- Project ウィンドウの `BehaviorTreeAsset` をキャンバスへドロップすると SubTree ノードになる。SubTree ノードの右クリック `Open SubTree` で子ツリーを開く。
+- コピー & ペースト、Undo / Redo に対応。ノード右クリックの `Edit Comment` でコメントを付けられる。
+- 値欄 (`BtInt` など) の `▾` から、パラメータへの結びつけ・`固定値を使う`・`今の値で新しいパラメータを作成` を選べる。右ペインのパラメータ行を値欄へドラッグしても結びつけられる。型の合わないパラメータは警告表示になる。
+- パラメータ名を変えると、参照している値欄・`bindToParent`・`*Param` 欄も追従する（`ParameterUtility.FindReferencePaths`）。
+- パラメータを削除すると、参照していた値欄は固定値に戻る。
+- 再生中は、最近 Tick されたノードがハイライトされる（`BehaviorTreeDebug`）。同じ定義を複数の敵が使っている場合はまとめて光る。
+
+- PlayScenario ノードの右クリック `会話のコマンドから OnCommand を作る` で、会話に出てくるのに OnCommand が無いコマンドの子をまとめて作れる。
+
+性能上の工夫として、ノードの入力欄（PropertyField）は選択中のノードにだけ作り、それ以外はヘッダーと一行要約（`Node.Summary`）だけを表示する。構造変更時もグラフ全体を作り直さず、増減した要素だけを反映する。
+
+## 10. 設計判断
+
+| 判断 | 内容 |
+|---|---|
+| BT の適用範囲 | ステージ層・敵（敵/ボス）層・弾層に適用する。敵と弾は `IAgent` として同じノード群で動く。弾は数が多いため、ツリーの複製は `TreePool` で使い回し、ツリー未指定の弾は MoveSelf だけの組み込みツリーで動かす |
+| ツリーの種類 | `BehaviorTreeAsset` を Stage / Enemy / Bullet / Common に分け、置けるノードと SubTree の参照先を種類で制限する。敵を前提とするノードは属性ではなく `EnemyActionNode` の継承で表す |
+| 消える処理の一本化 | 敵・弾が消えるかの判定は `EnemyAgent` / `BulletSystem` が行い、Presenter は自分で消えない。理由（`DespawnReason`）ごとに `SetDespawnBehavior` のツリーを実行する |
+| 合図 | ツリー間の連絡は `SendSignal` / `Signaled` で、次のフレームの頭に一斉に届ける。処理順で結果が変わらないようにするため |
+| 時間の基準 | BT はフレーム基準（60fps 固定）。描画フレームとは独立した `BattleClock` で進めるため、処理落ちしても弾幕の相対タイミングが崩れない。移動 (`MotionStep`) の長さは秒指定 |
+| 割り込み | 「条件成立で中断」は Until デコレータで表す。毎フレーム子より先に条件を評価し、成立したら子を Abort する。フェーズの終了条件・HP による打ち切りはすべてこれ |
+| Blackboard を持たない | ノード間の動的な値の受け渡しはしない。共通化したい値はツリーパラメータで `Setup` 時に解決する |
+| 再利用 | 攻撃パターンや敵の行動は `BehaviorTreeAsset` として切り出し、SubTree / Spawn.behavior で参照する。コピーせず参照するので、元アセットの修正がすべての使用箇所に効く。雑魚は共通ツリー `Enemy` に攻撃・撃破時の行動をパラメータで、移動を Spawn の `motionPreset` / `motion` で渡す |
+| 敵のプール | 雑魚は `EnemyPool` で使い回し、ステージ開始時に事前生成する。敵を消す処理は `EnemyDespawn.Despawn` に一本化する |
+| ノードの形 | ノード 1 種類 = 1 クラス（設定・状態・処理を 1 つに持つ）。アセット上のノードは雛形で、実行するツリーごとに複製する。OSS の BT と同じ形で、「設定のクラス」と「実行時のクラス」を 2 つ組で書かない |
+| 保存形式 | ScriptableObject + `[SerializeReference]`。実行中の状態は `[NonSerialized]` にしてアセットに残さない |
+| Ease 未指定 | Ease 未指定の移動は `StepClock` / `MotionEasing` で OutQuad として扱う |
+| ボスと雑魚の統一 | ボスと通常敵は同じ `EnemyAgent` + 同じノード群で攻撃・移動を解釈する。ボス固有なのは HP 系条件の対象 (`HpTarget.Boss`) と、HpSections が設定する HP ゲージの区切り・被ダメージ倍率程度 |
+| ステージ固有機能 | `BattleStageAsset.services` に宣言するステージサービスとしてカプセル化する。サービスが自機・弾へ働きかけ、自機・弾は汎用の受け口だけを持つ |
+| 進行もツリーに書く | 道中・会話・ボス戦の順序と、会話中のコマンド（ボスの出現・BGM）はステージツリーに書く。Presenter はツリーからの通知に演出で応えるだけで、進行を判断しない |
+| 1 ステージ = 1 アセット | 道中とボス戦を別アセットに分けず、Section で区切る。リトライ地点は Section 単位 |
+
+## 11. 既知の制約・注意点
+
+- **乱数は再現性がない**: `BattleWorld` の乱数シードは `Environment.TickCount` のため、同じ入力でも同じ展開にはならない。
+- **パラメータ化できるフィールドが限られる**: `Bt*` 型のフィールドは時間・回数系などの一部だけ、アセット参照は `*Param` 欄のある 4 つだけ（5.1 参照）。
+- **プール品の状態**: 使い回す敵の Prefab に、`Start` などで一度だけ状態を作るコンポーネントがあると 2 体目以降で動きが変わる。`IPoolableEnemy` で戻せないものは `NoEnemyPool` を付ける。
+- **消えるときのツリーは 1 フレームだけ**: `SetDespawnBehavior` のツリーは 1 回 Tick して返却する。Wait や Delay を含めても後半は実行されない。
+- **撃破時の行動は次の Step**: 敵の撃破は Step の外（物理演算）で起きるため、消えるときのツリーは次の Step の手順 6 で実行される（撃破から最大 1 フレーム遅れる）。
+- **合図は届いたフレームだけ**: `Signaled` はそのフレームに届いた合図しか見ない。届いたフレームに評価されない位置（未開始のノードの中など）にあると取りこぼす。
+- **TreePool で使い回すノードの状態**: 実行中の状態を `OnEnter` で初期化しないノードは、使い回されたときに前の弾の状態が残る。
+- **ツリー開始は翌フレーム**: 出現させた敵のツリー、`StartStage` で登録したステージツリーは次の `Step` から動く。
+- **秒とフレームの混在**: BT ノードの時間はフレーム、`MotionStep` と一部のバトルノードのフィールドは秒。単位は各フィールドの Tooltip を参照。
+- `BossEntityPresenter` は HP・被弾・撃破演出・登場直後の当たり判定オフだけを持つ。`Stage3WindBossController` は BossWindCue ノードの腕上げ演出の受け手（`IWindCueReceiver`）。

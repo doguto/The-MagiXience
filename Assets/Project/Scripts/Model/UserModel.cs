@@ -61,6 +61,14 @@ namespace Project.Scripts.Model
             UserData.isMashSkipEnabled = isEnabled;
         }
 
+        public bool IsRetryFromStageStartEnabled => UserData.isRetryFromStageStartEnabled;
+
+        // メモリ上に反映する。永続化はSave()を別途呼ぶ。
+        public void SetRetryFromStageStartEnabled(bool isEnabled)
+        {
+            UserData.isRetryFromStageStartEnabled = isEnabled;
+        }
+
         public void StageClear(int stageNumber, StageClearRank rank)
         {
             UserData.clearedStageNumber = Math.Max(UserData.clearedStageNumber, stageNumber);
@@ -106,7 +114,25 @@ namespace Project.Scripts.Model
 
         public bool IsOpenedStage(int stageNumber)
         {
-            return UserData.clearedStageNumber >= stageNumber - 1;
+            return UserData.clearedStageNumber >= stageNumber - 1 && !IsStageConcealed(stageNumber);
+        }
+
+        // 前のステージをクリアしても解放せず、未解放と同じ扱い(選択不可・情報非表示)にするステージ
+        const int ConcealedStageNumber = 5;
+
+        public bool IsStageConcealed(int stageNumber)
+        {
+            return stageNumber == ConcealedStageNumber && !IsClearedStage(stageNumber);
+        }
+
+        // 解放済みのステージのうち最も先のステージ番号
+        public int LatestOpenedStageNumber
+        {
+            get
+            {
+                var next = UserData.clearedStageNumber + 1;
+                return IsStageConcealed(next) ? UserData.clearedStageNumber : next;
+            }
         }
 
         public UserData Load()

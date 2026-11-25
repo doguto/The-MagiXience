@@ -30,10 +30,10 @@ namespace Project.Scenes.Battle.Scripts.Model.Entity
             TakeDamage(1);
         }
 
-        public void Reinitialize(int damage, bool isPlayerBullet = false)
+        public void Reinitialize(int damage, bool isPlayerChargeBullet = false)
         {
             Damage = damage;
-            IsPlayerChargeBullet = isPlayerBullet;
+            IsPlayerChargeBullet = isPlayerChargeBullet;
             IsInvincible = false;
             ResetHp();
         }

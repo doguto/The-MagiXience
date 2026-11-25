@@ -39,7 +39,8 @@ Magic-science-world/
 ├── Assets/
 │   ├── Project/           # メインプロジェクトアセット
 │   │   ├── Commons/       # 共通アセット
-│   │   ├── Scenes/        # シーン（Title, BattleWay, BattleBoss, など）
+│   │   ├── DataStore/     # ScriptableObject データ（ステージ・BGM・SE・BehaviorTree など）
+│   │   ├── Scenes/        # シーン（Title, Battle, Scenario など）
 │   │   ├── Scripts/       # グローバルスクリプト
 │   │   └── Textures/      # キャラクター・背景画像 Addressable管理のもの
 │   ├── Plugins/           # サードパーティライブラリ
@@ -50,20 +51,23 @@ Magic-science-world/
 
 ## シーン構成
 
+- **Entry** - 起動シーン
+- **Global** - 常駐シーン（SoundManager、SceneNavigator、共通モーダルなど）
 - **Title** - タイトル画面
 - **StageList** - ステージ選択画面
-- **Battle** - 戦闘シーン
-- **Scenario** - シナリオ・ノベルパートシーン
-- **Global** - グローバル管理シーン
-  - ユーティリティGameObject等を配置する
-    - SoundManager
-    - SceneNavigator
-    - etc
+- **Battle** - 戦闘シーン（道中・ボス戦）
+- **Scenario** - 会話シーン
+- **SoundRoom** - サウンドルーム
+- **DemoClear** - デモクリア画面
 
 ## ドキュメント
 
 - [Architecture.md](Document/Architecture.md) - MVPアーキテクチャの詳細説明
 - [Directory-Structure.md](Document/Directory-Structure.md) - ディレクトリ構造とファイル配置の詳細
+- [Document.md](Document/Document.md) - シーン・主要クラス・データアセットのリファレンス
+- [Battle/BehaviorTree.md](Document/Battle/BehaviorTree.md) - バトルの BehaviorTree の構造
+- [Battle/BehaviorTree-Nodes.md](Document/Battle/BehaviorTree-Nodes.md) - BehaviorTree ノードリファレンス
+- [Battle/DataStore.md](Document/Battle/DataStore.md) - バトルのデータ配置
 
 ## コーディング規約
 
@@ -73,8 +77,8 @@ Magic-science-world/
 // シーン固有
 Project.Scenes.[シーン名].Scripts.[Model|View|Presenter]
 
-// 共通機能
-Project.Commons.Scripts.[機能名]
+// シーン横断の共通機能
+Project.Commons.[機能名].Scripts.[Model|View|Presenter]
 
 // グローバル機能
 Project.Scripts.[機能名]
