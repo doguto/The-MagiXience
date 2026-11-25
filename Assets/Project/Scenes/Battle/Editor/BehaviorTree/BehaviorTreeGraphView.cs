@@ -189,6 +189,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         {
             asset = target;
             frameAfterLayout = true;
+            layoutOnOpen = true;
             Reload();
         }
 
@@ -293,7 +294,7 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
             isReloading = false;
             RefreshOrderBadges();
-            RequestLayout();
+            if (layoutOnOpen) RequestLayout();
 
             QueueSelectionChanged();
         }
@@ -335,11 +336,13 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
 
         bool layoutPending;
         bool frameAfterLayout;
+        bool layoutOnOpen;
 
-        // 位置は常に自動で決める。ノードの大きさは描画後にしか分からないため、大きさが変わるたびに並べ直す
+        // 自動で並べるのはツリーを開いたときだけ。編集中に並べ直すと、置いたノードや動かしたノードが元に戻されてしまう。
+        // ノードの大きさは描画後にしか分からないため、開いた直後は全ノードの大きさが出揃うまで並べ直す
         void OnNodeGeometryChanged(GeometryChangedEvent evt)
         {
-            if (evt.oldRect.size != evt.newRect.size) RequestLayout();
+            if (layoutOnOpen && evt.oldRect.size != evt.newRect.size) RequestLayout();
         }
 
         void RequestLayout()
@@ -350,11 +353,21 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
             {
                 layoutPending = false;
                 Layout();
+                if (layoutOnOpen && IsMeasured(rootView) && views.Values.All(IsMeasured)) layoutOnOpen = false;
                 if (!frameAfterLayout) return;
                 frameAfterLayout = false;
                 FrameWholeGraph();
             });
         }
+
+        public void AutoLayout()
+        {
+            if (asset == null) return;
+            Undo.RecordObject(asset, "Auto Layout Behavior Tree");
+            Layout();
+        }
+
+        static bool IsMeasured(GraphElement element) => element != null && !float.IsNaN(element.layout.width) && element.layout.width >= 1f;
 
         // 部分木の幅を丸ごと確保すると、深い段だけが広い部分木の隣が無駄に空くため、
         // 高さが重なるノード同士だけを比べて左右に詰める (Reingold–Tilford と同じ考え方)
@@ -491,6 +504,11 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             base.BuildContextualMenu(evt);
+            if (evt.target is GraphView && asset != null)
+            {
+                evt.menu.AppendAction("Auto Layout", _ => AutoLayout());
+            }
+
             if (evt.target is BehaviorTreeNodeView { TreeNode: SubTree { Tree: { } tree } })
             {
                 evt.menu.AppendAction("Open SubTree", _ => BehaviorTreeEditorWindow.Open(tree));
@@ -593,10 +611,9 @@ namespace Project.Scenes.Battle.Editor.BehaviorTree
                     if (view.IsRoot) continue;
                     view.TreeNode.GraphPosition = view.GetPosition().position;
                 }
-                // ドラッグは兄弟の並べ替えにだけ使い、離したら整列し直して元の段に戻す
+                // 子の実行順は x 座標で決まるため、動かしたら兄弟を並べ替える
                 SortAllChildrenByPosition();
                 RefreshOrderBadges();
-                RequestLayout();
             }
 
             EditorUtility.SetDirty(asset);
