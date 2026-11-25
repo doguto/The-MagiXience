@@ -21,5 +21,20 @@ namespace Project.Scenes.Global.Scripts.Presenter
             Debug.Log($"[SceneNavigator] Compele Scene Navigation: from {fromSceneName} to {toSceneName}");
             MessageBroker.Default.Publish(new SceneNavigationMessage(SceneNavigationState.Completed, toSceneName));
         }
+
+        // 同じシーンを読み込み直す。同名シーンが2つ同時に存在しないよう、先にアンロードしてからロードする。
+        public async UniTask Reload(string sceneName)
+        {
+            Debug.Log($"[SceneNavigator] Start Scene Reload: {sceneName}");
+            MessageBroker.Default.Publish(new SceneNavigationMessage(SceneNavigationState.InProgress, sceneName));
+
+            await SceneManager.UnloadSceneAsync(sceneName).ToUniTask();
+            await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).ToUniTask();
+
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
+
+            Debug.Log($"[SceneNavigator] Complete Scene Reload: {sceneName}");
+            MessageBroker.Default.Publish(new SceneNavigationMessage(SceneNavigationState.Completed, sceneName));
+        }
     }
 }
