@@ -34,13 +34,16 @@ namespace Project.Scenes.Title.Scripts.Presenter
             titleMenuView.InitStart();
 
             // titleMenuView.OnPressedStartMain.Subscribe(_ => { StartMain(_).Forget(); });
+            // スタートとサウンドルームは別の購読なので、SubscribeBlocking だけでは両方の遷移が走りうる。遷移中は無視する
             titleMenuView.OnPressedStart.SubscribeBlocking(async x =>
             {
+                if (globalScenePresenter.SceneNavigator.IsNavigating) return;
                 soundManager.PlaySEAsync(SeType.Click).Forget();
                 await StartGame(x);
             }).AddTo(this);
             titleMenuView.OnPressedSoundRoom.SubscribeBlocking(async _ =>
             {
+                if (globalScenePresenter.SceneNavigator.IsNavigating) return;
                 soundManager.PlaySEAsync(SeType.Click).Forget();
                 titleModelRepository.Refresh();
                 await globalScenePresenter.SceneNavigator.NavigateTo(SceneRouterModel.SoundRoom, gameObject.scene.name);

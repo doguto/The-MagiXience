@@ -7,6 +7,7 @@ using Project.Scripts.Presenter;
 using Project.Scripts.Repository.ModelRepository;
 using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Project.Commons.UI.Scripts.Presenter
 {
@@ -22,6 +23,9 @@ namespace Project.Commons.UI.Scripts.Presenter
         public IObservable<Unit> OnRetryRequested => onRetryRequested;
         public IObservable<Unit> OnTitleRequested => onTitleRequested;
         public bool IsOpen { get; private set; }
+
+        // Open 時に選択されていたオブジェクト。閉じたときに選択を戻し、下にあるモーダル等へ入力が届くようにする
+        GameObject previousSelection;
 
         RuntimeModel runtimeModel;
 
@@ -64,6 +68,7 @@ namespace Project.Commons.UI.Scripts.Presenter
         {
             if (IsOpen) return;
             IsOpen = true;
+            previousSelection = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
 
             Time.timeScale = 0f;
             AudioListener.pause = true;
@@ -79,6 +84,28 @@ namespace Project.Commons.UI.Scripts.Presenter
             gameOverModalView.SetRetryFromStageStart(UserModelRepository.Instance.Get().IsRetryFromStageStartEnabled);
         }
 
+        // Open 前に選択されていたオブジェクトへ選択を戻す。
+        // 戻せない場合、選択がこのモーダル内に残っていると非表示のボタンを指したままになるため外す
+        void RestorePreviousSelection()
+        {
+            var eventSystem = EventSystem.current;
+            var previous = previousSelection;
+            previousSelection = null;
+            if (eventSystem == null) return;
+
+            if (previous != null && previous.activeInHierarchy)
+            {
+                eventSystem.SetSelectedGameObject(previous);
+                return;
+            }
+
+            var current = eventSystem.currentSelectedGameObject;
+            if (current != null && current.transform.IsChildOf(transform))
+            {
+                eventSystem.SetSelectedGameObject(null);
+            }
+        }
+
         void Retry()
         {
             // 時間/音を戻してモーダルを閉じる。実際の再初期化はOnRetryRequestedを購読する側（BattleScenePresenter）が行う。
@@ -86,6 +113,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             Time.timeScale = 1f;
             AudioListener.pause = false;
             gameObject.SetActive(false);
+            RestorePreviousSelection();
 
             onRetryRequested.OnNext(Unit.Default);
         }
@@ -96,6 +124,7 @@ namespace Project.Commons.UI.Scripts.Presenter
             Time.timeScale = 1f;
             AudioListener.pause = false;
             gameObject.SetActive(false);
+            RestorePreviousSelection();
 
             onTitleRequested.OnNext(Unit.Default);
         }

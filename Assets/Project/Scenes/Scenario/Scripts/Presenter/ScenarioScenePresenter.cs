@@ -89,6 +89,11 @@ namespace Project.Scenes.Scenario.Scripts.Presenter
 
         bool IsSkipConfirmOpen => skipConfirmModalPresenter != null && skipConfirmModalPresenter.IsOpen;
 
+        // スキップ確認モーダルが開いているか、このフレームで閉じたか。
+        // Esc は UI/Cancel と Player/Pause の両方に割り当てられているため、
+        // Cancel でモーダルを閉じたのと同じ押下でポーズが開かないよう、閉じたフレームも含める
+        public bool IsSkipConfirmBlockingInput => IsSkipConfirmOpen || Time.frameCount == modalClosedFrame;
+
         void OnSubmit()
         {
             if (isCompleted || isSkipping) return;

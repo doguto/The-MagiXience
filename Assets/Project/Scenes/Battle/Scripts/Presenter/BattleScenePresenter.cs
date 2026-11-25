@@ -60,6 +60,11 @@ namespace Project.Scenes.Battle.Scripts.Presenter
         readonly CompositeDisposable scenarioSubscriptions = new();
         bool isSceneLoadedHandlerRegistered;
         bool restorePlayerControlAfterScenario;
+        // 再生中の会話シーンの Presenter。スキップ確認モーダル表示中のポーズ抑止に使う
+        ScenarioScenePresenter scenarioPresenter;
+
+        // タイトル・DemoClear への遷移を始めたら立てる。遷移中にポーズが開いて timeScale = 0 のまま残らないようにする
+        bool isLeavingScene;
 
         void Awake()
         {
@@ -148,6 +153,13 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         void TogglePause()
         {
+            // シーン遷移中はポーズを開かない
+            if (isLeavingScene) return;
+
+            // スキップ確認モーダルの表示中 (と Esc で閉じた直後のフレーム) はポーズを開かない。
+            // 開くと選択がポーズのボタンに移り、閉じた後にモーダルへキー入力が届かなくなる
+            if (scenarioPresenter != null && scenarioPresenter.IsSkipConfirmBlockingInput) return;
+
             // ゲームオーバー表示中はポーズ操作を無視
             if (globalScenePresenter?.GameOverModalPresenter != null
                 && globalScenePresenter.GameOverModalPresenter.IsOpen)
@@ -251,6 +263,8 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         async void ReturnToTitle()
         {
+            if (isLeavingScene) return;
+            isLeavingScene = true;
             StopBattle();
 
             var battleSceneName = SceneManager.GetSceneByName(SceneRouterModel.Battle).name;
@@ -465,7 +479,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
             if (scene.name != SceneRouterModel.Scenario) return;
             UnregisterSceneLoaded();
 
-            var scenarioPresenter = FindFirstObjectByType<ScenarioScenePresenter>();
+            scenarioPresenter = FindFirstObjectByType<ScenarioScenePresenter>();
             if (scenarioPresenter == null)
             {
                 Debug.LogWarning("ScenarioScenePresenter not found in the loaded scene.", this);
@@ -489,6 +503,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             scenarioSubscriptions.Clear();
             currentScenario = null;
+            scenarioPresenter = null;
             queue.Complete();
         }
 
@@ -500,6 +515,7 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
             var queue = currentScenario;
             currentScenario = null;
+            scenarioPresenter = null;
             queue?.Complete();
 
             var scenarioScene = SceneManager.GetSceneByName(SceneRouterModel.Scenario);
@@ -544,6 +560,10 @@ namespace Project.Scenes.Battle.Scripts.Presenter
 
         async void CompleteStage()
         {
+            if (isLeavingScene) return;
+            // DemoClear の読み込み中は isLoaded が false で TogglePause のガードをすり抜けるため、ここでポーズを止める
+            isLeavingScene = true;
+
             stageModel?.Clear(ResolveClearRank());
             OpenNextStage(stageModel);
 
