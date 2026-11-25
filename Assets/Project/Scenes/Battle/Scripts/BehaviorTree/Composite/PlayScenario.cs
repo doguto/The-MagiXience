@@ -67,7 +67,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         protected override void OnEnter(BattleContext ctx)
         {
             running.Clear();
-            var skip = skipOnResume && ctx.Services.Progress.CurrentSectionResumed;
+            // 経路が中の OnCommand へ続くときは、会話を見せずにコマンドだけ流してそこまで進める
+            var skip = skipOnResume && ctx.Services.Progress.CurrentSectionResumed || JumpTarget(ctx) >= 0;
             var service = ctx.Services.Scenario;
             if (service == null && !skip) Debug.LogWarning("[BehaviorTree] PlayScenario: 会話サービスが無いため、コマンドだけ実行します");
             handle = service != null ? service.Play(scenario, skip, restorePlayerControl) : ScenarioCommandQueue.Skipped(scenario);

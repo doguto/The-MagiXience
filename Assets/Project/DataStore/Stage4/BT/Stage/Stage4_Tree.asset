@@ -25,7 +25,7 @@ MonoBehaviour:
       type: {class: Stage, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: f8a85bafc93f4dba96f489973474b19a
-        graphPosition: {x: -90, y: 115.33333}
+        graphPosition: {x: -120, y: 125}
         comment: 
         children:
         - rid: 8540147960821842566
@@ -34,7 +34,7 @@ MonoBehaviour:
       type: {class: Section, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: e54125b21bc6426b9bb5179eca25d7bc
-        graphPosition: {x: -657.6665, y: 264}
+        graphPosition: {x: -1824, y: 295}
         comment: 
         child:
           rid: 8540147960821842568
@@ -44,7 +44,7 @@ MonoBehaviour:
       type: {class: Section, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: dcbe9530a4ee4db7a85cab051af3b8ef
-        graphPosition: {x: 1990, y: 264}
+        graphPosition: {x: 1584, y: 295}
         comment: 
         child:
           rid: 8540147960821842569
@@ -54,7 +54,7 @@ MonoBehaviour:
       type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: fc2b9174b29840708ac874aa1ca28601
-        graphPosition: {x: -657.6665, y: 412.66666}
+        graphPosition: {x: -1824, y: 465}
         comment: 
         children:
         - rid: 8540147960821842570
@@ -63,12 +63,7 @@ MonoBehaviour:
         - rid: 8540147960821842641
         - rid: 8540147960821842642
         - rid: 8540147960821842643
-        - rid: 8540147960821842644
-        - rid: 8540147960821842645
-        - rid: 8540147960821842646
-        - rid: 8540147960821842647
-        - rid: 8540147960821842648
-        - rid: 8540147960821842649
+        - rid: 8540148185946652746
         - rid: 8540147960821842650
         - rid: 8540147960821842651
         - rid: 8540147960821842652
@@ -79,7 +74,7 @@ MonoBehaviour:
       type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 0bd304a48cd44673b338c6873a38c0a8
-        graphPosition: {x: 1990, y: 412.66666}
+        graphPosition: {x: 1584, y: 465}
         comment: 
         children:
         - rid: 8540147960821842573
@@ -90,14 +85,14 @@ MonoBehaviour:
       type: {class: PlayBgm, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 7dbf2be286c24d06b678f5409a4168cd
-        graphPosition: {x: -2627.6665, y: 546}
+        graphPosition: {x: -4532, y: 619}
         comment: 
         bgm: 1
     - rid: 8540147960821842572
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: de5ceee79ac04056ac7a7e046e88cd7f
-        graphPosition: {x: 1312.3333, y: 546}
+        graphPosition: {x: 884, y: 619}
         comment: 
         frames:
           value: 120
@@ -106,7 +101,7 @@ MonoBehaviour:
       type: {class: PlayScenario, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 70c15c4a24114ae1a0bbad6433ef2570
-        graphPosition: {x: 1642.3334, y: 546}
+        graphPosition: {x: 1164, y: 619}
         comment: "\u30DC\u30B9\u524D\u306E\u4F1A\u8A71"
         children:
         - rid: 8540147960821842583
@@ -118,14 +113,14 @@ MonoBehaviour:
       type: {class: BossBattle, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 674757c3b82b45c28ea86c53fb9c6a0b
-        graphPosition: {x: 1972.3335, y: 546}
+        graphPosition: {x: 1444, y: 619}
         comment: 
         tree: {fileID: 0}
     - rid: 8540147960821842575
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 06933eb6da3e4fc09df558a367a92734
-        graphPosition: {x: 2192.3335, y: 546}
+        graphPosition: {x: 1724, y: 619}
         comment: 
         frames:
           value: 120
@@ -134,7 +129,7 @@ MonoBehaviour:
       type: {class: PlayScenario, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 70559b5891d04463bd46339e87e6fe7d
-        graphPosition: {x: 2412.3335, y: 546}
+        graphPosition: {x: 2004, y: 619}
         comment: "\u6483\u7834\u5F8C\u306E\u4F1A\u8A71"
         children: []
         scenario: {fileID: 11400000, guid: 67285982571f2074da66958033859d45, type: 2}
@@ -144,7 +139,7 @@ MonoBehaviour:
       type: {class: OnCommand, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: d23ffc0722fe4fe189764a1872f9d59e
-        graphPosition: {x: 1532.3334, y: 694.6667}
+        graphPosition: {x: 1024, y: 789}
         comment: 
         child:
           rid: 8540147960821842715
@@ -153,7 +148,7 @@ MonoBehaviour:
       type: {class: OnCommand, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: a98f38d4de344e44833a6035506449a6
-        graphPosition: {x: 1752.3334, y: 694.6667}
+        graphPosition: {x: 1304, y: 789}
         comment: 
         child:
           rid: 8540147960821842716
@@ -177,6 +172,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.2}
         worldSpace: 0
         layout:
@@ -208,6 +204,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.5}
         worldSpace: 0
         layout:
@@ -239,6 +236,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -3}
         worldSpace: 0
         layout:
@@ -270,6 +268,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.4}
         worldSpace: 0
         layout:
@@ -301,6 +300,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2}
         worldSpace: 0
         layout:
@@ -332,6 +332,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -0.5}
         worldSpace: 0
         layout:
@@ -363,6 +364,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 318d928b8a06e734795f8e769fee44c5, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1}
         worldSpace: 0
         layout:
@@ -394,6 +396,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0}
         worldSpace: 0
         layout:
@@ -425,6 +428,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 1}
         worldSpace: 0
         layout:
@@ -456,6 +460,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2.5}
         worldSpace: 0
         layout:
@@ -487,6 +492,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -0.2}
         worldSpace: 0
         layout:
@@ -518,6 +524,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 2}
         worldSpace: 0
         layout:
@@ -549,6 +556,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.7}
         worldSpace: 0
         layout:
@@ -580,6 +588,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.5}
         worldSpace: 0
         layout:
@@ -611,6 +620,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 318d928b8a06e734795f8e769fee44c5, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -3}
         worldSpace: 0
         layout:
@@ -642,6 +652,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0}
         worldSpace: 0
         layout:
@@ -673,6 +684,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.5}
         worldSpace: 0
         layout:
@@ -704,6 +716,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 1.5}
         worldSpace: 0
         layout:
@@ -735,6 +748,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2.8}
         worldSpace: 0
         layout:
@@ -766,6 +780,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.2}
         worldSpace: 0
         layout:
@@ -797,6 +812,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 2.2}
         worldSpace: 0
         layout:
@@ -828,6 +844,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.5}
         worldSpace: 0
         layout:
@@ -859,6 +876,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 318d928b8a06e734795f8e769fee44c5, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 1}
         worldSpace: 0
         layout:
@@ -890,6 +908,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.8}
         worldSpace: 0
         layout:
@@ -921,6 +940,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2.3}
         worldSpace: 0
         layout:
@@ -944,6 +964,7 @@ MonoBehaviour:
         motionPreset: {fileID: 11400000, guid: 45f0419c2b9f1ac488b5b047800dd7c6, type: 2}
         motion: []
         overrides: []
+        group: 
         position: {x: 9, y: -1}
         worldSpace: 0
         layout:
@@ -975,6 +996,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 234646bea44da1f44b28a8b3053d88b3, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: 1.8}
         worldSpace: 0
         layout:
@@ -1006,6 +1028,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 234646bea44da1f44b28a8b3053d88b3, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -1}
         worldSpace: 0
         layout:
@@ -1037,6 +1060,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 234646bea44da1f44b28a8b3053d88b3, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -3.8}
         worldSpace: 0
         layout:
@@ -1053,7 +1077,7 @@ MonoBehaviour:
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 5aac43cabb494041bc4e6093aafa4ebd
-        graphPosition: {x: -1967.6665, y: 812.6667}
+        graphPosition: {x: -3692, y: 619}
         comment: 4_Phase3
         frames:
           value: 90
@@ -1062,14 +1086,14 @@ MonoBehaviour:
       type: {class: ClearBullets, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 1daeea13549b4410a6afaa1e0ee89a1f
-        graphPosition: {x: -1747.6665, y: 812.6667}
+        graphPosition: {x: -3412, y: 619}
         comment: 
         clearEnemies: 1
     - rid: 8540147960821842643
       type: {class: Wait, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: e8cc1cf25c18486c8f27c99ec25caa23
-        graphPosition: {x: -1527.6665, y: 812.6667}
+        graphPosition: {x: -3132, y: 619}
         comment: 
         frames:
           value: 60
@@ -1078,13 +1102,14 @@ MonoBehaviour:
       type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 5174ffca8e644e6cb567aaca286ddb37
-        graphPosition: {x: -1307.6665, y: 812.6667}
+        graphPosition: {x: -2852, y: 619}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 54a6d03eb28620a4d9fac007df958dde, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
         motionPreset: {fileID: 11400000, guid: 4695b668344e77d47b46b5a636c4e42d, type: 2}
         motion: []
         overrides: []
+        group: 
         position: {x: 10, y: -1}
         worldSpace: 0
         layout:
@@ -1101,7 +1126,7 @@ MonoBehaviour:
       type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 245cfffe801c4bc69b5ae3c96e29caf5
-        graphPosition: {x: -1063.6665, y: 812.6667}
+        graphPosition: {x: -2463, y: 619}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
@@ -1116,6 +1141,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 84d74ce553eb55d4198cf73d6bfd13b0, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -2}
         worldSpace: 0
         layout:
@@ -1132,7 +1158,7 @@ MonoBehaviour:
       type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6fceb27982ce4686aa10409081245a12
-        graphPosition: {x: -820.3332, y: 812.6667}
+        graphPosition: {x: -2173.3333, y: 973.3334}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
@@ -1147,6 +1173,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 84d74ce553eb55d4198cf73d6bfd13b0, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -1}
         worldSpace: 0
         layout:
@@ -1163,7 +1190,7 @@ MonoBehaviour:
       type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 73acd7f6ddc240c5a187c91b1c07dc12
-        graphPosition: {x: -576.9999, y: 812.6667}
+        graphPosition: {x: -1680, y: 999.3333}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
@@ -1178,6 +1205,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 84d74ce553eb55d4198cf73d6bfd13b0, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: 0}
         worldSpace: 0
         layout:
@@ -1194,7 +1222,7 @@ MonoBehaviour:
       type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 3d14f29da8c94fd2aeaa51fbd45ffadf
-        graphPosition: {x: -333.66653, y: 812.6667}
+        graphPosition: {x: -1295, y: 619}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
@@ -1209,6 +1237,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 84d74ce553eb55d4198cf73d6bfd13b0, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: 1}
         worldSpace: 0
         layout:
@@ -1225,7 +1254,7 @@ MonoBehaviour:
       type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 208c0d66921b4141a711780a24a064a1
-        graphPosition: {x: -90.333206, y: 812.6667}
+        graphPosition: {x: -905, y: 619}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 3d6986456376adc47a2fa62e1349ffcf, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
@@ -1240,6 +1269,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 84d74ce553eb55d4198cf73d6bfd13b0, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -3}
         worldSpace: 0
         layout:
@@ -1256,7 +1286,7 @@ MonoBehaviour:
       type: {class: WaitUntil, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: db4527533a794af0a2d6af7bc563e265
-        graphPosition: {x: 153.0001, y: 812.6667}
+        graphPosition: {x: -516, y: 619}
         comment: 
         condition:
           rid: 8540147960821842754
@@ -1264,7 +1294,7 @@ MonoBehaviour:
       type: {class: Delay, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 6d760a51d6364f049d7dbde3fe95dd45
-        graphPosition: {x: 402.66663, y: 812.6667}
+        graphPosition: {x: -236, y: 619}
         comment: 4_Phase4
         child:
           rid: 8540147960821842755
@@ -1275,7 +1305,7 @@ MonoBehaviour:
       type: {class: WaitUntil, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: c9a0f3e5e38140f2b7f96d8c48caa00e
-        graphPosition: {x: 652.33325, y: 812.6667}
+        graphPosition: {x: 44, y: 619}
         comment: 
         condition:
           rid: 8540147960821842756
@@ -1298,6 +1328,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 5c952103f9e807d4faec1bb32a229e59, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.5}
         worldSpace: 0
         layout:
@@ -1329,6 +1360,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 8c082ace116436748877572d9a0098af, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: 0}
         worldSpace: 0
         layout:
@@ -1360,6 +1392,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 8c082ace116436748877572d9a0098af, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: 1}
         worldSpace: 0
         layout:
@@ -1391,6 +1424,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 5c952103f9e807d4faec1bb32a229e59, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -3}
         worldSpace: 0
         layout:
@@ -1422,6 +1456,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 8c082ace116436748877572d9a0098af, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -2.5}
         worldSpace: 0
         layout:
@@ -1453,6 +1488,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 8c082ace116436748877572d9a0098af, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -3.5}
         worldSpace: 0
         layout:
@@ -1484,6 +1520,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 5c952103f9e807d4faec1bb32a229e59, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.25}
         worldSpace: 0
         layout:
@@ -1515,6 +1552,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 8c082ace116436748877572d9a0098af, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -1.75}
         worldSpace: 0
         layout:
@@ -1546,6 +1584,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 8c082ace116436748877572d9a0098af, type: 2}
           bindToParent: 
+        group: 
         position: {x: 12, y: -0.75}
         worldSpace: 0
         layout:
@@ -1577,6 +1616,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.2}
         worldSpace: 0
         layout:
@@ -1608,6 +1648,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.5}
         worldSpace: 0
         layout:
@@ -1639,6 +1680,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -3}
         worldSpace: 0
         layout:
@@ -1670,6 +1712,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.4}
         worldSpace: 0
         layout:
@@ -1701,6 +1744,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2}
         worldSpace: 0
         layout:
@@ -1732,6 +1776,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -0.5}
         worldSpace: 0
         layout:
@@ -1763,6 +1808,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 33bb90761c7f378428e55ab64b4727f7, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1}
         worldSpace: 0
         layout:
@@ -1794,6 +1840,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0}
         worldSpace: 0
         layout:
@@ -1825,6 +1872,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 1}
         worldSpace: 0
         layout:
@@ -1856,6 +1904,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2.5}
         worldSpace: 0
         layout:
@@ -1887,6 +1936,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -0.2}
         worldSpace: 0
         layout:
@@ -1918,6 +1968,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 2}
         worldSpace: 0
         layout:
@@ -1949,6 +2000,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.7}
         worldSpace: 0
         layout:
@@ -1980,6 +2032,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.5}
         worldSpace: 0
         layout:
@@ -2011,6 +2064,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 33bb90761c7f378428e55ab64b4727f7, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -3}
         worldSpace: 0
         layout:
@@ -2042,6 +2096,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0}
         worldSpace: 0
         layout:
@@ -2073,6 +2128,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.5}
         worldSpace: 0
         layout:
@@ -2104,6 +2160,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 1.5}
         worldSpace: 0
         layout:
@@ -2135,6 +2192,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2.8}
         worldSpace: 0
         layout:
@@ -2166,6 +2224,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.2}
         worldSpace: 0
         layout:
@@ -2197,6 +2256,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 2.2}
         worldSpace: 0
         layout:
@@ -2228,6 +2288,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -1.5}
         worldSpace: 0
         layout:
@@ -2259,6 +2320,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 33bb90761c7f378428e55ab64b4727f7, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 1}
         worldSpace: 0
         layout:
@@ -2290,6 +2352,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: 0.8}
         worldSpace: 0
         layout:
@@ -2321,6 +2384,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 6ba6e60bf934389488114a76b6de8ded, type: 2}
           bindToParent: 
+        group: 
         position: {x: 10, y: -2.3}
         worldSpace: 0
         layout:
@@ -2337,14 +2401,14 @@ MonoBehaviour:
       type: {class: SpawnBoss, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: b0872663647240e395a33b624bf26173
-        graphPosition: {x: 1532.3334, y: 843.3334}
+        graphPosition: {x: 1024, y: 959}
         comment: 
         boss: {fileID: 11400000, guid: 964bcb6a35a01fe49bf706ebb4b50bfe, type: 2}
     - rid: 8540147960821842716
       type: {class: PlayBgm, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 3f2d82e4486d461dab0fc6371e3c4307
-        graphPosition: {x: 1752.3334, y: 843.3334}
+        graphPosition: {x: 1304, y: 959}
         comment: 
         bgm: 2
     - rid: 8540147960821842717
@@ -2500,7 +2564,7 @@ MonoBehaviour:
       type: {class: Spawn, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 1431524013734a0189864aea0439248b
-        graphPosition: {x: 372.99997, y: 961.3334}
+        graphPosition: {x: -294, y: 789}
         comment: 
         prefab: {fileID: 7074045735317373604, guid: 2b0110fd0f855ee4482b82ac5e06255f, type: 3}
         behavior: {fileID: 11400000, guid: f774903b65e9b13498b6087c22238c3f, type: 2}
@@ -2515,6 +2579,7 @@ MonoBehaviour:
           vector2Value: {x: 0, y: 0}
           objectValue: {fileID: 11400000, guid: 5780388ae3a605b45ba1bb5686a70894, type: 2}
           bindToParent: 
+        group: 
         position: {x: 9, y: 3.5}
         worldSpace: 0
         layout:
@@ -2680,7 +2745,7 @@ MonoBehaviour:
       type: {class: Wave, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 06c088cd9a8d49ed867270336a4d9a4d
-        graphPosition: {x: -2407.6665, y: 679.3334}
+        graphPosition: {x: -4252, y: 619}
         comment: 4_Phase1
         entries:
         - frame: 120
@@ -2764,7 +2829,7 @@ MonoBehaviour:
       type: {class: Wave, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 234ebc919afd4e19a2598a39faadbce2
-        graphPosition: {x: -2187.6665, y: 679.3334}
+        graphPosition: {x: -3972, y: 619}
         comment: 4_Phase2
         entries:
         - frame: 150
@@ -2785,7 +2850,7 @@ MonoBehaviour:
       type: {class: Wave, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 057ec759645e4666a3f8fe9d3153b857
-        graphPosition: {x: 872.3333, y: 679.3334}
+        graphPosition: {x: 324, y: 619}
         comment: 4_Phase5
         entries:
         - frame: 150
@@ -2821,7 +2886,7 @@ MonoBehaviour:
       type: {class: Wave, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
       data:
         guid: 21a795b54b904a15a9d7586d7661d81f
-        graphPosition: {x: 1092.3333, y: 679.3334}
+        graphPosition: {x: 604, y: 619}
         comment: 4_Phase6
         entries:
         - frame: 120
@@ -2901,3 +2966,16 @@ MonoBehaviour:
             rid: 8540147960821842713
         until:
           rid: 8540147960821842792
+    - rid: 8540148185946652746
+      type: {class: Sequence, ns: Project.Scenes.Battle.Scripts.BehaviorTree, asm: Presenter}
+      data:
+        guid: 2bfea0636b8b4dff9654e3f760559e8e
+        graphPosition: {x: -1861.3334, y: 779.3334}
+        comment: 
+        children:
+        - rid: 8540147960821842644
+        - rid: 8540147960821842645
+        - rid: 8540147960821842646
+        - rid: 8540147960821842647
+        - rid: 8540147960821842648
+        - rid: 8540147960821842649

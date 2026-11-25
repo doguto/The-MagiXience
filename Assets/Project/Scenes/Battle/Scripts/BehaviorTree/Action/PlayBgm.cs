@@ -18,5 +18,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             ctx.Services.PlayBgm?.Invoke(bgm);
             return NodeStatus.Success;
         }
+
+        public override void FastForward(BattleContext ctx) => ctx.Services.PlayBgm?.Invoke(bgm);
     }
 }

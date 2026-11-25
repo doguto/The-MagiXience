@@ -8,30 +8,18 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [SerializeField] string phaseId;
 
-        [NonSerialized] bool skipping;
-
         public string PhaseId => phaseId;
 
         public override string Summary => $"«{phaseId}» 〜 {base.Summary}";
 
         protected override void OnEnter(BattleContext ctx)
         {
-            var skipTo = ctx.Services.SkipToPhase;
-            skipping = !string.IsNullOrEmpty(skipTo) && skipTo != phaseId;
-            if (skipping)
-            {
-                Condition?.FastForward(ctx);
-                return;
-            }
-            if (skipTo == phaseId) ctx.Services.SkipToPhase = null;
-
             base.OnEnter(ctx);
             ctx.Services.NotifyPhase(phaseId);
         }
 
         protected override NodeStatus OnTick(BattleContext ctx)
         {
-            if (skipping) return NodeStatus.Success;
             ctx.Services.SetPhaseProgress(Condition?.Progress(ctx));
             return base.OnTick(ctx);
         }

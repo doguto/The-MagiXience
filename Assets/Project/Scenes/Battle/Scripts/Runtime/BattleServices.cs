@@ -30,8 +30,8 @@ namespace Project.Scenes.Battle.Scripts.Runtime
         public IObservable<string> OnPhaseStarted => phaseStarted;
         public void NotifyPhase(string phaseId) => phaseStarted.OnNext(phaseId);
 
-        // デバッグ起動で指定したフェーズ。空でなければ、このフェーズに着くまでの Phase を飛ばす
-        public string SkipToPhase { get; set; }
+        // デバッグ起動で指定したノードまでの経路。着いたら null に戻る
+        public BehaviorTree.NodeJump Jump { get; set; }
 
         // 実行中のフェーズの進み具合 (0〜1)。終了条件から決まらなければ null
         readonly ReactiveProperty<float?> phaseProgress = new();

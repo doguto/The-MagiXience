@@ -45,6 +45,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
         {
             model = HpTargets.Resolve(ctx, target);
             (model as BossEntityModel)?.SetHpBreaks(ratios);
+            LowerHpToChild(JumpTarget(ctx));
             SetStage(Reached());
             running = ChildIndex();
             holding = false;
@@ -113,7 +114,15 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
             return count;
         }
 
-        int ChildIndex() => Mathf.Clamp(stage, 0, Mathf.Max(0, Children.Count - 1));
+        // デバッグ起動で child 番目の子から始めるとき、その段階に入る区切りまで HP を下げる。既に下回っていればそのまま
+        void LowerHpToChild(int child)
+        {
+            if (child <= 0 || model is not BossEntityModel boss || ratios.Length == 0) return;
+            var ratio = ratios[Mathf.Min(child, ratios.Length) - 1];
+            if (boss.CurrentHp.Value > Mathf.CeilToInt(boss.MaxHp * ratio)) boss.SetHpPercent(ratio * 100f);
+        }
+
+        int ChildIndex() =>Mathf.Clamp(stage, 0, Mathf.Max(0, Children.Count - 1));
 
         void SetStage(int value)
         {

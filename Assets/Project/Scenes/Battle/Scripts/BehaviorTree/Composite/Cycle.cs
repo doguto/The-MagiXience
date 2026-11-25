@@ -30,8 +30,9 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         protected override void OnEnter(BattleContext ctx)
         {
-            completed = 0;
-            Scope?.Set(indexParam, 0);
+            completed = Mathf.Max(0, JumpTarget(ctx));
+            for (var i = 0; i < completed; i++) Children[i].FastForward(ctx);
+            Scope?.Set(indexParam, completed);
             elapsed = 0;
             waiting = false;
         }

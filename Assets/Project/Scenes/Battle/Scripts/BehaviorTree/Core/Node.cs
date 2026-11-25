@@ -57,6 +57,7 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 #endif
             if (!active)
             {
+                ctx.Services.Jump?.Arrive(this, ctx);
                 active = true;
                 OnEnter(ctx);
             }
@@ -88,6 +89,15 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
 
         // 実行をまたいで持ち続ける状態 (前回の抽選結果など) だけを戻す。実行中の状態は OnEnter で初期化する
         protected virtual void OnRecycle() { }
+
+        // デバッグ起動で途中から始めるとき、前にあって飛ばすノードに呼ばれる。実行はせず、後のノードが前提にする外部の状態 (BGM の位置・ボスなど) だけを進める
+        public virtual void FastForward(BattleContext ctx)
+        {
+            foreach (var child in Children) child?.FastForward(ctx);
+        }
+
+        // デバッグ起動の経路上にいれば、経路が続く子の番号。いなければ -1
+        protected int JumpTarget(BattleContext ctx) => ctx.Services.Jump?.NextChild(this, ctx) ?? -1;
 
         protected virtual void OnEnter(BattleContext ctx) { }
         protected abstract NodeStatus OnTick(BattleContext ctx);

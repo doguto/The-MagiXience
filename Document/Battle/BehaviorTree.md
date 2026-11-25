@@ -418,8 +418,11 @@ BGM と会話はサービス経由で Presenter が直接受ける。
 
 - Retry / タイトル戻り / ステージ完了では `flow.Stop()` が呼ばれ、ステージツリーの Abort（実行中の会話も閉じる）、ボスの破棄、弾の消去、`BattleClock.End()` → `BattleWorld.Clear()`（tickables・予約の破棄、`SetStage(null)` によるサービスの End）を行う。次の開始時に新しい `BattleWorld` が作られる。`EnemyPool` と弾の共有プールは作り直さず使い回す。
 - リトライは `CheckpointSection` の Section から `resume = true` で再開する。その Section の `skipOnResume` が ON の Scenario は会話を出さず、コマンドだけを順に即実行する（ボス前の会話を飛ばしてもボスは出る）。
-- `Tools/Battle Debug Launcher` と `DebugRuntimeModelInitializer` は `stageNumber` と `startSection`（Stage 直下の並び順）を指定する。途中の Section から始めた場合も resume 扱いで会話を飛ばす。
-- ボス戦の Section を選ぶと、`bossStartPhase`（ボスのツリーの Phase 名）と `bossStartHpPercent` も指定できる。指定した Phase に着くまでの Phase は即終了し、終了条件の `FastForward` で BGM をその Phase の開始位置まで進める（`BattleServices.SkipToPhase`）。HP は `BossBattle` の開始時に設定するので、`HpSections` は開始時の HP から段階を決める。Phase を使っていないボス（今は Stage2 / Stage4）は HP だけ選べる。
+- `Tools/Battle Debug Launcher` は、ステージのツリーを SubTree とボスのツリー（`BossBattle` のツリー、未指定なら直前の `SpawnBoss` の `BossDefinition.Tree`）の中まで展開して表示し、選んだノードから起動する。`DebugRuntimeModelInitializer` には `stageNumber`・`startSection`（Stage 直下の並び順）・`startNodePath`（ルートから選んだノードまでの `Node.Guid` を `,` でつないだもの）・`bossStartHpPercent` を渡す。途中の Section から始めた場合は resume 扱いで会話を飛ばす。
+- 経路は `BattleServices.Jump`（`NodeJump`）がたどる。`Node.Tick` で `OnEnter` の直前に `Arrive` を呼び、直前に着いたノードの子（SubTree / BossBattle ならその先のツリーのルート）で Guid が経路と一致すれば先へ進める。選んだノードに着いたら `Jump` は null に戻り、以降は普通に実行する。
+- 経路上の親は `JumpTarget` で経路が続く子から始める: Stage / Sequence / Selector / Cycle はその子の位置から、If / RandomSelect はその子を選び、HpSections はその段階に入る区切りまで HP を下げ、PlayScenario は会話を飛ばしてコマンドだけ流す。Parallel / Loop / Repeat / Delay などは変えない（並ぶ子とのタイミングを保つため）。
+- Sequence / Cycle で飛ばした前の子には `Node.FastForward` を呼び、実行はせずに後のノードが前提にする状態だけ進める。既定は子へ順に呼ぶだけで、Until / Phase / WaitUntil は条件の `FastForward`（BGM の位置）、PlayBgm は BGM の再生、SpawnBoss はボスの登場を行う。If は条件で選ぶ方の子だけに呼ぶ。`BossBattle` より後のノードから始めることはできない（警告を出す）。
+- `bossStartHpPercent` は経路が `BossBattle` を通るときだけ使い、`BossBattle` の開始時に設定する。リトライで再開する Section がデバッグ起動した Section と同じなら、もう一度同じ経路・HP から始める。Wave で出る敵・弾のツリーと、`treeParam` で実行時に決まる SubTree の中は選べない。
 
 ## 7. ステージサービス
 

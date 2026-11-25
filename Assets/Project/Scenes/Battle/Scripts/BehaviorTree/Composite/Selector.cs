@@ -7,7 +7,8 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [NonSerialized] int index;
 
-        protected override void OnEnter(BattleContext ctx) => index = 0;
+        // 経路の子より前は失敗した扱いなので FastForward しない
+        protected override void OnEnter(BattleContext ctx) => index = Math.Max(0, JumpTarget(ctx));
 
         protected override NodeStatus OnTick(BattleContext ctx)
         {

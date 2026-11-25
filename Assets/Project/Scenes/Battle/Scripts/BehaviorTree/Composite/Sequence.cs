@@ -8,7 +8,11 @@ namespace Project.Scenes.Battle.Scripts.BehaviorTree
     {
         [NonSerialized] int index;
 
-        protected override void OnEnter(BattleContext ctx) => index = 0;
+        protected override void OnEnter(BattleContext ctx)
+        {
+            index = Math.Max(0, JumpTarget(ctx));
+            for (var i = 0; i < index; i++) Children[i].FastForward(ctx);
+        }
 
         protected override NodeStatus OnTick(BattleContext ctx)
         {
